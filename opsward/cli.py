@@ -238,7 +238,9 @@ def install_skills_cmd(
             sr = scan(project_root)
 
     files = generate_skills(
-        target_dir, scan_result=sr, include_agents=agents,
+        target_dir,
+        scan_result=sr,
+        include_agents=agents,
     )
 
     if not files:

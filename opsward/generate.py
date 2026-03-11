@@ -12,14 +12,14 @@ from opsward.util import read_text_safe
 
 # Skills that opsward installs — each maps to shared/<name>/SKILL.md template
 _SKILL_NAMES = (
-    'opsward',
-    'opsward-diagnose',
-    'opsward-generate',
-    'opsward-maintain',
+    "opsward",
+    "opsward-diagnose",
+    "opsward-generate",
+    "opsward-maintain",
 )
 
 # Agent definitions that opsward installs
-_AGENT_NAMES = ('setup-auditor',)
+_AGENT_NAMES = ("setup-auditor",)
 
 
 def generate(scan_result: ScanResult) -> list[GeneratedFile]:
@@ -94,13 +94,7 @@ def generate(scan_result: ScanResult) -> list[GeneratedFile]:
     # AI-enhanced skills (invoke opsward CLI + Claude interpretation)
     for skill_name in _SKILL_NAMES:
         if skill_name not in existing_skills:
-            target = (
-                sr.project_root
-                / ".claude"
-                / "skills"
-                / skill_name
-                / "SKILL.md"
-            )
+            target = sr.project_root / ".claude" / "skills" / skill_name / "SKILL.md"
             files.append(
                 _render(
                     f"shared/{skill_name}/SKILL.md",
@@ -139,6 +133,7 @@ def _render(
 # Targeted skill/agent generation (for install-skills command)
 # ---------------------------------------------------------------------------
 
+
 def generate_skills(
     target_dir: Path,
     *,
@@ -161,16 +156,12 @@ def generate_skills(
 
     for skill_name in _SKILL_NAMES:
         target = target_dir / "skills" / skill_name / "SKILL.md"
-        files.append(
-            _render(f"shared/{skill_name}/SKILL.md", target, variables)
-        )
+        files.append(_render(f"shared/{skill_name}/SKILL.md", target, variables))
 
     if include_agents:
         for agent_name in _AGENT_NAMES:
             target = target_dir / "agents" / f"{agent_name}.md"
-            files.append(
-                _render(f"shared/{agent_name}.md", target, variables)
-            )
+            files.append(_render(f"shared/{agent_name}.md", target, variables))
 
     return files
 
