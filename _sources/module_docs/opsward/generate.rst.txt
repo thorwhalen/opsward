@@ -1,0 +1,4 @@
+opsward.generate
+================
+.. automodule:: opsward.generate
+   :members:

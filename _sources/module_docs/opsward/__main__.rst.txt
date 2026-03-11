@@ -1,0 +1,4 @@
+opsward.__main__
+================
+.. automodule:: opsward.__main__
+   :members:

@@ -1,0 +1,571 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>opsward.score &mdash; opsward 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=d45e8c67"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            opsward
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward.html">opsward</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/__main__.html">opsward.__main__</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/base.html">opsward.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/cli.html">opsward.cli</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/generate.html">opsward.generate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/maintain.html">opsward.maintain</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/scan.html">opsward.scan</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/score.html">opsward.score</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/util.html">opsward.util</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">opsward</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">opsward.score</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for opsward.score</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Pure scoring functions. ScanResult -&gt; DiagnosisReport.</span>
+
+<span class="sd">All functions are pure — same input, same output.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">opsward.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">ComponentScore</span><span class="p">,</span> <span class="n">DiagnosisReport</span><span class="p">,</span> <span class="n">ScanResult</span>
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Weights for overall health score (from scoring_rubric.md)</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+<span class="n">_OVERALL_WEIGHTS</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+    <span class="s1">&#39;CLAUDE.md quality&#39;</span><span class="p">:</span> <span class="mf">0.35</span><span class="p">,</span>
+    <span class="s1">&#39;Documentation&#39;</span><span class="p">:</span> <span class="mf">0.25</span><span class="p">,</span>
+    <span class="s1">&#39;Skills&#39;</span><span class="p">:</span> <span class="mf">0.20</span><span class="p">,</span>
+    <span class="s1">&#39;Setup (rules/agents/hooks)&#39;</span><span class="p">:</span> <span class="mf">0.10</span><span class="p">,</span>
+    <span class="s1">&#39;Cross-references&#39;</span><span class="p">:</span> <span class="mf">0.10</span><span class="p">,</span>
+<span class="p">}</span>
+
+<span class="c1"># Core docs the rubric expects</span>
+<span class="n">_CORE_DOCS</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;architecture&#39;</span><span class="p">,</span> <span class="s1">&#39;known_issues&#39;</span><span class="p">,</span> <span class="s1">&#39;conventions&#39;</span><span class="p">}</span>
+
+
+<div class="viewcode-block" id="diagnose">
+<a class="viewcode-back" href="../../module_docs/opsward/score.html#opsward.score.diagnose">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">diagnose</span><span class="p">(</span><span class="n">scan_result</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DiagnosisReport</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Score a ScanResult and return a DiagnosisReport.</span>
+
+<span class="sd">    &gt;&gt;&gt; from pathlib import Path</span>
+<span class="sd">    &gt;&gt;&gt; from opsward.base import ScanResult</span>
+<span class="sd">    &gt;&gt;&gt; r = diagnose(ScanResult(project_root=Path(&#39;/tmp/empty&#39;)))</span>
+<span class="sd">    &gt;&gt;&gt; r.grade</span>
+<span class="sd">    &#39;F&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">scores</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">ComponentScore</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">missing</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">suggestions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="c1"># 1. CLAUDE.md quality (max 100, 6 dimensions)</span>
+    <span class="n">claude_score</span> <span class="o">=</span> <span class="n">_score_claude_md</span><span class="p">(</span>
+        <span class="n">scan_result</span><span class="o">.</span><span class="n">claude_md_content</span><span class="p">,</span>
+        <span class="n">scan_result</span><span class="o">.</span><span class="n">project_root</span><span class="p">,</span>
+        <span class="n">missing</span><span class="o">=</span><span class="n">missing</span><span class="p">,</span>
+        <span class="n">suggestions</span><span class="o">=</span><span class="n">suggestions</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">scores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">claude_score</span><span class="p">)</span>
+
+    <span class="c1"># 2. Documentation completeness (max 100)</span>
+    <span class="n">doc_score</span> <span class="o">=</span> <span class="n">_score_docs</span><span class="p">(</span><span class="n">scan_result</span><span class="p">,</span> <span class="n">missing</span><span class="o">=</span><span class="n">missing</span><span class="p">,</span> <span class="n">suggestions</span><span class="o">=</span><span class="n">suggestions</span><span class="p">)</span>
+    <span class="n">scores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">doc_score</span><span class="p">)</span>
+
+    <span class="c1"># 3. Skills (max 100)</span>
+    <span class="n">skills_score</span> <span class="o">=</span> <span class="n">_score_skills</span><span class="p">(</span><span class="n">scan_result</span><span class="p">,</span> <span class="n">missing</span><span class="o">=</span><span class="n">missing</span><span class="p">,</span> <span class="n">suggestions</span><span class="o">=</span><span class="n">suggestions</span><span class="p">)</span>
+    <span class="n">scores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">skills_score</span><span class="p">)</span>
+
+    <span class="c1"># 4. Setup: rules, agents, hooks (max 100)</span>
+    <span class="n">setup_score</span> <span class="o">=</span> <span class="n">_score_setup</span><span class="p">(</span><span class="n">scan_result</span><span class="p">,</span> <span class="n">suggestions</span><span class="o">=</span><span class="n">suggestions</span><span class="p">)</span>
+    <span class="n">scores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">setup_score</span><span class="p">)</span>
+
+    <span class="c1"># 5. Cross-reference integrity (max 100)</span>
+    <span class="n">xref_score</span> <span class="o">=</span> <span class="n">_score_cross_references</span><span class="p">(</span><span class="n">scan_result</span><span class="p">,</span> <span class="n">suggestions</span><span class="o">=</span><span class="n">suggestions</span><span class="p">)</span>
+    <span class="n">scores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">xref_score</span><span class="p">)</span>
+
+    <span class="c1"># Weighted overall</span>
+    <span class="n">score_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">s</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">score</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">scores</span><span class="p">}</span>
+    <span class="n">weighted</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span>
+        <span class="n">score_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span> <span class="o">*</span> <span class="n">weight</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">weight</span> <span class="ow">in</span> <span class="n">_OVERALL_WEIGHTS</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">DiagnosisReport</span><span class="p">(</span>
+        <span class="n">project_root</span><span class="o">=</span><span class="n">scan_result</span><span class="o">.</span><span class="n">project_root</span><span class="p">,</span>
+        <span class="n">project_type</span><span class="o">=</span><span class="n">scan_result</span><span class="o">.</span><span class="n">project_type</span><span class="p">,</span>
+        <span class="n">scores</span><span class="o">=</span><span class="n">scores</span><span class="p">,</span>
+        <span class="n">missing_items</span><span class="o">=</span><span class="n">missing</span><span class="p">,</span>
+        <span class="n">suggestions</span><span class="o">=</span><span class="n">suggestions</span><span class="p">,</span>
+        <span class="n">weighted_score</span><span class="o">=</span><span class="n">weighted</span><span class="p">,</span>
+    <span class="p">)</span></div>
+
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># CLAUDE.md scoring — 6 dimensions, mapped to 0-100</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+<span class="c1"># Dimension max scores (sum = 100)</span>
+<span class="n">_CMD_MAX</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="n">_ARCH_MAX</span> <span class="o">=</span> <span class="mi">20</span>
+<span class="n">_CONV_MAX</span> <span class="o">=</span> <span class="mi">15</span>
+<span class="n">_CONCISE_MAX</span> <span class="o">=</span> <span class="mi">15</span>
+<span class="n">_CURRENCY_MAX</span> <span class="o">=</span> <span class="mi">15</span>
+<span class="n">_ACTION_MAX</span> <span class="o">=</span> <span class="mi">15</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_score_claude_md</span><span class="p">(</span>
+    <span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">project_root</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
+    <span class="o">*</span><span class="p">,</span>
+    <span class="n">missing</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">suggestions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ComponentScore</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">content</span><span class="p">:</span>
+        <span class="n">missing</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;CLAUDE.md&#39;</span><span class="p">)</span>
+        <span class="n">suggestions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Create a CLAUDE.md at the project root&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ComponentScore</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="s1">&#39;CLAUDE.md quality&#39;</span><span class="p">,</span> <span class="n">score</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">notes</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;No CLAUDE.md found&#39;</span><span class="p">]</span>
+        <span class="p">)</span>
+
+    <span class="n">notes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="n">total</span> <span class="o">+=</span> <span class="n">_dim_commands</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">notes</span><span class="p">)</span>
+    <span class="n">total</span> <span class="o">+=</span> <span class="n">_dim_architecture</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">notes</span><span class="p">)</span>
+    <span class="n">total</span> <span class="o">+=</span> <span class="n">_dim_conventions</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">notes</span><span class="p">)</span>
+    <span class="n">total</span> <span class="o">+=</span> <span class="n">_dim_conciseness</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">notes</span><span class="p">)</span>
+    <span class="n">total</span> <span class="o">+=</span> <span class="n">_dim_currency</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">project_root</span><span class="p">,</span> <span class="n">notes</span><span class="p">)</span>
+    <span class="n">total</span> <span class="o">+=</span> <span class="n">_dim_actionability</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">notes</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ComponentScore</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;CLAUDE.md quality&#39;</span><span class="p">,</span> <span class="n">score</span><span class="o">=</span><span class="n">total</span><span class="p">,</span> <span class="n">notes</span><span class="o">=</span><span class="n">notes</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_dim_commands</span><span class="p">(</span><span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">notes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Commands &amp; Workflows (0-20).&quot;&quot;&quot;</span>
+    <span class="n">code_blocks</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;```[\s\S]*?```&#39;</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span>
+    <span class="n">lower</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+    <span class="n">cmd_keywords</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;test&#39;</span><span class="p">,</span> <span class="s1">&#39;build&#39;</span><span class="p">,</span> <span class="s1">&#39;lint&#39;</span><span class="p">,</span> <span class="s1">&#39;run&#39;</span><span class="p">,</span> <span class="s1">&#39;dev&#39;</span><span class="p">,</span> <span class="s1">&#39;start&#39;</span><span class="p">,</span> <span class="s1">&#39;install&#39;</span><span class="p">}</span>
+    <span class="n">found</span> <span class="o">=</span> <span class="p">{</span><span class="n">kw</span> <span class="k">for</span> <span class="n">kw</span> <span class="ow">in</span> <span class="n">cmd_keywords</span> <span class="k">if</span> <span class="n">kw</span> <span class="ow">in</span> <span class="n">lower</span><span class="p">}</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">code_blocks</span><span class="p">:</span>
+        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Commands: no code blocks found&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">0</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">found</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">5</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_CMD_MAX</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">found</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">13</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">found</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">7</span>
+    <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Commands: code blocks present but no build/test/lint keywords&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="mi">3</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_dim_architecture</span><span class="p">(</span><span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">notes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Architecture Clarity (0-20).&quot;&quot;&quot;</span>
+    <span class="n">section</span> <span class="o">=</span> <span class="n">_find_section</span><span class="p">(</span>
+        <span class="n">content</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;architecture&#39;</span><span class="p">,</span> <span class="s1">&#39;module map&#39;</span><span class="p">,</span> <span class="s1">&#39;structure&#39;</span><span class="p">,</span> <span class="s1">&#39;project layout&#39;</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">section</span><span class="p">:</span>
+        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Architecture: no architecture/structure section found&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">0</span>
+
+    <span class="c1"># Check for descriptions alongside paths</span>
+    <span class="n">has_descriptions</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;[/\w]+\.\w+.*[-–—:]&#39;</span><span class="p">,</span> <span class="n">section</span><span class="p">))</span>
+    <span class="n">has_paths</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\w+/\w+&#39;</span><span class="p">,</span> <span class="n">section</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">has_descriptions</span> <span class="ow">and</span> <span class="n">has_paths</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">16</span>
+    <span class="k">if</span> <span class="n">has_paths</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">10</span>
+    <span class="k">return</span> <span class="mi">5</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_dim_conventions</span><span class="p">(</span><span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">notes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Conventions (0-15).&quot;&quot;&quot;</span>
+    <span class="n">section</span> <span class="o">=</span> <span class="n">_find_section</span><span class="p">(</span>
+        <span class="n">content</span><span class="p">,</span> <span class="p">(</span><span class="s1">&#39;conventions&#39;</span><span class="p">,</span> <span class="s1">&#39;style&#39;</span><span class="p">,</span> <span class="s1">&#39;patterns&#39;</span><span class="p">,</span> <span class="s1">&#39;coding&#39;</span><span class="p">,</span> <span class="s1">&#39;rules&#39;</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">section</span><span class="p">:</span>
+        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Conventions: no conventions/style section found&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">0</span>
+
+    <span class="c1"># Check for specificity indicators</span>
+    <span class="n">specific_indicators</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">pattern</span> <span class="ow">in</span> <span class="p">(</span>
+        <span class="sa">r</span><span class="s1">&#39;`\w+`&#39;</span><span class="p">,</span>  <span class="c1"># inline code</span>
+        <span class="sa">r</span><span class="s1">&#39;```&#39;</span><span class="p">,</span>  <span class="c1"># code blocks</span>
+        <span class="sa">r</span><span class="s1">&#39;\.(py|ts|js|json|toml|yaml)\b&#39;</span><span class="p">,</span>  <span class="c1"># file extensions</span>
+        <span class="sa">r</span><span class="s1">&#39;(ruff|black|eslint|prettier|mypy)\b&#39;</span><span class="p">,</span>  <span class="c1"># tool names</span>
+    <span class="p">):</span>
+        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">section</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">):</span>
+            <span class="n">specific_indicators</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="n">specific_indicators</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_CONV_MAX</span>
+    <span class="k">if</span> <span class="n">specific_indicators</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">9</span>
+    <span class="k">return</span> <span class="mi">5</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_dim_conciseness</span><span class="p">(</span><span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">notes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Conciseness (0-15).&quot;&quot;&quot;</span>
+    <span class="n">line_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">content</span><span class="o">.</span><span class="n">splitlines</span><span class="p">())</span>
+
+    <span class="k">if</span> <span class="n">line_count</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">line_count</span> <span class="o">&lt;=</span> <span class="mi">80</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_CONCISE_MAX</span>
+    <span class="k">if</span> <span class="n">line_count</span> <span class="o">&lt;=</span> <span class="mi">200</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">11</span>
+    <span class="k">if</span> <span class="n">line_count</span> <span class="o">&lt;=</span> <span class="mi">500</span><span class="p">:</span>
+        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Conciseness: </span><span class="si">{</span><span class="n">line_count</span><span class="si">}</span><span class="s1"> lines — consider trimming&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">6</span>
+    <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Conciseness: </span><span class="si">{</span><span class="n">line_count</span><span class="si">}</span><span class="s1"> lines — likely too long&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="mi">2</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_dim_currency</span><span class="p">(</span>
+    <span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">project_root</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">notes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Currency (0-15). Check that referenced paths actually exist.&quot;&quot;&quot;</span>
+    <span class="n">paths</span> <span class="o">=</span> <span class="n">_extract_paths</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">paths</span><span class="p">:</span>
+        <span class="c1"># No paths to validate — can&#39;t penalize, give moderate score</span>
+        <span class="k">return</span> <span class="mi">10</span>
+
+    <span class="n">existing</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">paths</span> <span class="k">if</span> <span class="p">(</span><span class="n">project_root</span> <span class="o">/</span> <span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">())</span>
+    <span class="n">ratio</span> <span class="o">=</span> <span class="n">existing</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">paths</span><span class="p">)</span> <span class="k">if</span> <span class="n">paths</span> <span class="k">else</span> <span class="mf">1.0</span>
+
+    <span class="k">if</span> <span class="n">ratio</span> <span class="o">&lt;</span> <span class="mf">0.5</span><span class="p">:</span>
+        <span class="n">broken</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">paths</span> <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">project_root</span> <span class="o">/</span> <span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()]</span>
+        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Currency: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">broken</span><span class="p">)</span><span class="si">}</span><span class="s1"> broken path reference(s)&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">3</span>
+    <span class="k">if</span> <span class="n">ratio</span> <span class="o">&lt;</span> <span class="mf">1.0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">9</span>
+    <span class="k">return</span> <span class="n">_CURRENCY_MAX</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_dim_actionability</span><span class="p">(</span><span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">notes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Actionability (0-15).&quot;&quot;&quot;</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="n">l</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">content</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span> <span class="k">if</span> <span class="n">l</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">lines</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span>
+
+    <span class="c1"># Count actionable indicators: imperative verbs, code refs, specifics</span>
+    <span class="n">actionable</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">vague</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">imperative_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+        <span class="sa">r</span><span class="s1">&#39;^[-*]?\s*(use|run|add|create|prefer|avoid|always|never|ensure|set|call|import)\b&#39;</span><span class="p">,</span>
+        <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="n">vague_pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span>
+        <span class="sa">r</span><span class="s1">&#39;\b(appropriate|as needed|consider|if possible|when necessary)\b&#39;</span><span class="p">,</span>
+        <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">imperative_pattern</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
+            <span class="n">actionable</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">vague_pattern</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
+            <span class="n">vague</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">if</span> <span class="n">actionable</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Actionability: no imperative instructions found&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="mi">3</span>
+
+    <span class="n">ratio</span> <span class="o">=</span> <span class="n">actionable</span> <span class="o">/</span> <span class="p">(</span><span class="n">actionable</span> <span class="o">+</span> <span class="n">vague</span><span class="p">)</span> <span class="k">if</span> <span class="p">(</span><span class="n">actionable</span> <span class="o">+</span> <span class="n">vague</span><span class="p">)</span> <span class="k">else</span> <span class="mf">0.5</span>
+    <span class="k">if</span> <span class="n">ratio</span> <span class="o">&gt;=</span> <span class="mf">0.8</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_ACTION_MAX</span>
+    <span class="k">if</span> <span class="n">ratio</span> <span class="o">&gt;=</span> <span class="mf">0.5</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">10</span>
+    <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Actionability: many vague instructions&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="mi">5</span>
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Documentation scoring (0-100)</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_score_docs</span><span class="p">(</span>
+    <span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">missing</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">suggestions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ComponentScore</span><span class="p">:</span>
+    <span class="n">notes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># docs_guide.md exists (25 pts)</span>
+    <span class="k">if</span> <span class="n">sr</span><span class="o">.</span><span class="n">has_docs_guide</span><span class="p">:</span>
+        <span class="n">total</span> <span class="o">+=</span> <span class="mi">25</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">missing</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;docs_guide.md&#39;</span><span class="p">)</span>
+        <span class="n">suggestions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Create a docs_guide.md to index your documentation&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Core docs present (30 pts, 10 each)</span>
+    <span class="n">doc_names</span> <span class="o">=</span> <span class="p">{</span><span class="n">d</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">sr</span><span class="o">.</span><span class="n">docs</span><span class="p">}</span>
+    <span class="k">for</span> <span class="n">core</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">_CORE_DOCS</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">core</span> <span class="ow">in</span> <span class="n">doc_names</span><span class="p">:</span>
+            <span class="n">total</span> <span class="o">+=</span> <span class="mi">10</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">missing</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;docs/</span><span class="si">{</span><span class="n">core</span><span class="si">}</span><span class="s1">.md&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Docs have content (20 pts) — check they&#39;re not tiny stubs</span>
+    <span class="k">if</span> <span class="n">sr</span><span class="o">.</span><span class="n">docs</span><span class="p">:</span>
+        <span class="n">non_empty</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">sr</span><span class="o">.</span><span class="n">docs</span> <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">size_bytes</span> <span class="o">&gt;</span> <span class="mi">50</span><span class="p">)</span>
+        <span class="n">content_ratio</span> <span class="o">=</span> <span class="n">non_empty</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">sr</span><span class="o">.</span><span class="n">docs</span><span class="p">)</span>
+        <span class="n">content_pts</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="mi">20</span> <span class="o">*</span> <span class="n">content_ratio</span><span class="p">)</span>
+        <span class="n">total</span> <span class="o">+=</span> <span class="n">content_pts</span>
+        <span class="k">if</span> <span class="n">content_ratio</span> <span class="o">&lt;</span> <span class="mf">1.0</span><span class="p">:</span>
+            <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">sr</span><span class="o">.</span><span class="n">docs</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">non_empty</span><span class="si">}</span><span class="s1"> doc(s) appear to be empty stubs&#39;</span>
+            <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;No documentation files found&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Cross-references (15 pts) — does CLAUDE.md mention docs_guide?</span>
+    <span class="k">if</span> <span class="n">sr</span><span class="o">.</span><span class="n">claude_md_content</span> <span class="ow">and</span> <span class="s1">&#39;docs_guide&#39;</span> <span class="ow">in</span> <span class="n">sr</span><span class="o">.</span><span class="n">claude_md_content</span><span class="p">:</span>
+        <span class="n">total</span> <span class="o">+=</span> <span class="mi">15</span>
+    <span class="k">elif</span> <span class="n">sr</span><span class="o">.</span><span class="n">claude_md_content</span><span class="p">:</span>
+        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;CLAUDE.md does not reference docs_guide.md&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Freshness (10 pts) — we can&#39;t check git dates in a pure function,</span>
+    <span class="c1"># so award if docs exist at all</span>
+    <span class="k">if</span> <span class="n">sr</span><span class="o">.</span><span class="n">docs</span><span class="p">:</span>
+        <span class="n">total</span> <span class="o">+=</span> <span class="mi">10</span>
+
+    <span class="k">return</span> <span class="n">ComponentScore</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Documentation&#39;</span><span class="p">,</span> <span class="n">score</span><span class="o">=</span><span class="nb">min</span><span class="p">(</span><span class="n">total</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span> <span class="n">notes</span><span class="o">=</span><span class="n">notes</span><span class="p">)</span>
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Skills scoring (0-100)</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_score_skills</span><span class="p">(</span>
+    <span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">missing</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">suggestions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ComponentScore</span><span class="p">:</span>
+    <span class="n">notes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">sr</span><span class="o">.</span><span class="n">skills</span><span class="p">:</span>
+        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;No skills defined&#39;</span><span class="p">)</span>
+        <span class="n">suggestions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Consider adding skills in .claude/skills/ for recurring tasks&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ComponentScore</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Skills&#39;</span><span class="p">,</span> <span class="n">score</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">notes</span><span class="o">=</span><span class="n">notes</span><span class="p">)</span>
+
+    <span class="n">per_skill</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">//</span> <span class="nb">len</span><span class="p">(</span><span class="n">sr</span><span class="o">.</span><span class="n">skills</span><span class="p">)</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="n">skill</span> <span class="ow">in</span> <span class="n">sr</span><span class="o">.</span><span class="n">skills</span><span class="p">:</span>
+        <span class="n">pts</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">skill</span><span class="o">.</span><span class="n">has_skill_md</span><span class="p">:</span>
+            <span class="n">pts</span> <span class="o">+=</span> <span class="n">per_skill</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">//</span> <span class="mi">100</span>  <span class="c1"># 60% for having SKILL.md</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Skill &quot;</span><span class="si">{</span><span class="n">skill</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;: missing SKILL.md&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">skill</span><span class="o">.</span><span class="n">description</span><span class="p">:</span>
+            <span class="n">pts</span> <span class="o">+=</span> <span class="n">per_skill</span> <span class="o">*</span> <span class="mi">40</span> <span class="o">//</span> <span class="mi">100</span>  <span class="c1"># 40% for having a description</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Skill &quot;</span><span class="si">{</span><span class="n">skill</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;: no description&#39;</span><span class="p">)</span>
+        <span class="n">total</span> <span class="o">+=</span> <span class="n">pts</span>
+
+    <span class="k">return</span> <span class="n">ComponentScore</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Skills&#39;</span><span class="p">,</span> <span class="n">score</span><span class="o">=</span><span class="nb">min</span><span class="p">(</span><span class="n">total</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span> <span class="n">notes</span><span class="o">=</span><span class="n">notes</span><span class="p">)</span>
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Setup scoring: rules, agents, hooks (0-100)</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_score_setup</span><span class="p">(</span><span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">suggestions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">ComponentScore</span><span class="p">:</span>
+    <span class="n">notes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="c1"># Rules (up to 35)</span>
+    <span class="k">if</span> <span class="n">sr</span><span class="o">.</span><span class="n">rules</span><span class="p">:</span>
+        <span class="n">total</span> <span class="o">+=</span> <span class="nb">min</span><span class="p">(</span><span class="mi">35</span><span class="p">,</span> <span class="mi">15</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">sr</span><span class="o">.</span><span class="n">rules</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;No rules defined&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Agents (up to 35)</span>
+    <span class="k">if</span> <span class="n">sr</span><span class="o">.</span><span class="n">agents</span><span class="p">:</span>
+        <span class="n">total</span> <span class="o">+=</span> <span class="nb">min</span><span class="p">(</span><span class="mi">35</span><span class="p">,</span> <span class="mi">15</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">sr</span><span class="o">.</span><span class="n">agents</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;No agents defined&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Hooks (30)</span>
+    <span class="k">if</span> <span class="n">sr</span><span class="o">.</span><span class="n">hooks_config</span><span class="p">:</span>
+        <span class="n">total</span> <span class="o">+=</span> <span class="mi">30</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;No hooks configured&#39;</span><span class="p">)</span>
+        <span class="n">suggestions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Consider adding hooks in .claude/hooks.json&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">ComponentScore</span><span class="p">(</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Setup (rules/agents/hooks)&#39;</span><span class="p">,</span> <span class="n">score</span><span class="o">=</span><span class="nb">min</span><span class="p">(</span><span class="n">total</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span> <span class="n">notes</span><span class="o">=</span><span class="n">notes</span>
+    <span class="p">)</span>
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Cross-reference integrity (0-100)</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_score_cross_references</span><span class="p">(</span>
+    <span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">suggestions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ComponentScore</span><span class="p">:</span>
+    <span class="n">notes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">sr</span><span class="o">.</span><span class="n">claude_md_content</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">ComponentScore</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Cross-references&#39;</span><span class="p">,</span> <span class="n">score</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">notes</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;No CLAUDE.md&#39;</span><span class="p">])</span>
+
+    <span class="n">paths</span> <span class="o">=</span> <span class="n">_extract_paths</span><span class="p">(</span><span class="n">sr</span><span class="o">.</span><span class="n">claude_md_content</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">paths</span><span class="p">:</span>
+        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;No file paths found in CLAUDE.md to validate&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ComponentScore</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Cross-references&#39;</span><span class="p">,</span> <span class="n">score</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">notes</span><span class="o">=</span><span class="n">notes</span><span class="p">)</span>
+
+    <span class="n">existing</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">broken</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">:</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">sr</span><span class="o">.</span><span class="n">project_root</span> <span class="o">/</span> <span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">existing</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">broken</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">broken</span><span class="p">:</span>
+        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Broken references: </span><span class="si">{</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">broken</span><span class="p">[:</span><span class="mi">5</span><span class="p">])</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">suggestions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Fix broken path references in CLAUDE.md&#39;</span><span class="p">)</span>
+
+    <span class="n">ratio</span> <span class="o">=</span> <span class="n">existing</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">paths</span><span class="p">)</span>
+    <span class="n">score</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="n">ratio</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">ComponentScore</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;Cross-references&#39;</span><span class="p">,</span> <span class="n">score</span><span class="o">=</span><span class="n">score</span><span class="p">,</span> <span class="n">notes</span><span class="o">=</span><span class="n">notes</span><span class="p">)</span>
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Helpers</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_find_section</span><span class="p">(</span><span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">heading_keywords</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract the first section whose heading matches any keyword.&quot;&quot;&quot;</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+    <span class="n">start</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lines</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">):</span>
+            <span class="n">heading_lower</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">kw</span> <span class="ow">in</span> <span class="n">heading_lower</span> <span class="k">for</span> <span class="n">kw</span> <span class="ow">in</span> <span class="n">heading_keywords</span><span class="p">):</span>
+                <span class="n">start</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="c1"># Hit next heading — return what we collected</span>
+                <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">i</span><span class="p">])</span>
+    <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="n">start</span><span class="p">:])</span>
+    <span class="k">return</span> <span class="s1">&#39;&#39;</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_extract_paths</span><span class="p">(</span><span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract plausible file/directory paths from markdown content.&quot;&quot;&quot;</span>
+    <span class="c1"># Match things like src/foo.py, ./bar/baz.ts, docs/guide.md</span>
+    <span class="n">pattern</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(?:^|[\s`(])(\./)?(\w[\w\-.]*/[\w\-./]+\.\w+)&#39;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
+    <span class="n">paths</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">pattern</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="n">content</span><span class="p">):</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="ow">or</span> <span class="s1">&#39;&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+        <span class="c1"># Filter out URLs</span>
+        <span class="k">if</span> <span class="s1">&#39;://&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">path</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;http&#39;</span><span class="p">):</span>
+            <span class="n">paths</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">paths</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright NO COPYRIGHT.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

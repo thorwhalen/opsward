@@ -1,0 +1,13 @@
+.. toctree::
+   :maxdepth: 2
+   :caption: Contents:
+
+   module_docs/opsward
+   module_docs/opsward/__main__
+   module_docs/opsward/base
+   module_docs/opsward/cli
+   module_docs/opsward/generate
+   module_docs/opsward/maintain
+   module_docs/opsward/scan
+   module_docs/opsward/score
+   module_docs/opsward/util

@@ -1,0 +1,216 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>opsward.base &mdash; opsward 0.0.1 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=d45e8c67"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="opsward.cli" href="cli.html" />
+    <link rel="prev" title="opsward.__main__" href="__main__.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            opsward
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../opsward.html">opsward</a></li>
+<li class="toctree-l1"><a class="reference internal" href="__main__.html">opsward.__main__</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">opsward.base</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#opsward.base.AgentInfo"><code class="docutils literal notranslate"><span class="pre">AgentInfo</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#opsward.base.ComponentScore"><code class="docutils literal notranslate"><span class="pre">ComponentScore</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#opsward.base.DiagnosisReport"><code class="docutils literal notranslate"><span class="pre">DiagnosisReport</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#opsward.base.DiagnosisReport.grade"><code class="docutils literal notranslate"><span class="pre">DiagnosisReport.grade</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#opsward.base.DiagnosisReport.overall_score"><code class="docutils literal notranslate"><span class="pre">DiagnosisReport.overall_score</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#opsward.base.DocSpec"><code class="docutils literal notranslate"><span class="pre">DocSpec</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#opsward.base.GeneratedFile"><code class="docutils literal notranslate"><span class="pre">GeneratedFile</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#opsward.base.MaintenanceSuggestion"><code class="docutils literal notranslate"><span class="pre">MaintenanceSuggestion</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#opsward.base.ProjectType"><code class="docutils literal notranslate"><span class="pre">ProjectType</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#opsward.base.RuleInfo"><code class="docutils literal notranslate"><span class="pre">RuleInfo</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#opsward.base.ScanResult"><code class="docutils literal notranslate"><span class="pre">ScanResult</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#opsward.base.SkillInfo"><code class="docutils literal notranslate"><span class="pre">SkillInfo</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">opsward.cli</a></li>
+<li class="toctree-l1"><a class="reference internal" href="generate.html">opsward.generate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="maintain.html">opsward.maintain</a></li>
+<li class="toctree-l1"><a class="reference internal" href="scan.html">opsward.scan</a></li>
+<li class="toctree-l1"><a class="reference internal" href="score.html">opsward.score</a></li>
+<li class="toctree-l1"><a class="reference internal" href="util.html">opsward.util</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">opsward</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">opsward.base</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/module_docs/opsward/base.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-opsward.base">
+<span id="opsward-base"></span><h1>opsward.base<a class="headerlink" href="#module-opsward.base" title="Link to this heading"></a></h1>
+<p>All dataclasses and type definitions for opsward.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="opsward.base.AgentInfo">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">opsward.base.</span></span><span class="sig-name descname"><span class="pre">AgentInfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/opsward/base.html#AgentInfo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.base.AgentInfo" title="Link to this definition"></a></dt>
+<dd><p>An agent found in .claude/agents/.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="opsward.base.ComponentScore">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">opsward.base.</span></span><span class="sig-name descname"><span class="pre">ComponentScore</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name:</span> <span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">score:</span> <span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_score:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">100</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">notes:</span> <span class="pre">list[str]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/opsward/base.html#ComponentScore"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.base.ComponentScore" title="Link to this definition"></a></dt>
+<dd><p>Score for a single component (0–100) with optional notes.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="opsward.base.DiagnosisReport">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">opsward.base.</span></span><span class="sig-name descname"><span class="pre">DiagnosisReport</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project_root:</span> <span class="pre">~pathlib.Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">project_type:</span> <span class="pre">~opsward.base.ProjectType</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scores:</span> <span class="pre">list[~opsward.base.ComponentScore]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">missing_items:</span> <span class="pre">list[str]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">suggestions:</span> <span class="pre">list[str]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">weighted_score:</span> <span class="pre">float</span> <span class="pre">=</span> <span class="pre">0.0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/opsward/base.html#DiagnosisReport"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.base.DiagnosisReport" title="Link to this definition"></a></dt>
+<dd><p>Report card produced by scoring a ScanResult.</p>
+<dl class="py property">
+<dt class="sig sig-object py" id="opsward.base.DiagnosisReport.grade">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">grade</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><a class="headerlink" href="#opsward.base.DiagnosisReport.grade" title="Link to this definition"></a></dt>
+<dd><p>A (90-100), B (80-89), C (70-79), D (60-69), F (&lt;60).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Letter grade</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="opsward.base.DiagnosisReport.overall_score">
+<em class="property"><span class="pre">property</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">overall_score</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">float</span></em><a class="headerlink" href="#opsward.base.DiagnosisReport.overall_score" title="Link to this definition"></a></dt>
+<dd><p>Weighted score if set, else simple average.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="opsward.base.DocSpec">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">opsward.base.</span></span><span class="sig-name descname"><span class="pre">DocSpec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">size_bytes</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/opsward/base.html#DocSpec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.base.DocSpec" title="Link to this definition"></a></dt>
+<dd><p>A document found in the docs directory.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="opsward.base.GeneratedFile">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">opsward.base.</span></span><span class="sig-name descname"><span class="pre">GeneratedFile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">overwrite_policy</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'skip'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/opsward/base.html#GeneratedFile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.base.GeneratedFile" title="Link to this definition"></a></dt>
+<dd><p>A file to be written by the generate step.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="opsward.base.MaintenanceSuggestion">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">opsward.base.</span></span><span class="sig-name descname"><span class="pre">MaintenanceSuggestion</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">category</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">diff</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/opsward/base.html#MaintenanceSuggestion"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.base.MaintenanceSuggestion" title="Link to this definition"></a></dt>
+<dd><p>A single maintenance action proposed by maintain.py.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="opsward.base.ProjectType">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">opsward.base.</span></span><span class="sig-name descname"><span class="pre">ProjectType</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/opsward/base.html#ProjectType"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.base.ProjectType" title="Link to this definition"></a></dt>
+<dd><p>Detected project type.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="opsward.base.RuleInfo">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">opsward.base.</span></span><span class="sig-name descname"><span class="pre">RuleInfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/opsward/base.html#RuleInfo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.base.RuleInfo" title="Link to this definition"></a></dt>
+<dd><p>A rule found in .claude/rules/.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="opsward.base.ScanResult">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">opsward.base.</span></span><span class="sig-name descname"><span class="pre">ScanResult</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project_root:</span> <span class="pre">~pathlib.Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">project_type:</span> <span class="pre">~opsward.base.ProjectType</span> <span class="pre">=</span> <span class="pre">ProjectType.unknown</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">claude_md_path:</span> <span class="pre">~pathlib.Path</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">claude_md_content:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">skills:</span> <span class="pre">list[~opsward.base.SkillInfo]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">agents:</span> <span class="pre">list[~opsward.base.AgentInfo]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rules:</span> <span class="pre">list[~opsward.base.RuleInfo]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hooks_path:</span> <span class="pre">~pathlib.Path</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hooks_config:</span> <span class="pre">dict</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">docs:</span> <span class="pre">list[~opsward.base.DocSpec]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">has_docs_guide:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">docs_guide_path:</span> <span class="pre">~pathlib.Path</span> <span class="pre">|</span> <span class="pre">None</span> <span class="pre">=</span> <span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/opsward/base.html#ScanResult"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.base.ScanResult" title="Link to this definition"></a></dt>
+<dd><p>Everything we learned by reading (never writing) a target project.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="opsward.base.SkillInfo">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">opsward.base.</span></span><span class="sig-name descname"><span class="pre">SkillInfo</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">has_skill_md</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/opsward/base.html#SkillInfo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.base.SkillInfo" title="Link to this definition"></a></dt>
+<dd><p>A skill found in .claude/skills/.</p>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="__main__.html" class="btn btn-neutral float-left" title="opsward.__main__" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="cli.html" class="btn btn-neutral float-right" title="opsward.cli" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright NO COPYRIGHT.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
