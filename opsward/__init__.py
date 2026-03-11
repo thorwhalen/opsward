@@ -14,5 +14,5 @@ from opsward.base import (
 )
 from opsward.scan import scan
 from opsward.score import diagnose
-from opsward.generate import generate
+from opsward.generate import generate, generate_skills
 from opsward.maintain import maintain

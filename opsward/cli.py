@@ -6,7 +6,7 @@ from dataclasses import asdict
 from pathlib import Path
 
 from opsward.base import DiagnosisReport
-from opsward.generate import generate
+from opsward.generate import generate, generate_skills
 from opsward.maintain import maintain
 from opsward.scan import scan
 from opsward.score import diagnose
@@ -208,4 +208,60 @@ def _print_verbose(sr):
     print(f"  Hooks:   {'yes' if sr.hooks_config else 'no'}")
 
 
-_dispatch_funcs = [diagnose_cmd, generate_cmd, maintain_cmd]
+def install_skills_cmd(
+    target: str = ".",
+    *,
+    global_install: bool = False,
+    agents: bool = True,
+    write: bool = False,
+):
+    """Install opsward's Claude Code skills (and agents) into a project or globally.
+
+    By default, shows what would be created (dry run). Use --write to
+    actually write files. Existing files are never overwritten.
+
+    :param target: project directory (ignored when --global is set)
+    :param global_install: install into ~/.claude/ instead of the project
+    :param agents: also install agent definitions (default: True)
+    :param write: actually write files (default: dry run)
+    """
+    if global_install:
+        target_dir = Path.home() / ".claude"
+    else:
+        target_dir = Path(target).resolve() / ".claude"
+
+    # Optionally scan the project for variable substitution
+    sr = None
+    if not global_install:
+        project_root = Path(target).resolve()
+        if project_root.is_dir():
+            sr = scan(project_root)
+
+    files = generate_skills(
+        target_dir, scan_result=sr, include_agents=agents,
+    )
+
+    if not files:
+        print("Nothing to install — all skills already present.")
+        return
+
+    action = "Installing" if write else "Would install"
+    print(f"{action} into {target_dir}/\n")
+
+    for gf in files:
+        rel = _relative_path(gf.target_path, target_dir)
+        exists = gf.target_path.exists()
+        if exists:
+            print(f"  SKIP {rel}  (already exists)")
+        else:
+            print(f"  {action} {rel}")
+
+        if write and not exists:
+            gf.target_path.parent.mkdir(parents=True, exist_ok=True)
+            gf.target_path.write_text(gf.content, encoding="utf-8")
+
+    if not write:
+        print("\nDry run — pass --write to install files.")
+
+
+_dispatch_funcs = [diagnose_cmd, generate_cmd, maintain_cmd, install_skills_cmd]

@@ -10,6 +10,17 @@ from string import Template
 from opsward.base import GeneratedFile, ProjectType, ScanResult
 from opsward.util import read_text_safe
 
+# Skills that opsward installs — each maps to shared/<name>/SKILL.md template
+_SKILL_NAMES = (
+    'opsward',
+    'opsward-diagnose',
+    'opsward-generate',
+    'opsward-maintain',
+)
+
+# Agent definitions that opsward installs
+_AGENT_NAMES = ('setup-auditor',)
+
 
 def generate(scan_result: ScanResult) -> list[GeneratedFile]:
     """Determine which artifacts are missing, render templates, return files to create.
@@ -80,27 +91,23 @@ def generate(scan_result: ScanResult) -> list[GeneratedFile]:
         target = sr.project_root / ".claude" / "agents" / "setup-auditor.md"
         files.append(_render("shared/setup-auditor.md", target, variables))
 
-    # diagnose-setup skill
-    if "diagnose-setup" not in existing_skills:
-        target = sr.project_root / ".claude" / "skills" / "diagnose-setup" / "SKILL.md"
-        files.append(
-            _render(
-                "shared/diagnose-setup/SKILL.md",
-                target,
-                variables,
+    # AI-enhanced skills (invoke opsward CLI + Claude interpretation)
+    for skill_name in _SKILL_NAMES:
+        if skill_name not in existing_skills:
+            target = (
+                sr.project_root
+                / ".claude"
+                / "skills"
+                / skill_name
+                / "SKILL.md"
             )
-        )
-
-    # maintain-docs skill
-    if "maintain-docs" not in existing_skills:
-        target = sr.project_root / ".claude" / "skills" / "maintain-docs" / "SKILL.md"
-        files.append(
-            _render(
-                "shared/maintain-docs/SKILL.md",
-                target,
-                variables,
+            files.append(
+                _render(
+                    f"shared/{skill_name}/SKILL.md",
+                    target,
+                    variables,
+                )
             )
-        )
 
     return files
 
@@ -126,6 +133,46 @@ def _render(
     # Use safe_substitute so unset variables remain as ${name} (valid markdown)
     content = Template(raw).safe_substitute(variables)
     return GeneratedFile(target_path=target_path, content=content)
+
+
+# ---------------------------------------------------------------------------
+# Targeted skill/agent generation (for install-skills command)
+# ---------------------------------------------------------------------------
+
+def generate_skills(
+    target_dir: Path,
+    *,
+    scan_result: ScanResult | None = None,
+    include_agents: bool = True,
+) -> list[GeneratedFile]:
+    """Generate only the opsward skill and agent files for *target_dir*.
+
+    If *scan_result* is provided, template variables are substituted from the
+    scan.  Otherwise templates are rendered without project-specific
+    substitution (suitable for global ``~/.claude/`` installation).
+
+    >>> from pathlib import Path
+    >>> files = generate_skills(Path('/tmp/test'))
+    >>> any('opsward-diagnose' in str(f.target_path) for f in files)
+    True
+    """
+    variables = _build_variables(scan_result) if scan_result is not None else {}
+    files: list[GeneratedFile] = []
+
+    for skill_name in _SKILL_NAMES:
+        target = target_dir / "skills" / skill_name / "SKILL.md"
+        files.append(
+            _render(f"shared/{skill_name}/SKILL.md", target, variables)
+        )
+
+    if include_agents:
+        for agent_name in _AGENT_NAMES:
+            target = target_dir / "agents" / f"{agent_name}.md"
+            files.append(
+                _render(f"shared/{agent_name}.md", target, variables)
+            )
+
+    return files
 
 
 # ---------------------------------------------------------------------------

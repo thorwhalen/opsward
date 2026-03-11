@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 from opsward.base import ProjectType, ScanResult
-from opsward.generate import generate, _load_template, _build_variables
+from opsward.generate import generate, generate_skills, _load_template, _build_variables
 from opsward.scan import scan
 
 FIXTURES = Path(__file__).parent / 'fixtures'
@@ -100,8 +100,34 @@ def test_generates_ai_artifacts(bare_scan):
     assert 'setup-auditor.md' in names
     # Skills produce SKILL.md, check by parent dir
     skill_parents = {f.target_path.parent.name for f in files if f.target_path.name == 'SKILL.md'}
-    assert 'diagnose-setup' in skill_parents
-    assert 'maintain-docs' in skill_parents
+    assert 'opsward' in skill_parents
+    assert 'opsward-diagnose' in skill_parents
+    assert 'opsward-generate' in skill_parents
+    assert 'opsward-maintain' in skill_parents
+
+
+def test_generate_skills_without_scan():
+    """generate_skills works without a ScanResult (global install)."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        target = Path(tmpdir) / '.claude'
+        files = generate_skills(target)
+        skill_parents = {f.target_path.parent.name for f in files if f.target_path.name == 'SKILL.md'}
+        assert 'opsward' in skill_parents
+        assert 'opsward-diagnose' in skill_parents
+        assert 'opsward-generate' in skill_parents
+        assert 'opsward-maintain' in skill_parents
+        # Also includes agent by default
+        agent_names = {f.target_path.stem for f in files if 'agents' in str(f.target_path)}
+        assert 'setup-auditor' in agent_names
+
+
+def test_generate_skills_no_agents():
+    """generate_skills can exclude agents."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        target = Path(tmpdir) / '.claude'
+        files = generate_skills(target, include_agents=False)
+        agent_files = [f for f in files if 'agents' in str(f.target_path)]
+        assert len(agent_files) == 0
 
 
 def test_skips_existing_agents(python_scan):

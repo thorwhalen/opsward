@@ -50,8 +50,29 @@ opsward generate-cmd . --write   # actually create files
 ```
 
 Generates CLAUDE.md, docs (architecture, conventions, known_issues, etc.),
-skills (diagnose-setup, maintain-docs), and agents (setup-auditor) —
-only what's missing, never overwrites existing files.
+AI-enhanced skills (opsward, opsward-diagnose, opsward-generate, opsward-maintain),
+and agents (setup-auditor) — only what's missing, never overwrites existing files.
+
+### Install Skills
+
+Install opsward's Claude Code skills into a project (or globally):
+
+```bash
+opsward install-skills-cmd                  # dry run for current project
+opsward install-skills-cmd --write          # install into ./.claude/
+opsward install-skills-cmd --global-install --write  # install into ~/.claude/
+```
+
+The installed skills let Claude Code **run opsward's deterministic tools, interpret
+the results intelligently, and act on suggestions** — no API keys needed, Claude Code
+is the AI engine.
+
+| Skill | Trigger | What it does |
+|-------|---------|--------------|
+| `opsward` | "check my setup" | Diagnose → decide next step → generate or maintain → re-diagnose |
+| `opsward-diagnose` | "audit my AI config" | Run `opsward diagnose`, interpret scores, offer fixes |
+| `opsward-generate` | "scaffold AI setup" | Run `opsward generate`, review, customize with real content |
+| `opsward-maintain` | "check for staleness" | Run `opsward maintain`, prioritize issues, apply fixes |
 
 ### Maintain
 
@@ -101,7 +122,8 @@ opsward maintain-cmd . --format json
 ## Python API
 
 ```python
-from opsward import scan, diagnose, generate, maintain
+from pathlib import Path
+from opsward import scan, diagnose, generate, generate_skills, maintain
 
 sr = scan('.')
 report = diagnose(sr)
@@ -110,4 +132,7 @@ print(report.grade)        # 'A', 'B', 'C', 'D', or 'F'
 
 files = generate(sr)       # list[GeneratedFile]
 issues = maintain(sr)      # list[MaintenanceSuggestion]
+
+# Install skills programmatically
+skill_files = generate_skills(Path.home() / '.claude')
 ```

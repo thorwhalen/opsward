@@ -32,11 +32,11 @@ Key docs to read before starting work:
 ## Module Map
 
 - `opsward/` — the main package
-  - `__init__.py` — public interface (the facade). Exports `diagnose`, `generate`, `maintain`, key types
+  - `__init__.py` — public interface (the facade). Exports `diagnose`, `generate`, `generate_skills`, `maintain`, key types
   - `base.py` — core data structures: `ProjectType`, `DiagnosisReport`, `DocSpec`, `SetupComponent`, scoring models
   - `scan.py` — read-only filesystem scanning: detect project type, find CLAUDE.md, skills, agents, rules, hooks, docs
   - `score.py` — quality scoring: CLAUDE.md rubric, skill validation, doc freshness, cross-reference checks
-  - `generate.py` — template rendering and file generation (never overwrites without confirmation)
+  - `generate.py` — template rendering and file generation (never overwrites without confirmation). Also provides `generate_skills()` for targeted skill/agent installation.
   - `maintain.py` — staleness detection, update suggestions, drift analysis
   - `cli.py` — argh-based CLI entry point
   - `util.py` — internal helpers (underscore-prefixed)
@@ -46,7 +46,7 @@ Key docs to read before starting work:
       - `python/` — Python-specific templates (paths use `misc/docs/`)
       - `jsts/` — JS/TS-specific templates (paths use `docs/`)
     - `rubrics/` — scoring criteria (YAML or TOML)
-    - `skills/` — Claude Code skill templates that opsward installs into target projects
+    - `skills/` — Claude Code skill templates (opsward, opsward-diagnose, opsward-generate, opsward-maintain) that opsward installs into target projects
 - `tests/` — pytest tests
 
 ## Commands
@@ -56,15 +56,18 @@ Key docs to read before starting work:
 pip install opsward   # or: pip install ow
 
 # CLI usage
-python -m opsward diagnose /path/to/project          # Diagnose AI setup
-python -m opsward diagnose /path/to/proj1 /path/to/proj2  # Multi-project
-python -m opsward generate /path/to/project           # Generate missing pieces
-python -m opsward maintain /path/to/project            # Check for staleness/drift
+python -m opsward diagnose-cmd /path/to/project          # Diagnose AI setup
+python -m opsward diagnose-cmd /path/to/proj1 /path/to/proj2  # Multi-project
+python -m opsward generate-cmd /path/to/project           # Generate missing pieces
+python -m opsward maintain-cmd /path/to/project            # Check for staleness/drift
+python -m opsward install-skills-cmd --write               # Install Claude Code skills
 
 # After pip install (via pyproject.toml [project.scripts]):
-opsward diagnose .
-opsward generate . --dry-run
-opsward maintain .
+opsward diagnose-cmd .
+opsward generate-cmd . --write
+opsward maintain-cmd .
+opsward install-skills-cmd --write                    # Install into .claude/
+opsward install-skills-cmd --global-install --write   # Install into ~/.claude/
 ```
 
 ## Conventions
@@ -85,7 +88,7 @@ Follow the argh SSOT dispatch pattern:
 
 ```python
 # In cli.py
-_dispatch_funcs = [diagnose, generate, maintain]
+_dispatch_funcs = [diagnose, generate, maintain, install_skills]
 
 if __name__ == "__main__":
     import argh
@@ -138,10 +141,14 @@ When generating for a target project, opsward can produce:
 
 **AI configuration layer** (the `.claude/` folder):
 - `CLAUDE.md` at project root (or updates to existing one)
-- `.claude/skills/diagnose-setup/SKILL.md` — the diagnostic skill
-- `.claude/skills/maintain-docs/SKILL.md` — the doc maintenance skill
-- `.claude/agents/setup-auditor.md` — read-only auditor subagent
+- `.claude/skills/opsward/SKILL.md` — meta-orchestrator: diagnose → generate/maintain → re-diagnose
+- `.claude/skills/opsward-diagnose/SKILL.md` — run `opsward diagnose`, interpret scores, offer fixes
+- `.claude/skills/opsward-generate/SKILL.md` — run `opsward generate`, customize with real content
+- `.claude/skills/opsward-maintain/SKILL.md` — run `opsward maintain`, prioritize and fix issues
+- `.claude/agents/setup-auditor.md` — read-only auditor subagent (uses opsward CLI)
 - `.claude/rules/` files if appropriate
+
+These skills are AI-enhanced: they invoke opsward's deterministic CLI tools via Bash, then Claude Code interprets the structured output and acts on suggestions. No API keys needed.
 
 See `misc/docs/target_artifacts.md` for the full spec of generated artifacts.
 
