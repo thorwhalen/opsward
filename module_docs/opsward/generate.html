@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>opsward.generate &mdash; opsward 0.0.1 documentation</title>
+  <title>opsward.generate &mdash; opsward 0.0.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -15,7 +15,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=d45e8c67"></script>
+      <script src="../../_static/documentation_options.js?v=e3a6060d"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -55,6 +55,7 @@
 <li class="toctree-l1"><a class="reference internal" href="cli.html">opsward.cli</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">opsward.generate</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#opsward.generate.generate"><code class="docutils literal notranslate"><span class="pre">generate()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#opsward.generate.generate_skills"><code class="docutils literal notranslate"><span class="pre">generate_skills()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="maintain.html">opsward.maintain</a></li>
@@ -99,6 +100,21 @@
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">opsward.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScanResult</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">files</span> <span class="o">=</span> <span class="n">generate</span><span class="p">(</span><span class="n">ScanResult</span><span class="p">(</span><span class="n">project_root</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s1">&#39;/tmp/empty&#39;</span><span class="p">)))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">any</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">target_path</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;CLAUDE.md&#39;</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">)</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="opsward.generate.generate_skills">
+<span class="sig-prename descclassname"><span class="pre">opsward.generate.</span></span><span class="sig-name descname"><span class="pre">generate_skills</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scan_result</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="base.html#opsward.base.ScanResult" title="opsward.base.ScanResult"><span class="pre">ScanResult</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_agents</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="base.html#opsward.base.GeneratedFile" title="opsward.base.GeneratedFile"><span class="pre">GeneratedFile</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/opsward/generate.html#generate_skills"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.generate.generate_skills" title="Link to this definition"></a></dt>
+<dd><p>Generate only the opsward skill and agent files for <em>target_dir</em>.</p>
+<p>If <em>scan_result</em> is provided, template variables are substituted from the
+scan.  Otherwise templates are rendered without project-specific
+substitution (suitable for global <code class="docutils literal notranslate"><span class="pre">~/.claude/</span></code> installation).</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">files</span> <span class="o">=</span> <span class="n">generate_skills</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s1">&#39;/tmp/test&#39;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">any</span><span class="p">(</span><span class="s1">&#39;opsward-diagnose&#39;</span> <span class="ow">in</span> <span class="nb">str</span><span class="p">(</span><span class="n">f</span><span class="o">.</span><span class="n">target_path</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">)</span>
 <span class="go">True</span>
 </pre></div>
 </div>

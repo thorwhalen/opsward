@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>opsward.cli &mdash; opsward 0.0.1 documentation</title>
+  <title>opsward.cli &mdash; opsward 0.0.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -15,7 +15,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=d45e8c67"></script>
+      <script src="../../_static/documentation_options.js?v=e3a6060d"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -55,6 +55,7 @@
 <li class="toctree-l1 current"><a class="current reference internal" href="#">opsward.cli</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#opsward.cli.diagnose_cmd"><code class="docutils literal notranslate"><span class="pre">diagnose_cmd()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#opsward.cli.generate_cmd"><code class="docutils literal notranslate"><span class="pre">generate_cmd()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#opsward.cli.install_skills_cmd"><code class="docutils literal notranslate"><span class="pre">install_skills_cmd()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#opsward.cli.maintain_cmd"><code class="docutils literal notranslate"><span class="pre">maintain_cmd()</span></code></a></li>
 </ul>
 </li>
@@ -119,6 +120,24 @@ actually write files. Existing files are never overwritten.</p>
 <li><p><strong>project_roots</strong> – one or more paths to project directories</p></li>
 <li><p><strong>write</strong> – actually write files (default: dry run)</p></li>
 <li><p><strong>format</strong> – output format — ‘text’ or ‘json’</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="opsward.cli.install_skills_cmd">
+<span class="sig-prename descclassname"><span class="pre">opsward.cli.</span></span><span class="sig-name descname"><span class="pre">install_skills_cmd</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'.'</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">global_install</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">agents</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/opsward/cli.html#install_skills_cmd"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.cli.install_skills_cmd" title="Link to this definition"></a></dt>
+<dd><p>Install opsward’s Claude Code skills (and agents) into a project or globally.</p>
+<p>By default, shows what would be created (dry run). Use –write to
+actually write files. Existing files are never overwritten.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target</strong> – project directory (ignored when –global is set)</p></li>
+<li><p><strong>global_install</strong> – install into ~/.claude/ instead of the project</p></li>
+<li><p><strong>agents</strong> – also install agent definitions (default: True)</p></li>
+<li><p><strong>write</strong> – actually write files (default: dry run)</p></li>
 </ul>
 </dd>
 </dl>

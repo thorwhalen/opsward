@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>opsward.base &mdash; opsward 0.0.1 documentation</title>
+  <title>opsward.base &mdash; opsward 0.0.2 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=d45e8c67"></script>
+      <script src="../../_static/documentation_options.js?v=e3a6060d"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -95,10 +95,10 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">ProjectType</span><span class="p">(</span><span class="n">Enum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Detected project type.&quot;&quot;&quot;</span>
 
-    <span class="n">python</span> <span class="o">=</span> <span class="s1">&#39;python&#39;</span>
-    <span class="n">jsts</span> <span class="o">=</span> <span class="s1">&#39;jsts&#39;</span>
-    <span class="n">mixed</span> <span class="o">=</span> <span class="s1">&#39;mixed&#39;</span>
-    <span class="n">unknown</span> <span class="o">=</span> <span class="s1">&#39;unknown&#39;</span></div>
+    <span class="n">python</span> <span class="o">=</span> <span class="s2">&quot;python&quot;</span>
+    <span class="n">jsts</span> <span class="o">=</span> <span class="s2">&quot;jsts&quot;</span>
+    <span class="n">mixed</span> <span class="o">=</span> <span class="s2">&quot;mixed&quot;</span>
+    <span class="n">unknown</span> <span class="o">=</span> <span class="s2">&quot;unknown&quot;</span></div>
 
 
 
@@ -116,7 +116,7 @@
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">path</span><span class="p">:</span> <span class="n">Path</span>
     <span class="n">has_skill_md</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
-    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span></div>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span></div>
 
 
 
@@ -128,7 +128,7 @@
 
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">path</span><span class="p">:</span> <span class="n">Path</span>
-    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span></div>
+    <span class="n">description</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span></div>
 
 
 
@@ -140,7 +140,7 @@
 
     <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
     <span class="n">path</span><span class="p">:</span> <span class="n">Path</span>
-    <span class="n">content</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span></div>
+    <span class="n">content</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span></div>
 
 
 
@@ -172,7 +172,7 @@
 
     <span class="c1"># CLAUDE.md</span>
     <span class="n">claude_md_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">claude_md_content</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+    <span class="n">claude_md_content</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
 
     <span class="c1"># .claude/ inventories</span>
     <span class="n">skills</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">SkillInfo</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
@@ -237,51 +237,51 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Letter grade: A (90-100), B (80-89), C (70-79), D (60-69), F (&lt;60).&quot;&quot;&quot;</span>
         <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">overall_score</span>
         <span class="k">if</span> <span class="n">s</span> <span class="o">&gt;=</span> <span class="mi">90</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s1">&#39;A&#39;</span>
+            <span class="k">return</span> <span class="s2">&quot;A&quot;</span>
         <span class="k">if</span> <span class="n">s</span> <span class="o">&gt;=</span> <span class="mi">80</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s1">&#39;B&#39;</span>
+            <span class="k">return</span> <span class="s2">&quot;B&quot;</span>
         <span class="k">if</span> <span class="n">s</span> <span class="o">&gt;=</span> <span class="mi">70</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s1">&#39;C&#39;</span>
+            <span class="k">return</span> <span class="s2">&quot;C&quot;</span>
         <span class="k">if</span> <span class="n">s</span> <span class="o">&gt;=</span> <span class="mi">60</span><span class="p">:</span>
-            <span class="k">return</span> <span class="s1">&#39;D&#39;</span>
-        <span class="k">return</span> <span class="s1">&#39;F&#39;</span>
+            <span class="k">return</span> <span class="s2">&quot;D&quot;</span>
+        <span class="k">return</span> <span class="s2">&quot;F&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span>
-            <span class="sa">f</span><span class="s1">&#39;Diagnosis Report: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">project_root</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
-            <span class="sa">f</span><span class="s1">&#39;Project type: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">project_type</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span>
-            <span class="sa">f</span><span class="s1">&#39;Overall score: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">overall_score</span><span class="si">:</span><span class="s1">.0f</span><span class="si">}</span><span class="s1">/100  (Grade: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">grade</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;&#39;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;Diagnosis Report: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">project_root</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;Project type: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">project_type</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;Overall score: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">overall_score</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="s2">/100  (Grade: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">grade</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;&quot;</span><span class="p">,</span>
         <span class="p">]</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scores</span><span class="p">:</span>
-            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Components:&#39;</span><span class="p">)</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Components:&quot;</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">cs</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">scores</span><span class="p">:</span>
                 <span class="n">bar</span> <span class="o">=</span> <span class="n">_score_bar</span><span class="p">(</span><span class="n">cs</span><span class="o">.</span><span class="n">score</span><span class="p">,</span> <span class="n">cs</span><span class="o">.</span><span class="n">max_score</span><span class="p">)</span>
-                <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;  </span><span class="si">{</span><span class="n">cs</span><span class="o">.</span><span class="n">name</span><span class="si">:</span><span class="s1">&lt;25s</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">bar</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">cs</span><span class="o">.</span><span class="n">score</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">cs</span><span class="o">.</span><span class="n">max_score</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">cs</span><span class="o">.</span><span class="n">name</span><span class="si">:</span><span class="s2">&lt;25s</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">bar</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">cs</span><span class="o">.</span><span class="n">score</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">cs</span><span class="o">.</span><span class="n">max_score</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">note</span> <span class="ow">in</span> <span class="n">cs</span><span class="o">.</span><span class="n">notes</span><span class="p">:</span>
-                    <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;    - </span><span class="si">{</span><span class="n">note</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+                    <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;    - </span><span class="si">{</span><span class="n">note</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">missing_items</span><span class="p">:</span>
-            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Missing:&#39;</span><span class="p">)</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Missing:&quot;</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">missing_items</span><span class="p">:</span>
-                <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;  [ ] </span><span class="si">{</span><span class="n">item</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  [ ] </span><span class="si">{</span><span class="n">item</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">suggestions</span><span class="p">:</span>
-            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;Suggestions:&#39;</span><span class="p">)</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Suggestions:&quot;</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">sug</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">suggestions</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
-                <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;  </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">. </span><span class="si">{</span><span class="n">sug</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+                <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">. </span><span class="si">{</span><span class="n">sug</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div>
 
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_score_bar</span><span class="p">(</span><span class="n">score</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">max_score</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">width</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">20</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return a simple ASCII progress bar.&quot;&quot;&quot;</span>
     <span class="n">filled</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">width</span> <span class="o">*</span> <span class="n">score</span> <span class="o">/</span> <span class="n">max_score</span><span class="p">)</span> <span class="k">if</span> <span class="n">max_score</span> <span class="k">else</span> <span class="mi">0</span>
-    <span class="k">return</span> <span class="s1">&#39;[&#39;</span> <span class="o">+</span> <span class="s1">&#39;#&#39;</span> <span class="o">*</span> <span class="n">filled</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span> <span class="o">*</span> <span class="p">(</span><span class="n">width</span> <span class="o">-</span> <span class="n">filled</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;]&#39;</span>
+    <span class="k">return</span> <span class="s2">&quot;[&quot;</span> <span class="o">+</span> <span class="s2">&quot;#&quot;</span> <span class="o">*</span> <span class="n">filled</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span> <span class="o">*</span> <span class="p">(</span><span class="n">width</span> <span class="o">-</span> <span class="n">filled</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;]&quot;</span>
 
 
 <span class="c1"># ---------------------------------------------------------------------------</span>
@@ -297,7 +297,7 @@
 
     <span class="n">target_path</span><span class="p">:</span> <span class="n">Path</span>
     <span class="n">content</span><span class="p">:</span> <span class="nb">str</span>
-    <span class="n">overwrite_policy</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;skip&#39;</span>  <span class="c1"># &#39;skip&#39; | &#39;overwrite&#39; | &#39;merge&#39;</span></div>
+    <span class="n">overwrite_policy</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;skip&quot;</span>  <span class="c1"># &#39;skip&#39; | &#39;overwrite&#39; | &#39;merge&#39;</span></div>
 
 
 
@@ -314,7 +314,7 @@
 
     <span class="n">category</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># e.g. &#39;stale_path&#39;, &#39;outdated_doc&#39;, &#39;sync_issue&#39;</span>
     <span class="n">description</span><span class="p">:</span> <span class="nb">str</span>
-    <span class="n">diff</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span></div>
+    <span class="n">diff</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span></div>
 
 </pre></div>
 
