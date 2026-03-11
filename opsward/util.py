@@ -13,9 +13,9 @@ def read_text_safe(path: Path) -> str:
     ''
     """
     try:
-        return path.read_text(encoding='utf-8')
+        return path.read_text(encoding="utf-8")
     except (OSError, UnicodeDecodeError):
-        return ''
+        return ""
 
 
 def read_json_safe(path: Path) -> Optional[dict]:
@@ -39,7 +39,7 @@ def iter_subdirs(directory: Path):
     )
 
 
-def iter_files(directory: Path, *, suffix: str = ''):
+def iter_files(directory: Path, *, suffix: str = ""):
     """Yield files in *directory* (non-recursive), optionally filtered by suffix."""
     if not directory.is_dir():
         return

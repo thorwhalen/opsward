@@ -33,10 +33,10 @@ def scan(project_root: Path) -> ScanResult:
     result.claude_md_path, result.claude_md_content = _find_claude_md(project_root)
 
     # .claude/ sub-directories
-    claude_dir = project_root / '.claude'
-    result.skills = list(_scan_skills(claude_dir / 'skills'))
-    result.agents = list(_scan_agents(claude_dir / 'agents'))
-    result.rules = list(_scan_rules(claude_dir / 'rules'))
+    claude_dir = project_root / ".claude"
+    result.skills = list(_scan_skills(claude_dir / "skills"))
+    result.agents = list(_scan_agents(claude_dir / "agents"))
+    result.rules = list(_scan_rules(claude_dir / "rules"))
 
     # Hooks config
     result.hooks_path, result.hooks_config = _find_hooks(claude_dir)
@@ -56,15 +56,12 @@ def scan(project_root: Path) -> ScanResult:
 
 def _detect_project_type(root: Path) -> ProjectType:
     has_python = (
-        (root / 'pyproject.toml').exists()
-        or (root / 'setup.py').exists()
-        or (root / 'setup.cfg').exists()
-        or (root / 'requirements.txt').exists()
+        (root / "pyproject.toml").exists()
+        or (root / "setup.py").exists()
+        or (root / "setup.cfg").exists()
+        or (root / "requirements.txt").exists()
     )
-    has_jsts = (
-        (root / 'package.json').exists()
-        or (root / 'tsconfig.json').exists()
-    )
+    has_jsts = (root / "package.json").exists() or (root / "tsconfig.json").exists()
     if has_python and has_jsts:
         return ProjectType.mixed
     if has_python:
@@ -75,17 +72,17 @@ def _detect_project_type(root: Path) -> ProjectType:
 
 
 def _find_claude_md(root: Path) -> tuple[Path | None, str]:
-    for candidate in (root / 'CLAUDE.md', root / '.claude' / 'CLAUDE.md'):
+    for candidate in (root / "CLAUDE.md", root / ".claude" / "CLAUDE.md"):
         if candidate.is_file():
             return candidate, read_text_safe(candidate)
-    return None, ''
+    return None, ""
 
 
 def _scan_skills(skills_dir: Path):
     for skill_path in iter_subdirs(skills_dir):
-        skill_md = skill_path / 'SKILL.md'
+        skill_md = skill_path / "SKILL.md"
         has_skill_md = skill_md.is_file()
-        description = ''
+        description = ""
         if has_skill_md:
             # Use first non-empty line as description
             description = _first_line(read_text_safe(skill_md))
@@ -98,7 +95,7 @@ def _scan_skills(skills_dir: Path):
 
 
 def _scan_agents(agents_dir: Path):
-    for agent_file in iter_files(agents_dir, suffix='.md'):
+    for agent_file in iter_files(agents_dir, suffix=".md"):
         content = read_text_safe(agent_file)
         yield AgentInfo(
             name=agent_file.stem,
@@ -108,7 +105,7 @@ def _scan_agents(agents_dir: Path):
 
 
 def _scan_rules(rules_dir: Path):
-    for rule_file in iter_files(rules_dir, suffix='.md'):
+    for rule_file in iter_files(rules_dir, suffix=".md"):
         content = read_text_safe(rule_file)
         yield RuleInfo(
             name=rule_file.stem,
@@ -119,7 +116,7 @@ def _scan_rules(rules_dir: Path):
 
 def _find_hooks(claude_dir: Path) -> tuple[Path | None, dict | None]:
     # hooks.json takes priority, then settings.local.json
-    for name in ('hooks.json', 'settings.local.json'):
+    for name in ("hooks.json", "settings.local.json"):
         candidate = claude_dir / name
         if candidate.is_file():
             data = read_json_safe(candidate)
@@ -129,10 +126,10 @@ def _find_hooks(claude_dir: Path) -> tuple[Path | None, dict | None]:
 
 
 def _scan_docs(root: Path) -> tuple[list[DocSpec], bool, Path | None]:
-    docs_dir = root / 'docs'
+    docs_dir = root / "docs"
     if not docs_dir.is_dir():
         # Also check misc/docs
-        docs_dir = root / 'misc' / 'docs'
+        docs_dir = root / "misc" / "docs"
     if not docs_dir.is_dir():
         return [], False, None
 
@@ -140,11 +137,9 @@ def _scan_docs(root: Path) -> tuple[list[DocSpec], bool, Path | None]:
     docs_guide_path = None
     has_docs_guide = False
 
-    for f in iter_files(docs_dir, suffix='.md'):
-        docs.append(
-            DocSpec(name=f.stem, path=f, size_bytes=f.stat().st_size)
-        )
-        if f.name == 'docs_guide.md':
+    for f in iter_files(docs_dir, suffix=".md"):
+        docs.append(DocSpec(name=f.stem, path=f, size_bytes=f.stat().st_size))
+        if f.name == "docs_guide.md":
             has_docs_guide = True
             docs_guide_path = f
 
@@ -155,6 +150,6 @@ def _first_line(text: str) -> str:
     """Return the first non-empty, non-heading line of *text*."""
     for line in text.splitlines():
         stripped = line.strip()
-        if stripped and not stripped.startswith('#'):
+        if stripped and not stripped.startswith("#"):
             return stripped
-    return ''
+    return ""

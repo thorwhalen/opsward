@@ -9,5 +9,5 @@ def main():
     argh.dispatch_commands(_dispatch_funcs)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

@@ -15,15 +15,15 @@ from opsward.base import ComponentScore, DiagnosisReport, ScanResult
 # ---------------------------------------------------------------------------
 
 _OVERALL_WEIGHTS: dict[str, float] = {
-    'CLAUDE.md quality': 0.35,
-    'Documentation': 0.25,
-    'Skills': 0.20,
-    'Setup (rules/agents/hooks)': 0.10,
-    'Cross-references': 0.10,
+    "CLAUDE.md quality": 0.35,
+    "Documentation": 0.25,
+    "Skills": 0.20,
+    "Setup (rules/agents/hooks)": 0.10,
+    "Cross-references": 0.10,
 }
 
 # Core docs the rubric expects
-_CORE_DOCS = {'architecture', 'known_issues', 'conventions'}
+_CORE_DOCS = {"architecture", "known_issues", "conventions"}
 
 
 def diagnose(scan_result: ScanResult) -> DiagnosisReport:
@@ -67,8 +67,7 @@ def diagnose(scan_result: ScanResult) -> DiagnosisReport:
     # Weighted overall
     score_map = {s.name: s.score for s in scores}
     weighted = sum(
-        score_map.get(name, 0) * weight
-        for name, weight in _OVERALL_WEIGHTS.items()
+        score_map.get(name, 0) * weight for name, weight in _OVERALL_WEIGHTS.items()
     )
 
     return DiagnosisReport(
@@ -102,10 +101,10 @@ def _score_claude_md(
     suggestions: list[str],
 ) -> ComponentScore:
     if not content:
-        missing.append('CLAUDE.md')
-        suggestions.append('Create a CLAUDE.md at the project root')
+        missing.append("CLAUDE.md")
+        suggestions.append("Create a CLAUDE.md at the project root")
         return ComponentScore(
-            name='CLAUDE.md quality', score=0, notes=['No CLAUDE.md found']
+            name="CLAUDE.md quality", score=0, notes=["No CLAUDE.md found"]
         )
 
     notes: list[str] = []
@@ -118,19 +117,19 @@ def _score_claude_md(
     total += _dim_currency(content, project_root, notes)
     total += _dim_actionability(content, notes)
 
-    return ComponentScore(name='CLAUDE.md quality', score=total, notes=notes)
+    return ComponentScore(name="CLAUDE.md quality", score=total, notes=notes)
 
 
 def _dim_commands(content: str, notes: list[str]) -> int:
     """Commands & Workflows (0-20)."""
-    code_blocks = re.findall(r'```[\s\S]*?```', content)
+    code_blocks = re.findall(r"```[\s\S]*?```", content)
     lower = content.lower()
 
-    cmd_keywords = {'test', 'build', 'lint', 'run', 'dev', 'start', 'install'}
+    cmd_keywords = {"test", "build", "lint", "run", "dev", "start", "install"}
     found = {kw for kw in cmd_keywords if kw in lower}
 
     if not code_blocks:
-        notes.append('Commands: no code blocks found')
+        notes.append("Commands: no code blocks found")
         return 0
 
     if len(found) >= 5:
@@ -139,22 +138,22 @@ def _dim_commands(content: str, notes: list[str]) -> int:
         return 13
     if len(found) >= 1:
         return 7
-    notes.append('Commands: code blocks present but no build/test/lint keywords')
+    notes.append("Commands: code blocks present but no build/test/lint keywords")
     return 3
 
 
 def _dim_architecture(content: str, notes: list[str]) -> int:
     """Architecture Clarity (0-20)."""
     section = _find_section(
-        content, ('architecture', 'module map', 'structure', 'project layout')
+        content, ("architecture", "module map", "structure", "project layout")
     )
     if not section:
-        notes.append('Architecture: no architecture/structure section found')
+        notes.append("Architecture: no architecture/structure section found")
         return 0
 
     # Check for descriptions alongside paths
-    has_descriptions = bool(re.search(r'[/\w]+\.\w+.*[-–—:]', section))
-    has_paths = bool(re.search(r'\w+/\w+', section))
+    has_descriptions = bool(re.search(r"[/\w]+\.\w+.*[-–—:]", section))
+    has_paths = bool(re.search(r"\w+/\w+", section))
 
     if has_descriptions and has_paths:
         return 16
@@ -166,19 +165,19 @@ def _dim_architecture(content: str, notes: list[str]) -> int:
 def _dim_conventions(content: str, notes: list[str]) -> int:
     """Conventions (0-15)."""
     section = _find_section(
-        content, ('conventions', 'style', 'patterns', 'coding', 'rules')
+        content, ("conventions", "style", "patterns", "coding", "rules")
     )
     if not section:
-        notes.append('Conventions: no conventions/style section found')
+        notes.append("Conventions: no conventions/style section found")
         return 0
 
     # Check for specificity indicators
     specific_indicators = 0
     for pattern in (
-        r'`\w+`',  # inline code
-        r'```',  # code blocks
-        r'\.(py|ts|js|json|toml|yaml)\b',  # file extensions
-        r'(ruff|black|eslint|prettier|mypy)\b',  # tool names
+        r"`\w+`",  # inline code
+        r"```",  # code blocks
+        r"\.(py|ts|js|json|toml|yaml)\b",  # file extensions
+        r"(ruff|black|eslint|prettier|mypy)\b",  # tool names
     ):
         if re.search(pattern, section, re.IGNORECASE):
             specific_indicators += 1
@@ -201,15 +200,13 @@ def _dim_conciseness(content: str, notes: list[str]) -> int:
     if line_count <= 200:
         return 11
     if line_count <= 500:
-        notes.append(f'Conciseness: {line_count} lines — consider trimming')
+        notes.append(f"Conciseness: {line_count} lines — consider trimming")
         return 6
-    notes.append(f'Conciseness: {line_count} lines — likely too long')
+    notes.append(f"Conciseness: {line_count} lines — likely too long")
     return 2
 
 
-def _dim_currency(
-    content: str, project_root: Path, notes: list[str]
-) -> int:
+def _dim_currency(content: str, project_root: Path, notes: list[str]) -> int:
     """Currency (0-15). Check that referenced paths actually exist."""
     paths = _extract_paths(content)
     if not paths:
@@ -221,7 +218,7 @@ def _dim_currency(
 
     if ratio < 0.5:
         broken = [p for p in paths if not (project_root / p).exists()]
-        notes.append(f'Currency: {len(broken)} broken path reference(s)')
+        notes.append(f"Currency: {len(broken)} broken path reference(s)")
         return 3
     if ratio < 1.0:
         return 9
@@ -238,11 +235,11 @@ def _dim_actionability(content: str, notes: list[str]) -> int:
     actionable = 0
     vague = 0
     imperative_pattern = re.compile(
-        r'^[-*]?\s*(use|run|add|create|prefer|avoid|always|never|ensure|set|call|import)\b',
+        r"^[-*]?\s*(use|run|add|create|prefer|avoid|always|never|ensure|set|call|import)\b",
         re.IGNORECASE,
     )
     vague_pattern = re.compile(
-        r'\b(appropriate|as needed|consider|if possible|when necessary)\b',
+        r"\b(appropriate|as needed|consider|if possible|when necessary)\b",
         re.IGNORECASE,
     )
 
@@ -253,7 +250,7 @@ def _dim_actionability(content: str, notes: list[str]) -> int:
             vague += 1
 
     if actionable == 0:
-        notes.append('Actionability: no imperative instructions found')
+        notes.append("Actionability: no imperative instructions found")
         return 3
 
     ratio = actionable / (actionable + vague) if (actionable + vague) else 0.5
@@ -261,7 +258,7 @@ def _dim_actionability(content: str, notes: list[str]) -> int:
         return _ACTION_MAX
     if ratio >= 0.5:
         return 10
-    notes.append('Actionability: many vague instructions')
+    notes.append("Actionability: many vague instructions")
     return 5
 
 
@@ -280,8 +277,8 @@ def _score_docs(
     if sr.has_docs_guide:
         total += 25
     else:
-        missing.append('docs_guide.md')
-        suggestions.append('Create a docs_guide.md to index your documentation')
+        missing.append("docs_guide.md")
+        suggestions.append("Create a docs_guide.md to index your documentation")
 
     # Core docs present (30 pts, 10 each)
     doc_names = {d.name for d in sr.docs}
@@ -289,7 +286,7 @@ def _score_docs(
         if core in doc_names:
             total += 10
         else:
-            missing.append(f'docs/{core}.md')
+            missing.append(f"docs/{core}.md")
 
     # Docs have content (20 pts) — check they're not tiny stubs
     if sr.docs:
@@ -298,24 +295,22 @@ def _score_docs(
         content_pts = round(20 * content_ratio)
         total += content_pts
         if content_ratio < 1.0:
-            notes.append(
-                f'{len(sr.docs) - non_empty} doc(s) appear to be empty stubs'
-            )
+            notes.append(f"{len(sr.docs) - non_empty} doc(s) appear to be empty stubs")
     else:
-        notes.append('No documentation files found')
+        notes.append("No documentation files found")
 
     # Cross-references (15 pts) — does CLAUDE.md mention docs_guide?
-    if sr.claude_md_content and 'docs_guide' in sr.claude_md_content:
+    if sr.claude_md_content and "docs_guide" in sr.claude_md_content:
         total += 15
     elif sr.claude_md_content:
-        notes.append('CLAUDE.md does not reference docs_guide.md')
+        notes.append("CLAUDE.md does not reference docs_guide.md")
 
     # Freshness (10 pts) — we can't check git dates in a pure function,
     # so award if docs exist at all
     if sr.docs:
         total += 10
 
-    return ComponentScore(name='Documentation', score=min(total, 100), notes=notes)
+    return ComponentScore(name="Documentation", score=min(total, 100), notes=notes)
 
 
 # ---------------------------------------------------------------------------
@@ -329,9 +324,11 @@ def _score_skills(
     notes: list[str] = []
 
     if not sr.skills:
-        notes.append('No skills defined')
-        suggestions.append('Consider adding skills in .claude/skills/ for recurring tasks')
-        return ComponentScore(name='Skills', score=0, notes=notes)
+        notes.append("No skills defined")
+        suggestions.append(
+            "Consider adding skills in .claude/skills/ for recurring tasks"
+        )
+        return ComponentScore(name="Skills", score=0, notes=notes)
 
     per_skill = 100 // len(sr.skills)
     total = 0
@@ -347,7 +344,7 @@ def _score_skills(
             notes.append(f'Skill "{skill.name}": no description')
         total += pts
 
-    return ComponentScore(name='Skills', score=min(total, 100), notes=notes)
+    return ComponentScore(name="Skills", score=min(total, 100), notes=notes)
 
 
 # ---------------------------------------------------------------------------
@@ -363,23 +360,23 @@ def _score_setup(sr: ScanResult, *, suggestions: list[str]) -> ComponentScore:
     if sr.rules:
         total += min(35, 15 * len(sr.rules))
     else:
-        notes.append('No rules defined')
+        notes.append("No rules defined")
 
     # Agents (up to 35)
     if sr.agents:
         total += min(35, 15 * len(sr.agents))
     else:
-        notes.append('No agents defined')
+        notes.append("No agents defined")
 
     # Hooks (30)
     if sr.hooks_config:
         total += 30
     else:
-        notes.append('No hooks configured')
-        suggestions.append('Consider adding hooks in .claude/hooks.json')
+        notes.append("No hooks configured")
+        suggestions.append("Consider adding hooks in .claude/hooks.json")
 
     return ComponentScore(
-        name='Setup (rules/agents/hooks)', score=min(total, 100), notes=notes
+        name="Setup (rules/agents/hooks)", score=min(total, 100), notes=notes
     )
 
 
@@ -394,12 +391,12 @@ def _score_cross_references(
     notes: list[str] = []
 
     if not sr.claude_md_content:
-        return ComponentScore(name='Cross-references', score=0, notes=['No CLAUDE.md'])
+        return ComponentScore(name="Cross-references", score=0, notes=["No CLAUDE.md"])
 
     paths = _extract_paths(sr.claude_md_content)
     if not paths:
-        notes.append('No file paths found in CLAUDE.md to validate')
-        return ComponentScore(name='Cross-references', score=50, notes=notes)
+        notes.append("No file paths found in CLAUDE.md to validate")
+        return ComponentScore(name="Cross-references", score=50, notes=notes)
 
     existing = 0
     broken = []
@@ -410,12 +407,12 @@ def _score_cross_references(
             broken.append(p)
 
     if broken:
-        notes.append(f'Broken references: {", ".join(broken[:5])}')
-        suggestions.append('Fix broken path references in CLAUDE.md')
+        notes.append(f"Broken references: {', '.join(broken[:5])}")
+        suggestions.append("Fix broken path references in CLAUDE.md")
 
     ratio = existing / len(paths)
     score = round(100 * ratio)
-    return ComponentScore(name='Cross-references', score=score, notes=notes)
+    return ComponentScore(name="Cross-references", score=score, notes=notes)
 
 
 # ---------------------------------------------------------------------------
@@ -428,27 +425,27 @@ def _find_section(content: str, heading_keywords: Sequence[str]) -> str:
     lines = content.splitlines()
     start = None
     for i, line in enumerate(lines):
-        if line.startswith('#'):
-            heading_lower = line.lstrip('#').strip().lower()
+        if line.startswith("#"):
+            heading_lower = line.lstrip("#").strip().lower()
             if any(kw in heading_lower for kw in heading_keywords):
                 start = i + 1
                 continue
             if start is not None:
                 # Hit next heading — return what we collected
-                return '\n'.join(lines[start:i])
+                return "\n".join(lines[start:i])
     if start is not None:
-        return '\n'.join(lines[start:])
-    return ''
+        return "\n".join(lines[start:])
+    return ""
 
 
 def _extract_paths(content: str) -> list[str]:
     """Extract plausible file/directory paths from markdown content."""
     # Match things like src/foo.py, ./bar/baz.ts, docs/guide.md
-    pattern = re.compile(r'(?:^|[\s`(])(\./)?(\w[\w\-.]*/[\w\-./]+\.\w+)', re.MULTILINE)
+    pattern = re.compile(r"(?:^|[\s`(])(\./)?(\w[\w\-.]*/[\w\-./]+\.\w+)", re.MULTILINE)
     paths = []
     for m in pattern.finditer(content):
-        path = (m.group(1) or '') + m.group(2)
+        path = (m.group(1) or "") + m.group(2)
         # Filter out URLs
-        if '://' not in path and not path.startswith('http'):
+        if "://" not in path and not path.startswith("http"):
             paths.append(path)
     return paths

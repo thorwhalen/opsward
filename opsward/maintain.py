@@ -51,9 +51,9 @@ def _check_stale_paths(sr: ScanResult) -> Iterable[MaintenanceSuggestion]:
         full = sr.project_root / path_str
         if not full.exists():
             yield MaintenanceSuggestion(
-                category='stale_path',
+                category="stale_path",
                 description=(
-                    f'CLAUDE.md references `{path_str}` but it does not exist'
+                    f"CLAUDE.md references `{path_str}` but it does not exist"
                 ),
             )
 
@@ -76,7 +76,7 @@ def _check_docs_guide_sync(sr: ScanResult) -> Iterable[MaintenanceSuggestion]:
     actual_docs = {
         d.name
         for d in sr.docs
-        if d.name != 'docs_guide'  # don't expect docs_guide to list itself
+        if d.name != "docs_guide"  # don't expect docs_guide to list itself
     }
 
     # Extract doc names referenced in docs_guide.md (look for .md links)
@@ -86,9 +86,9 @@ def _check_docs_guide_sync(sr: ScanResult) -> Iterable[MaintenanceSuggestion]:
     unlisted = actual_docs - referenced
     for name in sorted(unlisted):
         yield MaintenanceSuggestion(
-            category='sync_issue',
+            category="sync_issue",
             description=(
-                f'`{name}.md` exists in docs/ but is not listed in docs_guide.md'
+                f"`{name}.md` exists in docs/ but is not listed in docs_guide.md"
             ),
             diff=_suggest_guide_addition(name),
         )
@@ -97,13 +97,12 @@ def _check_docs_guide_sync(sr: ScanResult) -> Iterable[MaintenanceSuggestion]:
     missing = referenced - actual_docs
     for name in sorted(missing):
         # Check the actual file doesn't exist (the ref might use a different stem)
-        candidate = docs_dir / f'{name}.md'
+        candidate = docs_dir / f"{name}.md"
         if not candidate.exists():
             yield MaintenanceSuggestion(
-                category='sync_issue',
+                category="sync_issue",
                 description=(
-                    f'docs_guide.md references `{name}.md` '
-                    f'but the file does not exist'
+                    f"docs_guide.md references `{name}.md` but the file does not exist"
                 ),
             )
 
@@ -120,7 +119,7 @@ def _check_doc_freshness(sr: ScanResult) -> Iterable[MaintenanceSuggestion]:
     if not sr.docs:
         return
 
-    git_dir = sr.project_root / '.git'
+    git_dir = sr.project_root / ".git"
     if not git_dir.is_dir():
         return
 
@@ -128,10 +127,8 @@ def _check_doc_freshness(sr: ScanResult) -> Iterable[MaintenanceSuggestion]:
         days = _days_since_last_commit(doc.path, sr.project_root)
         if days is not None and days > _STALE_DAYS:
             yield MaintenanceSuggestion(
-                category='outdated_doc',
-                description=(
-                    f'`{doc.name}.md` has not been updated in {days} days'
-                ),
+                category="outdated_doc",
+                description=(f"`{doc.name}.md` has not been updated in {days} days"),
             )
 
 
@@ -139,7 +136,7 @@ def _days_since_last_commit(file_path: Path, repo_root: Path) -> Optional[int]:
     """Return days since last git commit touching *file_path*, or None."""
     try:
         result = subprocess.run(
-            ['git', 'log', '-1', '--format=%ct', '--', str(file_path)],
+            ["git", "log", "-1", "--format=%ct", "--", str(file_path)],
             capture_output=True,
             text=True,
             cwd=str(repo_root),
@@ -166,18 +163,16 @@ def _check_skills_without_description(
     for skill in sr.skills:
         if not skill.has_skill_md:
             yield MaintenanceSuggestion(
-                category='incomplete_skill',
+                category="incomplete_skill",
                 description=(
-                    f'Skill `{skill.name}` has no SKILL.md — '
-                    f'agents cannot discover when to use it'
+                    f"Skill `{skill.name}` has no SKILL.md — "
+                    f"agents cannot discover when to use it"
                 ),
             )
         elif not skill.description:
             yield MaintenanceSuggestion(
-                category='incomplete_skill',
-                description=(
-                    f'Skill `{skill.name}` SKILL.md has no description line'
-                ),
+                category="incomplete_skill",
+                description=(f"Skill `{skill.name}` SKILL.md has no description line"),
             )
 
 
@@ -192,10 +187,10 @@ def _check_empty_docs(sr: ScanResult) -> Iterable[MaintenanceSuggestion]:
     for doc in sr.docs:
         if doc.size_bytes < _MIN_DOC_BYTES:
             yield MaintenanceSuggestion(
-                category='empty_doc',
+                category="empty_doc",
                 description=(
-                    f'`{doc.name}.md` appears to be an empty stub '
-                    f'({doc.size_bytes} bytes)'
+                    f"`{doc.name}.md` appears to be an empty stub "
+                    f"({doc.size_bytes} bytes)"
                 ),
             )
 
@@ -207,13 +202,11 @@ def _check_empty_docs(sr: ScanResult) -> Iterable[MaintenanceSuggestion]:
 
 def _extract_paths(content: str) -> list[str]:
     """Extract plausible file/directory paths from markdown content."""
-    pattern = re.compile(
-        r'(?:^|[\s`(])(\./)?(\w[\w\-.]*/[\w\-./]+\.\w+)', re.MULTILINE
-    )
+    pattern = re.compile(r"(?:^|[\s`(])(\./)?(\w[\w\-.]*/[\w\-./]+\.\w+)", re.MULTILINE)
     paths = []
     for m in pattern.finditer(content):
-        path = (m.group(1) or '') + m.group(2)
-        if '://' not in path and not path.startswith('http'):
+        path = (m.group(1) or "") + m.group(2)
+        if "://" not in path and not path.startswith("http"):
             paths.append(path)
     return paths
 
@@ -226,19 +219,19 @@ def _extract_doc_refs(guide_content: str) -> Iterable[str]:
     """
     seen = set()
     # Markdown links: [anything](something.md)
-    for m in re.finditer(r'\[.*?\]\((\w[\w\-]*)\.md[^)]*\)', guide_content):
+    for m in re.finditer(r"\[.*?\]\((\w[\w\-]*)\.md[^)]*\)", guide_content):
         name = m.group(1)
-        if name != 'docs_guide' and name not in seen:
+        if name != "docs_guide" and name not in seen:
             seen.add(name)
             yield name
     # Backtick references: `something.md`
-    for m in re.finditer(r'`(\w[\w\-]*)\.md`', guide_content):
+    for m in re.finditer(r"`(\w[\w\-]*)\.md`", guide_content):
         name = m.group(1)
-        if name != 'docs_guide' and name not in seen:
+        if name != "docs_guide" and name not in seen:
             seen.add(name)
             yield name
 
 
 def _suggest_guide_addition(doc_name: str) -> str:
     """Return a diff-like suggestion for adding a doc to docs_guide.md."""
-    return f'+ | [{doc_name}.md]({doc_name}.md) | <!-- add description --> |'
+    return f"+ | [{doc_name}.md]({doc_name}.md) | <!-- add description --> |"
