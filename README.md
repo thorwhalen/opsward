@@ -95,8 +95,9 @@ opsward maintain-cmd . --format json
 ## Claude Code Mode (AI-enhanced)
 
 Install opsward's skills into Claude Code, and Claude becomes an intelligent
-layer on top of the deterministic tools — it runs `opsward diagnose`, reads the
-scores, figures out what to fix, and does it.
+layer on top of the deterministic tools. It doesn't just run opsward — it goes
+beyond the heuristic scores by reading actual source code, reasoning about
+accuracy, and making intelligent edits.
 
 ### Install Skills
 
@@ -113,18 +114,31 @@ the right thing:
 | Skill | Trigger | What it does |
 |-------|---------|--------------|
 | `opsward` | "check my setup", "opsward" | Diagnose → decide next step → generate or maintain → re-diagnose |
-| `opsward-diagnose` | "audit my AI config" | Run `opsward diagnose`, interpret scores, offer concrete fixes |
-| `opsward-generate` | "scaffold AI setup" | Run `opsward generate`, review, customize templates with real content |
-| `opsward-maintain` | "check for staleness" | Run `opsward maintain`, prioritize issues, apply fixes |
+| `opsward-diagnose` | "audit my AI config" | Run `opsward diagnose`, then read code to assess semantic quality, offer fixes |
+| `opsward-generate` | "scaffold AI setup" | Run `opsward generate`, then read the codebase and replace templates with real content |
+| `opsward-maintain` | "check for staleness" | Run `opsward maintain`, then check for semantic drift (docs that no longer match code) |
 
 ### How It Works
 
-1. Claude Code runs `opsward diagnose . --format json` via Bash
-2. Opsward returns deterministic scores and suggestions (pure code, no AI)
-3. Claude reads the structured output and reasons about what to do
-4. Claude offers fixes, edits files, re-runs diagnose to show improvement
+1. **Opsward CLI** runs deterministic checks (regex scoring, path validation, template substitution) — fast, reproducible, no AI
+2. **Claude reads the output** and adds deeper analysis: reads actual source code, checks if docs match reality, verifies commands are correct
+3. **Claude proposes fixes** — not just what opsward suggests, but what it discovers by understanding the code
+4. **Claude applies fixes** with user approval, then re-runs opsward to show improvement
 
-The CLI does the analysis. Claude does the thinking and acting.
+The CLI provides the structural analysis. Claude provides the semantic understanding and action.
+
+### Permissions
+
+The skills use Claude Code's standard permission model — no special permissions are
+assumed or required:
+
+- **Read-only operations** (reading files, searching code, running `opsward diagnose`): always safe, used freely
+- **Write operations** (creating docs, editing CLAUDE.md): Claude Code prompts the user for each action per their permission settings
+- **Destructive operations** (deleting files, removing content): always ask for explicit confirmation
+
+If you want faster workflows (e.g., auto-approve file creation during generation),
+you can configure that in your Claude Code permission settings — but opsward skills
+never assume it.
 
 ---
 

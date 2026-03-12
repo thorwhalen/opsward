@@ -5,7 +5,7 @@ description: Diagnose the health of this project's AI agent setup. Use when the 
 
 # Diagnose AI Setup
 
-Run opsward's deterministic diagnostic, then interpret results and offer fixes.
+Run opsward's deterministic diagnostic, then go deeper with your own analysis, and offer fixes.
 
 ## Prerequisites
 
@@ -13,35 +13,57 @@ Requires `opsward` to be installed (`pip install opsward`). If the command is no
 
 ## Workflow
 
-1. **Run the diagnostic** via Bash:
-   ```
-   opsward diagnose . --format json
-   ```
-   This returns structured scores for: CLAUDE.md quality, documentation, skills, setup (rules/agents/hooks), and cross-references. Each scored 0-100 with an overall weighted grade.
+### 1. Run the deterministic diagnostic
 
-2. **Run the text report** for presentation:
-   ```
-   opsward diagnose .
-   ```
+```bash
+opsward diagnose . --format json
+```
 
-3. **Present the report card** to the user. For each component:
-   - State the score and what it measures
-   - Explain why it scored the way it did (read the relevant files if needed to give specific feedback)
-   - Highlight the most impactful improvement opportunities
+This returns structured scores (0-100) for CLAUDE.md quality, documentation, skills, setup, and cross-references. Also run the text version for the user:
 
-4. **For each suggestion or low-scoring area**, offer a concrete fix:
-   - Missing CLAUDE.md → offer to generate one (via `opsward generate . --write` or write a tailored one)
-   - Low commands/workflows score → read the project's build config and add the real commands to CLAUDE.md
-   - Broken cross-references → identify the stale paths and update or remove them
-   - Missing docs → offer to create them with real content
-   - Missing skill descriptions → read the skill and write a proper description
+```bash
+opsward diagnose .
+```
 
-5. **Apply fixes** with user approval, using Edit/Write tools.
+### 2. Go deeper than the scores
 
-6. **Re-run diagnostic** after fixes to show improvement:
-   ```
-   opsward diagnose .
-   ```
+Opsward uses regex heuristics — it catches structural issues but can't assess semantic quality. You can. For each component:
+
+- **CLAUDE.md**: Read it. Is the module map accurate? Are the commands actually correct? Does it match the real project structure? Check `pyproject.toml`, `package.json`, source directories.
+- **Docs**: Read each doc. Is the content real or just a template stub? Does `architecture.md` describe the actual architecture?
+- **Skills**: Read each SKILL.md. Are the trigger descriptions clear? Do the instructions make sense for this project?
+- **Cross-references**: Opsward checks path existence. You can check whether referenced files have the content the reference implies.
+
+Use Read, Glob, and Grep freely to inspect the project — these are read-only and safe.
+
+### 3. Present findings
+
+For each component:
+- State the opsward score and what it measures
+- Add your own observations (what opsward can't catch)
+- Highlight the most impactful improvements
+
+### 4. Offer fixes
+
+For each issue, propose a concrete fix:
+- Missing CLAUDE.md → offer to generate or write a tailored one
+- Inaccurate module map → read the actual directory structure and rewrite it
+- Low commands score → read `pyproject.toml`/`package.json` and add real commands
+- Broken cross-references → identify stale paths, update or remove them
+- Missing/empty docs → read the codebase and write real content (not just templates)
+- Missing skill descriptions → read the skill directory and write a proper description
+
+### 5. Apply fixes with user approval
+
+Always ask before writing or editing files. Show the proposed change first.
+
+### 6. Re-run diagnostic
+
+```bash
+opsward diagnose .
+```
+
+Show before/after scores.
 
 ## Scoring Dimensions (for reference)
 
@@ -50,3 +72,7 @@ Requires `opsward` to be installed (`pip install opsward`). If the command is no
 - **Skills** (20%): SKILL.md presence, descriptions
 - **Setup** (10%): rules, agents, hooks configuration
 - **Cross-references** (10%): paths in CLAUDE.md that actually exist on disk
+
+## Permissions
+
+This skill needs no special permissions for diagnosis (read-only). Applying fixes requires write permission — Claude Code will prompt the user for approval on each write/edit action as configured in their permission settings.

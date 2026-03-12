@@ -5,7 +5,7 @@ description: Generate missing AI setup artifacts for this project. Use when the 
 
 # Generate AI Setup Artifacts
 
-Use opsward to scaffold missing artifacts, then customize them with real project content.
+Use opsward to scaffold missing artifacts, then go beyond templates — read the actual codebase and fill in real content.
 
 ## Prerequisites
 
@@ -13,39 +13,51 @@ Requires `opsward` to be installed (`pip install opsward`). If the command is no
 
 ## Workflow
 
-1. **Preview what would be generated** via Bash:
-   ```
-   opsward generate .
-   ```
-   This shows a dry-run list of files that would be created. Existing files are never overwritten.
+### 1. Preview what would be generated
 
-2. **Present the plan** to the user. For each proposed file:
-   - Explain what it is and why it's useful
-   - Note if it's a core artifact (CLAUDE.md, docs_guide) vs optional (roadmap, glossary)
-   - Let the user decide which files to create
+```bash
+opsward generate .
+```
 
-3. **Generate the files:**
-   ```
-   opsward generate . --write
-   ```
+This shows a dry-run list of files that would be created. Existing files are never overwritten.
 
-4. **Customize each generated file** with real project content:
-   - Read the project's source code, configs, and README to understand the project
-   - For CLAUDE.md: fill in accurate module descriptions, real build/test commands, actual conventions
-   - For architecture.md: describe the real architecture based on code inspection
-   - For docs_guide.md: ensure it accurately indexes the docs that were created
-   - For skills: verify the generated skills make sense for this project
-   - Replace all placeholder text (`<!-- Add ... -->`) with real content
+### 2. Present the plan
 
-5. **Verify the result:**
-   ```
-   opsward diagnose .
-   ```
-   Show the user the resulting score.
+For each proposed file:
+- Explain what it is and why it's useful
+- Note if it's a core artifact (CLAUDE.md, docs_guide) vs optional (roadmap, glossary)
+- Let the user decide which files to create
 
-## Guidelines
+### 3. Generate the scaffolds
 
-- Always show the dry-run output before writing files.
-- Ask the user before creating files.
-- After generation, spend time customizing — templates with placeholders are only a starting point.
-- Focus on making CLAUDE.md accurate and actionable first, then docs, then skills.
+```bash
+opsward generate . --write
+```
+
+### 4. Replace templates with real content
+
+This is the critical step. Opsward generates templates with placeholders — you turn them into useful documents by reading the actual project:
+
+- **CLAUDE.md**: Read `pyproject.toml`/`package.json` for real project name and description. Scan source directories to build an accurate module map with real descriptions. Extract actual build/test/lint commands from config files. Check for linter/formatter configs and document real conventions.
+- **architecture.md**: Read the source code to understand the real architecture. Document actual data flow, module responsibilities, and key abstractions.
+- **conventions.md**: Look at existing code patterns — naming, error handling, import style — and document what you find.
+- **docs_guide.md**: Verify it accurately indexes the docs that were created.
+- **testing.md**: Read test files to document actual test patterns, fixtures, and how to run tests.
+
+Use Read, Glob, Grep, and Bash freely to understand the project before writing.
+
+### 5. Verify the result
+
+```bash
+opsward diagnose .
+```
+
+Show the resulting score. If any component scores low, offer to improve it further.
+
+## Permissions
+
+- **Read access**: Used freely to inspect the project (always safe).
+- **Write access**: Needed to create new files. Claude Code prompts for approval per the user's permission settings.
+- **Bash**: Used to run opsward commands and inspect the project (e.g., `git log`, `tree`).
+
+If the user wants to skip confirmation prompts for file creation, they can configure auto-allow for Write in their Claude Code settings — but this is their choice, not something the skill assumes.
