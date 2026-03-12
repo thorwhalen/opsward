@@ -3,13 +3,25 @@
 Diagnose, generate, and maintain the AI agent setup of your projects —
 CLAUDE.md, skills, subagents, rules, and supporting docs.
 
+Opsward works in two modes:
+
+- **CLI mode** — deterministic, pure-code analysis you run directly. No AI involved.
+- **Claude Code mode** — install opsward as Claude Code skills so that Claude runs the
+  CLI tools, interprets results intelligently, and acts on suggestions. No API keys
+  needed — Claude Code is the AI engine.
+
 ## Install
 
 ```bash
 pip install opsward
 ```
 
-## Quick Start
+---
+
+## CLI Mode (no AI)
+
+These commands are deterministic Python code — regex scoring, filesystem checks,
+template substitution. Same input always gives the same output.
 
 ### Diagnose
 
@@ -50,29 +62,7 @@ opsward generate-cmd . --write   # actually create files
 ```
 
 Generates CLAUDE.md, docs (architecture, conventions, known_issues, etc.),
-AI-enhanced skills (opsward, opsward-diagnose, opsward-generate, opsward-maintain),
-and agents (setup-auditor) — only what's missing, never overwrites existing files.
-
-### Install Skills
-
-Install opsward's Claude Code skills into a project (or globally):
-
-```bash
-opsward install-skills-cmd                  # dry run for current project
-opsward install-skills-cmd --write          # install into ./.claude/
-opsward install-skills-cmd --global-install --write  # install into ~/.claude/
-```
-
-The installed skills let Claude Code **run opsward's deterministic tools, interpret
-the results intelligently, and act on suggestions** — no API keys needed, Claude Code
-is the AI engine.
-
-| Skill | Trigger | What it does |
-|-------|---------|--------------|
-| `opsward` | "check my setup" | Diagnose → decide next step → generate or maintain → re-diagnose |
-| `opsward-diagnose` | "audit my AI config" | Run `opsward diagnose`, interpret scores, offer fixes |
-| `opsward-generate` | "scaffold AI setup" | Run `opsward generate`, review, customize with real content |
-| `opsward-maintain` | "check for staleness" | Run `opsward maintain`, prioritize issues, apply fixes |
+skill templates, and agents — only what's missing, never overwrites existing files.
 
 ### Maintain
 
@@ -89,6 +79,54 @@ myproject: 3 issue(s)
   [sync_issue] `new_doc.md` exists in docs/ but is not listed in docs_guide.md
   [empty_doc] `conventions.md` appears to be an empty stub (12 bytes)
 ```
+
+### Output Formats
+
+All CLI commands support `--format json` for machine-parseable output:
+
+```bash
+opsward diagnose-cmd . --format json
+opsward generate-cmd . --format json
+opsward maintain-cmd . --format json
+```
+
+---
+
+## Claude Code Mode (AI-enhanced)
+
+Install opsward's skills into Claude Code, and Claude becomes an intelligent
+layer on top of the deterministic tools — it runs `opsward diagnose`, reads the
+scores, figures out what to fix, and does it.
+
+### Install Skills
+
+```bash
+opsward install-skills-cmd --write                    # into ./.claude/ (project-level)
+opsward install-skills-cmd --global-install --write   # into ~/.claude/ (all projects)
+```
+
+### What the Skills Do
+
+Once installed, these skills activate automatically in Claude Code when you ask
+the right thing:
+
+| Skill | Trigger | What it does |
+|-------|---------|--------------|
+| `opsward` | "check my setup", "opsward" | Diagnose → decide next step → generate or maintain → re-diagnose |
+| `opsward-diagnose` | "audit my AI config" | Run `opsward diagnose`, interpret scores, offer concrete fixes |
+| `opsward-generate` | "scaffold AI setup" | Run `opsward generate`, review, customize templates with real content |
+| `opsward-maintain` | "check for staleness" | Run `opsward maintain`, prioritize issues, apply fixes |
+
+### How It Works
+
+1. Claude Code runs `opsward diagnose . --format json` via Bash
+2. Opsward returns deterministic scores and suggestions (pure code, no AI)
+3. Claude reads the structured output and reasons about what to do
+4. Claude offers fixes, edits files, re-runs diagnose to show improvement
+
+The CLI does the analysis. Claude does the thinking and acting.
+
+---
 
 ## What It Checks
 
@@ -108,16 +146,6 @@ known_issues.md, and content quality.
 **Cross-references**: paths in CLAUDE.md validated against the filesystem.
 
 **Overall health**: weighted score (A–F grade) combining all components.
-
-## Output Formats
-
-All commands support `--format json` for machine-parseable output:
-
-```bash
-opsward diagnose-cmd . --format json
-opsward generate-cmd . --format json
-opsward maintain-cmd . --format json
-```
 
 ## Python API
 
