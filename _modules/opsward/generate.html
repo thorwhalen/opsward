@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>opsward.generate &mdash; opsward 0.0.2 documentation</title>
+  <title>opsward.generate &mdash; opsward 0.0.3 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=e3a6060d"></script>
+      <script src="../../_static/documentation_options.js?v=47de8214"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -96,14 +96,14 @@
 
 <span class="c1"># Skills that opsward installs — each maps to shared/&lt;name&gt;/SKILL.md template</span>
 <span class="n">_SKILL_NAMES</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="s1">&#39;opsward&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;opsward-diagnose&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;opsward-generate&#39;</span><span class="p">,</span>
-    <span class="s1">&#39;opsward-maintain&#39;</span><span class="p">,</span>
+    <span class="s2">&quot;opsward&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;opsward-diagnose&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;opsward-generate&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;opsward-maintain&quot;</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="c1"># Agent definitions that opsward installs</span>
-<span class="n">_AGENT_NAMES</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;setup-auditor&#39;</span><span class="p">,)</span>
+<span class="n">_AGENT_NAMES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;setup-auditor&quot;</span><span class="p">,)</span>
 
 
 <div class="viewcode-block" id="generate">
@@ -180,13 +180,7 @@
     <span class="c1"># AI-enhanced skills (invoke opsward CLI + Claude interpretation)</span>
     <span class="k">for</span> <span class="n">skill_name</span> <span class="ow">in</span> <span class="n">_SKILL_NAMES</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">skill_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">existing_skills</span><span class="p">:</span>
-            <span class="n">target</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span>
-                <span class="o">/</span> <span class="s2">&quot;.claude&quot;</span>
-                <span class="o">/</span> <span class="s2">&quot;skills&quot;</span>
-                <span class="o">/</span> <span class="n">skill_name</span>
-                <span class="o">/</span> <span class="s2">&quot;SKILL.md&quot;</span>
-            <span class="p">)</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span> <span class="o">/</span> <span class="s2">&quot;.claude&quot;</span> <span class="o">/</span> <span class="s2">&quot;skills&quot;</span> <span class="o">/</span> <span class="n">skill_name</span> <span class="o">/</span> <span class="s2">&quot;SKILL.md&quot;</span>
             <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="n">_render</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s2">&quot;shared/</span><span class="si">{</span><span class="n">skill_name</span><span class="si">}</span><span class="s2">/SKILL.md&quot;</span><span class="p">,</span>
@@ -226,6 +220,7 @@
 <span class="c1"># Targeted skill/agent generation (for install-skills command)</span>
 <span class="c1"># ---------------------------------------------------------------------------</span>
 
+
 <div class="viewcode-block" id="generate_skills">
 <a class="viewcode-back" href="../../module_docs/opsward/generate.html#opsward.generate.generate_skills">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">generate_skills</span><span class="p">(</span>
@@ -250,16 +245,12 @@
 
     <span class="k">for</span> <span class="n">skill_name</span> <span class="ow">in</span> <span class="n">_SKILL_NAMES</span><span class="p">:</span>
         <span class="n">target</span> <span class="o">=</span> <span class="n">target_dir</span> <span class="o">/</span> <span class="s2">&quot;skills&quot;</span> <span class="o">/</span> <span class="n">skill_name</span> <span class="o">/</span> <span class="s2">&quot;SKILL.md&quot;</span>
-        <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-            <span class="n">_render</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;shared/</span><span class="si">{</span><span class="n">skill_name</span><span class="si">}</span><span class="s2">/SKILL.md&quot;</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">variables</span><span class="p">)</span>
-        <span class="p">)</span>
+        <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_render</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;shared/</span><span class="si">{</span><span class="n">skill_name</span><span class="si">}</span><span class="s2">/SKILL.md&quot;</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">variables</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="n">include_agents</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">agent_name</span> <span class="ow">in</span> <span class="n">_AGENT_NAMES</span><span class="p">:</span>
             <span class="n">target</span> <span class="o">=</span> <span class="n">target_dir</span> <span class="o">/</span> <span class="s2">&quot;agents&quot;</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">agent_name</span><span class="si">}</span><span class="s2">.md&quot;</span>
-            <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-                <span class="n">_render</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;shared/</span><span class="si">{</span><span class="n">agent_name</span><span class="si">}</span><span class="s2">.md&quot;</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">variables</span><span class="p">)</span>
-            <span class="p">)</span>
+            <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_render</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;shared/</span><span class="si">{</span><span class="n">agent_name</span><span class="si">}</span><span class="s2">.md&quot;</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">variables</span><span class="p">))</span>
 
     <span class="k">return</span> <span class="n">files</span></div>
 
