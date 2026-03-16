@@ -7,7 +7,7 @@ import re
 from collections.abc import Sequence
 from pathlib import Path
 
-from opsward.base import ComponentScore, DiagnosisReport, ScanResult
+from opsward.base import ComponentScore, DiagnosisReport, ScanResult, SkillInfo
 
 
 # ---------------------------------------------------------------------------
@@ -63,6 +63,9 @@ def diagnose(scan_result: ScanResult) -> DiagnosisReport:
     # 5. Cross-reference integrity (max 100)
     xref_score = _score_cross_references(scan_result, suggestions=suggestions)
     scores.append(xref_score)
+
+    # 6. AGENTS.md cross-platform check (advisory, not scored)
+    _check_agents_md(scan_result, suggestions=suggestions)
 
     # Weighted overall
     score_map = {s.name: s.score for s in scores}
@@ -335,16 +338,100 @@ def _score_skills(
     for skill in sr.skills:
         pts = 0
         if skill.has_skill_md:
-            pts += per_skill * 60 // 100  # 60% for having SKILL.md
+            pts += per_skill * 40 // 100  # 40% for having SKILL.md
         else:
             notes.append(f'Skill "{skill.name}": missing SKILL.md')
         if skill.description:
-            pts += per_skill * 40 // 100  # 40% for having a description
+            pts += per_skill * 30 // 100  # 30% for having a description
         else:
             notes.append(f'Skill "{skill.name}": no description')
+        # 30% for spec compliance
+        violations = _validate_skill_spec(skill)
+        if not violations:
+            pts += per_skill * 30 // 100
+        else:
+            for v in violations:
+                notes.append(f'Skill "{skill.name}": {v}')
         total += pts
 
     return ComponentScore(name="Skills", score=min(total, 100), notes=notes)
+
+
+# ---------------------------------------------------------------------------
+# agentskills.io spec validation
+# ---------------------------------------------------------------------------
+
+def validate_skill_spec(skill: SkillInfo) -> list[str]:
+    """Validate a SkillInfo against the agentskills.io specification.
+
+    Returns a list of human-readable violation strings (empty = compliant).
+
+    >>> from pathlib import Path
+    >>> from opsward.base import SkillInfo
+    >>> s = SkillInfo(name='good-skill', path=Path('.'), has_skill_md=True,
+    ...     frontmatter={'name': 'good-skill', 'description': 'Does X.'}, line_count=50)
+    >>> validate_skill_spec(s)
+    []
+    """
+    return _validate_skill_spec(skill)
+
+
+_NAME_PATTERN = re.compile(r"^[a-z0-9]([a-z0-9-]*[a-z0-9])?$")
+_MAX_SKILL_LINES = 500
+_MAX_NAME_LEN = 64
+_MAX_DESC_LEN = 1024
+_MAX_COMPAT_LEN = 500
+
+
+def _validate_skill_spec(skill) -> list[str]:
+    """Validate a SkillInfo against the agentskills.io specification.
+
+    Returns a list of human-readable violation strings (empty = compliant).
+    """
+    violations: list[str] = []
+    if not skill.has_skill_md:
+        return violations  # Can't validate without SKILL.md
+
+    fm = skill.frontmatter
+
+    # name field
+    fm_name = fm.get("name", "")
+    if not fm_name:
+        violations.append("frontmatter missing required `name` field")
+    else:
+        if len(fm_name) > _MAX_NAME_LEN:
+            violations.append(f"`name` exceeds {_MAX_NAME_LEN} chars")
+        if not _NAME_PATTERN.match(fm_name):
+            violations.append(
+                "`name` must be lowercase alphanumeric + hyphens, "
+                "no leading/trailing/consecutive hyphens"
+            )
+        if "--" in fm_name:
+            violations.append("`name` contains consecutive hyphens")
+        if fm_name != skill.name:
+            violations.append(
+                f"`name` field ({fm_name!r}) must match directory name ({skill.name!r})"
+            )
+
+    # description field
+    fm_desc = fm.get("description", "")
+    if not fm_desc:
+        violations.append("frontmatter missing required `description` field")
+    elif len(fm_desc) > _MAX_DESC_LEN:
+        violations.append(f"`description` exceeds {_MAX_DESC_LEN} chars")
+
+    # compatibility field length
+    compat = fm.get("compatibility", "")
+    if compat and len(compat) > _MAX_COMPAT_LEN:
+        violations.append(f"`compatibility` exceeds {_MAX_COMPAT_LEN} chars")
+
+    # SKILL.md size
+    if skill.line_count > _MAX_SKILL_LINES:
+        violations.append(
+            f"SKILL.md has {skill.line_count} lines (max {_MAX_SKILL_LINES})"
+        )
+
+    return violations
 
 
 # ---------------------------------------------------------------------------
@@ -373,7 +460,10 @@ def _score_setup(sr: ScanResult, *, suggestions: list[str]) -> ComponentScore:
         total += 30
     else:
         notes.append("No hooks configured")
-        suggestions.append("Consider adding hooks in .claude/hooks.json")
+        suggestions.append(
+            "Add hooks in .claude/hooks.json — run `opsward generate --hooks` "
+            "for starter templates (auto-format on PostToolUse, session context on SessionStart)"
+        )
 
     return ComponentScore(
         name="Setup (rules/agents/hooks)", score=min(total, 100), notes=notes
@@ -418,6 +508,28 @@ def _score_cross_references(
 # ---------------------------------------------------------------------------
 # Helpers
 # ---------------------------------------------------------------------------
+
+
+def _check_agents_md(sr: ScanResult, *, suggestions: list[str]) -> None:
+    """Advisory check for AGENTS.md (cross-platform agent instructions)."""
+    if not sr.agents_md_content:
+        if sr.claude_md_content:
+            suggestions.append(
+                "No AGENTS.md found — run `opsward generate --agents-md` to create "
+                "cross-platform agent instructions (supported by 60,000+ projects)"
+            )
+        return
+
+    # If both exist, check for basic consistency
+    if sr.claude_md_content and sr.agents_md_content:
+        # Check that AGENTS.md has build/test commands if CLAUDE.md does
+        claude_lower = sr.claude_md_content.lower()
+        agents_lower = sr.agents_md_content.lower()
+        if "```" in claude_lower and "```" not in agents_lower:
+            suggestions.append(
+                "AGENTS.md has no code blocks but CLAUDE.md does — "
+                "consider syncing build/test commands"
+            )
 
 
 def _find_section(content: str, heading_keywords: Sequence[str]) -> str:

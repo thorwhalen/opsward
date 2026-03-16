@@ -28,6 +28,8 @@ class SkillInfo:
     path: Path
     has_skill_md: bool = False
     description: str = ""
+    frontmatter: dict = field(default_factory=dict)
+    line_count: int = 0
 
 
 @dataclass(frozen=True)
@@ -86,6 +88,14 @@ class ScanResult:
     docs: list[DocSpec] = field(default_factory=list)
     has_docs_guide: bool = False
     docs_guide_path: Optional[Path] = None
+
+    # AGENTS.md
+    agents_md_path: Optional[Path] = None
+    agents_md_content: str = ""
+
+    # Monorepo detection
+    is_monorepo: bool = False
+    monorepo_packages: list[str] = field(default_factory=list)
 
 
 # ---------------------------------------------------------------------------

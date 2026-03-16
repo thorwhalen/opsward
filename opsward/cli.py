@@ -8,6 +8,7 @@ from pathlib import Path
 from opsward.base import DiagnosisReport
 from opsward.generate import generate as _generate, generate_skills as _generate_skills
 from opsward.maintain import maintain as _maintain
+from opsward.recommend import recommend_skills as _recommend_skills
 from opsward.scan import scan
 from opsward.score import diagnose as _diagnose
 
@@ -26,12 +27,14 @@ def diagnose(
     *project_roots: str,
     format: str = "text",
     verbose: bool = False,
+    min_score: int = 80,
 ):
     """Diagnose the AI agent setup of one or more projects.
 
     :param project_roots: one or more paths to project directories
     :param format: output format — 'text' or 'json'
     :param verbose: show additional detail in text output
+    :param min_score: minimum overall score to pass (exit 0); below this exits 1
     """
     if not project_roots:
         project_roots = (".",)
@@ -61,13 +64,15 @@ def diagnose(
                 _print_verbose(sr)
 
     worst = min(r.overall_score for r in reports)
-    sys.exit(0 if worst >= 80 else 1)
+    sys.exit(0 if worst >= min_score else 1)
 
 
 def generate(
     *project_roots: str,
     write: bool = False,
     format: str = "text",
+    agents_md: bool = False,
+    hooks: bool = False,
 ):
     """Generate missing AI setup artifacts for one or more projects.
 
@@ -77,6 +82,8 @@ def generate(
     :param project_roots: one or more paths to project directories
     :param write: actually write files (default: dry run)
     :param format: output format — 'text' or 'json'
+    :param agents_md: also generate AGENTS.md (cross-platform agent instructions)
+    :param hooks: also generate starter hook scripts
     """
     if not project_roots:
         project_roots = (".",)
@@ -89,7 +96,7 @@ def generate(
             sys.exit(2)
 
         sr = scan(root)
-        files = _generate(sr)
+        files = _generate(sr, agents_md=agents_md, hooks=hooks)
         all_files.extend(files)
 
         if format == "json":
@@ -266,4 +273,48 @@ def install_skills(
         print("\nDry run — pass --write to install files.")
 
 
-_dispatch_funcs = [diagnose, generate, maintain, install_skills]
+def recommend(
+    *project_roots: str,
+    format: str = "text",
+):
+    """Recommend ecosystem skills based on the project's tech stack.
+
+    Analyzes dependencies and suggests skills from the community catalog.
+
+    :param project_roots: one or more paths to project directories
+    :param format: output format — 'text' or 'json'
+    """
+    if not project_roots:
+        project_roots = (".",)
+
+    all_recs = []
+    for root_str in project_roots:
+        root = Path(root_str).resolve()
+        if not root.is_dir():
+            print(f"Error: {root_str} is not a directory", file=sys.stderr)
+            sys.exit(2)
+
+        sr = scan(root)
+        recs = _recommend_skills(sr)
+        all_recs.extend(recs)
+
+        if format != "json":
+            if not recs:
+                print(f"{root.name}: no skill recommendations")
+            else:
+                print(f"{root.name}: {len(recs)} recommended skill(s)\n")
+                for rec in recs:
+                    print(f"  {rec.name}")
+                    print(f"    Reason: {rec.reason}")
+                    print(f"    Source: {rec.source}")
+                print()
+
+    if format == "json":
+        data = [
+            {"name": r.name, "reason": r.reason, "source": r.source}
+            for r in all_recs
+        ]
+        print(json.dumps(data, indent=2))
+
+
+_dispatch_funcs = [diagnose, generate, maintain, recommend, install_skills]

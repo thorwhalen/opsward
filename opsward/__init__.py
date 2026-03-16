@@ -13,6 +13,7 @@ from opsward.base import (
     SkillInfo,
 )
 from opsward.scan import scan
-from opsward.score import diagnose
+from opsward.score import diagnose, validate_skill_spec
 from opsward.generate import generate, generate_skills
 from opsward.maintain import maintain
+from opsward.recommend import recommend_skills, SkillRecommendation

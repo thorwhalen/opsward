@@ -166,6 +166,7 @@ known_issues.md, and content quality.
 ```python
 from pathlib import Path
 from opsward import scan, diagnose, generate, generate_skills, maintain
+from opsward import recommend_skills, validate_skill_spec
 
 sr = scan('.')
 report = diagnose(sr)
@@ -175,6 +176,54 @@ print(report.grade)        # 'A', 'B', 'C', 'D', or 'F'
 files = generate(sr)       # list[GeneratedFile]
 issues = maintain(sr)      # list[MaintenanceSuggestion]
 
+# Recommend ecosystem skills based on tech stack
+recs = recommend_skills(sr)  # list[SkillRecommendation]
+
+# Validate skills against agentskills.io spec
+for skill in sr.skills:
+    violations = validate_skill_spec(skill)
+
 # Install skills programmatically
 skill_files = generate_skills(Path.home() / '.claude')
 ```
+
+## CI Integration
+
+Use opsward in CI to enforce AI setup quality:
+
+```bash
+# Fail if overall score drops below 60
+opsward diagnose . --min-score 60
+
+# Machine-parseable output for CI tooling
+opsward diagnose . --format json --min-score 60
+```
+
+```yaml
+# .github/workflows/ai-setup-check.yml
+name: AI Setup Check
+on: [pull_request]
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install opsward
+      - run: opsward diagnose . --min-score 60
+```
+
+## Related Work
+
+| Project | Relationship |
+|---------|-------------|
+| [spec-kit](https://github.com/github/spec-kit) (GitHub) | Template-based scaffolding for 20+ AI agents. No diagnosis/scoring/maintenance. |
+| [claude-code-skill-factory](https://github.com/alirezarezvani/claude-code-skill-factory) | Inside-agent builders for skills, agents, hooks. Good for interactive authoring. |
+| [ccexp](https://github.com/nyatinte/ccexp) | Interactive TUI for browsing Claude Code config files. Complements opsward. |
+| [npx skills](https://github.com/vercel-labs/skills) (Vercel) | Cross-platform skill package manager. Opsward-generated skills are compatible. |
+| [awesome-agent-skills](https://github.com/VoltAgent/awesome-agent-skills) | 549+ community skills from official dev teams. |
+| [awesome-claude-code](https://github.com/hesreallyhim/awesome-claude-code) | Best single index of the Claude Code ecosystem. |
+| [wshobson/agents](https://github.com/wshobson/agents) | Pre-built plugin monorepo (72 plugins, 112 agents, 146 skills). |
+| [Mintlify skill.md](https://www.mintlify.com/blog/skill-md) | Auto-generates skill.md from docs sites. Same philosophy, different input. |

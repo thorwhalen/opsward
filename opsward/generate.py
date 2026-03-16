@@ -22,7 +22,12 @@ _SKILL_NAMES = (
 _AGENT_NAMES = ("setup-auditor",)
 
 
-def generate(scan_result: ScanResult) -> list[GeneratedFile]:
+def generate(
+    scan_result: ScanResult,
+    *,
+    agents_md: bool = False,
+    hooks: bool = False,
+) -> list[GeneratedFile]:
     """Determine which artifacts are missing, render templates, return files to create.
 
     >>> from pathlib import Path
@@ -100,6 +105,27 @@ def generate(scan_result: ScanResult) -> list[GeneratedFile]:
                     f"shared/{skill_name}/SKILL.md",
                     target,
                     variables,
+                )
+            )
+
+    # ---- AGENTS.md (cross-platform agent instructions) ----
+    if agents_md and sr.agents_md_path is None:
+        files.append(
+            _render(
+                "shared/agents_md.md",
+                sr.project_root / "AGENTS.md",
+                variables,
+            )
+        )
+
+    # ---- Hook scaffolding ----
+    if hooks and sr.hooks_config is None:
+        hooks_file = sr.project_root / ".claude" / "hooks.json"
+        if not hooks_file.exists():
+            files.append(
+                GeneratedFile(
+                    target_path=hooks_file,
+                    content=_build_starter_hooks(),
                 )
             )
 
@@ -445,6 +471,38 @@ def _has_tests(sr: ScanResult) -> bool:
         or (root / "__tests__").is_dir()
         or _detect_test_framework(sr) != "not detected"
     )
+
+
+def _build_starter_hooks() -> str:
+    """Build a starter hooks.json with common hook patterns."""
+    import json
+
+    hooks = {
+        "hooks": {
+            "PostToolUse": [
+                {
+                    "matcher": {"tool_name": "Edit|Write"},
+                    "hooks": [
+                        {
+                            "type": "command",
+                            "command": "echo 'File modified — consider running formatter'",
+                        }
+                    ],
+                }
+            ],
+            "SessionStart": [
+                {
+                    "hooks": [
+                        {
+                            "type": "command",
+                            "command": "echo \"Session started in $(pwd) on $(date +%Y-%m-%d)\"",
+                        }
+                    ],
+                }
+            ],
+        }
+    }
+    return json.dumps(hooks, indent=2) + "\n"
 
 
 def _has_deploy_artifacts(sr: ScanResult) -> bool:
