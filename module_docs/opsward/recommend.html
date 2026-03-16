@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>opsward.maintain &mdash; opsward 0.0.7 documentation</title>
+  <title>opsward.recommend &mdash; opsward 0.0.7 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -24,8 +24,8 @@
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="opsward.recommend" href="recommend.html" />
-    <link rel="prev" title="opsward.generate" href="generate.html" /> 
+    <link rel="next" title="opsward.scan" href="scan.html" />
+    <link rel="prev" title="opsward.maintain" href="maintain.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -54,11 +54,12 @@
 <li class="toctree-l1"><a class="reference internal" href="base.html">opsward.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cli.html">opsward.cli</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generate.html">opsward.generate</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">opsward.maintain</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="#opsward.maintain.maintain"><code class="docutils literal notranslate"><span class="pre">maintain()</span></code></a></li>
+<li class="toctree-l1"><a class="reference internal" href="maintain.html">opsward.maintain</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">opsward.recommend</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#opsward.recommend.SkillRecommendation"><code class="docutils literal notranslate"><span class="pre">SkillRecommendation</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#opsward.recommend.recommend_skills"><code class="docutils literal notranslate"><span class="pre">recommend_skills()</span></code></a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="recommend.html">opsward.recommend</a></li>
 <li class="toctree-l1"><a class="reference internal" href="scan.html">opsward.scan</a></li>
 <li class="toctree-l1"><a class="reference internal" href="score.html">opsward.score</a></li>
 <li class="toctree-l1"><a class="reference internal" href="util.html">opsward.util</a></li>
@@ -78,9 +79,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">opsward.maintain</li>
+      <li class="breadcrumb-item active">opsward.recommend</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../../_sources/module_docs/opsward/maintain.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../../_sources/module_docs/opsward/recommend.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -88,17 +89,23 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-opsward.maintain">
-<span id="opsward-maintain"></span><h1>opsward.maintain<a class="headerlink" href="#module-opsward.maintain" title="Link to this heading"></a></h1>
-<p>Drift and staleness detection. ScanResult -&gt; list[MaintenanceSuggestion].</p>
-<p>Checks for stale paths, out-of-sync docs_guide, and other maintenance issues.</p>
+  <section id="module-opsward.recommend">
+<span id="opsward-recommend"></span><h1>opsward.recommend<a class="headerlink" href="#module-opsward.recommend" title="Link to this heading"></a></h1>
+<p>Recommend skills from the ecosystem based on project tech stack.</p>
+<p>Maps detected dependencies and frameworks to curated skill sources.</p>
+<dl class="py class">
+<dt class="sig sig-object py" id="opsward.recommend.SkillRecommendation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">opsward.recommend.</span></span><span class="sig-name descname"><span class="pre">SkillRecommendation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reason</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">source</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/opsward/recommend.html#SkillRecommendation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.recommend.SkillRecommendation" title="Link to this definition"></a></dt>
+<dd><p>A recommended skill from the ecosystem.</p>
+</dd></dl>
+
 <dl class="py function">
-<dt class="sig sig-object py" id="opsward.maintain.maintain">
-<span class="sig-prename descclassname"><span class="pre">opsward.maintain.</span></span><span class="sig-name descname"><span class="pre">maintain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scan_result</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="base.html#opsward.base.ScanResult" title="opsward.base.ScanResult"><span class="pre">ScanResult</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">previous_report</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="base.html#opsward.base.DiagnosisReport" title="opsward.base.DiagnosisReport"><span class="pre">DiagnosisReport</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="base.html#opsward.base.MaintenanceSuggestion" title="opsward.base.MaintenanceSuggestion"><span class="pre">MaintenanceSuggestion</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/opsward/maintain.html#maintain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.maintain.maintain" title="Link to this definition"></a></dt>
-<dd><p>Detect maintenance issues and return suggestions.</p>
+<dt class="sig sig-object py" id="opsward.recommend.recommend_skills">
+<span class="sig-prename descclassname"><span class="pre">opsward.recommend.</span></span><span class="sig-name descname"><span class="pre">recommend_skills</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scan_result</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="base.html#opsward.base.ScanResult" title="opsward.base.ScanResult"><span class="pre">ScanResult</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#opsward.recommend.SkillRecommendation" title="opsward.recommend.SkillRecommendation"><span class="pre">SkillRecommendation</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/opsward/recommend.html#recommend_skills"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.recommend.recommend_skills" title="Link to this definition"></a></dt>
+<dd><p>Recommend ecosystem skills based on detected tech stack.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">opsward.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScanResult</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">maintain</span><span class="p">(</span><span class="n">ScanResult</span><span class="p">(</span><span class="n">project_root</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s1">&#39;/tmp/empty&#39;</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">recommend_skills</span><span class="p">(</span><span class="n">ScanResult</span><span class="p">(</span><span class="n">project_root</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s1">&#39;/tmp/empty&#39;</span><span class="p">)))</span>
 <span class="go">[]</span>
 </pre></div>
 </div>
@@ -110,8 +117,8 @@
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="generate.html" class="btn btn-neutral float-left" title="opsward.generate" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="recommend.html" class="btn btn-neutral float-right" title="opsward.recommend" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="maintain.html" class="btn btn-neutral float-left" title="opsward.maintain" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="scan.html" class="btn btn-neutral float-right" title="opsward.scan" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>opsward.cli &mdash; opsward 0.0.6 documentation</title>
+  <title>opsward.cli &mdash; opsward 0.0.7 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -15,7 +15,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=1fd71caa"></script>
+      <script src="../../_static/documentation_options.js?v=bbaf98b3"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -57,10 +57,12 @@
 <li class="toctree-l2"><a class="reference internal" href="#opsward.cli.generate"><code class="docutils literal notranslate"><span class="pre">generate()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#opsward.cli.install_skills"><code class="docutils literal notranslate"><span class="pre">install_skills()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#opsward.cli.maintain"><code class="docutils literal notranslate"><span class="pre">maintain()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#opsward.cli.recommend"><code class="docutils literal notranslate"><span class="pre">recommend()</span></code></a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="generate.html">opsward.generate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="maintain.html">opsward.maintain</a></li>
+<li class="toctree-l1"><a class="reference internal" href="recommend.html">opsward.recommend</a></li>
 <li class="toctree-l1"><a class="reference internal" href="scan.html">opsward.scan</a></li>
 <li class="toctree-l1"><a class="reference internal" href="score.html">opsward.score</a></li>
 <li class="toctree-l1"><a class="reference internal" href="util.html">opsward.util</a></li>
@@ -95,7 +97,7 @@
 <p>CLI dispatch for opsward.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="opsward.cli.diagnose">
-<span class="sig-prename descclassname"><span class="pre">opsward.cli.</span></span><span class="sig-name descname"><span class="pre">diagnose</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">project_roots</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'text'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/opsward/cli.html#diagnose"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.cli.diagnose" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">opsward.cli.</span></span><span class="sig-name descname"><span class="pre">diagnose</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">project_roots</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'text'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_score</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">80</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/opsward/cli.html#diagnose"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.cli.diagnose" title="Link to this definition"></a></dt>
 <dd><p>Diagnose the AI agent setup of one or more projects.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -103,6 +105,7 @@
 <li><p><strong>project_roots</strong> – one or more paths to project directories</p></li>
 <li><p><strong>format</strong> – output format — ‘text’ or ‘json’</p></li>
 <li><p><strong>verbose</strong> – show additional detail in text output</p></li>
+<li><p><strong>min_score</strong> – minimum overall score to pass (exit 0); below this exits 1</p></li>
 </ul>
 </dd>
 </dl>
@@ -110,7 +113,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="opsward.cli.generate">
-<span class="sig-prename descclassname"><span class="pre">opsward.cli.</span></span><span class="sig-name descname"><span class="pre">generate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">project_roots</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'text'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/opsward/cli.html#generate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.cli.generate" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">opsward.cli.</span></span><span class="sig-name descname"><span class="pre">generate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">project_roots</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">write</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'text'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">agents_md</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hooks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/opsward/cli.html#generate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.cli.generate" title="Link to this definition"></a></dt>
 <dd><p>Generate missing AI setup artifacts for one or more projects.</p>
 <p>By default, shows what would be created (dry run). Use –write to
 actually write files. Existing files are never overwritten.</p>
@@ -120,6 +123,8 @@ actually write files. Existing files are never overwritten.</p>
 <li><p><strong>project_roots</strong> – one or more paths to project directories</p></li>
 <li><p><strong>write</strong> – actually write files (default: dry run)</p></li>
 <li><p><strong>format</strong> – output format — ‘text’ or ‘json’</p></li>
+<li><p><strong>agents_md</strong> – also generate AGENTS.md (cross-platform agent instructions)</p></li>
+<li><p><strong>hooks</strong> – also generate starter hook scripts</p></li>
 </ul>
 </dd>
 </dl>
@@ -147,6 +152,21 @@ actually write files. Existing files are never overwritten.</p>
 <dt class="sig sig-object py" id="opsward.cli.maintain">
 <span class="sig-prename descclassname"><span class="pre">opsward.cli.</span></span><span class="sig-name descname"><span class="pre">maintain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">project_roots</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'text'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/opsward/cli.html#maintain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.cli.maintain" title="Link to this definition"></a></dt>
 <dd><p>Check for stale references, out-of-sync docs, and other drift.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>project_roots</strong> – one or more paths to project directories</p></li>
+<li><p><strong>format</strong> – output format — ‘text’ or ‘json’</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="opsward.cli.recommend">
+<span class="sig-prename descclassname"><span class="pre">opsward.cli.</span></span><span class="sig-name descname"><span class="pre">recommend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">project_roots</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'text'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/opsward/cli.html#recommend"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.cli.recommend" title="Link to this definition"></a></dt>
+<dd><p>Recommend ecosystem skills based on the project’s tech stack.</p>
+<p>Analyzes dependencies and suggests skills from the community catalog.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">

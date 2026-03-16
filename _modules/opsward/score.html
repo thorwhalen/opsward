@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>opsward.score &mdash; opsward 0.0.6 documentation</title>
+  <title>opsward.score &mdash; opsward 0.0.7 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=1fd71caa"></script>
+      <script src="../../_static/documentation_options.js?v=bbaf98b3"></script>
       <script src="../../_static/doctools.js?v=9bcbadda"></script>
       <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -52,6 +52,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/cli.html">opsward.cli</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/generate.html">opsward.generate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/maintain.html">opsward.maintain</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/recommend.html">opsward.recommend</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/scan.html">opsward.scan</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/score.html">opsward.score</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/util.html">opsward.util</a></li>
@@ -91,7 +92,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">opsward.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">ComponentScore</span><span class="p">,</span> <span class="n">DiagnosisReport</span><span class="p">,</span> <span class="n">ScanResult</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">opsward.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">ComponentScore</span><span class="p">,</span> <span class="n">DiagnosisReport</span><span class="p">,</span> <span class="n">ScanResult</span><span class="p">,</span> <span class="n">SkillInfo</span>
 
 
 <span class="c1"># ---------------------------------------------------------------------------</span>
@@ -149,6 +150,9 @@
     <span class="c1"># 5. Cross-reference integrity (max 100)</span>
     <span class="n">xref_score</span> <span class="o">=</span> <span class="n">_score_cross_references</span><span class="p">(</span><span class="n">scan_result</span><span class="p">,</span> <span class="n">suggestions</span><span class="o">=</span><span class="n">suggestions</span><span class="p">)</span>
     <span class="n">scores</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">xref_score</span><span class="p">)</span>
+
+    <span class="c1"># 6. AGENTS.md cross-platform check (advisory, not scored)</span>
+    <span class="n">_check_agents_md</span><span class="p">(</span><span class="n">scan_result</span><span class="p">,</span> <span class="n">suggestions</span><span class="o">=</span><span class="n">suggestions</span><span class="p">)</span>
 
     <span class="c1"># Weighted overall</span>
     <span class="n">score_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">s</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">s</span><span class="o">.</span><span class="n">score</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">scores</span><span class="p">}</span>
@@ -422,16 +426,103 @@
     <span class="k">for</span> <span class="n">skill</span> <span class="ow">in</span> <span class="n">sr</span><span class="o">.</span><span class="n">skills</span><span class="p">:</span>
         <span class="n">pts</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">if</span> <span class="n">skill</span><span class="o">.</span><span class="n">has_skill_md</span><span class="p">:</span>
-            <span class="n">pts</span> <span class="o">+=</span> <span class="n">per_skill</span> <span class="o">*</span> <span class="mi">60</span> <span class="o">//</span> <span class="mi">100</span>  <span class="c1"># 60% for having SKILL.md</span>
+            <span class="n">pts</span> <span class="o">+=</span> <span class="n">per_skill</span> <span class="o">*</span> <span class="mi">40</span> <span class="o">//</span> <span class="mi">100</span>  <span class="c1"># 40% for having SKILL.md</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Skill &quot;</span><span class="si">{</span><span class="n">skill</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;: missing SKILL.md&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">skill</span><span class="o">.</span><span class="n">description</span><span class="p">:</span>
-            <span class="n">pts</span> <span class="o">+=</span> <span class="n">per_skill</span> <span class="o">*</span> <span class="mi">40</span> <span class="o">//</span> <span class="mi">100</span>  <span class="c1"># 40% for having a description</span>
+            <span class="n">pts</span> <span class="o">+=</span> <span class="n">per_skill</span> <span class="o">*</span> <span class="mi">30</span> <span class="o">//</span> <span class="mi">100</span>  <span class="c1"># 30% for having a description</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Skill &quot;</span><span class="si">{</span><span class="n">skill</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;: no description&#39;</span><span class="p">)</span>
+        <span class="c1"># 30% for spec compliance</span>
+        <span class="n">violations</span> <span class="o">=</span> <span class="n">_validate_skill_spec</span><span class="p">(</span><span class="n">skill</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">violations</span><span class="p">:</span>
+            <span class="n">pts</span> <span class="o">+=</span> <span class="n">per_skill</span> <span class="o">*</span> <span class="mi">30</span> <span class="o">//</span> <span class="mi">100</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">violations</span><span class="p">:</span>
+                <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Skill &quot;</span><span class="si">{</span><span class="n">skill</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;: </span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="n">total</span> <span class="o">+=</span> <span class="n">pts</span>
 
     <span class="k">return</span> <span class="n">ComponentScore</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Skills&quot;</span><span class="p">,</span> <span class="n">score</span><span class="o">=</span><span class="nb">min</span><span class="p">(</span><span class="n">total</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span> <span class="n">notes</span><span class="o">=</span><span class="n">notes</span><span class="p">)</span>
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># agentskills.io spec validation</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="validate_skill_spec">
+<a class="viewcode-back" href="../../module_docs/opsward/score.html#opsward.score.validate_skill_spec">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">validate_skill_spec</span><span class="p">(</span><span class="n">skill</span><span class="p">:</span> <span class="n">SkillInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Validate a SkillInfo against the agentskills.io specification.</span>
+
+<span class="sd">    Returns a list of human-readable violation strings (empty = compliant).</span>
+
+<span class="sd">    &gt;&gt;&gt; from pathlib import Path</span>
+<span class="sd">    &gt;&gt;&gt; from opsward.base import SkillInfo</span>
+<span class="sd">    &gt;&gt;&gt; s = SkillInfo(name=&#39;good-skill&#39;, path=Path(&#39;.&#39;), has_skill_md=True,</span>
+<span class="sd">    ...     frontmatter={&#39;name&#39;: &#39;good-skill&#39;, &#39;description&#39;: &#39;Does X.&#39;}, line_count=50)</span>
+<span class="sd">    &gt;&gt;&gt; validate_skill_spec(s)</span>
+<span class="sd">    []</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_validate_skill_spec</span><span class="p">(</span><span class="n">skill</span><span class="p">)</span></div>
+
+
+
+<span class="n">_NAME_PATTERN</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;^[a-z0-9]([a-z0-9-]*[a-z0-9])?$&quot;</span><span class="p">)</span>
+<span class="n">_MAX_SKILL_LINES</span> <span class="o">=</span> <span class="mi">500</span>
+<span class="n">_MAX_NAME_LEN</span> <span class="o">=</span> <span class="mi">64</span>
+<span class="n">_MAX_DESC_LEN</span> <span class="o">=</span> <span class="mi">1024</span>
+<span class="n">_MAX_COMPAT_LEN</span> <span class="o">=</span> <span class="mi">500</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_validate_skill_spec</span><span class="p">(</span><span class="n">skill</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Validate a SkillInfo against the agentskills.io specification.</span>
+
+<span class="sd">    Returns a list of human-readable violation strings (empty = compliant).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">violations</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">skill</span><span class="o">.</span><span class="n">has_skill_md</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">violations</span>  <span class="c1"># Can&#39;t validate without SKILL.md</span>
+
+    <span class="n">fm</span> <span class="o">=</span> <span class="n">skill</span><span class="o">.</span><span class="n">frontmatter</span>
+
+    <span class="c1"># name field</span>
+    <span class="n">fm_name</span> <span class="o">=</span> <span class="n">fm</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">fm_name</span><span class="p">:</span>
+        <span class="n">violations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;frontmatter missing required `name` field&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">fm_name</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">_MAX_NAME_LEN</span><span class="p">:</span>
+            <span class="n">violations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`name` exceeds </span><span class="si">{</span><span class="n">_MAX_NAME_LEN</span><span class="si">}</span><span class="s2"> chars&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_NAME_PATTERN</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">fm_name</span><span class="p">):</span>
+            <span class="n">violations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="s2">&quot;`name` must be lowercase alphanumeric + hyphens, &quot;</span>
+                <span class="s2">&quot;no leading/trailing/consecutive hyphens&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="s2">&quot;--&quot;</span> <span class="ow">in</span> <span class="n">fm_name</span><span class="p">:</span>
+            <span class="n">violations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;`name` contains consecutive hyphens&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fm_name</span> <span class="o">!=</span> <span class="n">skill</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="n">violations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;`name` field (</span><span class="si">{</span><span class="n">fm_name</span><span class="si">!r}</span><span class="s2">) must match directory name (</span><span class="si">{</span><span class="n">skill</span><span class="o">.</span><span class="n">name</span><span class="si">!r}</span><span class="s2">)&quot;</span>
+            <span class="p">)</span>
+
+    <span class="c1"># description field</span>
+    <span class="n">fm_desc</span> <span class="o">=</span> <span class="n">fm</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">fm_desc</span><span class="p">:</span>
+        <span class="n">violations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;frontmatter missing required `description` field&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">fm_desc</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">_MAX_DESC_LEN</span><span class="p">:</span>
+        <span class="n">violations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`description` exceeds </span><span class="si">{</span><span class="n">_MAX_DESC_LEN</span><span class="si">}</span><span class="s2"> chars&quot;</span><span class="p">)</span>
+
+    <span class="c1"># compatibility field length</span>
+    <span class="n">compat</span> <span class="o">=</span> <span class="n">fm</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;compatibility&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">compat</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">compat</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">_MAX_COMPAT_LEN</span><span class="p">:</span>
+        <span class="n">violations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;`compatibility` exceeds </span><span class="si">{</span><span class="n">_MAX_COMPAT_LEN</span><span class="si">}</span><span class="s2"> chars&quot;</span><span class="p">)</span>
+
+    <span class="c1"># SKILL.md size</span>
+    <span class="k">if</span> <span class="n">skill</span><span class="o">.</span><span class="n">line_count</span> <span class="o">&gt;</span> <span class="n">_MAX_SKILL_LINES</span><span class="p">:</span>
+        <span class="n">violations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;SKILL.md has </span><span class="si">{</span><span class="n">skill</span><span class="o">.</span><span class="n">line_count</span><span class="si">}</span><span class="s2"> lines (max </span><span class="si">{</span><span class="n">_MAX_SKILL_LINES</span><span class="si">}</span><span class="s2">)&quot;</span>
+        <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">violations</span>
 
 
 <span class="c1"># ---------------------------------------------------------------------------</span>
@@ -460,7 +551,10 @@
         <span class="n">total</span> <span class="o">+=</span> <span class="mi">30</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;No hooks configured&quot;</span><span class="p">)</span>
-        <span class="n">suggestions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Consider adding hooks in .claude/hooks.json&quot;</span><span class="p">)</span>
+        <span class="n">suggestions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="s2">&quot;Add hooks in .claude/hooks.json — run `opsward generate --hooks` &quot;</span>
+            <span class="s2">&quot;for starter templates (auto-format on PostToolUse, session context on SessionStart)&quot;</span>
+        <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">ComponentScore</span><span class="p">(</span>
         <span class="n">name</span><span class="o">=</span><span class="s2">&quot;Setup (rules/agents/hooks)&quot;</span><span class="p">,</span> <span class="n">score</span><span class="o">=</span><span class="nb">min</span><span class="p">(</span><span class="n">total</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span> <span class="n">notes</span><span class="o">=</span><span class="n">notes</span>
@@ -505,6 +599,28 @@
 <span class="c1"># ---------------------------------------------------------------------------</span>
 <span class="c1"># Helpers</span>
 <span class="c1"># ---------------------------------------------------------------------------</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_check_agents_md</span><span class="p">(</span><span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">suggestions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Advisory check for AGENTS.md (cross-platform agent instructions).&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">sr</span><span class="o">.</span><span class="n">agents_md_content</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">sr</span><span class="o">.</span><span class="n">claude_md_content</span><span class="p">:</span>
+            <span class="n">suggestions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="s2">&quot;No AGENTS.md found — run `opsward generate --agents-md` to create &quot;</span>
+                <span class="s2">&quot;cross-platform agent instructions (supported by 60,000+ projects)&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="c1"># If both exist, check for basic consistency</span>
+    <span class="k">if</span> <span class="n">sr</span><span class="o">.</span><span class="n">claude_md_content</span> <span class="ow">and</span> <span class="n">sr</span><span class="o">.</span><span class="n">agents_md_content</span><span class="p">:</span>
+        <span class="c1"># Check that AGENTS.md has build/test commands if CLAUDE.md does</span>
+        <span class="n">claude_lower</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">claude_md_content</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="n">agents_lower</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">agents_md_content</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+        <span class="k">if</span> <span class="s2">&quot;```&quot;</span> <span class="ow">in</span> <span class="n">claude_lower</span> <span class="ow">and</span> <span class="s2">&quot;```&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">agents_lower</span><span class="p">:</span>
+            <span class="n">suggestions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="s2">&quot;AGENTS.md has no code blocks but CLAUDE.md does — &quot;</span>
+                <span class="s2">&quot;consider syncing build/test commands&quot;</span>
+            <span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_find_section</span><span class="p">(</span><span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">heading_keywords</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>

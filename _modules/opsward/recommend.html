@@ -1,0 +1,312 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>opsward.recommend &mdash; opsward 0.0.7 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=bbaf98b3"></script>
+      <script src="../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            opsward
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward.html">opsward</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/__main__.html">opsward.__main__</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/base.html">opsward.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/cli.html">opsward.cli</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/generate.html">opsward.generate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/maintain.html">opsward.maintain</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/recommend.html">opsward.recommend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/scan.html">opsward.scan</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/score.html">opsward.score</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/util.html">opsward.util</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">opsward</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">opsward.recommend</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for opsward.recommend</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Recommend skills from the ecosystem based on project tech stack.</span>
+
+<span class="sd">Maps detected dependencies and frameworks to curated skill sources.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">opsward.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScanResult</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">opsward.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_text_safe</span>
+
+
+<div class="viewcode-block" id="SkillRecommendation">
+<a class="viewcode-back" href="../../module_docs/opsward/recommend.html#opsward.recommend.SkillRecommendation">[docs]</a>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">SkillRecommendation</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A recommended skill from the ecosystem.&quot;&quot;&quot;</span>
+
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">reason</span><span class="p">:</span> <span class="nb">str</span>
+    <span class="n">source</span><span class="p">:</span> <span class="nb">str</span>  <span class="c1"># URL or repo reference</span></div>
+
+
+
+<span class="c1"># ---------------------------------------------------------------------------</span>
+<span class="c1"># Curated mapping: dependency signals -&gt; skill recommendations</span>
+<span class="c1"># ---------------------------------------------------------------------------</span>
+
+<span class="c1"># Each entry: (signal_keywords, SkillRecommendation)</span>
+<span class="c1"># signal_keywords are checked against pyproject.toml/package.json content</span>
+<span class="n">_RECOMMENDATIONS</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">SkillRecommendation</span><span class="p">]]</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">(</span>
+        <span class="p">(</span><span class="s2">&quot;supabase&quot;</span><span class="p">,),</span>
+        <span class="n">SkillRecommendation</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;supabase&quot;</span><span class="p">,</span>
+            <span class="n">reason</span><span class="o">=</span><span class="s2">&quot;Supabase dependency detected&quot;</span><span class="p">,</span>
+            <span class="n">source</span><span class="o">=</span><span class="s2">&quot;https://github.com/VoltAgent/awesome-agent-skills&quot;</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">),</span>
+    <span class="p">(</span>
+        <span class="p">(</span><span class="s2">&quot;stripe&quot;</span><span class="p">,),</span>
+        <span class="n">SkillRecommendation</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;stripe&quot;</span><span class="p">,</span>
+            <span class="n">reason</span><span class="o">=</span><span class="s2">&quot;Stripe dependency detected&quot;</span><span class="p">,</span>
+            <span class="n">source</span><span class="o">=</span><span class="s2">&quot;https://github.com/VoltAgent/awesome-agent-skills&quot;</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">),</span>
+    <span class="p">(</span>
+        <span class="p">(</span><span class="s2">&quot;cloudflare&quot;</span><span class="p">,</span> <span class="s2">&quot;wrangler&quot;</span><span class="p">),</span>
+        <span class="n">SkillRecommendation</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;cloudflare-workers&quot;</span><span class="p">,</span>
+            <span class="n">reason</span><span class="o">=</span><span class="s2">&quot;Cloudflare dependency detected&quot;</span><span class="p">,</span>
+            <span class="n">source</span><span class="o">=</span><span class="s2">&quot;https://github.com/VoltAgent/awesome-agent-skills&quot;</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">),</span>
+    <span class="p">(</span>
+        <span class="p">(</span><span class="s2">&quot;firebase&quot;</span><span class="p">,</span> <span class="s2">&quot;firestore&quot;</span><span class="p">),</span>
+        <span class="n">SkillRecommendation</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;firebase&quot;</span><span class="p">,</span>
+            <span class="n">reason</span><span class="o">=</span><span class="s2">&quot;Firebase dependency detected&quot;</span><span class="p">,</span>
+            <span class="n">source</span><span class="o">=</span><span class="s2">&quot;https://github.com/VoltAgent/awesome-agent-skills&quot;</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">),</span>
+    <span class="p">(</span>
+        <span class="p">(</span><span class="s2">&quot;prisma&quot;</span><span class="p">,),</span>
+        <span class="n">SkillRecommendation</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;prisma&quot;</span><span class="p">,</span>
+            <span class="n">reason</span><span class="o">=</span><span class="s2">&quot;Prisma ORM detected&quot;</span><span class="p">,</span>
+            <span class="n">source</span><span class="o">=</span><span class="s2">&quot;https://github.com/VoltAgent/awesome-agent-skills&quot;</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">),</span>
+    <span class="p">(</span>
+        <span class="p">(</span><span class="s2">&quot;docker&quot;</span><span class="p">,</span> <span class="s2">&quot;Dockerfile&quot;</span><span class="p">),</span>
+        <span class="n">SkillRecommendation</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;docker&quot;</span><span class="p">,</span>
+            <span class="n">reason</span><span class="o">=</span><span class="s2">&quot;Docker usage detected&quot;</span><span class="p">,</span>
+            <span class="n">source</span><span class="o">=</span><span class="s2">&quot;https://github.com/VoltAgent/awesome-agent-skills&quot;</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">),</span>
+    <span class="p">(</span>
+        <span class="p">(</span><span class="s2">&quot;terraform&quot;</span><span class="p">,),</span>
+        <span class="n">SkillRecommendation</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;terraform&quot;</span><span class="p">,</span>
+            <span class="n">reason</span><span class="o">=</span><span class="s2">&quot;Terraform dependency detected&quot;</span><span class="p">,</span>
+            <span class="n">source</span><span class="o">=</span><span class="s2">&quot;https://github.com/VoltAgent/awesome-agent-skills&quot;</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">),</span>
+    <span class="p">(</span>
+        <span class="p">(</span><span class="s2">&quot;fastapi&quot;</span><span class="p">,),</span>
+        <span class="n">SkillRecommendation</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;fastapi&quot;</span><span class="p">,</span>
+            <span class="n">reason</span><span class="o">=</span><span class="s2">&quot;FastAPI framework detected&quot;</span><span class="p">,</span>
+            <span class="n">source</span><span class="o">=</span><span class="s2">&quot;https://github.com/VoltAgent/awesome-agent-skills&quot;</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">),</span>
+    <span class="p">(</span>
+        <span class="p">(</span><span class="s2">&quot;django&quot;</span><span class="p">,),</span>
+        <span class="n">SkillRecommendation</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;django&quot;</span><span class="p">,</span>
+            <span class="n">reason</span><span class="o">=</span><span class="s2">&quot;Django framework detected&quot;</span><span class="p">,</span>
+            <span class="n">source</span><span class="o">=</span><span class="s2">&quot;https://github.com/VoltAgent/awesome-agent-skills&quot;</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">),</span>
+    <span class="p">(</span>
+        <span class="p">(</span><span class="s2">&quot;flask&quot;</span><span class="p">,),</span>
+        <span class="n">SkillRecommendation</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;flask&quot;</span><span class="p">,</span>
+            <span class="n">reason</span><span class="o">=</span><span class="s2">&quot;Flask framework detected&quot;</span><span class="p">,</span>
+            <span class="n">source</span><span class="o">=</span><span class="s2">&quot;https://github.com/VoltAgent/awesome-agent-skills&quot;</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">),</span>
+    <span class="p">(</span>
+        <span class="p">(</span><span class="s2">&quot;react&quot;</span><span class="p">,</span> <span class="s2">&quot;next&quot;</span><span class="p">,</span> <span class="s2">&quot;nextjs&quot;</span><span class="p">),</span>
+        <span class="n">SkillRecommendation</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;nextjs&quot;</span><span class="p">,</span>
+            <span class="n">reason</span><span class="o">=</span><span class="s2">&quot;React/Next.js dependency detected&quot;</span><span class="p">,</span>
+            <span class="n">source</span><span class="o">=</span><span class="s2">&quot;https://github.com/VoltAgent/awesome-agent-skills&quot;</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">),</span>
+    <span class="p">(</span>
+        <span class="p">(</span><span class="s2">&quot;tailwindcss&quot;</span><span class="p">,</span> <span class="s2">&quot;tailwind&quot;</span><span class="p">),</span>
+        <span class="n">SkillRecommendation</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;tailwindcss&quot;</span><span class="p">,</span>
+            <span class="n">reason</span><span class="o">=</span><span class="s2">&quot;Tailwind CSS detected&quot;</span><span class="p">,</span>
+            <span class="n">source</span><span class="o">=</span><span class="s2">&quot;https://github.com/VoltAgent/awesome-agent-skills&quot;</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">),</span>
+    <span class="p">(</span>
+        <span class="p">(</span><span class="s2">&quot;vercel&quot;</span><span class="p">,),</span>
+        <span class="n">SkillRecommendation</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;vercel&quot;</span><span class="p">,</span>
+            <span class="n">reason</span><span class="o">=</span><span class="s2">&quot;Vercel deployment detected&quot;</span><span class="p">,</span>
+            <span class="n">source</span><span class="o">=</span><span class="s2">&quot;https://github.com/VoltAgent/awesome-agent-skills&quot;</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">),</span>
+    <span class="p">(</span>
+        <span class="p">(</span><span class="s2">&quot;netlify&quot;</span><span class="p">,),</span>
+        <span class="n">SkillRecommendation</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;netlify&quot;</span><span class="p">,</span>
+            <span class="n">reason</span><span class="o">=</span><span class="s2">&quot;Netlify deployment detected&quot;</span><span class="p">,</span>
+            <span class="n">source</span><span class="o">=</span><span class="s2">&quot;https://github.com/VoltAgent/awesome-agent-skills&quot;</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">),</span>
+    <span class="p">(</span>
+        <span class="p">(</span><span class="s2">&quot;anthropic&quot;</span><span class="p">,</span> <span class="s2">&quot;claude&quot;</span><span class="p">),</span>
+        <span class="n">SkillRecommendation</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="s2">&quot;anthropic-sdk&quot;</span><span class="p">,</span>
+            <span class="n">reason</span><span class="o">=</span><span class="s2">&quot;Anthropic/Claude dependency detected&quot;</span><span class="p">,</span>
+            <span class="n">source</span><span class="o">=</span><span class="s2">&quot;https://github.com/VoltAgent/awesome-agent-skills&quot;</span><span class="p">,</span>
+        <span class="p">),</span>
+    <span class="p">),</span>
+<span class="p">]</span>
+
+
+<div class="viewcode-block" id="recommend_skills">
+<a class="viewcode-back" href="../../module_docs/opsward/recommend.html#opsward.recommend.recommend_skills">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">recommend_skills</span><span class="p">(</span><span class="n">scan_result</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">SkillRecommendation</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Recommend ecosystem skills based on detected tech stack.</span>
+
+<span class="sd">    &gt;&gt;&gt; from pathlib import Path</span>
+<span class="sd">    &gt;&gt;&gt; from opsward.base import ScanResult</span>
+<span class="sd">    &gt;&gt;&gt; recommend_skills(ScanResult(project_root=Path(&#39;/tmp/empty&#39;)))</span>
+<span class="sd">    []</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">_iter_recommendations</span><span class="p">(</span><span class="n">scan_result</span><span class="p">))</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_iter_recommendations</span><span class="p">(</span><span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">SkillRecommendation</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Yield skill recommendations matching the project&#39;s dependency signals.&quot;&quot;&quot;</span>
+    <span class="n">corpus</span> <span class="o">=</span> <span class="n">_build_signal_corpus</span><span class="p">(</span><span class="n">sr</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">corpus</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="n">existing_skills</span> <span class="o">=</span> <span class="p">{</span><span class="n">s</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">sr</span><span class="o">.</span><span class="n">skills</span><span class="p">}</span>
+    <span class="n">seen_names</span><span class="p">:</span> <span class="nb">set</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">signals</span><span class="p">,</span> <span class="n">rec</span> <span class="ow">in</span> <span class="n">_RECOMMENDATIONS</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">rec</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">existing_skills</span> <span class="ow">or</span> <span class="n">rec</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">seen_names</span><span class="p">:</span>
+            <span class="k">continue</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">signal</span> <span class="ow">in</span> <span class="n">corpus</span> <span class="k">for</span> <span class="n">signal</span> <span class="ow">in</span> <span class="n">signals</span><span class="p">):</span>
+            <span class="n">seen_names</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">rec</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">yield</span> <span class="n">rec</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_build_signal_corpus</span><span class="p">(</span><span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build a lowercase text corpus from dependency files for signal matching.&quot;&quot;&quot;</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span>
+    <span class="n">parts</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;pyproject.toml&quot;</span><span class="p">,</span> <span class="s2">&quot;setup.py&quot;</span><span class="p">,</span> <span class="s2">&quot;setup.cfg&quot;</span><span class="p">,</span> <span class="s2">&quot;requirements.txt&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;package.json&quot;</span><span class="p">,</span> <span class="s2">&quot;Dockerfile&quot;</span><span class="p">,</span> <span class="s2">&quot;docker-compose.yml&quot;</span><span class="p">,</span>
+                 <span class="s2">&quot;docker-compose.yaml&quot;</span><span class="p">):</span>
+        <span class="n">text</span> <span class="o">=</span> <span class="n">read_text_safe</span><span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">text</span><span class="p">:</span>
+            <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span>
+    <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright NO COPYRIGHT.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
