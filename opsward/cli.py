@@ -6,10 +6,10 @@ from dataclasses import asdict
 from pathlib import Path
 
 from opsward.base import DiagnosisReport
-from opsward.generate import generate, generate_skills
-from opsward.maintain import maintain
+from opsward.generate import generate as _generate, generate_skills as _generate_skills
+from opsward.maintain import maintain as _maintain
 from opsward.scan import scan
-from opsward.score import diagnose
+from opsward.score import diagnose as _diagnose
 
 
 def _serialize_report(report: DiagnosisReport) -> dict:
@@ -22,7 +22,7 @@ def _serialize_report(report: DiagnosisReport) -> dict:
     return d
 
 
-def diagnose_cmd(
+def diagnose(
     *project_roots: str,
     format: str = "text",
     verbose: bool = False,
@@ -44,7 +44,7 @@ def diagnose_cmd(
             sys.exit(2)
 
         sr = scan(root)
-        report = diagnose(sr)
+        report = _diagnose(sr)
         reports.append(report)
 
     if format == "json":
@@ -64,7 +64,7 @@ def diagnose_cmd(
     sys.exit(0 if worst >= 80 else 1)
 
 
-def generate_cmd(
+def generate(
     *project_roots: str,
     write: bool = False,
     format: str = "text",
@@ -89,7 +89,7 @@ def generate_cmd(
             sys.exit(2)
 
         sr = scan(root)
-        files = generate(sr)
+        files = _generate(sr)
         all_files.extend(files)
 
         if format == "json":
@@ -130,7 +130,7 @@ def generate_cmd(
         print(json.dumps(data, indent=2))
 
 
-def maintain_cmd(
+def maintain(
     *project_roots: str,
     format: str = "text",
 ):
@@ -150,7 +150,7 @@ def maintain_cmd(
             sys.exit(2)
 
         sr = scan(root)
-        suggestions = maintain(sr)
+        suggestions = _maintain(sr)
         all_suggestions.extend(suggestions)
 
         if format == "json":
@@ -208,7 +208,7 @@ def _print_verbose(sr):
     print(f"  Hooks:   {'yes' if sr.hooks_config else 'no'}")
 
 
-def install_skills_cmd(
+def install_skills(
     target: str = ".",
     *,
     global_install: bool = False,
@@ -237,7 +237,7 @@ def install_skills_cmd(
         if project_root.is_dir():
             sr = scan(project_root)
 
-    files = generate_skills(
+    files = _generate_skills(
         target_dir,
         scan_result=sr,
         include_agents=agents,
@@ -266,4 +266,4 @@ def install_skills_cmd(
         print("\nDry run — pass --write to install files.")
 
 
-_dispatch_funcs = [diagnose_cmd, generate_cmd, maintain_cmd, install_skills_cmd]
+_dispatch_funcs = [diagnose, generate, maintain, install_skills]

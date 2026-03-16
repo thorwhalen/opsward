@@ -30,14 +30,14 @@ def _run_cli(*args, expect_rc=None):
 
 
 def test_text_output_contains_report():
-    stdout, _, _ = _run_cli('diagnose-cmd', str(FIXTURES / 'python_project'))
+    stdout, _, _ = _run_cli('diagnose', str(FIXTURES / 'python_project'))
     assert 'Diagnosis Report' in stdout
     assert 'CLAUDE.md quality' in stdout
     assert 'Grade:' in stdout
 
 
 def test_text_output_bare_project():
-    stdout, _, rc = _run_cli('diagnose-cmd', str(FIXTURES / 'bare_project'))
+    stdout, _, rc = _run_cli('diagnose', str(FIXTURES / 'bare_project'))
     assert 'Grade: F' in stdout
     assert rc == 1  # issues found
 
@@ -47,7 +47,7 @@ def test_text_output_bare_project():
 
 def test_json_output_valid():
     stdout, _, _ = _run_cli(
-        'diagnose-cmd', str(FIXTURES / 'python_project'), '--format', 'json'
+        'diagnose', str(FIXTURES / 'python_project'), '--format', 'json'
     )
     data = json.loads(stdout)
     assert 'overall_score' in data
@@ -58,7 +58,7 @@ def test_json_output_valid():
 
 def test_json_output_has_all_fields():
     stdout, _, _ = _run_cli(
-        'diagnose-cmd', str(FIXTURES / 'python_project'), '--format', 'json'
+        'diagnose', str(FIXTURES / 'python_project'), '--format', 'json'
     )
     data = json.loads(stdout)
     assert data['project_type'] == 'python'
@@ -70,6 +70,6 @@ def test_json_output_has_all_fields():
 
 
 def test_nonexistent_path():
-    _, stderr, rc = _run_cli('diagnose-cmd', '/nonexistent/path/12345')
+    _, stderr, rc = _run_cli('diagnose', '/nonexistent/path/12345')
     assert rc == 2
     assert 'not a directory' in stderr.lower() or 'error' in stderr.lower()

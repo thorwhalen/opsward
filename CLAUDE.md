@@ -56,18 +56,18 @@ Key docs to read before starting work:
 pip install opsward   # or: pip install ow
 
 # CLI usage
-python -m opsward diagnose-cmd /path/to/project          # Diagnose AI setup
-python -m opsward diagnose-cmd /path/to/proj1 /path/to/proj2  # Multi-project
-python -m opsward generate-cmd /path/to/project           # Generate missing pieces
-python -m opsward maintain-cmd /path/to/project            # Check for staleness/drift
-python -m opsward install-skills-cmd --write               # Install Claude Code skills
+python -m opsward diagnose /path/to/project          # Diagnose AI setup
+python -m opsward diagnose /path/to/proj1 /path/to/proj2  # Multi-project
+python -m opsward generate /path/to/project           # Generate missing pieces
+python -m opsward maintain /path/to/project            # Check for staleness/drift
+python -m opsward install-skills --write               # Install Claude Code skills
 
 # After pip install (via pyproject.toml [project.scripts]):
-opsward diagnose-cmd .
-opsward generate-cmd . --write
-opsward maintain-cmd .
-opsward install-skills-cmd --write                    # Install into .claude/
-opsward install-skills-cmd --global-install --write   # Install into ~/.claude/
+opsward diagnose .
+opsward generate . --write
+opsward maintain .
+opsward install-skills --write                    # Install into .claude/
+opsward install-skills --global-install --write   # Install into ~/.claude/
 ```
 
 ## Conventions

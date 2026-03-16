@@ -28,7 +28,7 @@ template substitution. Same input always gives the same output.
 Score your project's AI setup health:
 
 ```bash
-opsward diagnose-cmd .
+opsward diagnose .
 ```
 
 ```
@@ -57,8 +57,8 @@ Suggestions:
 Create missing artifacts (dry run by default):
 
 ```bash
-opsward generate-cmd .
-opsward generate-cmd . --write   # actually create files
+opsward generate .
+opsward generate . --write   # actually create files
 ```
 
 Generates CLAUDE.md, docs (architecture, conventions, known_issues, etc.),
@@ -69,7 +69,7 @@ skill templates, and agents — only what's missing, never overwrites existing f
 Find stale references and drift:
 
 ```bash
-opsward maintain-cmd .
+opsward maintain .
 ```
 
 ```
@@ -85,9 +85,9 @@ myproject: 3 issue(s)
 All CLI commands support `--format json` for machine-parseable output:
 
 ```bash
-opsward diagnose-cmd . --format json
-opsward generate-cmd . --format json
-opsward maintain-cmd . --format json
+opsward diagnose . --format json
+opsward generate . --format json
+opsward maintain . --format json
 ```
 
 ---
@@ -102,8 +102,8 @@ accuracy, and making intelligent edits.
 ### Install Skills
 
 ```bash
-opsward install-skills-cmd --write                    # into ./.claude/ (project-level)
-opsward install-skills-cmd --global-install --write   # into ~/.claude/ (all projects)
+opsward install-skills --write                    # into ./.claude/ (project-level)
+opsward install-skills --global-install --write   # into ~/.claude/ (all projects)
 ```
 
 ### What the Skills Do
