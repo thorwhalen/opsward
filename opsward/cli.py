@@ -311,8 +311,7 @@ def recommend(
 
     if format == "json":
         data = [
-            {"name": r.name, "reason": r.reason, "source": r.source}
-            for r in all_recs
+            {"name": r.name, "reason": r.reason, "source": r.source} for r in all_recs
         ]
         print(json.dumps(data, indent=2))
 

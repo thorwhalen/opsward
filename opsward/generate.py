@@ -495,7 +495,7 @@ def _build_starter_hooks() -> str:
                     "hooks": [
                         {
                             "type": "command",
-                            "command": "echo \"Session started in $(pwd) on $(date +%Y-%m-%d)\"",
+                            "command": 'echo "Session started in $(pwd) on $(date +%Y-%m-%d)"',
                         }
                     ],
                 }

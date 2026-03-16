@@ -182,9 +182,16 @@ def _build_signal_corpus(sr: ScanResult) -> str:
     """Build a lowercase text corpus from dependency files for signal matching."""
     root = sr.project_root
     parts: list[str] = []
-    for name in ("pyproject.toml", "setup.py", "setup.cfg", "requirements.txt",
-                 "package.json", "Dockerfile", "docker-compose.yml",
-                 "docker-compose.yaml"):
+    for name in (
+        "pyproject.toml",
+        "setup.py",
+        "setup.cfg",
+        "requirements.txt",
+        "package.json",
+        "Dockerfile",
+        "docker-compose.yml",
+        "docker-compose.yaml",
+    ):
         text = read_text_safe(root / name)
         if text:
             parts.append(text.lower())

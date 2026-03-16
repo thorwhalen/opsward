@@ -361,6 +361,7 @@ def _score_skills(
 # agentskills.io spec validation
 # ---------------------------------------------------------------------------
 
+
 def validate_skill_spec(skill: SkillInfo) -> list[str]:
     """Validate a SkillInfo against the agentskills.io specification.
 
