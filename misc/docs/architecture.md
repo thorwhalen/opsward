@@ -26,7 +26,7 @@ Target Project ──► scan.py ──► ScanResult ──► score.py ──�
    - Docs directory contents and `docs_guide.md` if present
 2. `score.py` evaluates the scan results against rubrics:
    - CLAUDE.md quality (6 dimensions, 0-100)
-   - Skill validity (frontmatter, size, description quality)
+   - Skill validity (frontmatter against agentskills.io spec, size ≤500 lines, description quality)
    - Doc completeness (which docs exist vs. recommended set)
    - Cross-reference integrity (do paths in CLAUDE.md actually exist?)
 3. Output: `DiagnosisReport` dataclass with component scores, missing items, and prioritized suggestions.
@@ -39,6 +39,8 @@ Target Project ──► scan.py ──► ScanResult ──► score.py ──�
 4. Substitutes variables from scan results (project name, detected tech stack, module paths).
 5. Returns `list[GeneratedFile]` — each is a `(target_path, content, overwrite_policy)` tuple.
 6. CLI presents diffs and asks for confirmation before writing.
+
+Generated artifacts include CLAUDE.md, docs, skills, agents, and rules. Future: AGENTS.md generation (cross-platform agent instructions, see `ai_setup_meta_tooling.md` Section 1.5).
 
 ### Maintain
 
@@ -75,3 +77,5 @@ Target Project ──► scan.py ──► ScanResult ──► score.py ──�
 - **Custom rubrics**: Users can provide a rubric override file (YAML) to adjust scoring weights.
 - **Custom templates**: Users can point to a directory of custom templates that override built-in ones.
 - **Project type plugins**: The detection logic in `scan.py` uses a registry pattern — new project types can be added by registering detection functions and doc-path conventions.
+- **AGENTS.md output**: `generate.py` can be extended to emit AGENTS.md (cross-platform agent instructions) alongside CLAUDE.md.
+- **Skill spec validation**: `score.py` can validate skills against the agentskills.io specification (name format, frontmatter fields, size limits, directory structure).

@@ -36,13 +36,81 @@ From **skills.sh** and **LobeHub**, several community skills address pieces of t
 | **agent-skill-creator** | FrancyJGLisboa (GitHub) [13] | Cross-platform (14 agents) skill generator with auto-install scripts, format adapters for Cursor/Windsurf |
 | **find-skills** | vercel-labs/skills [6] | #1 most-installed skill (478K installs). Searches and discovers skills from the ecosystem |
 
-**The gap**: None of these tools combine all three concerns — (1) diagnosing the full AI setup, (2) generating missing pieces, and (3) maintaining/updating the documentation layer — into a single cohesive workflow that works across multiple project roots.
+**Reference architecture repos** — these aren't tools but demonstrate what "good" Claude Code setups look like in practice:
+
+| Repo | What It Demonstrates |
+|------|---------------------|
+| **ChrisWiles/claude-code-showcase** [25] | Skill-evaluation hooks (UserPromptSubmit → skill-eval.sh → skill-rules.json), auto-formatting PostToolUse hooks, GitHub Actions for monthly doc sync + weekly code quality + biweekly dependency audits, PR review automation |
+| **diet103/claude-code-infrastructure-showcase** [26] | Hook-based skill auto-activation (solving the "skills don't activate" problem via skill-rules.json pattern matching). Modular skills with 500-line rule, progressive disclosure, dev docs for cross-session persistence (plan/context/tasks files) |
+| **disler/claude-code-hooks-mastery** [27] | All 13 hook events implemented. Meta-agent that generates sub-agents. UV single-file scripts for hook isolation (each script self-contained with embedded deps). Builder/Validator agent pairs |
+| **philoserf/claude-code-setup** [28] | 5 hooks, 8 rules, 23 skills, 2 commands. Observability via session directories and shell snapshots. Skill quality assessment skills. "Don't install this, just steal what you like" philosophy |
+| **christianestay/claude-code-base-project** [29] | 4 agents, 12 skills (all agentskills.io-compliant). Self-improvement loop (tasks/todo.md + tasks/lessons.md). 6-layer anti-hallucination architecture. Progressive disclosure: metadata (~100 tokens) → instructions (~200 tokens) → references (on demand) |
+
+**Ecosystem resources**:
+
+| Resource | What It Is |
+|----------|-----------|
+| **VoltAgent/awesome-agent-skills** [30] | Curated catalog of 549+ skills from official dev teams (Anthropic, Google Labs, Vercel, Stripe, Cloudflare, Supabase). Cross-platform. Could opsward recommend/install skills from here based on project analysis? |
+| **hesreallyhim/awesome-claude-code** [31] | Best single index of the Claude Code ecosystem — skills, workflows, tooling, hooks, slash-commands, alternative clients. No mention of diagnostic tools → confirms the gap opsward fills |
+| **Mintlify skill.md auto-generation** [32] | Auto-generates `/.well-known/skills/default/skill.md` from docs sites. Same philosophy as opsward (generate agent-readable context from existing artifacts), applied to documentation instead of codebases. Decision tables, explicit boundaries, gotchas sections |
+| **TÂCHES Claude Code Resources** [31] | Meta-skills: skill-auditor, hook creation, adaptable workflows. Self-referential tooling in the same vein as opsward |
+
+**The gap**: None of these tools combine all three concerns — (1) diagnosing the full AI setup, (2) generating missing pieces, and (3) maintaining/updating the documentation layer — into a single cohesive workflow that works across multiple project roots. The closest competitor (spec-kit [18]) covers scaffolding but has no diagnosis or maintenance. The inside-agent tools (skill-factory [19], agents-md-generator [21]) can't run in CI or across projects.
 
 ### 1.3 Related Standards
 
 - **AGENTS.md** [14]: Open standard from OpenAI/community for agent instructions. Claude Code uses CLAUDE.md instead but they can be symlinked. GitHub found 6 core areas in effective agent config: commands, testing, project structure, code style, git workflow, and boundaries [15].
 - **MADR** (Markdown Any Decision Records) [16]: Structured format for architectural decisions in `decisions/` folders.
 - **`.agent/` directory proposal** [17]: A GitHub issue proposing a standardized `.agent` directory as a single source of truth for project context (specs, wiki, resources, links). Not adopted yet but the right instinct.
+
+### 1.4 Closest Competitors & Peer Tools
+
+These are the CLI tools and generators that operate closest to opsward's space. For each: what it does, how it differs, and what opsward should do about it.
+
+| Tool | What It Does | Key Difference from Opsward | Opsward Posture |
+|------|-------------|---------------------------|----------------|
+| **spec-kit** (GitHub) [18] | Python CLI (`specify init`) that scaffolds agent config for 20+ AI agents. Template-based, supports `--ai claude`, `--ai-skills` for SKILL.md generation. Maintained under the GitHub org. | Template-based scaffolding only — no diagnosis, no scoring, no maintenance. Single-project. Focused on "spec-driven development" (specs → implementation). | **Integrate**: opsward's `generate` could optionally emit spec-kit-compatible project structures. Don't compete on scaffolding — compete on diagnosis + maintenance. |
+| **claude-code-skill-factory** [19] | Interactive builders (`/build skill`, `/build agent`, `/build hook`, `/build prompt`) + CLAUDE.md analyzer/enhancer with quality scoring. 5 interactive guide agents, 9 production skills. | Operates *inside* Claude Code via prompts — not a standalone CLI. Consumes agent context. No multi-project support. No staleness/drift detection. | **Mention**: good for individual skill authoring. Opsward's external CLI approach is CI-friendly and context-free. |
+| **ccexp** [20] | Interactive TUI (React Ink) for discovering/browsing Claude Code config files. Split-pane layout, search, preview. | Read-only browser — no generation, no diagnosis, no scoring. Complements opsward rather than competing. | **Mention**: nice companion for manual exploration. Orthogonal to opsward. |
+| **agents-md-generator** (LobeHub) [21] | Skill that auto-generates/updates CLAUDE.md and AGENTS.md by scanning project files. Multi-tech-stack detection, merge-safe updates preserving custom sections. | Runs inside an agent (context-consuming). No quality scoring, no multi-project, no maintenance loop. | **Mention**: similar generation philosophy. Opsward does it externally and adds diagnosis + maintenance. |
+| **netresearch/agent-rules-skill** [22] | Skill for generating AGENTS.md from inside Claude Code. Creates thin root files + scoped subsystem files. Idempotent updates with managed headers. | Inside-agent only. AGENTS.md-specific (not CLAUDE.md). No scoring or drift detection. | **Integrate**: opsward could adopt its scoped-AGENTS.md pattern for monorepos. |
+| **claudekit** [23] | CLI toolkit with auto-save checkpointing, code quality hooks, spec generation, 20+ specialized subagents. | Broader scope (checkpointing, hooks, subagents) but no diagnostic scoring or maintenance loop. More of an "enhanced Claude Code runtime" than a meta-tooling system. | **Mention**: different problem space. Not a direct competitor. |
+| **Vercel skills CLI** (`npx skills`) [6] | Cross-platform skill package manager: install, list, find, update, check, init. Supports GitHub/GitLab/local sources. | Package manager, not a generator or diagnostician. Manages individual skills, not the full AI setup. | **Integrate**: opsward-generated skills should be installable via `npx skills add`. |
+| **wshobson/agents** [24] | Monorepo of 72 plugins, 112 agents, 146 skills, 16 orchestrators. Batteries-included, plugin-based architecture. | Opposite philosophy: pre-built configs vs. project-specific generation. No diagnosis. | **Mention**: good for users who want off-the-shelf configs. Opsward generates *project-specific* configs. |
+
+**Takeaway**: No existing tool combines diagnosis + generation + maintenance in a standalone, CI-friendly CLI. spec-kit is closest on generation but lacks diagnosis/scoring entirely. The inside-agent tools (skill-factory, agents-md-generator) solve similar problems but consume context and can't run in CI or across multiple projects.
+
+### 1.5 Open Standards Opsward Should Target
+
+Three open standards are relevant to opsward's output:
+
+**1. Agent Skills Open Standard (agentskills.io)** [5]
+
+The cross-platform SKILL.md specification adopted by Claude Code, Codex, Copilot, Cursor, Gemini CLI, OpenCode, and 20+ tools. Defines:
+- Required frontmatter: `name` (1-64 chars, lowercase+hyphens, must match directory name), `description` (1-1024 chars)
+- Optional frontmatter: `license`, `compatibility`, `metadata` (arbitrary key-value), `allowed-tools` (space-delimited, experimental)
+- Directory structure: `SKILL.md` (required) + optional `scripts/`, `references/`, `assets/`
+- Progressive disclosure: metadata (~100 tokens) → instructions (<5000 tokens) → resources (on demand)
+- Main SKILL.md should stay under 500 lines
+- Validation via `skills-ref validate ./my-skill`
+
+**Opsward status**: Opsward already generates SKILL.md files and follows the directory convention. It should add a **validation step** to `diagnose` that checks existing skills against the agentskills.io spec (name format, frontmatter fields, size limits).
+
+**2. AGENTS.md Standard** [14]
+
+Cross-platform convention supported by 60,000+ open-source projects and agents including Codex, Jules, Copilot, Cursor, Devin, Gemini CLI, and others. Key properties:
+- Standard Markdown, flexible headings, no required fields
+- Placed at repo root or in subdirectories (nearest file to edited content wins)
+- Complements CLAUDE.md: AGENTS.md = cross-platform behavioral guidance; CLAUDE.md = Claude-specific configuration
+- Common sections: project overview, build/test commands, code style, testing, PR instructions, security
+
+**Opsward status**: Opsward currently generates CLAUDE.md but not AGENTS.md. It should add an `--agents-md` flag to `generate` that emits an AGENTS.md alongside (or instead of) CLAUDE.md, making the project's AI setup portable across agents.
+
+**3. MADR (Markdown Any Decision Records)** [16]
+
+Structured format for architectural decisions in `decisions/` folders.
+
+**Opsward status**: Already targeted. Opsward's `generate` creates a `decisions/` folder with MADR-style templates. No changes needed.
 
 ---
 
@@ -264,3 +332,33 @@ Drawing from your coding philosophy:
 [16] MADR. "Markdown Any Decision Records." [adr.github.io/madr](https://adr.github.io/madr/)
 
 [17] agentsmd/agents.md Issue #71. "Proposal: Standardize a .agent Directory." [GitHub](https://github.com/agentsmd/agents.md/issues/71)
+
+[18] GitHub. "spec-kit (Specify CLI)." [github/spec-kit](https://github.com/github/spec-kit)
+
+[19] Alireza Rezvani. "Claude Code Skill Factory." [GitHub](https://github.com/alirezarezvani/claude-code-skill-factory)
+
+[20] nyatinte. "ccexp — Claude Code Explorer." [GitHub](https://github.com/nyatinte/ccexp)
+
+[21] thienanblog. "agents-md-generator." [LobeHub](https://lobehub.com/skills/thienanblog-awesome-agent-skills-agents-md-generator)
+
+[22] Netresearch. "agent-rules-skill." [GitHub](https://github.com/netresearch/agent-rules-skill)
+
+[23] Carl Rannaberg. "claudekit." Referenced in [awesome-claude-code](https://github.com/hesreallyhim/awesome-claude-code)
+
+[24] wshobson. "agents — 72 plugins, 112 agents, 146 skills." [GitHub](https://github.com/wshobson/agents)
+
+[25] Chris Wiles. "claude-code-showcase." [GitHub](https://github.com/ChrisWiles/claude-code-showcase)
+
+[26] diet103. "claude-code-infrastructure-showcase." [GitHub](https://github.com/diet103/claude-code-infrastructure-showcase)
+
+[27] disler. "claude-code-hooks-mastery." [GitHub](https://github.com/disler/claude-code-hooks-mastery)
+
+[28] philoserf. "claude-code-setup." [GitHub](https://github.com/philoserf/claude-code-setup)
+
+[29] Christian Estay. "claude-code-base-project." [GitHub](https://github.com/christianestay/claude-code-base-project)
+
+[30] VoltAgent. "awesome-agent-skills." [GitHub](https://github.com/VoltAgent/awesome-agent-skills)
+
+[31] hesreallyhim. "awesome-claude-code." [GitHub](https://github.com/hesreallyhim/awesome-claude-code)
+
+[32] Mintlify. "Auto-generated skill.md." [Blog](https://www.mintlify.com/blog/skill-md)
