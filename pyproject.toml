@@ -6,7 +6,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "opsward"
-version = "0.0.5"
+version = "0.0.6"
 description = "Diagnose, generate, and maintain the AI agent setup of your projects — CLAUDE.md, skills, subagents, rules, and supporting docs."
 readme = "README.md"
 requires-python = ">=3.10"
