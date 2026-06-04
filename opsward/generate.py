@@ -477,11 +477,15 @@ def _build_starter_hooks() -> str:
     """Build a starter hooks.json with common hook patterns."""
     import json
 
+    # NOTE: `matcher` must be a STRING regex matching tool names (e.g. "Edit|Write"),
+    # NOT a dict. Claude Code does not honor a dict matcher, so the hook would
+    # silently never fire. The command bodies below are intentionally no-op
+    # placeholders for the user to customize.
     hooks = {
         "hooks": {
             "PostToolUse": [
                 {
-                    "matcher": {"tool_name": "Edit|Write"},
+                    "matcher": "Edit|Write|MultiEdit",
                     "hooks": [
                         {
                             "type": "command",
@@ -492,6 +496,7 @@ def _build_starter_hooks() -> str:
             ],
             "SessionStart": [
                 {
+                    "matcher": "startup",
                     "hooks": [
                         {
                             "type": "command",
@@ -506,12 +511,18 @@ def _build_starter_hooks() -> str:
 
 
 def _has_deploy_artifacts(sr: ScanResult) -> bool:
+    """True only for genuine deployment signals.
+
+    Note: the presence of ``.github/workflows/`` is deliberately NOT a signal —
+    almost every library has CI workflows (test/lint/publish) without being a
+    deployed application. Treating CI as deployment would mis-fire on essentially
+    every project with CI and contradict the minimal-generation principle.
+    """
     root = sr.project_root
     return (
         (root / "Dockerfile").exists()
         or (root / "docker-compose.yml").exists()
         or (root / "docker-compose.yaml").exists()
-        or (root / ".github" / "workflows").is_dir()
         or (root / "Procfile").exists()
         or (root / "fly.toml").exists()
         or (root / "render.yaml").exists()
