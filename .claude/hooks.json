@@ -1,0 +1,26 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit|Write|MultiEdit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=$(jq -r '.tool_input.file_path // empty'); case \"$f\" in *.py) ruff format \"$f\" >/dev/null 2>&1 || true ;; esac"
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "startup",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "echo \"opsward — branch $(git branch --show-current 2>/dev/null). Run 'python -m opsward diagnose .' to check the AI setup.\""
+          }
+        ]
+      }
+    ]
+  }
+}
