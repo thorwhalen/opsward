@@ -32,21 +32,20 @@ Key docs to read before starting work:
 ## Module Map
 
 - `opsward/` — the main package
-  - `__init__.py` — public interface (the facade). Exports `diagnose`, `generate`, `generate_skills`, `maintain`, key types
-  - `base.py` — core data structures: `ProjectType`, `DiagnosisReport`, `DocSpec`, `SetupComponent`, scoring models
+  - `__init__.py` — public interface (the facade). Exports `diagnose`, `generate`, `generate_skills`, `maintain`, `recommend_skills`, `validate_skill_spec`, `SkillRecommendation`, key types
+  - `base.py` — core data structures: `ProjectType`, `ScanResult`, `DiagnosisReport`, `ComponentScore`, `DocSpec`, `SkillInfo`, `AgentInfo`, `RuleInfo`, `GeneratedFile`, `MaintenanceSuggestion`
   - `scan.py` — read-only filesystem scanning: detect project type, find CLAUDE.md, skills, agents, rules, hooks, docs
-  - `score.py` — quality scoring: CLAUDE.md rubric, skill validation, doc freshness, cross-reference checks
+  - `score.py` — quality scoring: CLAUDE.md rubric, skill validation, doc freshness, cross-reference checks. Rubric weights/dimensions are hardcoded module constants (no external rubric files)
   - `generate.py` — template rendering and file generation (never overwrites without confirmation). Also provides `generate_skills()` for targeted skill/agent installation.
   - `maintain.py` — staleness detection, update suggestions, drift analysis
+  - `recommend.py` — map detected tech-stack signals (deps, frameworks) to curated ecosystem skill recommendations
   - `cli.py` — argh-based CLI entry point
   - `util.py` — internal helpers (underscore-prefixed)
   - `data/` — bundled package resources (accessed via `importlib.resources.files`)
     - `templates/` — generation templates organized by target project type
-      - `shared/` — templates that work for any project type
+      - `shared/` — templates that work for any project type. **This is also where the installable Claude Code skills live**, as `opsward/data/templates/shared/<skill-name>/SKILL.md` (opsward, opsward-diagnose, opsward-generate, opsward-maintain) plus the `opsward/data/templates/shared/setup-auditor.md` agent. `generate.py` installs these into a target project's `.claude/`.
       - `python/` — Python-specific templates (paths use `misc/docs/`)
       - `jsts/` — JS/TS-specific templates (paths use `docs/`)
-    - `rubrics/` — scoring criteria (YAML or TOML)
-    - `skills/` — Claude Code skill templates (opsward, opsward-diagnose, opsward-generate, opsward-maintain) that opsward installs into target projects
 - `tests/` — pytest tests
 
 ## Commands
@@ -60,6 +59,7 @@ python -m opsward diagnose /path/to/project          # Diagnose AI setup
 python -m opsward diagnose /path/to/proj1 /path/to/proj2  # Multi-project
 python -m opsward generate /path/to/project           # Generate missing pieces
 python -m opsward maintain /path/to/project            # Check for staleness/drift
+python -m opsward recommend /path/to/project           # Recommend ecosystem skills from tech stack
 python -m opsward install-skills --write               # Install Claude Code skills
 
 # After pip install (via pyproject.toml [project.scripts]):
@@ -88,7 +88,7 @@ Follow the argh SSOT dispatch pattern:
 
 ```python
 # In cli.py
-_dispatch_funcs = [diagnose, generate, maintain, install_skills]
+_dispatch_funcs = [diagnose, generate, maintain, recommend, install_skills]
 
 if __name__ == "__main__":
     import argh
@@ -108,7 +108,7 @@ Templates live in `opsward/data/templates/`. They are plain markdown files with 
 
 ### Scoring Pattern
 
-Scoring functions are pure: `(scan_result) -> score_dict`. No side effects. The rubric definitions live in `opsward/data/rubrics/` as YAML. Scoring dimensions for CLAUDE.md (inspired by community best practices):
+Scoring functions are pure: `(scan_result) -> DiagnosisReport`. No side effects. The rubric — overall weights (`_OVERALL_WEIGHTS`) and per-dimension max scores (`_CMD_MAX`, `_ARCH_MAX`, …) — is defined as hardcoded module-level constants in `score.py`, not in external data files. Scoring dimensions for CLAUDE.md (inspired by community best practices):
 
 1. **Commands/Workflows** (0-20): Are build/test/run commands documented?
 2. **Architecture Clarity** (0-20): Is the module map present and accurate?
@@ -164,7 +164,7 @@ See `misc/docs/target_artifacts.md` for the full spec of generated artifacts.
 - Templates are **not** Jinja2. Use `string.Template` for simplicity and zero deps. If a template needs conditionals, split it into separate template files per variant.
 - The `diagnose` function returns a `DiagnosisReport` dataclass that is both human-readable (via `__str__`) and machine-consumable (via dataclass fields). The CLI pretty-prints it; library users get structured data.
 - The `scan.py` module must be **purely read-only** — it never modifies the target project. This is a hard invariant. It uses `pathlib.Path` and `os.walk`, never writes.
-- For multi-project scanning, each project gets its own `DiagnosisReport`. There is also an aggregate `MultiProjectReport` that summarizes cross-project patterns.
+- For multi-project scanning, each project gets its own `DiagnosisReport`. The CLI's `diagnose` accepts multiple roots (`*project_roots`) and reports each independently — there is no aggregate report object.
 - The `ow` shim package is a separate `pyproject.toml` / directory. It literally just does `from opsward import *` and declares `opsward` as a dependency.
 
 ## Git Workflow
