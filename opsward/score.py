@@ -132,16 +132,30 @@ def _dim_commands(content: str, notes: list[str]) -> int:
     found = {kw for kw in cmd_keywords if kw in lower}
 
     if not code_blocks:
-        notes.append("Commands: no code blocks found")
+        notes.append(
+            "Commands: no code blocks found "
+            "→ add a fenced code block with the build, test, and run commands"
+        )
         return 0
 
     if len(found) >= 5:
         return _CMD_MAX
     if len(found) >= 3:
+        notes.append(
+            f"Commands: {len(found)} command keyword(s) found "
+            "→ document the rest (build, test, lint, run, install) for full credit"
+        )
         return 13
     if len(found) >= 1:
+        notes.append(
+            f"Commands: only {len(found)} command keyword(s) found "
+            "→ document build, test, lint, run, and install commands"
+        )
         return 7
-    notes.append("Commands: code blocks present but no build/test/lint keywords")
+    notes.append(
+        "Commands: code blocks present but no build/test/lint keywords "
+        "→ label the commands (build, test, run) so an agent knows what they do"
+    )
     return 3
 
 
@@ -151,7 +165,10 @@ def _dim_architecture(content: str, notes: list[str]) -> int:
         content, ("architecture", "module map", "structure", "project layout")
     )
     if not section:
-        notes.append("Architecture: no architecture/structure section found")
+        notes.append(
+            "Architecture: no architecture/structure section found "
+            "→ add a '## Architecture' section mapping key modules to one-line descriptions"
+        )
         return 0
 
     # Check for descriptions alongside paths
@@ -159,9 +176,17 @@ def _dim_architecture(content: str, notes: list[str]) -> int:
     has_paths = bool(re.search(r"\w+/\w+", section))
 
     if has_descriptions and has_paths:
-        return 16
+        return _ARCH_MAX
     if has_paths:
+        notes.append(
+            "Architecture: paths listed without descriptions "
+            "→ add a one-line description after each module path (e.g. `path/ — what it does`)"
+        )
         return 10
+    notes.append(
+        "Architecture: section has no module paths "
+        "→ list the key modules by path with a one-line description each"
+    )
     return 5
 
 
@@ -171,7 +196,10 @@ def _dim_conventions(content: str, notes: list[str]) -> int:
         content, ("conventions", "style", "patterns", "coding", "rules")
     )
     if not section:
-        notes.append("Conventions: no conventions/style section found")
+        notes.append(
+            "Conventions: no conventions/style section found "
+            "→ add a '## Conventions' section documenting non-obvious patterns"
+        )
         return 0
 
     # Check for specificity indicators
@@ -188,7 +216,15 @@ def _dim_conventions(content: str, notes: list[str]) -> int:
     if specific_indicators >= 3:
         return _CONV_MAX
     if specific_indicators >= 1:
+        notes.append(
+            "Conventions: low specificity "
+            "→ name the tools (e.g. ruff), cite file extensions, and show code snippets"
+        )
         return 9
+    notes.append(
+        "Conventions: section is vague "
+        "→ replace generic advice with concrete patterns: tool names, file paths, code examples"
+    )
     return 5
 
 
@@ -201,11 +237,21 @@ def _dim_conciseness(content: str, notes: list[str]) -> int:
     if line_count <= 80:
         return _CONCISE_MAX
     if line_count <= 200:
+        notes.append(
+            f"Conciseness: {line_count} lines — healthy, but trimming "
+            "→ move reference detail into docs/ to get under 80 lines for full marks"
+        )
         return 11
     if line_count <= 500:
-        notes.append(f"Conciseness: {line_count} lines — consider trimming")
+        notes.append(
+            f"Conciseness: {line_count} lines "
+            "→ move detail into docs/ and link it, keeping CLAUDE.md scannable"
+        )
         return 6
-    notes.append(f"Conciseness: {line_count} lines — likely too long")
+    notes.append(
+        f"Conciseness: {line_count} lines — likely too long "
+        "→ extract sections into docs/ and reference them from a short CLAUDE.md"
+    )
     return 2
 
 
@@ -216,16 +262,17 @@ def _dim_currency(content: str, project_root: Path, notes: list[str]) -> int:
         # No paths to validate — can't penalize, give moderate score
         return 10
 
-    existing = sum(1 for p in paths if (project_root / p).exists())
-    ratio = existing / len(paths) if paths else 1.0
+    broken = [p for p in paths if not (project_root / p).exists()]
+    ratio = (len(paths) - len(broken)) / len(paths)
 
-    if ratio < 0.5:
-        broken = [p for p in paths if not (project_root / p).exists()]
-        notes.append(f"Currency: {len(broken)} broken path reference(s)")
-        return 3
-    if ratio < 1.0:
-        return 9
-    return _CURRENCY_MAX
+    if ratio == 1.0:
+        return _CURRENCY_MAX
+
+    notes.append(
+        f"Currency: {len(broken)} broken path reference(s) "
+        f"({', '.join(broken[:3])}) → update or remove the stale paths"
+    )
+    return 3 if ratio < 0.5 else 9
 
 
 def _dim_actionability(content: str, notes: list[str]) -> int:
@@ -253,15 +300,25 @@ def _dim_actionability(content: str, notes: list[str]) -> int:
             vague += 1
 
     if actionable == 0:
-        notes.append("Actionability: no imperative instructions found")
+        notes.append(
+            "Actionability: no imperative instructions found "
+            "→ phrase guidance as commands (use/run/add/avoid/never/always …)"
+        )
         return 3
 
     ratio = actionable / (actionable + vague) if (actionable + vague) else 0.5
     if ratio >= 0.8:
         return _ACTION_MAX
     if ratio >= 0.5:
+        notes.append(
+            "Actionability: some vague instructions "
+            "→ replace hedges (appropriate, as needed, consider) with concrete directives"
+        )
         return 10
-    notes.append("Actionability: many vague instructions")
+    notes.append(
+        "Actionability: many vague instructions "
+        "→ replace hedges (appropriate, as needed, consider) with concrete directives"
+    )
     return 5
 
 
@@ -298,15 +355,25 @@ def _score_docs(
         content_pts = round(20 * content_ratio)
         total += content_pts
         if content_ratio < 1.0:
-            notes.append(f"{len(sr.docs) - non_empty} doc(s) appear to be empty stubs")
+            stub_names = ", ".join(d.name for d in sr.docs if d.size_bytes <= 50)
+            notes.append(
+                f"{len(sr.docs) - non_empty} doc(s) appear to be empty stubs "
+                f"({stub_names}) → flesh them out with real content or remove them"
+            )
     else:
-        notes.append("No documentation files found")
+        notes.append(
+            "No documentation files found "
+            "→ run `opsward generate` to scaffold architecture/conventions docs"
+        )
 
     # Cross-references (15 pts) — does CLAUDE.md mention docs_guide?
     if sr.claude_md_content and "docs_guide" in sr.claude_md_content:
         total += 15
     elif sr.claude_md_content:
-        notes.append("CLAUDE.md does not reference docs_guide.md")
+        notes.append(
+            "CLAUDE.md does not reference docs_guide.md "
+            "→ link docs_guide.md from CLAUDE.md so agents discover the docs"
+        )
 
     # Freshness (10 pts) — we can't check git dates in a pure function,
     # so award if docs exist at all
@@ -333,28 +400,37 @@ def _score_skills(
         )
         return ComponentScore(name="Skills", score=0, notes=notes)
 
-    per_skill = 100 // len(sr.skills)
-    total = 0
+    # Each skill earns a quality fraction in [0, 1]: 40% for a SKILL.md, 30% for
+    # a description, 30% for spec compliance. We average across skills and scale
+    # to 100, rounding once — so N perfect skills score a full 100 (an earlier
+    # per-skill integer floor silently capped perfect setups below 100).
+    quality = 0.0
     for skill in sr.skills:
-        pts = 0
+        q = 0.0
         if skill.has_skill_md:
-            pts += per_skill * 40 // 100  # 40% for having SKILL.md
+            q += 0.40
         else:
-            notes.append(f'Skill "{skill.name}": missing SKILL.md')
+            notes.append(
+                f'Skill "{skill.name}": missing SKILL.md '
+                "→ add a SKILL.md with `name` and `description` frontmatter"
+            )
         if skill.description:
-            pts += per_skill * 30 // 100  # 30% for having a description
+            q += 0.30
         else:
-            notes.append(f'Skill "{skill.name}": no description')
-        # 30% for spec compliance
+            notes.append(
+                f'Skill "{skill.name}": no description '
+                "→ add a `description:` line to the frontmatter so the skill can be triggered"
+            )
         violations = _validate_skill_spec(skill)
         if not violations:
-            pts += per_skill * 30 // 100
+            q += 0.30
         else:
             for v in violations:
                 notes.append(f'Skill "{skill.name}": {v}')
-        total += pts
+        quality += q
 
-    return ComponentScore(name="Skills", score=min(total, 100), notes=notes)
+    score = round(100 * quality / len(sr.skills))
+    return ComponentScore(name="Skills", score=min(score, 100), notes=notes)
 
 
 # ---------------------------------------------------------------------------
