@@ -440,25 +440,138 @@ def _validate_skill_spec(skill) -> list[str]:
 # ---------------------------------------------------------------------------
 
 
+# Setup point budget (sums to 100): rules 35, agents 35, hooks 30
+_SETUP_RULES_MAX = 35
+_SETUP_AGENTS_MAX = 35
+_SETUP_HOOKS_MAX = 30
+_SETUP_PER_ARTIFACT = 15  # per rule / agent, capped at the section max
+
+# A rule shorter than this (stripped) reads as a bare stub, not a real invariant.
+_RULE_MIN_CHARS = 40
+
+# Hook event names Claude Code recognizes (anything else silently never fires).
+_KNOWN_HOOK_EVENTS = frozenset(
+    {
+        "PreToolUse",
+        "PostToolUse",
+        "UserPromptSubmit",
+        "Notification",
+        "Stop",
+        "SubagentStop",
+        "SessionStart",
+        "SessionEnd",
+        "PreCompact",
+    }
+)
+
+
+def validate_hooks_config(cfg: object) -> list[str]:
+    """Validate a hooks config against Claude Code's expected shape.
+
+    Returns a list of human-readable violation strings (empty = valid). Catches
+    the silent-failure traps: a non-string ``matcher``, an unknown event name,
+    or an entry with no runnable ``command`` hook — none of which Claude Code
+    honors, so the hook never fires even though the file "looks" configured.
+
+    >>> validate_hooks_config({'hooks': {'PostToolUse': [
+    ...     {'matcher': 'Edit', 'hooks': [{'type': 'command', 'command': 'x'}]}]}})
+    []
+    >>> validate_hooks_config({'pre_commit': ['ruff']})
+    ['no top-level `hooks` key']
+    >>> 'matcher' in validate_hooks_config({'hooks': {'PostToolUse': [
+    ...     {'matcher': {'tool_name': 'Edit'}, 'hooks': [
+    ...         {'type': 'command', 'command': 'x'}]}]}})[0]
+    True
+    """
+    return _validate_hooks_config(cfg)
+
+
+def _validate_hooks_config(cfg: object) -> list[str]:
+    violations: list[str] = []
+    if not isinstance(cfg, dict):
+        return ["hooks config is not a JSON object"]
+    hooks = cfg.get("hooks")
+    if hooks is None:
+        return ["no top-level `hooks` key"]
+    if not isinstance(hooks, dict):
+        return ["`hooks` is not an object of event -> entries"]
+    if not hooks:
+        return ["`hooks` is empty"]
+
+    for event, entries in hooks.items():
+        if event not in _KNOWN_HOOK_EVENTS:
+            violations.append(f"unknown hook event {event!r}")
+        if not isinstance(entries, list):
+            violations.append(f"event {event!r}: entries must be a list")
+            continue
+        for entry in entries:
+            if not isinstance(entry, dict):
+                violations.append(f"event {event!r}: entry is not an object")
+                continue
+            matcher = entry.get("matcher")
+            if matcher is not None and not isinstance(matcher, str):
+                violations.append(
+                    f"event {event!r}: `matcher` must be a string regex, "
+                    f"not {type(matcher).__name__} (Claude Code ignores a dict matcher)"
+                )
+            hook_list = entry.get("hooks")
+            if not isinstance(hook_list, list) or not hook_list:
+                violations.append(
+                    f"event {event!r}: entry has no non-empty `hooks` list"
+                )
+                continue
+            for h in hook_list:
+                if (
+                    not isinstance(h, dict)
+                    or h.get("type") != "command"
+                    or not h.get("command")
+                ):
+                    violations.append(
+                        f"event {event!r}: each hook needs `type: command` and a `command`"
+                    )
+    return violations
+
+
 def _score_setup(sr: ScanResult, *, suggestions: list[str]) -> ComponentScore:
     notes: list[str] = []
     total = 0
 
-    # Rules (up to 35)
+    # Rules (up to 35) — credit substantive rules, not bare stubs.
     if sr.rules:
-        total += min(35, 15 * len(sr.rules))
+        substantive = [r for r in sr.rules if len(r.content.strip()) >= _RULE_MIN_CHARS]
+        stubs = [r for r in sr.rules if r not in substantive]
+        total += min(_SETUP_RULES_MAX, _SETUP_PER_ARTIFACT * len(substantive))
+        for r in stubs:
+            notes.append(f'Rule "{r.name}": looks like a stub — add a real invariant')
+        if stubs:
+            suggestions.append(
+                "Flesh out stub rule(s) in .claude/rules/ — a heading alone is not an invariant"
+            )
     else:
         notes.append("No rules defined")
 
-    # Agents (up to 35)
+    # Agents (up to 35) — credit agents that at least carry a description.
     if sr.agents:
-        total += min(35, 15 * len(sr.agents))
+        described = [a for a in sr.agents if a.description.strip()]
+        total += min(_SETUP_AGENTS_MAX, _SETUP_PER_ARTIFACT * len(described))
+        for a in sr.agents:
+            if not a.description.strip():
+                notes.append(f'Agent "{a.name}": no description')
     else:
         notes.append("No agents defined")
 
-    # Hooks (30)
+    # Hooks (30) — score validity, not mere presence (issue #6).
     if sr.hooks_config:
-        total += 30
+        violations = _validate_hooks_config(sr.hooks_config)
+        if not violations:
+            total += _SETUP_HOOKS_MAX
+        else:
+            total += _SETUP_HOOKS_MAX // 3  # partial: configured but won't fire
+            notes.append(f"Hooks config invalid: {violations[0]}")
+            suggestions.append(
+                "Fix the hooks config in .claude/hooks.json — "
+                f"{violations[0]} (an invalid hook silently never fires)"
+            )
     else:
         notes.append("No hooks configured")
         suggestions.append(
