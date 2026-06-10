@@ -214,6 +214,95 @@ def test_no_testing_for_bare(bare_scan):
     assert "testing.md" not in names
 
 
+# -- Module map (derived from docstrings) --
+
+
+def _make_python_pkg(root: Path) -> Path:
+    """Build a tiny python project: pkg with __init__ + two documented modules."""
+    (root / "pyproject.toml").write_text('[project]\nname = "demo"\n')
+    pkg = root / "demo"
+    pkg.mkdir()
+    (pkg / "__init__.py").write_text('"""Demo package facade."""\n')
+    (pkg / "core.py").write_text('"""Core domain logic."""\n\n\ndef f():\n    pass\n')
+    (pkg / "util.py").write_text('"""Shared helpers."""\n')
+    (root / "tests").mkdir()
+    return root
+
+
+def test_module_map_uses_docstrings():
+    """Each module's description is its top-level docstring's first line."""
+    from opsward.generate import _detect_module_map
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        root = Path(tmpdir)
+        _make_python_pkg(root)
+        mm = _detect_module_map(scan(root))
+        # package description comes from __init__.py docstring
+        assert "`demo/` — Demo package facade." in mm
+        # submodules nested (two-space indent) with their docstring first-lines
+        assert "  - `core.py` — Core domain logic." in mm
+        assert "  - `util.py` — Shared helpers." in mm
+        # __init__.py is the package description, not listed as its own submodule
+        assert "`__init__.py`" not in mm
+
+
+def test_module_map_no_blank_descriptions():
+    """Regression: a documented module must never render a bare trailing dash."""
+    from opsward.generate import _detect_module_map
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        root = Path(tmpdir)
+        _make_python_pkg(root)
+        mm = _detect_module_map(scan(root))
+        for line in mm.splitlines():
+            assert not line.rstrip().endswith("—"), f"blank description: {line!r}"
+
+
+def test_module_map_placeholder_for_undocumented():
+    """Dirs/files with no derivable docstring get a fill-in placeholder, not blank."""
+    from opsward.generate import _detect_module_map
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        root = Path(tmpdir)
+        (root / "pyproject.toml").write_text('[project]\nname = "demo"\n')
+        (root / "tests").mkdir()  # plain dir: no __init__, no docstring
+        mm = _detect_module_map(scan(root))
+        assert "`tests/` — <!-- describe -->" in mm
+
+
+# -- Evidence-gated doc claims --
+
+
+def test_testing_md_omits_conftest_when_absent():
+    """Regression: testing.md must not claim a conftest.py that does not exist."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        root = Path(tmpdir)
+        (root / "pyproject.toml").write_text(
+            '[project]\nname = "demo"\n[tool.pytest.ini_options]\n'
+        )
+        (root / "tests").mkdir()
+        (root / "tests" / "test_x.py").write_text("def test_x():\n    assert True\n")
+        testing = next(
+            f for f in generate(scan(root)) if f.target_path.name == "testing.md"
+        )
+        assert "conftest.py" not in testing.content
+
+
+def test_testing_md_includes_conftest_when_present():
+    """When a conftest.py exists, testing.md cites its real path."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        root = Path(tmpdir)
+        (root / "pyproject.toml").write_text(
+            '[project]\nname = "demo"\n[tool.pytest.ini_options]\n'
+        )
+        (root / "tests").mkdir()
+        (root / "tests" / "conftest.py").write_text("import pytest\n")
+        testing = next(
+            f for f in generate(scan(root)) if f.target_path.name == "testing.md"
+        )
+        assert "tests/conftest.py" in testing.content
+
+
 # -- Template rendering --
 
 

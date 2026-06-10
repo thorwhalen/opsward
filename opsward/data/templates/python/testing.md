@@ -12,9 +12,7 @@ ${test_command}
 
 ## Test Structure
 
-- Tests live in `${test_dir}/`
-- Test files follow `test_{module_name}.py` naming
-- Fixtures and shared helpers in `${test_dir}/conftest.py`
+${test_structure}
 
 ## Coverage
 

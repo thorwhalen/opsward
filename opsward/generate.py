@@ -3,12 +3,20 @@
 Never overwrites existing files (overwrite_policy='skip' by default).
 """
 
+import ast
 import importlib.resources
 from pathlib import Path
 from string import Template
 
 from opsward.base import GeneratedFile, ProjectType, ScanResult
 from opsward.util import read_text_safe
+
+# Names never shown in a module map (VCS, caches, build/vendor output)
+_MAP_SKIP_NAMES = frozenset({"node_modules", "__pycache__", ".git", "dist", "build"})
+# Top-level files worth listing in a module map (config + source)
+_MAP_FILE_SUFFIXES = (".py", ".ts", ".js", ".json", ".toml", ".yaml", ".yml")
+# Stand-in when no description can be honestly derived (user fills it in)
+_DESCRIBE_PLACEHOLDER = "<!-- describe -->"
 
 # Skills that opsward installs — each maps to shared/<name>/SKILL.md template
 _SKILL_NAMES = (
@@ -220,6 +228,7 @@ def _build_variables(sr: ScanResult) -> dict[str, str]:
         "test_framework": _detect_test_framework(sr),
         "test_command": _detect_test_command(sr),
         "test_dir": _detect_test_dir(sr),
+        "test_structure": _detect_test_structure(sr),
         "coverage_command": _detect_coverage_command(sr),
         "additional_docs_table": _build_additional_docs_table(sr),
         "glossary_entries": "| <!-- Add terms here --> | |",
@@ -294,21 +303,70 @@ def _detect_tech_stack(sr: ScanResult) -> str:
     return ", ".join(parts)
 
 
+def _module_docstring_summary(py_file: Path) -> str | None:
+    """First line of a Python module's top-level docstring, or None.
+
+    Descriptions are *derived*, never guessed: if a module has no docstring (or
+    fails to parse) we return None so the caller can emit a fill-in placeholder
+    rather than assert something unverified.
+    """
+    try:
+        tree = ast.parse(read_text_safe(py_file))
+    except (SyntaxError, ValueError):
+        return None
+    doc = ast.get_docstring(tree)
+    if not doc:
+        return None
+    first = doc.strip().splitlines()[0].strip()
+    return first or None
+
+
+def _package_summary(directory: Path) -> str:
+    """Package description from its ``__init__.py`` docstring, else a placeholder."""
+    init = directory / "__init__.py"
+    if init.is_file():
+        summary = _module_docstring_summary(init)
+        if summary:
+            return summary
+    return _DESCRIBE_PLACEHOLDER
+
+
+def _submodule_lines(package_dir: Path) -> list[str]:
+    """Nested bullets for a Python package's direct ``.py`` submodules (one level).
+
+    Only descends into real packages (those with ``__init__.py``). Private and
+    dunder modules (``_x.py``, ``__init__.py``, ``__main__.py``) are skipped —
+    ``__init__``'s docstring is already the package's own description.
+    """
+    if not (package_dir / "__init__.py").is_file():
+        return []
+    lines = []
+    for sub in sorted(package_dir.iterdir(), key=lambda p: p.name):
+        if sub.suffix != ".py" or sub.name.startswith("_"):
+            continue
+        summary = _module_docstring_summary(sub)
+        lines.append(f"  - `{sub.name}` — {summary or _DESCRIBE_PLACEHOLDER}")
+    return lines
+
+
 def _detect_module_map(sr: ScanResult) -> str:
     root = sr.project_root
     if not root.is_dir():
-        return "<!-- Add module descriptions -->"
-    lines = []
+        return f"- {_DESCRIBE_PLACEHOLDER}"
+    lines: list[str] = []
     for child in sorted(root.iterdir(), key=lambda p: p.name):
-        if child.name.startswith(".") or child.name.startswith("_"):
-            continue
-        if child.name in ("node_modules", "__pycache__", ".git", "dist", "build"):
+        name = child.name
+        if name.startswith(".") or name.startswith("_") or name in _MAP_SKIP_NAMES:
             continue
         if child.is_dir():
-            lines.append(f"- `{child.name}/` — ")
-        elif child.suffix in (".py", ".ts", ".js", ".json", ".toml", ".yaml", ".yml"):
-            lines.append(f"- `{child.name}` — ")
-    return "\n".join(lines) if lines else "<!-- Add module descriptions -->"
+            lines.append(f"- `{name}/` — {_package_summary(child)}")
+            lines.extend(_submodule_lines(child))
+        elif child.suffix in _MAP_FILE_SUFFIXES:
+            summary = (
+                _module_docstring_summary(child) if child.suffix == ".py" else None
+            )
+            lines.append(f"- `{name}` — {summary or _DESCRIBE_PLACEHOLDER}")
+    return "\n".join(lines) if lines else f"- {_DESCRIBE_PLACEHOLDER}"
 
 
 def _detect_commands(sr: ScanResult) -> str:
@@ -422,6 +480,45 @@ def _detect_coverage_command(sr: ScanResult) -> str:
         pm = _detect_package_manager(sr)
         return f"{pm} run test -- --coverage"
     return "# configure coverage command"
+
+
+def _find_conftest(sr: ScanResult) -> str | None:
+    """Repo-relative path to a ``conftest.py`` if one exists, else None.
+
+    Checks the detected test dir and the root first, then a bounded search,
+    skipping hidden/vendored trees. Returns None when none exists so generated
+    docs never assert a conftest that isn't there.
+    """
+    root = sr.project_root
+    if not root.is_dir():
+        return None
+    test_dir = _detect_test_dir(sr)
+    for candidate in (root / test_dir / "conftest.py", root / "conftest.py"):
+        if candidate.is_file():
+            return str(candidate.relative_to(root))
+    for found in sorted(root.rglob("conftest.py")):
+        parts = found.relative_to(root).parts
+        if any(p.startswith(".") or p in _MAP_SKIP_NAMES for p in parts):
+            continue
+        return str(found.relative_to(root))
+    return None
+
+
+def _detect_test_structure(sr: ScanResult) -> str:
+    """Bullet list for the testing doc's 'Test Structure' section.
+
+    The conftest bullet is emitted only when a conftest.py actually exists —
+    the doc must not claim fixtures live in a file the project doesn't have.
+    """
+    test_dir = _detect_test_dir(sr)
+    lines = [
+        f"- Tests live in `{test_dir}/`",
+        "- Test files follow `test_{module_name}.py` naming",
+    ]
+    conftest = _find_conftest(sr)
+    if conftest is not None:
+        lines.append(f"- Fixtures and shared helpers in `{conftest}`")
+    return "\n".join(lines)
 
 
 def _detect_conventions_summary(sr: ScanResult) -> str:
