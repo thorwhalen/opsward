@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>opsward.generate &mdash; opsward 0.0.7 documentation</title>
+  <title>opsward.generate &mdash; opsward 0.0.8 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,9 +14,9 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=bbaf98b3"></script>
-      <script src="../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/documentation_options.js?v=53b53b71"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
       <script src="../../_static/copybutton.js?v=f281be69"></script>
@@ -50,6 +50,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/__main__.html">opsward.__main__</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/base.html">opsward.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/cli.html">opsward.cli</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/data.html">opsward.data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/data/templates.html">opsward.data.templates</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/generate.html">opsward.generate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/maintain.html">opsward.maintain</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/recommend.html">opsward.recommend</a></li>
@@ -88,12 +90,20 @@
 <span class="sd">Never overwrites existing files (overwrite_policy=&#39;skip&#39; by default).</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="kn">import</span><span class="w"> </span><span class="nn">ast</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">importlib.resources</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">string</span><span class="w"> </span><span class="kn">import</span> <span class="n">Template</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">opsward.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">GeneratedFile</span><span class="p">,</span> <span class="n">ProjectType</span><span class="p">,</span> <span class="n">ScanResult</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">opsward.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_text_safe</span>
+
+<span class="c1"># Names never shown in a module map (VCS, caches, build/vendor output)</span>
+<span class="n">_MAP_SKIP_NAMES</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="s2">&quot;node_modules&quot;</span><span class="p">,</span> <span class="s2">&quot;__pycache__&quot;</span><span class="p">,</span> <span class="s2">&quot;.git&quot;</span><span class="p">,</span> <span class="s2">&quot;dist&quot;</span><span class="p">,</span> <span class="s2">&quot;build&quot;</span><span class="p">})</span>
+<span class="c1"># Top-level files worth listing in a module map (config + source)</span>
+<span class="n">_MAP_FILE_SUFFIXES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;.py&quot;</span><span class="p">,</span> <span class="s2">&quot;.ts&quot;</span><span class="p">,</span> <span class="s2">&quot;.js&quot;</span><span class="p">,</span> <span class="s2">&quot;.json&quot;</span><span class="p">,</span> <span class="s2">&quot;.toml&quot;</span><span class="p">,</span> <span class="s2">&quot;.yaml&quot;</span><span class="p">,</span> <span class="s2">&quot;.yml&quot;</span><span class="p">)</span>
+<span class="c1"># Stand-in when no description can be honestly derived (user fills it in)</span>
+<span class="n">_DESCRIBE_PLACEHOLDER</span> <span class="o">=</span> <span class="s2">&quot;&lt;!-- describe --&gt;&quot;</span>
 
 <span class="c1"># Skills that opsward installs — each maps to shared/&lt;name&gt;/SKILL.md template</span>
 <span class="n">_SKILL_NAMES</span> <span class="o">=</span> <span class="p">(</span>
@@ -311,6 +321,7 @@
         <span class="s2">&quot;test_framework&quot;</span><span class="p">:</span> <span class="n">_detect_test_framework</span><span class="p">(</span><span class="n">sr</span><span class="p">),</span>
         <span class="s2">&quot;test_command&quot;</span><span class="p">:</span> <span class="n">_detect_test_command</span><span class="p">(</span><span class="n">sr</span><span class="p">),</span>
         <span class="s2">&quot;test_dir&quot;</span><span class="p">:</span> <span class="n">_detect_test_dir</span><span class="p">(</span><span class="n">sr</span><span class="p">),</span>
+        <span class="s2">&quot;test_structure&quot;</span><span class="p">:</span> <span class="n">_detect_test_structure</span><span class="p">(</span><span class="n">sr</span><span class="p">),</span>
         <span class="s2">&quot;coverage_command&quot;</span><span class="p">:</span> <span class="n">_detect_coverage_command</span><span class="p">(</span><span class="n">sr</span><span class="p">),</span>
         <span class="s2">&quot;additional_docs_table&quot;</span><span class="p">:</span> <span class="n">_build_additional_docs_table</span><span class="p">(</span><span class="n">sr</span><span class="p">),</span>
         <span class="s2">&quot;glossary_entries&quot;</span><span class="p">:</span> <span class="s2">&quot;| &lt;!-- Add terms here --&gt; | |&quot;</span><span class="p">,</span>
@@ -385,21 +396,70 @@
     <span class="k">return</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span>
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_module_docstring_summary</span><span class="p">(</span><span class="n">py_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;First line of a Python module&#39;s top-level docstring, or None.</span>
+
+<span class="sd">    Descriptions are *derived*, never guessed: if a module has no docstring (or</span>
+<span class="sd">    fails to parse) we return None so the caller can emit a fill-in placeholder</span>
+<span class="sd">    rather than assert something unverified.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">tree</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">read_text_safe</span><span class="p">(</span><span class="n">py_file</span><span class="p">))</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">SyntaxError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">doc</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">get_docstring</span><span class="p">(</span><span class="n">tree</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">doc</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">first</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">first</span> <span class="ow">or</span> <span class="kc">None</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_package_summary</span><span class="p">(</span><span class="n">directory</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Package description from its ``__init__.py`` docstring, else a placeholder.&quot;&quot;&quot;</span>
+    <span class="n">init</span> <span class="o">=</span> <span class="n">directory</span> <span class="o">/</span> <span class="s2">&quot;__init__.py&quot;</span>
+    <span class="k">if</span> <span class="n">init</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+        <span class="n">summary</span> <span class="o">=</span> <span class="n">_module_docstring_summary</span><span class="p">(</span><span class="n">init</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">summary</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">summary</span>
+    <span class="k">return</span> <span class="n">_DESCRIBE_PLACEHOLDER</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_submodule_lines</span><span class="p">(</span><span class="n">package_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Nested bullets for a Python package&#39;s direct ``.py`` submodules (one level).</span>
+
+<span class="sd">    Only descends into real packages (those with ``__init__.py``). Private and</span>
+<span class="sd">    dunder modules (``_x.py``, ``__init__.py``, ``__main__.py``) are skipped —</span>
+<span class="sd">    ``__init__``&#39;s docstring is already the package&#39;s own description.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">package_dir</span> <span class="o">/</span> <span class="s2">&quot;__init__.py&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+        <span class="k">return</span> <span class="p">[]</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">sub</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">package_dir</span><span class="o">.</span><span class="n">iterdir</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">sub</span><span class="o">.</span><span class="n">suffix</span> <span class="o">!=</span> <span class="s2">&quot;.py&quot;</span> <span class="ow">or</span> <span class="n">sub</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">):</span>
+            <span class="k">continue</span>
+        <span class="n">summary</span> <span class="o">=</span> <span class="n">_module_docstring_summary</span><span class="p">(</span><span class="n">sub</span><span class="p">)</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  - `</span><span class="si">{</span><span class="n">sub</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">` — </span><span class="si">{</span><span class="n">summary</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">_DESCRIBE_PLACEHOLDER</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">lines</span>
+
+
 <span class="k">def</span><span class="w"> </span><span class="nf">_detect_module_map</span><span class="p">(</span><span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="n">root</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">root</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
-        <span class="k">return</span> <span class="s2">&quot;&lt;!-- Add module descriptions --&gt;&quot;</span>
-    <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;- </span><span class="si">{</span><span class="n">_DESCRIBE_PLACEHOLDER</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="n">lines</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">iterdir</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">child</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">):</span>
-            <span class="k">continue</span>
-        <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;node_modules&quot;</span><span class="p">,</span> <span class="s2">&quot;__pycache__&quot;</span><span class="p">,</span> <span class="s2">&quot;.git&quot;</span><span class="p">,</span> <span class="s2">&quot;dist&quot;</span><span class="p">,</span> <span class="s2">&quot;build&quot;</span><span class="p">):</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">child</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">_MAP_SKIP_NAMES</span><span class="p">:</span>
             <span class="k">continue</span>
         <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
-            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- `</span><span class="si">{</span><span class="n">child</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">/` — &quot;</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">suffix</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;.py&quot;</span><span class="p">,</span> <span class="s2">&quot;.ts&quot;</span><span class="p">,</span> <span class="s2">&quot;.js&quot;</span><span class="p">,</span> <span class="s2">&quot;.json&quot;</span><span class="p">,</span> <span class="s2">&quot;.toml&quot;</span><span class="p">,</span> <span class="s2">&quot;.yaml&quot;</span><span class="p">,</span> <span class="s2">&quot;.yml&quot;</span><span class="p">):</span>
-            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- `</span><span class="si">{</span><span class="n">child</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">` — &quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="k">if</span> <span class="n">lines</span> <span class="k">else</span> <span class="s2">&quot;&lt;!-- Add module descriptions --&gt;&quot;</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- `</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">/` — </span><span class="si">{</span><span class="n">_package_summary</span><span class="p">(</span><span class="n">child</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">_submodule_lines</span><span class="p">(</span><span class="n">child</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">suffix</span> <span class="ow">in</span> <span class="n">_MAP_FILE_SUFFIXES</span><span class="p">:</span>
+            <span class="n">summary</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">_module_docstring_summary</span><span class="p">(</span><span class="n">child</span><span class="p">)</span> <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s2">&quot;.py&quot;</span> <span class="k">else</span> <span class="kc">None</span>
+            <span class="p">)</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- `</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">` — </span><span class="si">{</span><span class="n">summary</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">_DESCRIBE_PLACEHOLDER</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="k">if</span> <span class="n">lines</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;- </span><span class="si">{</span><span class="n">_DESCRIBE_PLACEHOLDER</span><span class="si">}</span><span class="s2">&quot;</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_detect_commands</span><span class="p">(</span><span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -515,6 +575,45 @@
     <span class="k">return</span> <span class="s2">&quot;# configure coverage command&quot;</span>
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_find_conftest</span><span class="p">(</span><span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Repo-relative path to a ``conftest.py`` if one exists, else None.</span>
+
+<span class="sd">    Checks the detected test dir and the root first, then a bounded search,</span>
+<span class="sd">    skipping hidden/vendored trees. Returns None when none exists so generated</span>
+<span class="sd">    docs never assert a conftest that isn&#39;t there.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">root</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    <span class="n">test_dir</span> <span class="o">=</span> <span class="n">_detect_test_dir</span><span class="p">(</span><span class="n">sr</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="n">test_dir</span> <span class="o">/</span> <span class="s2">&quot;conftest.py&quot;</span><span class="p">,</span> <span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;conftest.py&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">candidate</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+            <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">candidate</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">root</span><span class="p">))</span>
+    <span class="k">for</span> <span class="n">found</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span><span class="s2">&quot;conftest.py&quot;</span><span class="p">)):</span>
+        <span class="n">parts</span> <span class="o">=</span> <span class="n">found</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">root</span><span class="p">)</span><span class="o">.</span><span class="n">parts</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">_MAP_SKIP_NAMES</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parts</span><span class="p">):</span>
+            <span class="k">continue</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">found</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">root</span><span class="p">))</span>
+    <span class="k">return</span> <span class="kc">None</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_detect_test_structure</span><span class="p">(</span><span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Bullet list for the testing doc&#39;s &#39;Test Structure&#39; section.</span>
+
+<span class="sd">    The conftest bullet is emitted only when a conftest.py actually exists —</span>
+<span class="sd">    the doc must not claim fixtures live in a file the project doesn&#39;t have.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">test_dir</span> <span class="o">=</span> <span class="n">_detect_test_dir</span><span class="p">(</span><span class="n">sr</span><span class="p">)</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="sa">f</span><span class="s2">&quot;- Tests live in `</span><span class="si">{</span><span class="n">test_dir</span><span class="si">}</span><span class="s2">/`&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;- Test files follow `test_</span><span class="si">{module_name}</span><span class="s2">.py` naming&quot;</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="n">conftest</span> <span class="o">=</span> <span class="n">_find_conftest</span><span class="p">(</span><span class="n">sr</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">conftest</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- Fixtures and shared helpers in `</span><span class="si">{</span><span class="n">conftest</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+
+
 <span class="k">def</span><span class="w"> </span><span class="nf">_detect_conventions_summary</span><span class="p">(</span><span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="n">parts</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">formatter</span> <span class="o">=</span> <span class="n">_detect_formatter</span><span class="p">(</span><span class="n">sr</span><span class="p">)</span>
@@ -568,11 +667,15 @@
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Build a starter hooks.json with common hook patterns.&quot;&quot;&quot;</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 
+    <span class="c1"># NOTE: `matcher` must be a STRING regex matching tool names (e.g. &quot;Edit|Write&quot;),</span>
+    <span class="c1"># NOT a dict. Claude Code does not honor a dict matcher, so the hook would</span>
+    <span class="c1"># silently never fire. The command bodies below are intentionally no-op</span>
+    <span class="c1"># placeholders for the user to customize.</span>
     <span class="n">hooks</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s2">&quot;hooks&quot;</span><span class="p">:</span> <span class="p">{</span>
             <span class="s2">&quot;PostToolUse&quot;</span><span class="p">:</span> <span class="p">[</span>
                 <span class="p">{</span>
-                    <span class="s2">&quot;matcher&quot;</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;tool_name&quot;</span><span class="p">:</span> <span class="s2">&quot;Edit|Write&quot;</span><span class="p">},</span>
+                    <span class="s2">&quot;matcher&quot;</span><span class="p">:</span> <span class="s2">&quot;Edit|Write|MultiEdit&quot;</span><span class="p">,</span>
                     <span class="s2">&quot;hooks&quot;</span><span class="p">:</span> <span class="p">[</span>
                         <span class="p">{</span>
                             <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;command&quot;</span><span class="p">,</span>
@@ -583,10 +686,11 @@
             <span class="p">],</span>
             <span class="s2">&quot;SessionStart&quot;</span><span class="p">:</span> <span class="p">[</span>
                 <span class="p">{</span>
+                    <span class="s2">&quot;matcher&quot;</span><span class="p">:</span> <span class="s2">&quot;startup&quot;</span><span class="p">,</span>
                     <span class="s2">&quot;hooks&quot;</span><span class="p">:</span> <span class="p">[</span>
                         <span class="p">{</span>
                             <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;command&quot;</span><span class="p">,</span>
-                            <span class="s2">&quot;command&quot;</span><span class="p">:</span> <span class="s2">&quot;echo </span><span class="se">\&quot;</span><span class="s2">Session started in $(pwd) on $(date +%Y-%m-</span><span class="si">%d</span><span class="s2">)</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">,</span>
+                            <span class="s2">&quot;command&quot;</span><span class="p">:</span> <span class="s1">&#39;echo &quot;Session started in $(pwd) on $(date +%Y-%m-</span><span class="si">%d</span><span class="s1">)&quot;&#39;</span><span class="p">,</span>
                         <span class="p">}</span>
                     <span class="p">],</span>
                 <span class="p">}</span>
@@ -597,12 +701,18 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_has_deploy_artifacts</span><span class="p">(</span><span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;True only for genuine deployment signals.</span>
+
+<span class="sd">    Note: the presence of ``.github/workflows/`` is deliberately NOT a signal —</span>
+<span class="sd">    almost every library has CI workflows (test/lint/publish) without being a</span>
+<span class="sd">    deployed application. Treating CI as deployment would mis-fire on essentially</span>
+<span class="sd">    every project with CI and contradict the minimal-generation principle.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">root</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span>
     <span class="k">return</span> <span class="p">(</span>
         <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;Dockerfile&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
         <span class="ow">or</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;docker-compose.yml&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
         <span class="ow">or</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;docker-compose.yaml&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
-        <span class="ow">or</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;.github&quot;</span> <span class="o">/</span> <span class="s2">&quot;workflows&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span>
         <span class="ow">or</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;Procfile&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
         <span class="ow">or</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;fly.toml&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
         <span class="ow">or</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;render.yaml&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
@@ -616,7 +726,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright NO COPYRIGHT.</p>
+    <p></p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

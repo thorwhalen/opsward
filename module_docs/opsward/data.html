@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>opsward.__main__ &mdash; opsward 0.0.8 documentation</title>
+  <title>opsward.data &mdash; opsward 0.0.8 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -24,8 +24,8 @@
     <script src="../../_static/js/theme.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <link rel="next" title="opsward.base" href="base.html" />
-    <link rel="prev" title="opsward" href="../opsward.html" /> 
+    <link rel="next" title="opsward.data.templates" href="data/templates.html" />
+    <link rel="prev" title="opsward.cli" href="cli.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -50,10 +50,10 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../opsward.html">opsward</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">opsward.__main__</a></li>
+<li class="toctree-l1"><a class="reference internal" href="__main__.html">opsward.__main__</a></li>
 <li class="toctree-l1"><a class="reference internal" href="base.html">opsward.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cli.html">opsward.cli</a></li>
-<li class="toctree-l1"><a class="reference internal" href="data.html">opsward.data</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">opsward.data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="data/templates.html">opsward.data.templates</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generate.html">opsward.generate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="maintain.html">opsward.maintain</a></li>
@@ -77,9 +77,9 @@
           <div role="navigation" aria-label="Page navigation">
   <ul class="wy-breadcrumbs">
       <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">opsward.__main__</li>
+      <li class="breadcrumb-item active">opsward.data</li>
       <li class="wy-breadcrumbs-aside">
-            <a href="../../_sources/module_docs/opsward/__main__.rst.txt" rel="nofollow"> View page source</a>
+            <a href="../../_sources/module_docs/opsward/data.rst.txt" rel="nofollow"> View page source</a>
       </li>
   </ul>
   <hr/>
@@ -87,17 +87,20 @@
           <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
            <div itemprop="articleBody">
              
-  <section id="module-opsward.__main__">
-<span id="opsward-main"></span><h1>opsward.__main__<a class="headerlink" href="#module-opsward.__main__" title="Link to this heading"></a></h1>
-<p>CLI entry point: python -m opsward.</p>
+  <section id="module-opsward.data">
+<span id="opsward-data"></span><h1>opsward.data<a class="headerlink" href="#module-opsward.data" title="Link to this heading"></a></h1>
+<p>Bundled package resources for opsward, accessed via <code class="docutils literal notranslate"><span class="pre">importlib.resources.files(&quot;opsward.data&quot;)</span></code>.</p>
+<p>Holds the generation templates (under <code class="docutils literal notranslate"><span class="pre">templates/</span></code>) and any other static
+assets the generator installs into target projects. Never hardcode filesystem
+paths to these resources – resolve them through <code class="docutils literal notranslate"><span class="pre">importlib.resources</span></code>.</p>
 </section>
 
 
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="../opsward.html" class="btn btn-neutral float-left" title="opsward" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
-        <a href="base.html" class="btn btn-neutral float-right" title="opsward.base" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+        <a href="cli.html" class="btn btn-neutral float-left" title="opsward.cli" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="data/templates.html" class="btn btn-neutral float-right" title="opsward.data.templates" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>

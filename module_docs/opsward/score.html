@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>opsward.score &mdash; opsward 0.0.7 documentation</title>
+  <title>opsward.score &mdash; opsward 0.0.8 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -15,9 +15,9 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=bbaf98b3"></script>
-      <script src="../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/documentation_options.js?v=53b53b71"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
       <script src="../../_static/copybutton.js?v=f281be69"></script>
@@ -53,12 +53,15 @@
 <li class="toctree-l1"><a class="reference internal" href="__main__.html">opsward.__main__</a></li>
 <li class="toctree-l1"><a class="reference internal" href="base.html">opsward.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cli.html">opsward.cli</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data.html">opsward.data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data/templates.html">opsward.data.templates</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generate.html">opsward.generate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="maintain.html">opsward.maintain</a></li>
 <li class="toctree-l1"><a class="reference internal" href="recommend.html">opsward.recommend</a></li>
 <li class="toctree-l1"><a class="reference internal" href="scan.html">opsward.scan</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">opsward.score</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#opsward.score.diagnose"><code class="docutils literal notranslate"><span class="pre">diagnose()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#opsward.score.validate_hooks_config"><code class="docutils literal notranslate"><span class="pre">validate_hooks_config()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#opsward.score.validate_skill_spec"><code class="docutils literal notranslate"><span class="pre">validate_skill_spec()</span></code></a></li>
 </ul>
 </li>
@@ -107,6 +110,27 @@
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="opsward.score.validate_hooks_config">
+<span class="sig-prename descclassname"><span class="pre">opsward.score.</span></span><span class="sig-name descname"><span class="pre">validate_hooks_config</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cfg</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">object</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/opsward/score.html#validate_hooks_config"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.score.validate_hooks_config" title="Link to this definition"></a></dt>
+<dd><p>Validate a hooks config against Claude Code’s expected shape.</p>
+<p>Returns a list of human-readable violation strings (empty = valid). Catches
+the silent-failure traps: a non-string <code class="docutils literal notranslate"><span class="pre">matcher</span></code>, an unknown event name,
+or an entry with no runnable <code class="docutils literal notranslate"><span class="pre">command</span></code> hook — none of which Claude Code
+honors, so the hook never fires even though the file “looks” configured.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">validate_hooks_config</span><span class="p">({</span><span class="s1">&#39;hooks&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;PostToolUse&#39;</span><span class="p">:</span> <span class="p">[</span>
+<span class="gp">... </span>    <span class="p">{</span><span class="s1">&#39;matcher&#39;</span><span class="p">:</span> <span class="s1">&#39;Edit&#39;</span><span class="p">,</span> <span class="s1">&#39;hooks&#39;</span><span class="p">:</span> <span class="p">[{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;command&#39;</span><span class="p">,</span> <span class="s1">&#39;command&#39;</span><span class="p">:</span> <span class="s1">&#39;x&#39;</span><span class="p">}]}]}})</span>
+<span class="go">[]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">validate_hooks_config</span><span class="p">({</span><span class="s1">&#39;pre_commit&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;ruff&#39;</span><span class="p">]})</span>
+<span class="go">[&#39;no top-level `hooks` key&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s1">&#39;matcher&#39;</span> <span class="ow">in</span> <span class="n">validate_hooks_config</span><span class="p">({</span><span class="s1">&#39;hooks&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;PostToolUse&#39;</span><span class="p">:</span> <span class="p">[</span>
+<span class="gp">... </span>    <span class="p">{</span><span class="s1">&#39;matcher&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;tool_name&#39;</span><span class="p">:</span> <span class="s1">&#39;Edit&#39;</span><span class="p">},</span> <span class="s1">&#39;hooks&#39;</span><span class="p">:</span> <span class="p">[</span>
+<span class="gp">... </span>        <span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;command&#39;</span><span class="p">,</span> <span class="s1">&#39;command&#39;</span><span class="p">:</span> <span class="s1">&#39;x&#39;</span><span class="p">}]}]}})[</span><span class="mi">0</span><span class="p">]</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="opsward.score.validate_skill_spec">
 <span class="sig-prename descclassname"><span class="pre">opsward.score.</span></span><span class="sig-name descname"><span class="pre">validate_skill_spec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skill</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="base.html#opsward.base.SkillInfo" title="opsward.base.SkillInfo"><span class="pre">SkillInfo</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/opsward/score.html#validate_skill_spec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.score.validate_skill_spec" title="Link to this definition"></a></dt>
 <dd><p>Validate a SkillInfo against the agentskills.io specification.</p>
@@ -134,7 +158,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright NO COPYRIGHT.</p>
+    <p></p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

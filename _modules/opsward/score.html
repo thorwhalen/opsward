@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>opsward.score &mdash; opsward 0.0.7 documentation</title>
+  <title>opsward.score &mdash; opsward 0.0.8 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,9 +14,9 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=bbaf98b3"></script>
-      <script src="../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/documentation_options.js?v=53b53b71"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
       <script src="../../_static/copybutton.js?v=f281be69"></script>
@@ -50,6 +50,8 @@
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/__main__.html">opsward.__main__</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/base.html">opsward.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/cli.html">opsward.cli</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/data.html">opsward.data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/data/templates.html">opsward.data.templates</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/generate.html">opsward.generate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/maintain.html">opsward.maintain</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/recommend.html">opsward.recommend</a></li>
@@ -220,16 +222,30 @@
     <span class="n">found</span> <span class="o">=</span> <span class="p">{</span><span class="n">kw</span> <span class="k">for</span> <span class="n">kw</span> <span class="ow">in</span> <span class="n">cmd_keywords</span> <span class="k">if</span> <span class="n">kw</span> <span class="ow">in</span> <span class="n">lower</span><span class="p">}</span>
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">code_blocks</span><span class="p">:</span>
-        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Commands: no code blocks found&quot;</span><span class="p">)</span>
+        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="s2">&quot;Commands: no code blocks found &quot;</span>
+            <span class="s2">&quot;→ add a fenced code block with the build, test, and run commands&quot;</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="mi">0</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">found</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">5</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">_CMD_MAX</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">found</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Commands: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">found</span><span class="p">)</span><span class="si">}</span><span class="s2"> command keyword(s) found &quot;</span>
+            <span class="s2">&quot;→ document the rest (build, test, lint, run, install) for full credit&quot;</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="mi">13</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">found</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Commands: only </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">found</span><span class="p">)</span><span class="si">}</span><span class="s2"> command keyword(s) found &quot;</span>
+            <span class="s2">&quot;→ document build, test, lint, run, and install commands&quot;</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="mi">7</span>
-    <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Commands: code blocks present but no build/test/lint keywords&quot;</span><span class="p">)</span>
+    <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+        <span class="s2">&quot;Commands: code blocks present but no build/test/lint keywords &quot;</span>
+        <span class="s2">&quot;→ label the commands (build, test, run) so an agent knows what they do&quot;</span>
+    <span class="p">)</span>
     <span class="k">return</span> <span class="mi">3</span>
 
 
@@ -239,7 +255,10 @@
         <span class="n">content</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;architecture&quot;</span><span class="p">,</span> <span class="s2">&quot;module map&quot;</span><span class="p">,</span> <span class="s2">&quot;structure&quot;</span><span class="p">,</span> <span class="s2">&quot;project layout&quot;</span><span class="p">)</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">section</span><span class="p">:</span>
-        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Architecture: no architecture/structure section found&quot;</span><span class="p">)</span>
+        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="s2">&quot;Architecture: no architecture/structure section found &quot;</span>
+            <span class="s2">&quot;→ add a &#39;## Architecture&#39; section mapping key modules to one-line descriptions&quot;</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="mi">0</span>
 
     <span class="c1"># Check for descriptions alongside paths</span>
@@ -247,9 +266,17 @@
     <span class="n">has_paths</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s2">&quot;\w+/\w+&quot;</span><span class="p">,</span> <span class="n">section</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="n">has_descriptions</span> <span class="ow">and</span> <span class="n">has_paths</span><span class="p">:</span>
-        <span class="k">return</span> <span class="mi">16</span>
+        <span class="k">return</span> <span class="n">_ARCH_MAX</span>
     <span class="k">if</span> <span class="n">has_paths</span><span class="p">:</span>
+        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="s2">&quot;Architecture: paths listed without descriptions &quot;</span>
+            <span class="s2">&quot;→ add a one-line description after each module path (e.g. `path/ — what it does`)&quot;</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="mi">10</span>
+    <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+        <span class="s2">&quot;Architecture: section has no module paths &quot;</span>
+        <span class="s2">&quot;→ list the key modules by path with a one-line description each&quot;</span>
+    <span class="p">)</span>
     <span class="k">return</span> <span class="mi">5</span>
 
 
@@ -259,7 +286,10 @@
         <span class="n">content</span><span class="p">,</span> <span class="p">(</span><span class="s2">&quot;conventions&quot;</span><span class="p">,</span> <span class="s2">&quot;style&quot;</span><span class="p">,</span> <span class="s2">&quot;patterns&quot;</span><span class="p">,</span> <span class="s2">&quot;coding&quot;</span><span class="p">,</span> <span class="s2">&quot;rules&quot;</span><span class="p">)</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">section</span><span class="p">:</span>
-        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Conventions: no conventions/style section found&quot;</span><span class="p">)</span>
+        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="s2">&quot;Conventions: no conventions/style section found &quot;</span>
+            <span class="s2">&quot;→ add a &#39;## Conventions&#39; section documenting non-obvious patterns&quot;</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="mi">0</span>
 
     <span class="c1"># Check for specificity indicators</span>
@@ -276,7 +306,15 @@
     <span class="k">if</span> <span class="n">specific_indicators</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">_CONV_MAX</span>
     <span class="k">if</span> <span class="n">specific_indicators</span> <span class="o">&gt;=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="s2">&quot;Conventions: low specificity &quot;</span>
+            <span class="s2">&quot;→ name the tools (e.g. ruff), cite file extensions, and show code snippets&quot;</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="mi">9</span>
+    <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+        <span class="s2">&quot;Conventions: section is vague &quot;</span>
+        <span class="s2">&quot;→ replace generic advice with concrete patterns: tool names, file paths, code examples&quot;</span>
+    <span class="p">)</span>
     <span class="k">return</span> <span class="mi">5</span>
 
 
@@ -289,11 +327,21 @@
     <span class="k">if</span> <span class="n">line_count</span> <span class="o">&lt;=</span> <span class="mi">80</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">_CONCISE_MAX</span>
     <span class="k">if</span> <span class="n">line_count</span> <span class="o">&lt;=</span> <span class="mi">200</span><span class="p">:</span>
+        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Conciseness: </span><span class="si">{</span><span class="n">line_count</span><span class="si">}</span><span class="s2"> lines — healthy, but trimming &quot;</span>
+            <span class="s2">&quot;→ move reference detail into docs/ to get under 80 lines for full marks&quot;</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="mi">11</span>
     <span class="k">if</span> <span class="n">line_count</span> <span class="o">&lt;=</span> <span class="mi">500</span><span class="p">:</span>
-        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Conciseness: </span><span class="si">{</span><span class="n">line_count</span><span class="si">}</span><span class="s2"> lines — consider trimming&quot;</span><span class="p">)</span>
+        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Conciseness: </span><span class="si">{</span><span class="n">line_count</span><span class="si">}</span><span class="s2"> lines &quot;</span>
+            <span class="s2">&quot;→ move detail into docs/ and link it, keeping CLAUDE.md scannable&quot;</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="mi">6</span>
-    <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Conciseness: </span><span class="si">{</span><span class="n">line_count</span><span class="si">}</span><span class="s2"> lines — likely too long&quot;</span><span class="p">)</span>
+    <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;Conciseness: </span><span class="si">{</span><span class="n">line_count</span><span class="si">}</span><span class="s2"> lines — likely too long &quot;</span>
+        <span class="s2">&quot;→ extract sections into docs/ and reference them from a short CLAUDE.md&quot;</span>
+    <span class="p">)</span>
     <span class="k">return</span> <span class="mi">2</span>
 
 
@@ -304,16 +352,17 @@
         <span class="c1"># No paths to validate — can&#39;t penalize, give moderate score</span>
         <span class="k">return</span> <span class="mi">10</span>
 
-    <span class="n">existing</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">paths</span> <span class="k">if</span> <span class="p">(</span><span class="n">project_root</span> <span class="o">/</span> <span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">())</span>
-    <span class="n">ratio</span> <span class="o">=</span> <span class="n">existing</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">paths</span><span class="p">)</span> <span class="k">if</span> <span class="n">paths</span> <span class="k">else</span> <span class="mf">1.0</span>
+    <span class="n">broken</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">paths</span> <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">project_root</span> <span class="o">/</span> <span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()]</span>
+    <span class="n">ratio</span> <span class="o">=</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">paths</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">broken</span><span class="p">))</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">paths</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">ratio</span> <span class="o">&lt;</span> <span class="mf">0.5</span><span class="p">:</span>
-        <span class="n">broken</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">paths</span> <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">project_root</span> <span class="o">/</span> <span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()]</span>
-        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Currency: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">broken</span><span class="p">)</span><span class="si">}</span><span class="s2"> broken path reference(s)&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="mi">3</span>
-    <span class="k">if</span> <span class="n">ratio</span> <span class="o">&lt;</span> <span class="mf">1.0</span><span class="p">:</span>
-        <span class="k">return</span> <span class="mi">9</span>
-    <span class="k">return</span> <span class="n">_CURRENCY_MAX</span>
+    <span class="k">if</span> <span class="n">ratio</span> <span class="o">==</span> <span class="mf">1.0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_CURRENCY_MAX</span>
+
+    <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;Currency: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">broken</span><span class="p">)</span><span class="si">}</span><span class="s2"> broken path reference(s) &quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">broken</span><span class="p">[:</span><span class="mi">3</span><span class="p">])</span><span class="si">}</span><span class="s2">) → update or remove the stale paths&quot;</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="mi">3</span> <span class="k">if</span> <span class="n">ratio</span> <span class="o">&lt;</span> <span class="mf">0.5</span> <span class="k">else</span> <span class="mi">9</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_dim_actionability</span><span class="p">(</span><span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">notes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
@@ -341,15 +390,25 @@
             <span class="n">vague</span> <span class="o">+=</span> <span class="mi">1</span>
 
     <span class="k">if</span> <span class="n">actionable</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Actionability: no imperative instructions found&quot;</span><span class="p">)</span>
+        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="s2">&quot;Actionability: no imperative instructions found &quot;</span>
+            <span class="s2">&quot;→ phrase guidance as commands (use/run/add/avoid/never/always …)&quot;</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="mi">3</span>
 
     <span class="n">ratio</span> <span class="o">=</span> <span class="n">actionable</span> <span class="o">/</span> <span class="p">(</span><span class="n">actionable</span> <span class="o">+</span> <span class="n">vague</span><span class="p">)</span> <span class="k">if</span> <span class="p">(</span><span class="n">actionable</span> <span class="o">+</span> <span class="n">vague</span><span class="p">)</span> <span class="k">else</span> <span class="mf">0.5</span>
     <span class="k">if</span> <span class="n">ratio</span> <span class="o">&gt;=</span> <span class="mf">0.8</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">_ACTION_MAX</span>
     <span class="k">if</span> <span class="n">ratio</span> <span class="o">&gt;=</span> <span class="mf">0.5</span><span class="p">:</span>
+        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="s2">&quot;Actionability: some vague instructions &quot;</span>
+            <span class="s2">&quot;→ replace hedges (appropriate, as needed, consider) with concrete directives&quot;</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="mi">10</span>
-    <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Actionability: many vague instructions&quot;</span><span class="p">)</span>
+    <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+        <span class="s2">&quot;Actionability: many vague instructions &quot;</span>
+        <span class="s2">&quot;→ replace hedges (appropriate, as needed, consider) with concrete directives&quot;</span>
+    <span class="p">)</span>
     <span class="k">return</span> <span class="mi">5</span>
 
 
@@ -386,15 +445,25 @@
         <span class="n">content_pts</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="mi">20</span> <span class="o">*</span> <span class="n">content_ratio</span><span class="p">)</span>
         <span class="n">total</span> <span class="o">+=</span> <span class="n">content_pts</span>
         <span class="k">if</span> <span class="n">content_ratio</span> <span class="o">&lt;</span> <span class="mf">1.0</span><span class="p">:</span>
-            <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">sr</span><span class="o">.</span><span class="n">docs</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">non_empty</span><span class="si">}</span><span class="s2"> doc(s) appear to be empty stubs&quot;</span><span class="p">)</span>
+            <span class="n">stub_names</span> <span class="o">=</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">sr</span><span class="o">.</span><span class="n">docs</span> <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">size_bytes</span> <span class="o">&lt;=</span> <span class="mi">50</span><span class="p">)</span>
+            <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">sr</span><span class="o">.</span><span class="n">docs</span><span class="p">)</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">non_empty</span><span class="si">}</span><span class="s2"> doc(s) appear to be empty stubs &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">stub_names</span><span class="si">}</span><span class="s2">) → flesh them out with real content or remove them&quot;</span>
+            <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;No documentation files found&quot;</span><span class="p">)</span>
+        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="s2">&quot;No documentation files found &quot;</span>
+            <span class="s2">&quot;→ run `opsward generate` to scaffold architecture/conventions docs&quot;</span>
+        <span class="p">)</span>
 
     <span class="c1"># Cross-references (15 pts) — does CLAUDE.md mention docs_guide?</span>
     <span class="k">if</span> <span class="n">sr</span><span class="o">.</span><span class="n">claude_md_content</span> <span class="ow">and</span> <span class="s2">&quot;docs_guide&quot;</span> <span class="ow">in</span> <span class="n">sr</span><span class="o">.</span><span class="n">claude_md_content</span><span class="p">:</span>
         <span class="n">total</span> <span class="o">+=</span> <span class="mi">15</span>
     <span class="k">elif</span> <span class="n">sr</span><span class="o">.</span><span class="n">claude_md_content</span><span class="p">:</span>
-        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;CLAUDE.md does not reference docs_guide.md&quot;</span><span class="p">)</span>
+        <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+            <span class="s2">&quot;CLAUDE.md does not reference docs_guide.md &quot;</span>
+            <span class="s2">&quot;→ link docs_guide.md from CLAUDE.md so agents discover the docs&quot;</span>
+        <span class="p">)</span>
 
     <span class="c1"># Freshness (10 pts) — we can&#39;t check git dates in a pure function,</span>
     <span class="c1"># so award if docs exist at all</span>
@@ -421,33 +490,43 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">ComponentScore</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Skills&quot;</span><span class="p">,</span> <span class="n">score</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">notes</span><span class="o">=</span><span class="n">notes</span><span class="p">)</span>
 
-    <span class="n">per_skill</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">//</span> <span class="nb">len</span><span class="p">(</span><span class="n">sr</span><span class="o">.</span><span class="n">skills</span><span class="p">)</span>
-    <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="c1"># Each skill earns a quality fraction in [0, 1]: 40% for a SKILL.md, 30% for</span>
+    <span class="c1"># a description, 30% for spec compliance. We average across skills and scale</span>
+    <span class="c1"># to 100, rounding once — so N perfect skills score a full 100 (an earlier</span>
+    <span class="c1"># per-skill integer floor silently capped perfect setups below 100).</span>
+    <span class="n">quality</span> <span class="o">=</span> <span class="mf">0.0</span>
     <span class="k">for</span> <span class="n">skill</span> <span class="ow">in</span> <span class="n">sr</span><span class="o">.</span><span class="n">skills</span><span class="p">:</span>
-        <span class="n">pts</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">q</span> <span class="o">=</span> <span class="mf">0.0</span>
         <span class="k">if</span> <span class="n">skill</span><span class="o">.</span><span class="n">has_skill_md</span><span class="p">:</span>
-            <span class="n">pts</span> <span class="o">+=</span> <span class="n">per_skill</span> <span class="o">*</span> <span class="mi">40</span> <span class="o">//</span> <span class="mi">100</span>  <span class="c1"># 40% for having SKILL.md</span>
+            <span class="n">q</span> <span class="o">+=</span> <span class="mf">0.40</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Skill &quot;</span><span class="si">{</span><span class="n">skill</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;: missing SKILL.md&#39;</span><span class="p">)</span>
+            <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;Skill &quot;</span><span class="si">{</span><span class="n">skill</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;: missing SKILL.md &#39;</span>
+                <span class="s2">&quot;→ add a SKILL.md with `name` and `description` frontmatter&quot;</span>
+            <span class="p">)</span>
         <span class="k">if</span> <span class="n">skill</span><span class="o">.</span><span class="n">description</span><span class="p">:</span>
-            <span class="n">pts</span> <span class="o">+=</span> <span class="n">per_skill</span> <span class="o">*</span> <span class="mi">30</span> <span class="o">//</span> <span class="mi">100</span>  <span class="c1"># 30% for having a description</span>
+            <span class="n">q</span> <span class="o">+=</span> <span class="mf">0.30</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Skill &quot;</span><span class="si">{</span><span class="n">skill</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;: no description&#39;</span><span class="p">)</span>
-        <span class="c1"># 30% for spec compliance</span>
+            <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;Skill &quot;</span><span class="si">{</span><span class="n">skill</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;: no description &#39;</span>
+                <span class="s2">&quot;→ add a `description:` line to the frontmatter so the skill can be triggered&quot;</span>
+            <span class="p">)</span>
         <span class="n">violations</span> <span class="o">=</span> <span class="n">_validate_skill_spec</span><span class="p">(</span><span class="n">skill</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">violations</span><span class="p">:</span>
-            <span class="n">pts</span> <span class="o">+=</span> <span class="n">per_skill</span> <span class="o">*</span> <span class="mi">30</span> <span class="o">//</span> <span class="mi">100</span>
+            <span class="n">q</span> <span class="o">+=</span> <span class="mf">0.30</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">violations</span><span class="p">:</span>
                 <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Skill &quot;</span><span class="si">{</span><span class="n">skill</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;: </span><span class="si">{</span><span class="n">v</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="n">total</span> <span class="o">+=</span> <span class="n">pts</span>
+        <span class="n">quality</span> <span class="o">+=</span> <span class="n">q</span>
 
-    <span class="k">return</span> <span class="n">ComponentScore</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Skills&quot;</span><span class="p">,</span> <span class="n">score</span><span class="o">=</span><span class="nb">min</span><span class="p">(</span><span class="n">total</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span> <span class="n">notes</span><span class="o">=</span><span class="n">notes</span><span class="p">)</span>
+    <span class="n">score</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="n">quality</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">sr</span><span class="o">.</span><span class="n">skills</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">ComponentScore</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;Skills&quot;</span><span class="p">,</span> <span class="n">score</span><span class="o">=</span><span class="nb">min</span><span class="p">(</span><span class="n">score</span><span class="p">,</span> <span class="mi">100</span><span class="p">),</span> <span class="n">notes</span><span class="o">=</span><span class="n">notes</span><span class="p">)</span>
 
 
 <span class="c1"># ---------------------------------------------------------------------------</span>
 <span class="c1"># agentskills.io spec validation</span>
 <span class="c1"># ---------------------------------------------------------------------------</span>
+
 
 <div class="viewcode-block" id="validate_skill_spec">
 <a class="viewcode-back" href="../../module_docs/opsward/score.html#opsward.score.validate_skill_spec">[docs]</a>
@@ -530,25 +609,141 @@
 <span class="c1"># ---------------------------------------------------------------------------</span>
 
 
+<span class="c1"># Setup point budget (sums to 100): rules 35, agents 35, hooks 30</span>
+<span class="n">_SETUP_RULES_MAX</span> <span class="o">=</span> <span class="mi">35</span>
+<span class="n">_SETUP_AGENTS_MAX</span> <span class="o">=</span> <span class="mi">35</span>
+<span class="n">_SETUP_HOOKS_MAX</span> <span class="o">=</span> <span class="mi">30</span>
+<span class="n">_SETUP_PER_ARTIFACT</span> <span class="o">=</span> <span class="mi">15</span>  <span class="c1"># per rule / agent, capped at the section max</span>
+
+<span class="c1"># A rule shorter than this (stripped) reads as a bare stub, not a real invariant.</span>
+<span class="n">_RULE_MIN_CHARS</span> <span class="o">=</span> <span class="mi">40</span>
+
+<span class="c1"># Hook event names Claude Code recognizes (anything else silently never fires).</span>
+<span class="n">_KNOWN_HOOK_EVENTS</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">(</span>
+    <span class="p">{</span>
+        <span class="s2">&quot;PreToolUse&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;PostToolUse&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;UserPromptSubmit&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Notification&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;Stop&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;SubagentStop&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;SessionStart&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;SessionEnd&quot;</span><span class="p">,</span>
+        <span class="s2">&quot;PreCompact&quot;</span><span class="p">,</span>
+    <span class="p">}</span>
+<span class="p">)</span>
+
+
+<div class="viewcode-block" id="validate_hooks_config">
+<a class="viewcode-back" href="../../module_docs/opsward/score.html#opsward.score.validate_hooks_config">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">validate_hooks_config</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Validate a hooks config against Claude Code&#39;s expected shape.</span>
+
+<span class="sd">    Returns a list of human-readable violation strings (empty = valid). Catches</span>
+<span class="sd">    the silent-failure traps: a non-string ``matcher``, an unknown event name,</span>
+<span class="sd">    or an entry with no runnable ``command`` hook — none of which Claude Code</span>
+<span class="sd">    honors, so the hook never fires even though the file &quot;looks&quot; configured.</span>
+
+<span class="sd">    &gt;&gt;&gt; validate_hooks_config({&#39;hooks&#39;: {&#39;PostToolUse&#39;: [</span>
+<span class="sd">    ...     {&#39;matcher&#39;: &#39;Edit&#39;, &#39;hooks&#39;: [{&#39;type&#39;: &#39;command&#39;, &#39;command&#39;: &#39;x&#39;}]}]}})</span>
+<span class="sd">    []</span>
+<span class="sd">    &gt;&gt;&gt; validate_hooks_config({&#39;pre_commit&#39;: [&#39;ruff&#39;]})</span>
+<span class="sd">    [&#39;no top-level `hooks` key&#39;]</span>
+<span class="sd">    &gt;&gt;&gt; &#39;matcher&#39; in validate_hooks_config({&#39;hooks&#39;: {&#39;PostToolUse&#39;: [</span>
+<span class="sd">    ...     {&#39;matcher&#39;: {&#39;tool_name&#39;: &#39;Edit&#39;}, &#39;hooks&#39;: [</span>
+<span class="sd">    ...         {&#39;type&#39;: &#39;command&#39;, &#39;command&#39;: &#39;x&#39;}]}]}})[0]</span>
+<span class="sd">    True</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">return</span> <span class="n">_validate_hooks_config</span><span class="p">(</span><span class="n">cfg</span><span class="p">)</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_validate_hooks_config</span><span class="p">(</span><span class="n">cfg</span><span class="p">:</span> <span class="nb">object</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="n">violations</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">cfg</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;hooks config is not a JSON object&quot;</span><span class="p">]</span>
+    <span class="n">hooks</span> <span class="o">=</span> <span class="n">cfg</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hooks&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">hooks</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;no top-level `hooks` key&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hooks</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;`hooks` is not an object of event -&gt; entries&quot;</span><span class="p">]</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">hooks</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[</span><span class="s2">&quot;`hooks` is empty&quot;</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">event</span><span class="p">,</span> <span class="n">entries</span> <span class="ow">in</span> <span class="n">hooks</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="k">if</span> <span class="n">event</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_KNOWN_HOOK_EVENTS</span><span class="p">:</span>
+            <span class="n">violations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;unknown hook event </span><span class="si">{</span><span class="n">event</span><span class="si">!r}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">entries</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">violations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;event </span><span class="si">{</span><span class="n">event</span><span class="si">!r}</span><span class="s2">: entries must be a list&quot;</span><span class="p">)</span>
+            <span class="k">continue</span>
+        <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">entries</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">entry</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+                <span class="n">violations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;event </span><span class="si">{</span><span class="n">event</span><span class="si">!r}</span><span class="s2">: entry is not an object&quot;</span><span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="n">matcher</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;matcher&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">matcher</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">matcher</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">violations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;event </span><span class="si">{</span><span class="n">event</span><span class="si">!r}</span><span class="s2">: `matcher` must be a string regex, &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;not </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">matcher</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2"> (Claude Code ignores a dict matcher)&quot;</span>
+                <span class="p">)</span>
+            <span class="n">hook_list</span> <span class="o">=</span> <span class="n">entry</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;hooks&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">hook_list</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">hook_list</span><span class="p">:</span>
+                <span class="n">violations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;event </span><span class="si">{</span><span class="n">event</span><span class="si">!r}</span><span class="s2">: entry has no non-empty `hooks` list&quot;</span>
+                <span class="p">)</span>
+                <span class="k">continue</span>
+            <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">hook_list</span><span class="p">:</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
+                    <span class="ow">or</span> <span class="n">h</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;type&quot;</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;command&quot;</span>
+                    <span class="ow">or</span> <span class="ow">not</span> <span class="n">h</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;command&quot;</span><span class="p">)</span>
+                <span class="p">):</span>
+                    <span class="n">violations</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                        <span class="sa">f</span><span class="s2">&quot;event </span><span class="si">{</span><span class="n">event</span><span class="si">!r}</span><span class="s2">: each hook needs `type: command` and a `command`&quot;</span>
+                    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">violations</span>
+
+
 <span class="k">def</span><span class="w"> </span><span class="nf">_score_setup</span><span class="p">(</span><span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">suggestions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">ComponentScore</span><span class="p">:</span>
     <span class="n">notes</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">total</span> <span class="o">=</span> <span class="mi">0</span>
 
-    <span class="c1"># Rules (up to 35)</span>
+    <span class="c1"># Rules (up to 35) — credit substantive rules, not bare stubs.</span>
     <span class="k">if</span> <span class="n">sr</span><span class="o">.</span><span class="n">rules</span><span class="p">:</span>
-        <span class="n">total</span> <span class="o">+=</span> <span class="nb">min</span><span class="p">(</span><span class="mi">35</span><span class="p">,</span> <span class="mi">15</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">sr</span><span class="o">.</span><span class="n">rules</span><span class="p">))</span>
+        <span class="n">substantive</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">sr</span><span class="o">.</span><span class="n">rules</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">r</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="o">&gt;=</span> <span class="n">_RULE_MIN_CHARS</span><span class="p">]</span>
+        <span class="n">stubs</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">sr</span><span class="o">.</span><span class="n">rules</span> <span class="k">if</span> <span class="n">r</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">substantive</span><span class="p">]</span>
+        <span class="n">total</span> <span class="o">+=</span> <span class="nb">min</span><span class="p">(</span><span class="n">_SETUP_RULES_MAX</span><span class="p">,</span> <span class="n">_SETUP_PER_ARTIFACT</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">substantive</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">stubs</span><span class="p">:</span>
+            <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Rule &quot;</span><span class="si">{</span><span class="n">r</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;: looks like a stub — add a real invariant&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">stubs</span><span class="p">:</span>
+            <span class="n">suggestions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="s2">&quot;Flesh out stub rule(s) in .claude/rules/ — a heading alone is not an invariant&quot;</span>
+            <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;No rules defined&quot;</span><span class="p">)</span>
 
-    <span class="c1"># Agents (up to 35)</span>
+    <span class="c1"># Agents (up to 35) — credit agents that at least carry a description.</span>
     <span class="k">if</span> <span class="n">sr</span><span class="o">.</span><span class="n">agents</span><span class="p">:</span>
-        <span class="n">total</span> <span class="o">+=</span> <span class="nb">min</span><span class="p">(</span><span class="mi">35</span><span class="p">,</span> <span class="mi">15</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">sr</span><span class="o">.</span><span class="n">agents</span><span class="p">))</span>
+        <span class="n">described</span> <span class="o">=</span> <span class="p">[</span><span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">sr</span><span class="o">.</span><span class="n">agents</span> <span class="k">if</span> <span class="n">a</span><span class="o">.</span><span class="n">description</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span>
+        <span class="n">total</span> <span class="o">+=</span> <span class="nb">min</span><span class="p">(</span><span class="n">_SETUP_AGENTS_MAX</span><span class="p">,</span> <span class="n">_SETUP_PER_ARTIFACT</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">described</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">sr</span><span class="o">.</span><span class="n">agents</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">a</span><span class="o">.</span><span class="n">description</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+                <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Agent &quot;</span><span class="si">{</span><span class="n">a</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;: no description&#39;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;No agents defined&quot;</span><span class="p">)</span>
 
-    <span class="c1"># Hooks (30)</span>
+    <span class="c1"># Hooks (30) — score validity, not mere presence (issue #6).</span>
     <span class="k">if</span> <span class="n">sr</span><span class="o">.</span><span class="n">hooks_config</span><span class="p">:</span>
-        <span class="n">total</span> <span class="o">+=</span> <span class="mi">30</span>
+        <span class="n">violations</span> <span class="o">=</span> <span class="n">_validate_hooks_config</span><span class="p">(</span><span class="n">sr</span><span class="o">.</span><span class="n">hooks_config</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">violations</span><span class="p">:</span>
+            <span class="n">total</span> <span class="o">+=</span> <span class="n">_SETUP_HOOKS_MAX</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">total</span> <span class="o">+=</span> <span class="n">_SETUP_HOOKS_MAX</span> <span class="o">//</span> <span class="mi">3</span>  <span class="c1"># partial: configured but won&#39;t fire</span>
+            <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Hooks config invalid: </span><span class="si">{</span><span class="n">violations</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">suggestions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+                <span class="s2">&quot;Fix the hooks config in .claude/hooks.json — &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">violations</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> (an invalid hook silently never fires)&quot;</span>
+            <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">notes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;No hooks configured&quot;</span><span class="p">)</span>
         <span class="n">suggestions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
@@ -661,7 +856,7 @@
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright NO COPYRIGHT.</p>
+    <p></p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a

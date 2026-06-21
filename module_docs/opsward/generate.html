@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>opsward.generate &mdash; opsward 0.0.7 documentation</title>
+  <title>opsward.generate &mdash; opsward 0.0.8 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -15,9 +15,9 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=bbaf98b3"></script>
-      <script src="../../_static/doctools.js?v=9bcbadda"></script>
-      <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+      <script src="../../_static/documentation_options.js?v=53b53b71"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
       <script src="../../_static/copybutton.js?v=f281be69"></script>
@@ -25,7 +25,7 @@
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
     <link rel="next" title="opsward.maintain" href="maintain.html" />
-    <link rel="prev" title="opsward.cli" href="cli.html" /> 
+    <link rel="prev" title="opsward.data.templates" href="data/templates.html" /> 
 </head>
 
 <body class="wy-body-for-nav"> 
@@ -53,6 +53,8 @@
 <li class="toctree-l1"><a class="reference internal" href="__main__.html">opsward.__main__</a></li>
 <li class="toctree-l1"><a class="reference internal" href="base.html">opsward.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cli.html">opsward.cli</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data.html">opsward.data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data/templates.html">opsward.data.templates</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">opsward.generate</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#opsward.generate.generate"><code class="docutils literal notranslate"><span class="pre">generate()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#opsward.generate.generate_skills"><code class="docutils literal notranslate"><span class="pre">generate_skills()</span></code></a></li>
@@ -95,7 +97,7 @@
 <p>Never overwrites existing files (overwrite_policy=’skip’ by default).</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="opsward.generate.generate">
-<span class="sig-prename descclassname"><span class="pre">opsward.generate.</span></span><span class="sig-name descname"><span class="pre">generate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scan_result</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="base.html#opsward.base.ScanResult" title="opsward.base.ScanResult"><span class="pre">ScanResult</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">agents_md</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hooks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="base.html#opsward.base.GeneratedFile" title="opsward.base.GeneratedFile"><span class="pre">GeneratedFile</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/opsward/generate.html#generate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.generate.generate" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">opsward.generate.</span></span><span class="sig-name descname"><span class="pre">generate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scan_result</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="base.html#opsward.base.ScanResult" title="opsward.base.ScanResult"><span class="pre">ScanResult</span></a></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">agents_md</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hooks</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="base.html#opsward.base.GeneratedFile" title="opsward.base.GeneratedFile"><span class="pre">GeneratedFile</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/opsward/generate.html#generate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.generate.generate" title="Link to this definition"></a></dt>
 <dd><p>Determine which artifacts are missing, render templates, return files to create.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">opsward.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScanResult</span>
@@ -108,7 +110,7 @@
 
 <dl class="py function">
 <dt class="sig sig-object py" id="opsward.generate.generate_skills">
-<span class="sig-prename descclassname"><span class="pre">opsward.generate.</span></span><span class="sig-name descname"><span class="pre">generate_skills</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scan_result</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="base.html#opsward.base.ScanResult" title="opsward.base.ScanResult"><span class="pre">ScanResult</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_agents</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="base.html#opsward.base.GeneratedFile" title="opsward.base.GeneratedFile"><span class="pre">GeneratedFile</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/opsward/generate.html#generate_skills"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.generate.generate_skills" title="Link to this definition"></a></dt>
+<span class="sig-prename descclassname"><span class="pre">opsward.generate.</span></span><span class="sig-name descname"><span class="pre">generate_skills</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target_dir</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">scan_result</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="base.html#opsward.base.ScanResult" title="opsward.base.ScanResult"><span class="pre">ScanResult</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">include_agents</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">list</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="base.html#opsward.base.GeneratedFile" title="opsward.base.GeneratedFile"><span class="pre">GeneratedFile</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="../../_modules/opsward/generate.html#generate_skills"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.generate.generate_skills" title="Link to this definition"></a></dt>
 <dd><p>Generate only the opsward skill and agent files for <em>target_dir</em>.</p>
 <p>If <em>scan_result</em> is provided, template variables are substituted from the
 scan.  Otherwise templates are rendered without project-specific
@@ -127,14 +129,14 @@ substitution (suitable for global <code class="docutils literal notranslate"><sp
            </div>
           </div>
           <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="cli.html" class="btn btn-neutral float-left" title="opsward.cli" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="data/templates.html" class="btn btn-neutral float-left" title="opsward.data.templates" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
         <a href="maintain.html" class="btn btn-neutral float-right" title="opsward.maintain" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
     </div>
 
   <hr/>
 
   <div role="contentinfo">
-    <p>&#169; Copyright NO COPYRIGHT.</p>
+    <p></p>
   </div>
 
   Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
