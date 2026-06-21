@@ -10,9 +10,21 @@ version = "0.0.8"
 description = "Diagnose, generate, and maintain the AI agent setup of your projects — CLAUDE.md, skills, subagents, rules, and supporting docs."
 readme = "README.md"
 requires-python = ">=3.10"
+license = "MIT"
 keywords = ["claude", "ai-agents", "developer-tools", "code-quality", "documentation"]
 authors = [
     { name = "Thor Whalen" },
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Software Development :: Quality Assurance",
+    "Topic :: Software Development :: Documentation",
 ]
 dependencies = [
     "argh>=0.31",
@@ -21,13 +33,12 @@ dependencies = [
 [project.scripts]
 opsward = "opsward.__main__:main"
 
-[project.license]
-text = "mit"
-
 [project.urls]
-Homepage = "https://github.com/thorwhalen/opsward"
+Homepage = "https://thorwhalen.github.io/opsward/"
 Repository = "https://github.com/thorwhalen/opsward"
-Documentation = "https://thorwhalen.github.io/opsward"
+Documentation = "https://thorwhalen.github.io/opsward/"
+Issues = "https://github.com/thorwhalen/opsward/issues"
+Changelog = "https://github.com/thorwhalen/opsward/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
 dev = [
@@ -89,7 +100,7 @@ doctest_optionflags = [
 ]
 
 [tool.wads.ci]
-project_name = ""
+project_name = "opsward"
 
 [tool.wads.ci.commands]
 pre_test = []
