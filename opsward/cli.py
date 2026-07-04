@@ -316,4 +316,41 @@ def recommend(
         print(json.dumps(data, indent=2))
 
 
-_dispatch_funcs = [diagnose, generate, maintain, recommend, install_skills]
+def find(
+    query: str,
+    *project_roots: str,
+    kinds: str = "skill,agent",
+    semantic: bool = False,
+    limit: int = 10,
+):
+    """Find assets (skills, agents, docs) across one or more projects by QUERY.
+
+    Cross-repo asset discovery via the toolery package
+    (install with: pip install 'opsward[discovery]').
+
+    :param query: search query
+    :param project_roots: one or more project directories (default: current dir)
+    :param kinds: comma-separated asset kinds — skill, agent, doc
+    :param semantic: use toolery's ir semantic backend (needs toolery[ir])
+    :param limit: max results to show
+    """
+    from opsward.discover import find_assets
+
+    roots = project_roots or (".",)
+    try:
+        hits = find_assets(
+            *roots, query=query, kinds=kinds, semantic=semantic, limit=limit
+        )
+    except ImportError as e:
+        print(str(e), file=sys.stderr)
+        sys.exit(2)
+    if not hits:
+        print(f"No assets matching {query!r} in {', '.join(roots)}.")
+        return
+    for card, score in hits:
+        print(f"{score:6.2f}  [{card.kind}] {card.name}")
+        if card.source_uri:
+            print(f"          {card.source_uri}")
+
+
+_dispatch_funcs = [diagnose, generate, maintain, recommend, install_skills, find]

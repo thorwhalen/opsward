@@ -17,3 +17,4 @@ from opsward.score import diagnose, validate_hooks_config, validate_skill_spec
 from opsward.generate import generate, generate_skills
 from opsward.maintain import maintain
 from opsward.recommend import recommend_skills, SkillRecommendation
+from opsward.discover import find_assets
