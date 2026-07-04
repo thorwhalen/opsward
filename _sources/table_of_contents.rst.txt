@@ -8,6 +8,7 @@
    module_docs/opsward/cli
    module_docs/opsward/data
    module_docs/opsward/data/templates
+   module_docs/opsward/discover
    module_docs/opsward/generate
    module_docs/opsward/maintain
    module_docs/opsward/recommend

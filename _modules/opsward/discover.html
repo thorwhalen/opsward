@@ -1,0 +1,182 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>opsward.discover &mdash; opsward 0.0.10 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
+      <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
+      <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css?v=4ae1632d" />
+
+  
+      <script src="../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../_static/documentation_options.js?v=a83ce22a"></script>
+      <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
+      <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../../_static/copybutton.js?v=f281be69"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            opsward
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward.html">opsward</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/__main__.html">opsward.__main__</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/base.html">opsward.base</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/cli.html">opsward.cli</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/data.html">opsward.data</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/data/templates.html">opsward.data.templates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/discover.html">opsward.discover</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/generate.html">opsward.generate</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/maintain.html">opsward.maintain</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/recommend.html">opsward.recommend</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/scan.html">opsward.scan</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/score.html">opsward.score</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/util.html">opsward.util</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">opsward</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">opsward.discover</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for opsward.discover</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Optional cross-repo asset discovery, delegating to the ``toolery`` package.</span>
+
+<span class="sd">opsward scans and *scores* the AI setup of one repo; this adds *finding* assets — skills,</span>
+<span class="sd">subagents, docs — across one or more repos. It is opt-in and keeps opsward&#39;s core</span>
+<span class="sd">dependency-light: ``pip install &#39;opsward[discovery]&#39;`` pulls in ``toolery`` (add</span>
+<span class="sd">``toolery[ir]`` for semantic search). Conceptually this is opsward&#39;s per-repo/fleet</span>
+<span class="sd">orchestration meeting toolery&#39;s discovery engine (epic #12 → #13).</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_require_toolery</span><span class="p">():</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Import ``toolery`` or raise an actionable error naming the extra to install.&quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="kn">import</span><span class="w"> </span><span class="nn">toolery</span>
+    <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># pragma: no cover - only without the extra installed</span>
+        <span class="k">raise</span> <span class="ne">ImportError</span><span class="p">(</span>
+            <span class="s2">&quot;opsward&#39;s discovery feature needs the &#39;toolery&#39; package. &quot;</span>
+            <span class="s2">&quot;Install it with:  pip install &#39;opsward[discovery]&#39;&quot;</span>
+        <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+    <span class="k">return</span> <span class="n">toolery</span>
+
+
+<div class="viewcode-block" id="find_assets">
+<a class="viewcode-back" href="../../module_docs/opsward/discover.html#opsward.discover.find_assets">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">find_assets</span><span class="p">(</span>
+    <span class="o">*</span><span class="n">roots</span><span class="p">,</span>
+    <span class="n">query</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">kinds</span><span class="o">=</span><span class="s2">&quot;skill,agent&quot;</span><span class="p">,</span>
+    <span class="n">semantic</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Find assets matching ``query`` across one or more project ``roots``.</span>
+
+<span class="sd">    Harvests the requested ``kinds`` (comma-separated string or a sequence of</span>
+<span class="sd">    ``&quot;skill&quot;``/``&quot;agent&quot;``/``&quot;doc&quot;``) from each root via ``toolery`` and returns ranked</span>
+<span class="sd">    ``(Card, score)`` results. With ``semantic=True``, uses ``toolery``&#39;s ir federated</span>
+<span class="sd">    backend (needs ``toolery[ir]``). Defaults to the current directory when no roots given.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">toolery</span> <span class="o">=</span> <span class="n">_require_toolery</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">kinds</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">kinds</span> <span class="o">=</span> <span class="p">[</span><span class="n">k</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">kinds</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">k</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span>
+    <span class="n">harvesters</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;skill&quot;</span><span class="p">:</span> <span class="n">toolery</span><span class="o">.</span><span class="n">skills</span><span class="p">,</span>
+        <span class="s2">&quot;agent&quot;</span><span class="p">:</span> <span class="n">toolery</span><span class="o">.</span><span class="n">agents</span><span class="p">,</span>
+        <span class="s2">&quot;doc&quot;</span><span class="p">:</span> <span class="n">toolery</span><span class="o">.</span><span class="n">folder</span><span class="p">,</span>
+    <span class="p">}</span>
+    <span class="n">sources</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">root</span> <span class="ow">in</span> <span class="n">roots</span> <span class="ow">or</span> <span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,):</span>
+        <span class="n">root_path</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">root</span><span class="p">)</span><span class="o">.</span><span class="n">expanduser</span><span class="p">())</span>
+        <span class="k">for</span> <span class="n">kind</span> <span class="ow">in</span> <span class="n">kinds</span><span class="p">:</span>
+            <span class="n">harvester</span> <span class="o">=</span> <span class="n">harvesters</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">kind</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">harvester</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">sources</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">harvester</span><span class="p">(</span><span class="n">root_path</span><span class="p">))</span>
+    <span class="n">backend</span> <span class="o">=</span> <span class="n">toolery</span><span class="o">.</span><span class="n">IrFederatedBackend</span><span class="p">()</span> <span class="k">if</span> <span class="n">semantic</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">backend</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">cat</span> <span class="o">=</span> <span class="n">toolery</span><span class="o">.</span><span class="n">catalog</span><span class="p">(</span><span class="o">*</span><span class="n">sources</span><span class="p">,</span> <span class="n">search_backend</span><span class="o">=</span><span class="n">backend</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">cat</span> <span class="o">=</span> <span class="n">toolery</span><span class="o">.</span><span class="n">catalog</span><span class="p">(</span><span class="o">*</span><span class="n">sources</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">cat</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="n">limit</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p></p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

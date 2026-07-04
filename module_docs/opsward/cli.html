@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>opsward.cli &mdash; opsward 0.0.9 documentation</title>
+  <title>opsward.cli &mdash; opsward 0.0.10 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -15,7 +15,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=f7cdbf68"></script>
+      <script src="../../_static/documentation_options.js?v=a83ce22a"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -54,6 +54,7 @@
 <li class="toctree-l1"><a class="reference internal" href="base.html">opsward.base</a></li>
 <li class="toctree-l1 current"><a class="current reference internal" href="#">opsward.cli</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="#opsward.cli.diagnose"><code class="docutils literal notranslate"><span class="pre">diagnose()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="#opsward.cli.find"><code class="docutils literal notranslate"><span class="pre">find()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#opsward.cli.generate"><code class="docutils literal notranslate"><span class="pre">generate()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#opsward.cli.install_skills"><code class="docutils literal notranslate"><span class="pre">install_skills()</span></code></a></li>
 <li class="toctree-l2"><a class="reference internal" href="#opsward.cli.maintain"><code class="docutils literal notranslate"><span class="pre">maintain()</span></code></a></li>
@@ -62,6 +63,7 @@
 </li>
 <li class="toctree-l1"><a class="reference internal" href="data.html">opsward.data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="data/templates.html">opsward.data.templates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="discover.html">opsward.discover</a></li>
 <li class="toctree-l1"><a class="reference internal" href="generate.html">opsward.generate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="maintain.html">opsward.maintain</a></li>
 <li class="toctree-l1"><a class="reference internal" href="recommend.html">opsward.recommend</a></li>
@@ -108,6 +110,25 @@
 <li><p><strong>format</strong> – output format — ‘text’ or ‘json’</p></li>
 <li><p><strong>verbose</strong> – show additional detail in text output</p></li>
 <li><p><strong>min_score</strong> – minimum overall score to pass (exit 0); below this exits 1</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="opsward.cli.find">
+<span class="sig-prename descclassname"><span class="pre">opsward.cli.</span></span><span class="sig-name descname"><span class="pre">find</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">query</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">project_roots</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kinds</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'skill,agent'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">semantic</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">limit</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/opsward/cli.html#find"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.cli.find" title="Link to this definition"></a></dt>
+<dd><p>Find assets (skills, agents, docs) across one or more projects by QUERY.</p>
+<p>Cross-repo asset discovery via the toolery package
+(install with: pip install ‘opsward[discovery]’).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>query</strong> – search query</p></li>
+<li><p><strong>project_roots</strong> – one or more project directories (default: current dir)</p></li>
+<li><p><strong>kinds</strong> – comma-separated asset kinds — skill, agent, doc</p></li>
+<li><p><strong>semantic</strong> – use toolery’s ir semantic backend (needs toolery[ir])</p></li>
+<li><p><strong>limit</strong> – max results to show</p></li>
 </ul>
 </dd>
 </dl>

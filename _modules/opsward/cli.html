@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>opsward.cli &mdash; opsward 0.0.9 documentation</title>
+  <title>opsward.cli &mdash; opsward 0.0.10 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=f7cdbf68"></script>
+      <script src="../../_static/documentation_options.js?v=a83ce22a"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -52,6 +52,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/cli.html">opsward.cli</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/data.html">opsward.data</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/data/templates.html">opsward.data.templates</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/discover.html">opsward.discover</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/generate.html">opsward.generate</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/maintain.html">opsward.maintain</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../module_docs/opsward/recommend.html">opsward.recommend</a></li>
@@ -418,7 +419,47 @@
 
 
 
-<span class="n">_dispatch_funcs</span> <span class="o">=</span> <span class="p">[</span><span class="n">diagnose</span><span class="p">,</span> <span class="n">generate</span><span class="p">,</span> <span class="n">maintain</span><span class="p">,</span> <span class="n">recommend</span><span class="p">,</span> <span class="n">install_skills</span><span class="p">]</span>
+<div class="viewcode-block" id="find">
+<a class="viewcode-back" href="../../module_docs/opsward/cli.html#opsward.cli.find">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">find</span><span class="p">(</span>
+    <span class="n">query</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="o">*</span><span class="n">project_roots</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">kinds</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;skill,agent&quot;</span><span class="p">,</span>
+    <span class="n">semantic</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Find assets (skills, agents, docs) across one or more projects by QUERY.</span>
+
+<span class="sd">    Cross-repo asset discovery via the toolery package</span>
+<span class="sd">    (install with: pip install &#39;opsward[discovery]&#39;).</span>
+
+<span class="sd">    :param query: search query</span>
+<span class="sd">    :param project_roots: one or more project directories (default: current dir)</span>
+<span class="sd">    :param kinds: comma-separated asset kinds — skill, agent, doc</span>
+<span class="sd">    :param semantic: use toolery&#39;s ir semantic backend (needs toolery[ir])</span>
+<span class="sd">    :param limit: max results to show</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">opsward.discover</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_assets</span>
+
+    <span class="n">roots</span> <span class="o">=</span> <span class="n">project_roots</span> <span class="ow">or</span> <span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">,)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">hits</span> <span class="o">=</span> <span class="n">find_assets</span><span class="p">(</span>
+            <span class="o">*</span><span class="n">roots</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="n">query</span><span class="p">,</span> <span class="n">kinds</span><span class="o">=</span><span class="n">kinds</span><span class="p">,</span> <span class="n">semantic</span><span class="o">=</span><span class="n">semantic</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="n">limit</span>
+        <span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">hits</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No assets matching </span><span class="si">{</span><span class="n">query</span><span class="si">!r}</span><span class="s2"> in </span><span class="si">{</span><span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">roots</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+    <span class="k">for</span> <span class="n">card</span><span class="p">,</span> <span class="n">score</span> <span class="ow">in</span> <span class="n">hits</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">score</span><span class="si">:</span><span class="s2">6.2f</span><span class="si">}</span><span class="s2">  [</span><span class="si">{</span><span class="n">card</span><span class="o">.</span><span class="n">kind</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="n">card</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">card</span><span class="o">.</span><span class="n">source_uri</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;          </span><span class="si">{</span><span class="n">card</span><span class="o">.</span><span class="n">source_uri</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+
+<span class="n">_dispatch_funcs</span> <span class="o">=</span> <span class="p">[</span><span class="n">diagnose</span><span class="p">,</span> <span class="n">generate</span><span class="p">,</span> <span class="n">maintain</span><span class="p">,</span> <span class="n">recommend</span><span class="p">,</span> <span class="n">install_skills</span><span class="p">,</span> <span class="n">find</span><span class="p">]</span>
 </pre></div>
 
            </div>

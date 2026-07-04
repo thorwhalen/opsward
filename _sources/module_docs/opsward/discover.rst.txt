@@ -1,0 +1,4 @@
+opsward.discover
+================
+.. automodule:: opsward.discover
+   :members:
