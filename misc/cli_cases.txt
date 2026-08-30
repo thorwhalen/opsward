@@ -1,4 +1,5 @@
-# opsward CLI characterization corpus -- see misc/README-cli-parity.md
+# opsward CLI characterization corpus. Replayed by tests/test_cli_parity.py;
+# re-recording procedure is in CLAUDE.md, "CLI Pattern".
 #
 # Recorded from the argh-based CLI *before* the cw migration and replayed after, so a
 # dispatcher swap that changes anything a shell can see fails loudly.

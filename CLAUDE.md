@@ -11,7 +11,7 @@ There is also an `ow` PyPI package that is a thin re-export shim for `opsward`.
 ## Tech Stack
 
 - **Language:** Python 3.10+
-- **CLI:** `argh` for dispatching functions to CLI commands
+- **CLI:** `cw` for dispatching functions to CLI commands (MIT; reproduces argh's grammar)
 - **Templates:** String-based (`string.Template` or simple f-string/jinja2-minimal) — keep deps light
 - **Data structures:** `dataclasses` for models, `Mapping`/`MutableMapping` where storage is involved
 - **File access:** `importlib.resources.files` for bundled templates in `opsward/data/`
@@ -39,7 +39,7 @@ Key docs to read before starting work:
   - `generate.py` — template rendering and file generation (never overwrites without confirmation). Also provides `generate_skills()` for targeted skill/agent installation.
   - `maintain.py` — staleness detection, update suggestions, drift analysis
   - `recommend.py` — map detected tech-stack signals (deps, frameworks) to curated ecosystem skill recommendations
-  - `cli.py` — argh-based CLI entry point
+  - `cli.py` — CLI command functions (the `_dispatch_funcs` SSOT)
   - `util.py` — internal helpers (underscore-prefixed)
   - `data/` — bundled package resources (accessed via `importlib.resources.files`)
     - `templates/` — generation templates organized by target project type
@@ -84,23 +84,37 @@ opsward install-skills --global-install --write   # Install into ~/.claude/
 
 ### CLI Pattern
 
-Follow the argh SSOT dispatch pattern:
+Follow the SSOT dispatch pattern: `cli.py` owns the command list, `__main__.py`
+only runs it.
 
 ```python
 # In cli.py
-_dispatch_funcs = [diagnose, generate, maintain, recommend, install_skills]
-
-if __name__ == "__main__":
-    import argh
-    argh.dispatch_commands(_dispatch_funcs)
+_dispatch_funcs = [diagnose, generate, maintain, recommend, install_skills, find]
 ```
 
 ```python
 # In __main__.py
+import cw
 from opsward.cli import _dispatch_funcs
-import argh
-argh.dispatch_commands(_dispatch_funcs)
+
+def main():
+    raise SystemExit(cw.dispatch(_dispatch_funcs))
 ```
+
+Do not pass `prog=` — leaving it to `argparse` is what keeps `python -m opsward`
+reporting `__main__.py` and the console script reporting `opsward`.
+
+**The CLI surface is pinned.** `misc/cli_golden.json` records every argv in
+`misc/cli_cases.txt` — exit code, stdout, stderr — and `tests/test_cli_parity.py`
+replays it. Adding a command or a flag will fail that test; re-record with
+
+```bash
+python -m cw.testing characterize opsward --cases misc/cli_cases.txt -o misc/cli_golden.json
+```
+
+and put the resulting diff in the PR. Never re-record to make a red test green
+without reading what changed. Cases must not print absolute paths — the golden is
+committed and has to replay on someone else's machine.
 
 ### Template Pattern
 

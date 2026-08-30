@@ -7,7 +7,7 @@
 
 Diagnose, generate, and maintain the AI agent setup of your projects — CLAUDE.md, skills, subagents, rules, and supporting docs.
 
-**Tech stack:** Python 3.10+, `argh` (CLI), `string.Template` (templates), `dataclasses`. Lightweight by design — no heavy deps.
+**Tech stack:** Python 3.10+, `cw` (CLI), `string.Template` (templates), `dataclasses`. Lightweight by design — no heavy deps.
 
 ## Build & Test Commands
 
@@ -25,7 +25,7 @@ pytest --doctest-modules opsward/   # doctests embedded in the package
   - `generate.py` — template rendering + file generation (never overwrites; dry-run by default)
   - `maintain.py` — staleness / drift detection
   - `recommend.py` — tech-stack → curated ecosystem-skill recommendations
-  - `cli.py` / `__main__.py` — `argh` dispatch
+  - `cli.py` / `__main__.py` — `cw` dispatch (surface pinned by `tests/test_cli_parity.py`)
   - `base.py` — dataclasses (`ScanResult`, `DiagnosisReport`, `ComponentScore`, …)
   - `data/templates/` — bundled templates (`shared/`, `python/`, `jsts/`), accessed via `importlib.resources`
 - `tests/` — pytest tests + sample-project fixtures under `tests/fixtures/`
