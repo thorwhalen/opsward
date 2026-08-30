@@ -97,6 +97,7 @@ _dispatch_funcs = [diagnose, generate, maintain, recommend, install_skills, find
 import cw
 from opsward.cli import _dispatch_funcs
 
+
 def main():
     raise SystemExit(cw.dispatch(_dispatch_funcs))
 ```

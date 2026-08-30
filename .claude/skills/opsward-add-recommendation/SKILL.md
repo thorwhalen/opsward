@@ -29,13 +29,15 @@ Append a tuple to `_RECOMMENDATIONS` (`recommend.py:29`):
 
 ```python
 (
-    ("signal1", "signal2"),          # lowercase substrings to look for in deps
-    SkillRecommendation(
-        name="my-skill",             # also the dedup key
-        reason="Foo framework detected",
-        source="https://github.com/VoltAgent/awesome-agent-skills",
+    (
+        ("signal1", "signal2"),  # lowercase substrings to look for in deps
+        SkillRecommendation(
+            name="my-skill",  # also the dedup key
+            reason="Foo framework detected",
+            source="https://github.com/VoltAgent/awesome-agent-skills",
+        ),
     ),
-),
+)
 ```
 
 Guidelines:

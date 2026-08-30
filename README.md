@@ -168,13 +168,13 @@ from pathlib import Path
 from opsward import scan, diagnose, generate, generate_skills, maintain
 from opsward import recommend_skills, validate_skill_spec
 
-sr = scan('.')
+sr = scan(".")
 report = diagnose(sr)
-print(report)              # human-readable report card
-print(report.grade)        # 'A', 'B', 'C', 'D', or 'F'
+print(report)  # human-readable report card
+print(report.grade)  # 'A', 'B', 'C', 'D', or 'F'
 
-files = generate(sr)       # list[GeneratedFile]
-issues = maintain(sr)      # list[MaintenanceSuggestion]
+files = generate(sr)  # list[GeneratedFile]
+issues = maintain(sr)  # list[MaintenanceSuggestion]
 
 # Recommend ecosystem skills based on tech stack
 recs = recommend_skills(sr)  # list[SkillRecommendation]
@@ -184,7 +184,7 @@ for skill in sr.skills:
     violations = validate_skill_spec(skill)
 
 # Install skills programmatically
-skill_files = generate_skills(Path.home() / '.claude')
+skill_files = generate_skills(Path.home() / ".claude")
 ```
 
 ## CI Integration
