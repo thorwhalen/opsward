@@ -1,0 +1,60 @@
+# opsward CLI characterization corpus -- see misc/README-cli-parity.md
+#
+# Recorded from the argh-based CLI *before* the cw migration and replayed after, so a
+# dispatcher swap that changes anything a shell can see fails loudly.
+#
+# Rules for adding a case:
+#   * paths are relative to the repo root (characterize/replay run with cwd=repo root);
+#   * no case may print an absolute path -- the golden is committed and must be portable;
+#   * no case may write to the filesystem or reach the network;
+#   * no case may need an optional extra (`find`'s toolery), so the corpus replays on a
+#     bare install. `find --help` still pins find's grammar at tier 2.
+
+# -- tier 3: the whole help surface (top level + every subcommand) --
+--help
+diagnose --help
+generate --help
+maintain --help
+recommend --help
+install-skills --help
+find --help
+
+# -- tier 1: one happy path per subcommand (all dry-run / read-only) --
+diagnose tests/fixtures/bare_project
+diagnose tests/fixtures/python_project
+generate tests/fixtures/bare_project
+maintain tests/fixtures/stale_project
+recommend tests/fixtures/python_project
+
+# -- tier 1: option grammar. argh derives a short flag per parameter and dashes the long
+#    one; both spellings, the "=" form and repeated positionals are all pinned here.
+diagnose tests/fixtures/bare_project --min-score 0
+diagnose tests/fixtures/bare_project --min-score=0
+diagnose tests/fixtures/bare_project -m 0
+diagnose --verbose tests/fixtures/python_project
+diagnose -v tests/fixtures/python_project
+# NOTE: `--format json` is deliberately absent. Its output embeds the *resolved*
+# (absolute) project root, which would put a machine path in a committed golden and
+# make it unreplayable anywhere else. tests/test_cli.py covers the JSON surface.
+diagnose tests/fixtures/bare_project --format json-ish-typo --min-score 0
+diagnose tests/fixtures/bare_project tests/fixtures/python_project --min-score 0
+generate tests/fixtures/bare_project --agents-md --hooks
+generate tests/fixtures/bare_project -a
+# NOTE: `install-skills` has no happy-path case for the same reason as `--format json`:
+# every one of its lines names the *resolved* target directory. `install-skills --help`
+# pins its grammar at tier 2; tests/ covers its behaviour.
+install-skills --target
+install-skills -t
+
+# -- tier 1: usage errors. These must keep argparse's exit code 2; a dispatcher that
+#    starts exiting 0 on a bad command line breaks every CI step that checks it.
+[]
+nosuchcommand
+diagnose --nosuchflag
+diagnose --min-score
+diagnose tests/fixtures/bare_project --min-score notanint
+generate --write --nosuchflag tests/fixtures/bare_project
+find
+
+# -- tier 1: a runtime error path (opsward's own sys.exit(2)) --
+diagnose ./no/such/directory/opsward-characterization
