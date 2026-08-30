@@ -104,17 +104,31 @@ def main():
 Do not pass `prog=` — leaving it to `argparse` is what keeps `python -m opsward`
 reporting `__main__.py` and the console script reporting `opsward`.
 
-**The CLI surface is pinned.** `misc/cli_golden.json` records every argv in
-`misc/cli_cases.txt` — exit code, stdout, stderr — and `tests/test_cli_parity.py`
-replays it. Adding a command or a flag will fail that test; re-record with
+**The CLI surface is pinned.** `misc/cli_golden_py<major><minor>.json` records every
+argv in `misc/cli_cases.txt` — exit code, stdout, stderr, `usage:` line and the full
+`--help` body — and `tests/test_cli_parity.py` replays the one matching the running
+CPython. Adding a command or a flag will fail that test. Re-record **every** golden,
+each on its own interpreter:
 
 ```bash
-python -m cw.testing characterize opsward --cases misc/cli_cases.txt -o misc/cli_golden.json
+python3.12 -m cw.testing characterize opsward --cases misc/cli_cases.txt \
+    -o misc/cli_golden_py312.json
 ```
 
-and put the resulting diff in the PR. Never re-record to make a red test green
-without reading what changed. Cases must not print absolute paths — the golden is
-committed and has to replay on someone else's machine.
+and put the resulting diff in the PR. Never re-record to make a red test green without
+first reading what changed.
+
+Two rules for the corpus:
+
+- **No case may print an absolute path.** The goldens are committed and have to replay
+  on someone else's machine, so `--format json` and `install-skills` happy paths are
+  deliberately excluded (both name the *resolved* project root).
+- **One golden per CPython version in the CI matrix.** `argparse` is stdlib and rewrites
+  its own text between versions — 3.12 stopped listing `nargs='*'` positionals among
+  "the following arguments are required", and changed how `invalid choice` quotes the
+  choices. Those are the only two cases that differ between the 3.10 and 3.12
+  recordings. Adding a version to `[tool.wads.ci.testing]` means recording a golden for
+  it; the test fails loudly rather than skipping if one is missing.
 
 ### Template Pattern
 

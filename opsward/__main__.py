@@ -2,7 +2,7 @@
 
 The command list is :data:`opsward.cli._dispatch_funcs` -- one SSOT, no per-command
 registration here. :func:`cw.dispatch` turns it into an ``argparse`` parser and runs it,
-reproducing the grammar this CLI has always had (pinned by ``misc/cli_golden.json``
+reproducing the grammar this CLI has always had (pinned by ``misc/cli_golden_py*.json``
 and asserted by ``tests/test_cli_parity.py``).
 
 ``prog`` is deliberately not passed: leaving it to ``argparse`` keeps the program name
