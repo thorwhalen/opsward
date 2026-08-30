@@ -1,6 +1,6 @@
 """CLI entry point: python -m opsward."""
 
-import argh
+from cw import compat as argh
 
 from opsward.cli import _dispatch_funcs
 
