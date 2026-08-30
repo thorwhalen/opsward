@@ -1,0 +1,379 @@
+{
+  "cases": [
+    {
+      "argv": [
+        "--help"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find} ...\n\npositional arguments:\n  {diagnose,generate,maintain,recommend,install-skills,find}\n    diagnose            Diagnose the AI agent setup of one or more projects. :param project_roots:\n                        one or more paths to project directories :param format: output format \u2014\n                        'text' or 'json' :param verbose: show additional detail in text output\n                        :param min_score: minimum overall score to pass (exit 0); below this exits\n                        1\n    generate            Generate missing AI setup artifacts for one or more projects. By default,\n                        shows what would be created (dry run). Use --write to actually write\n                        files. Existing files are never overwritten. :param project_roots: one or\n                        more paths to project directories :param write: actually write files\n                        (default: dry run) :param format: output format \u2014 'text' or 'json' :param\n                        agents_md: also generate AGENTS.md (cross-platform agent instructions)\n                        :param hooks: also generate starter hook scripts\n    maintain            Check for stale references, out-of-sync docs, and other drift. :param\n                        project_roots: one or more paths to project directories :param format:\n                        output format \u2014 'text' or 'json'\n    recommend           Recommend ecosystem skills based on the project's tech stack. Analyzes\n                        dependencies and suggests skills from the community catalog. :param\n                        project_roots: one or more paths to project directories :param format:\n                        output format \u2014 'text' or 'json'\n    install-skills      Install opsward's Claude Code skills (and agents) into a project or\n                        globally. By default, shows what would be created (dry run). Use --write\n                        to actually write files. Existing files are never overwritten. :param\n                        target: project directory (ignored when --global is set) :param\n                        global_install: install into ~/.claude/ instead of the project :param\n                        agents: also install agent definitions (default: True) :param write:\n                        actually write files (default: dry run)\n    find                Find assets (skills, agents, docs) across one or more projects by QUERY.\n                        Cross-repo asset discovery via the toolery package (install with: pip\n                        install 'opsward[discovery]'). :param query: search query :param\n                        project_roots: one or more project directories (default: current dir)\n                        :param kinds: comma-separated asset kinds \u2014 skill, agent, doc :param\n                        semantic: use toolery's ir semantic backend (needs toolery[ir]) :param\n                        limit: max results to show\n\noptions:\n  -h, --help            show this help message and exit\n",
+      "tier": 3,
+      "usage": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find} ..."
+    },
+    {
+      "argv": [
+        "diagnose",
+        "--help"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "usage: opsward diagnose [-h] [-f FORMAT] [-v] [-m MIN_SCORE] [project-roots ...]\n\nDiagnose the AI agent setup of one or more projects.\n\n:param project_roots: one or more paths to project directories\n:param format: output format \u2014 'text' or 'json'\n:param verbose: show additional detail in text output\n:param min_score: minimum overall score to pass (exit 0); below this exits 1\n\npositional arguments:\n  project-roots         -\n\noptions:\n  -h, --help            show this help message and exit\n  -f FORMAT, --format FORMAT\n                        'text'\n  -v, --verbose         False\n  -m MIN_SCORE, --min-score MIN_SCORE\n                        80\n",
+      "tier": 3,
+      "usage": "usage: opsward diagnose [-h] [-f FORMAT] [-v] [-m MIN_SCORE] [project-roots ...]"
+    },
+    {
+      "argv": [
+        "generate",
+        "--help"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "usage: opsward generate [-h] [-w] [-f FORMAT] [-a] [--hooks] [project-roots ...]\n\nGenerate missing AI setup artifacts for one or more projects.\n\nBy default, shows what would be created (dry run). Use --write to\nactually write files. Existing files are never overwritten.\n\n:param project_roots: one or more paths to project directories\n:param write: actually write files (default: dry run)\n:param format: output format \u2014 'text' or 'json'\n:param agents_md: also generate AGENTS.md (cross-platform agent instructions)\n:param hooks: also generate starter hook scripts\n\npositional arguments:\n  project-roots         -\n\noptions:\n  -h, --help            show this help message and exit\n  -w, --write           False\n  -f FORMAT, --format FORMAT\n                        'text'\n  -a, --agents-md       False\n  --hooks               False\n",
+      "tier": 3,
+      "usage": "usage: opsward generate [-h] [-w] [-f FORMAT] [-a] [--hooks] [project-roots ...]"
+    },
+    {
+      "argv": [
+        "maintain",
+        "--help"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "usage: opsward maintain [-h] [-f FORMAT] [project-roots ...]\n\nCheck for stale references, out-of-sync docs, and other drift.\n\n:param project_roots: one or more paths to project directories\n:param format: output format \u2014 'text' or 'json'\n\npositional arguments:\n  project-roots         -\n\noptions:\n  -h, --help            show this help message and exit\n  -f FORMAT, --format FORMAT\n                        'text'\n",
+      "tier": 3,
+      "usage": "usage: opsward maintain [-h] [-f FORMAT] [project-roots ...]"
+    },
+    {
+      "argv": [
+        "recommend",
+        "--help"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "usage: opsward recommend [-h] [-f FORMAT] [project-roots ...]\n\nRecommend ecosystem skills based on the project's tech stack.\n\nAnalyzes dependencies and suggests skills from the community catalog.\n\n:param project_roots: one or more paths to project directories\n:param format: output format \u2014 'text' or 'json'\n\npositional arguments:\n  project-roots         -\n\noptions:\n  -h, --help            show this help message and exit\n  -f FORMAT, --format FORMAT\n                        'text'\n",
+      "tier": 3,
+      "usage": "usage: opsward recommend [-h] [-f FORMAT] [project-roots ...]"
+    },
+    {
+      "argv": [
+        "install-skills",
+        "--help"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "usage: opsward install-skills [-h] [-t TARGET] [-g] [-a] [-w]\n\nInstall opsward's Claude Code skills (and agents) into a project or globally.\n\nBy default, shows what would be created (dry run). Use --write to\nactually write files. Existing files are never overwritten.\n\n:param target: project directory (ignored when --global is set)\n:param global_install: install into ~/.claude/ instead of the project\n:param agents: also install agent definitions (default: True)\n:param write: actually write files (default: dry run)\n\noptions:\n  -h, --help            show this help message and exit\n  -t TARGET, --target TARGET\n                        '.'\n  -g, --global-install  False\n  -a, --agents          True\n  -w, --write           False\n",
+      "tier": 3,
+      "usage": "usage: opsward install-skills [-h] [-t TARGET] [-g] [-a] [-w]"
+    },
+    {
+      "argv": [
+        "find",
+        "--help"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "usage: opsward find [-h] [-k KINDS] [-s] [-l LIMIT] query [project-roots ...]\n\nFind assets (skills, agents, docs) across one or more projects by QUERY.\n\nCross-repo asset discovery via the toolery package\n(install with: pip install 'opsward[discovery]').\n\n:param query: search query\n:param project_roots: one or more project directories (default: current dir)\n:param kinds: comma-separated asset kinds \u2014 skill, agent, doc\n:param semantic: use toolery's ir semantic backend (needs toolery[ir])\n:param limit: max results to show\n\npositional arguments:\n  query                 -\n  project-roots         -\n\noptions:\n  -h, --help            show this help message and exit\n  -k KINDS, --kinds KINDS\n                        'skill,agent'\n  -s, --semantic        False\n  -l LIMIT, --limit LIMIT\n                        10\n",
+      "tier": 3,
+      "usage": "usage: opsward find [-h] [-k KINDS] [-s] [-l LIMIT] query [project-roots ...]"
+    },
+    {
+      "argv": [
+        "diagnose",
+        "tests/fixtures/bare_project"
+      ],
+      "returncode": 1,
+      "stderr": "",
+      "stdout": "Diagnosis Report: bare_project\nProject type: unknown\nOverall score: 0/100  (Grade: F)\n\nComponents:\n  CLAUDE.md quality         [....................] 0/100\n    - No CLAUDE.md found\n  Documentation             [....................] 0/100\n    - No documentation files found \u2192 run `opsward generate` to scaffold architecture/conventions docs\n  Skills                    [....................] 0/100\n    - No skills defined\n  Setup (rules/agents/hooks) [....................] 0/100\n    - No rules defined\n    - No agents defined\n    - No hooks configured\n  Cross-references          [....................] 0/100\n    - No CLAUDE.md\n\nMissing:\n  [ ] CLAUDE.md\n  [ ] docs_guide.md\n  [ ] docs/architecture.md\n  [ ] docs/conventions.md\n  [ ] docs/known_issues.md\n\nSuggestions:\n  1. Create a CLAUDE.md at the project root\n  2. Create a docs_guide.md to index your documentation\n  3. Consider adding skills in .claude/skills/ for recurring tasks\n  4. Add hooks in .claude/hooks.json \u2014 run `opsward generate --hooks` for starter templates (auto-format on PostToolUse, session context on SessionStart)\n",
+      "tier": 1,
+      "usage": ""
+    },
+    {
+      "argv": [
+        "diagnose",
+        "tests/fixtures/python_project"
+      ],
+      "returncode": 1,
+      "stderr": "",
+      "stdout": "Diagnosis Report: python_project\nProject type: python\nOverall score: 54/100  (Grade: F)\n\nComponents:\n  CLAUDE.md quality         [##########..........] 49/100\n    - Commands: no code blocks found \u2192 add a fenced code block with the build, test, and run commands\n    - Architecture: no architecture/structure section found \u2192 add a '## Architecture' section mapping key modules to one-line descriptions\n    - Conventions: low specificity \u2192 name the tools (e.g. ruff), cite file extensions, and show code snippets\n  Documentation             [###########.........] 55/100\n    - 1 doc(s) appear to be empty stubs (docs_guide) \u2192 flesh them out with real content or remove them\n    - CLAUDE.md does not reference docs_guide.md \u2192 link docs_guide.md from CLAUDE.md so agents discover the docs\n  Skills                    [##############......] 70/100\n    - Skill \"my-skill\": frontmatter missing required `name` field\n    - Skill \"my-skill\": frontmatter missing required `description` field\n  Setup (rules/agents/hooks) [########............] 40/100\n    - Hooks config invalid: no top-level `hooks` key\n  Cross-references          [##########..........] 50/100\n    - No file paths found in CLAUDE.md to validate\n\nMissing:\n  [ ] docs/conventions.md\n  [ ] docs/known_issues.md\n\nSuggestions:\n  1. Fix the hooks config in .claude/hooks.json \u2014 no top-level `hooks` key (an invalid hook silently never fires)\n  2. No AGENTS.md found \u2014 run `opsward generate --agents-md` to create cross-platform agent instructions (supported by 60,000+ projects)\n",
+      "tier": 1,
+      "usage": ""
+    },
+    {
+      "argv": [
+        "generate",
+        "tests/fixtures/bare_project"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "bare_project: 12 artifact(s)\n\n  Would create CLAUDE.md\n  Would create misc/docs/docs_guide.md\n  Would create misc/docs/architecture.md\n  Would create misc/docs/known_issues.md\n  Would create misc/docs/conventions.md\n  Would create misc/docs/roadmap.md\n  Would create misc/docs/decisions/0000-template.md\n  Would create .claude/agents/setup-auditor.md\n  Would create .claude/skills/opsward/SKILL.md\n  Would create .claude/skills/opsward-diagnose/SKILL.md\n  Would create .claude/skills/opsward-generate/SKILL.md\n  Would create .claude/skills/opsward-maintain/SKILL.md\n\nDry run \u2014 pass --write to create files.\n",
+      "tier": 1,
+      "usage": ""
+    },
+    {
+      "argv": [
+        "maintain",
+        "tests/fixtures/stale_project"
+      ],
+      "returncode": 1,
+      "stderr": "",
+      "stdout": "stale_project: 5 issue(s)\n\n  [stale_path] CLAUDE.md references `src/core.py` but it does not exist\n  [stale_path] CLAUDE.md references `src/utils.py` but it does not exist\n  [sync_issue] `unlisted_doc.md` exists in docs/ but is not listed in docs_guide.md\n    + | [unlisted_doc.md](unlisted_doc.md) | <!-- add description --> |\n  [sync_issue] docs_guide.md references `deleted_doc.md` but the file does not exist\n  [empty_doc] `conventions.md` appears to be an empty stub (37 bytes)\n\n",
+      "tier": 1,
+      "usage": ""
+    },
+    {
+      "argv": [
+        "recommend",
+        "tests/fixtures/python_project"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "python_project: no skill recommendations\n",
+      "tier": 1,
+      "usage": ""
+    },
+    {
+      "argv": [
+        "diagnose",
+        "tests/fixtures/bare_project",
+        "--min-score",
+        "0"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "Diagnosis Report: bare_project\nProject type: unknown\nOverall score: 0/100  (Grade: F)\n\nComponents:\n  CLAUDE.md quality         [....................] 0/100\n    - No CLAUDE.md found\n  Documentation             [....................] 0/100\n    - No documentation files found \u2192 run `opsward generate` to scaffold architecture/conventions docs\n  Skills                    [....................] 0/100\n    - No skills defined\n  Setup (rules/agents/hooks) [....................] 0/100\n    - No rules defined\n    - No agents defined\n    - No hooks configured\n  Cross-references          [....................] 0/100\n    - No CLAUDE.md\n\nMissing:\n  [ ] CLAUDE.md\n  [ ] docs_guide.md\n  [ ] docs/architecture.md\n  [ ] docs/conventions.md\n  [ ] docs/known_issues.md\n\nSuggestions:\n  1. Create a CLAUDE.md at the project root\n  2. Create a docs_guide.md to index your documentation\n  3. Consider adding skills in .claude/skills/ for recurring tasks\n  4. Add hooks in .claude/hooks.json \u2014 run `opsward generate --hooks` for starter templates (auto-format on PostToolUse, session context on SessionStart)\n",
+      "tier": 1,
+      "usage": ""
+    },
+    {
+      "argv": [
+        "diagnose",
+        "tests/fixtures/bare_project",
+        "--min-score=0"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "Diagnosis Report: bare_project\nProject type: unknown\nOverall score: 0/100  (Grade: F)\n\nComponents:\n  CLAUDE.md quality         [....................] 0/100\n    - No CLAUDE.md found\n  Documentation             [....................] 0/100\n    - No documentation files found \u2192 run `opsward generate` to scaffold architecture/conventions docs\n  Skills                    [....................] 0/100\n    - No skills defined\n  Setup (rules/agents/hooks) [....................] 0/100\n    - No rules defined\n    - No agents defined\n    - No hooks configured\n  Cross-references          [....................] 0/100\n    - No CLAUDE.md\n\nMissing:\n  [ ] CLAUDE.md\n  [ ] docs_guide.md\n  [ ] docs/architecture.md\n  [ ] docs/conventions.md\n  [ ] docs/known_issues.md\n\nSuggestions:\n  1. Create a CLAUDE.md at the project root\n  2. Create a docs_guide.md to index your documentation\n  3. Consider adding skills in .claude/skills/ for recurring tasks\n  4. Add hooks in .claude/hooks.json \u2014 run `opsward generate --hooks` for starter templates (auto-format on PostToolUse, session context on SessionStart)\n",
+      "tier": 1,
+      "usage": ""
+    },
+    {
+      "argv": [
+        "diagnose",
+        "tests/fixtures/bare_project",
+        "-m",
+        "0"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "Diagnosis Report: bare_project\nProject type: unknown\nOverall score: 0/100  (Grade: F)\n\nComponents:\n  CLAUDE.md quality         [....................] 0/100\n    - No CLAUDE.md found\n  Documentation             [....................] 0/100\n    - No documentation files found \u2192 run `opsward generate` to scaffold architecture/conventions docs\n  Skills                    [....................] 0/100\n    - No skills defined\n  Setup (rules/agents/hooks) [....................] 0/100\n    - No rules defined\n    - No agents defined\n    - No hooks configured\n  Cross-references          [....................] 0/100\n    - No CLAUDE.md\n\nMissing:\n  [ ] CLAUDE.md\n  [ ] docs_guide.md\n  [ ] docs/architecture.md\n  [ ] docs/conventions.md\n  [ ] docs/known_issues.md\n\nSuggestions:\n  1. Create a CLAUDE.md at the project root\n  2. Create a docs_guide.md to index your documentation\n  3. Consider adding skills in .claude/skills/ for recurring tasks\n  4. Add hooks in .claude/hooks.json \u2014 run `opsward generate --hooks` for starter templates (auto-format on PostToolUse, session context on SessionStart)\n",
+      "tier": 1,
+      "usage": ""
+    },
+    {
+      "argv": [
+        "diagnose",
+        "--verbose",
+        "tests/fixtures/python_project"
+      ],
+      "returncode": 1,
+      "stderr": "",
+      "stdout": "Diagnosis Report: python_project\nProject type: python\nOverall score: 54/100  (Grade: F)\n\nComponents:\n  CLAUDE.md quality         [##########..........] 49/100\n    - Commands: no code blocks found \u2192 add a fenced code block with the build, test, and run commands\n    - Architecture: no architecture/structure section found \u2192 add a '## Architecture' section mapping key modules to one-line descriptions\n    - Conventions: low specificity \u2192 name the tools (e.g. ruff), cite file extensions, and show code snippets\n  Documentation             [###########.........] 55/100\n    - 1 doc(s) appear to be empty stubs (docs_guide) \u2192 flesh them out with real content or remove them\n    - CLAUDE.md does not reference docs_guide.md \u2192 link docs_guide.md from CLAUDE.md so agents discover the docs\n  Skills                    [##############......] 70/100\n    - Skill \"my-skill\": frontmatter missing required `name` field\n    - Skill \"my-skill\": frontmatter missing required `description` field\n  Setup (rules/agents/hooks) [########............] 40/100\n    - Hooks config invalid: no top-level `hooks` key\n  Cross-references          [##########..........] 50/100\n    - No file paths found in CLAUDE.md to validate\n\nMissing:\n  [ ] docs/conventions.md\n  [ ] docs/known_issues.md\n\nSuggestions:\n  1. Fix the hooks config in .claude/hooks.json \u2014 no top-level `hooks` key (an invalid hook silently never fires)\n  2. No AGENTS.md found \u2014 run `opsward generate --agents-md` to create cross-platform agent instructions (supported by 60,000+ projects)\n\nDetailed inventory:\n  Skills:  1\n    - my-skill (SKILL.md: yes)\n  Agents:  1\n    - code-reviewer\n  Rules:   1\n    - no-print\n  Docs:    2\n    - architecture (54 bytes)\n    - docs_guide (44 bytes)\n  Hooks:   yes\n",
+      "tier": 1,
+      "usage": ""
+    },
+    {
+      "argv": [
+        "diagnose",
+        "-v",
+        "tests/fixtures/python_project"
+      ],
+      "returncode": 1,
+      "stderr": "",
+      "stdout": "Diagnosis Report: python_project\nProject type: python\nOverall score: 54/100  (Grade: F)\n\nComponents:\n  CLAUDE.md quality         [##########..........] 49/100\n    - Commands: no code blocks found \u2192 add a fenced code block with the build, test, and run commands\n    - Architecture: no architecture/structure section found \u2192 add a '## Architecture' section mapping key modules to one-line descriptions\n    - Conventions: low specificity \u2192 name the tools (e.g. ruff), cite file extensions, and show code snippets\n  Documentation             [###########.........] 55/100\n    - 1 doc(s) appear to be empty stubs (docs_guide) \u2192 flesh them out with real content or remove them\n    - CLAUDE.md does not reference docs_guide.md \u2192 link docs_guide.md from CLAUDE.md so agents discover the docs\n  Skills                    [##############......] 70/100\n    - Skill \"my-skill\": frontmatter missing required `name` field\n    - Skill \"my-skill\": frontmatter missing required `description` field\n  Setup (rules/agents/hooks) [########............] 40/100\n    - Hooks config invalid: no top-level `hooks` key\n  Cross-references          [##########..........] 50/100\n    - No file paths found in CLAUDE.md to validate\n\nMissing:\n  [ ] docs/conventions.md\n  [ ] docs/known_issues.md\n\nSuggestions:\n  1. Fix the hooks config in .claude/hooks.json \u2014 no top-level `hooks` key (an invalid hook silently never fires)\n  2. No AGENTS.md found \u2014 run `opsward generate --agents-md` to create cross-platform agent instructions (supported by 60,000+ projects)\n\nDetailed inventory:\n  Skills:  1\n    - my-skill (SKILL.md: yes)\n  Agents:  1\n    - code-reviewer\n  Rules:   1\n    - no-print\n  Docs:    2\n    - architecture (54 bytes)\n    - docs_guide (44 bytes)\n  Hooks:   yes\n",
+      "tier": 1,
+      "usage": ""
+    },
+    {
+      "argv": [
+        "diagnose",
+        "tests/fixtures/bare_project",
+        "--format",
+        "json-ish-typo",
+        "--min-score",
+        "0"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "Diagnosis Report: bare_project\nProject type: unknown\nOverall score: 0/100  (Grade: F)\n\nComponents:\n  CLAUDE.md quality         [....................] 0/100\n    - No CLAUDE.md found\n  Documentation             [....................] 0/100\n    - No documentation files found \u2192 run `opsward generate` to scaffold architecture/conventions docs\n  Skills                    [....................] 0/100\n    - No skills defined\n  Setup (rules/agents/hooks) [....................] 0/100\n    - No rules defined\n    - No agents defined\n    - No hooks configured\n  Cross-references          [....................] 0/100\n    - No CLAUDE.md\n\nMissing:\n  [ ] CLAUDE.md\n  [ ] docs_guide.md\n  [ ] docs/architecture.md\n  [ ] docs/conventions.md\n  [ ] docs/known_issues.md\n\nSuggestions:\n  1. Create a CLAUDE.md at the project root\n  2. Create a docs_guide.md to index your documentation\n  3. Consider adding skills in .claude/skills/ for recurring tasks\n  4. Add hooks in .claude/hooks.json \u2014 run `opsward generate --hooks` for starter templates (auto-format on PostToolUse, session context on SessionStart)\n",
+      "tier": 1,
+      "usage": ""
+    },
+    {
+      "argv": [
+        "diagnose",
+        "tests/fixtures/bare_project",
+        "tests/fixtures/python_project",
+        "--min-score",
+        "0"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "Diagnosis Report: bare_project\nProject type: unknown\nOverall score: 0/100  (Grade: F)\n\nComponents:\n  CLAUDE.md quality         [....................] 0/100\n    - No CLAUDE.md found\n  Documentation             [....................] 0/100\n    - No documentation files found \u2192 run `opsward generate` to scaffold architecture/conventions docs\n  Skills                    [....................] 0/100\n    - No skills defined\n  Setup (rules/agents/hooks) [....................] 0/100\n    - No rules defined\n    - No agents defined\n    - No hooks configured\n  Cross-references          [....................] 0/100\n    - No CLAUDE.md\n\nMissing:\n  [ ] CLAUDE.md\n  [ ] docs_guide.md\n  [ ] docs/architecture.md\n  [ ] docs/conventions.md\n  [ ] docs/known_issues.md\n\nSuggestions:\n  1. Create a CLAUDE.md at the project root\n  2. Create a docs_guide.md to index your documentation\n  3. Consider adding skills in .claude/skills/ for recurring tasks\n  4. Add hooks in .claude/hooks.json \u2014 run `opsward generate --hooks` for starter templates (auto-format on PostToolUse, session context on SessionStart)\n\n============================================================\n\nDiagnosis Report: python_project\nProject type: python\nOverall score: 54/100  (Grade: F)\n\nComponents:\n  CLAUDE.md quality         [##########..........] 49/100\n    - Commands: no code blocks found \u2192 add a fenced code block with the build, test, and run commands\n    - Architecture: no architecture/structure section found \u2192 add a '## Architecture' section mapping key modules to one-line descriptions\n    - Conventions: low specificity \u2192 name the tools (e.g. ruff), cite file extensions, and show code snippets\n  Documentation             [###########.........] 55/100\n    - 1 doc(s) appear to be empty stubs (docs_guide) \u2192 flesh them out with real content or remove them\n    - CLAUDE.md does not reference docs_guide.md \u2192 link docs_guide.md from CLAUDE.md so agents discover the docs\n  Skills                    [##############......] 70/100\n    - Skill \"my-skill\": frontmatter missing required `name` field\n    - Skill \"my-skill\": frontmatter missing required `description` field\n  Setup (rules/agents/hooks) [########............] 40/100\n    - Hooks config invalid: no top-level `hooks` key\n  Cross-references          [##########..........] 50/100\n    - No file paths found in CLAUDE.md to validate\n\nMissing:\n  [ ] docs/conventions.md\n  [ ] docs/known_issues.md\n\nSuggestions:\n  1. Fix the hooks config in .claude/hooks.json \u2014 no top-level `hooks` key (an invalid hook silently never fires)\n  2. No AGENTS.md found \u2014 run `opsward generate --agents-md` to create cross-platform agent instructions (supported by 60,000+ projects)\n",
+      "tier": 1,
+      "usage": ""
+    },
+    {
+      "argv": [
+        "generate",
+        "tests/fixtures/bare_project",
+        "--agents-md",
+        "--hooks"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "bare_project: 14 artifact(s)\n\n  Would create CLAUDE.md\n  Would create misc/docs/docs_guide.md\n  Would create misc/docs/architecture.md\n  Would create misc/docs/known_issues.md\n  Would create misc/docs/conventions.md\n  Would create misc/docs/roadmap.md\n  Would create misc/docs/decisions/0000-template.md\n  Would create .claude/agents/setup-auditor.md\n  Would create .claude/skills/opsward/SKILL.md\n  Would create .claude/skills/opsward-diagnose/SKILL.md\n  Would create .claude/skills/opsward-generate/SKILL.md\n  Would create .claude/skills/opsward-maintain/SKILL.md\n  Would create AGENTS.md\n  Would create .claude/hooks.json\n\nDry run \u2014 pass --write to create files.\n",
+      "tier": 1,
+      "usage": ""
+    },
+    {
+      "argv": [
+        "generate",
+        "tests/fixtures/bare_project",
+        "-a"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "bare_project: 13 artifact(s)\n\n  Would create CLAUDE.md\n  Would create misc/docs/docs_guide.md\n  Would create misc/docs/architecture.md\n  Would create misc/docs/known_issues.md\n  Would create misc/docs/conventions.md\n  Would create misc/docs/roadmap.md\n  Would create misc/docs/decisions/0000-template.md\n  Would create .claude/agents/setup-auditor.md\n  Would create .claude/skills/opsward/SKILL.md\n  Would create .claude/skills/opsward-diagnose/SKILL.md\n  Would create .claude/skills/opsward-generate/SKILL.md\n  Would create .claude/skills/opsward-maintain/SKILL.md\n  Would create AGENTS.md\n\nDry run \u2014 pass --write to create files.\n",
+      "tier": 1,
+      "usage": ""
+    },
+    {
+      "argv": [
+        "install-skills",
+        "--target"
+      ],
+      "returncode": 2,
+      "stderr": "usage: opsward install-skills [-h] [-t TARGET] [-g] [-a] [-w]\nopsward install-skills: error: argument -t/--target: expected one argument\n",
+      "stdout": "",
+      "tier": 1,
+      "usage": "usage: opsward install-skills [-h] [-t TARGET] [-g] [-a] [-w] opsward install-skills: error: argument -t/--target: expected one argument"
+    },
+    {
+      "argv": [
+        "install-skills",
+        "-t"
+      ],
+      "returncode": 2,
+      "stderr": "usage: opsward install-skills [-h] [-t TARGET] [-g] [-a] [-w]\nopsward install-skills: error: argument -t/--target: expected one argument\n",
+      "stdout": "",
+      "tier": 1,
+      "usage": "usage: opsward install-skills [-h] [-t TARGET] [-g] [-a] [-w] opsward install-skills: error: argument -t/--target: expected one argument"
+    },
+    {
+      "argv": [],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find} ...\n",
+      "tier": 1,
+      "usage": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find} ..."
+    },
+    {
+      "argv": [
+        "nosuchcommand"
+      ],
+      "returncode": 2,
+      "stderr": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find} ...\nopsward: error: argument {diagnose,generate,maintain,recommend,install-skills,find}: invalid choice: 'nosuchcommand' (choose from 'diagnose', 'generate', 'maintain', 'recommend', 'install-skills', 'find')\n",
+      "stdout": "",
+      "tier": 1,
+      "usage": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find} ... opsward: error: argument {diagnose,generate,maintain,recommend,install-skills,find}: invalid choice: 'nosuchcommand' (choose from 'diagnose', 'generate', 'maintain', 'recommend', 'install-skills', 'find')"
+    },
+    {
+      "argv": [
+        "diagnose",
+        "--nosuchflag"
+      ],
+      "returncode": 2,
+      "stderr": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find} ...\nopsward: error: unrecognized arguments: --nosuchflag\n",
+      "stdout": "",
+      "tier": 1,
+      "usage": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find} ... opsward: error: unrecognized arguments: --nosuchflag"
+    },
+    {
+      "argv": [
+        "diagnose",
+        "--min-score"
+      ],
+      "returncode": 2,
+      "stderr": "usage: opsward diagnose [-h] [-f FORMAT] [-v] [-m MIN_SCORE] [project-roots ...]\nopsward diagnose: error: argument -m/--min-score: expected one argument\n",
+      "stdout": "",
+      "tier": 1,
+      "usage": "usage: opsward diagnose [-h] [-f FORMAT] [-v] [-m MIN_SCORE] [project-roots ...] opsward diagnose: error: argument -m/--min-score: expected one argument"
+    },
+    {
+      "argv": [
+        "diagnose",
+        "tests/fixtures/bare_project",
+        "--min-score",
+        "notanint"
+      ],
+      "returncode": 2,
+      "stderr": "usage: opsward diagnose [-h] [-f FORMAT] [-v] [-m MIN_SCORE] [project-roots ...]\nopsward diagnose: error: argument -m/--min-score: invalid int value: 'notanint'\n",
+      "stdout": "",
+      "tier": 1,
+      "usage": "usage: opsward diagnose [-h] [-f FORMAT] [-v] [-m MIN_SCORE] [project-roots ...] opsward diagnose: error: argument -m/--min-score: invalid int value: 'notanint'"
+    },
+    {
+      "argv": [
+        "generate",
+        "--write",
+        "--nosuchflag",
+        "tests/fixtures/bare_project"
+      ],
+      "returncode": 2,
+      "stderr": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find} ...\nopsward: error: unrecognized arguments: --nosuchflag\n",
+      "stdout": "",
+      "tier": 1,
+      "usage": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find} ... opsward: error: unrecognized arguments: --nosuchflag"
+    },
+    {
+      "argv": [
+        "find"
+      ],
+      "returncode": 2,
+      "stderr": "usage: opsward find [-h] [-k KINDS] [-s] [-l LIMIT] query [project-roots ...]\nopsward find: error: the following arguments are required: query, project-roots\n",
+      "stdout": "",
+      "tier": 1,
+      "usage": "usage: opsward find [-h] [-k KINDS] [-s] [-l LIMIT] query [project-roots ...] opsward find: error: the following arguments are required: query, project-roots"
+    },
+    {
+      "argv": [
+        "diagnose",
+        "./no/such/directory/opsward-characterization"
+      ],
+      "returncode": 2,
+      "stderr": "Error: ./no/such/directory/opsward-characterization is not a directory\n",
+      "stdout": "",
+      "tier": 1,
+      "usage": ""
+    }
+  ],
+  "cw_golden": 1,
+  "env": {
+    "COLUMNS": "100",
+    "NO_COLOR": "1",
+    "PYTHONHASHSEED": "0",
+    "PYTHONIOENCODING": "utf-8",
+    "PYTHONUTF8": "1",
+    "TERM": "dumb"
+  },
+  "newlines": "lf",
+  "note": "argh 0.31.3, opsward 4e0b04f, pre-cw-migration, CPython 3.10",
+  "prog": [
+    "opsward"
+  ],
+  "recorded_with": {
+    "implementation": "CPython",
+    "platform": "Darwin",
+    "python": "3.10.13"
+  }
+}

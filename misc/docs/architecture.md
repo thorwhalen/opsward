@@ -62,7 +62,7 @@ Generated artifacts include CLAUDE.md, docs, skills, agents, and rules. Future: 
 | `generate.py` | Template loading + rendering | `ScanResult → list[GeneratedFile]` |
 | `maintain.py` | Drift/staleness detection | `ScanResult → list[MaintenanceSuggestion]` |
 | `base.py` | All dataclasses and type definitions | (no I/O) |
-| `cli.py` | argh dispatch + pretty-printing | stdin/stdout |
+| `cli.py` | command functions + pretty-printing | stdin/stdout |
 | `util.py` | Shared helpers | (internal) |
 
 ## Key Invariants
