@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>opsward.score &mdash; opsward 0.0.10 documentation</title>
+  <title>opsward.score &mdash; opsward 0.0.11 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -15,7 +15,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=a83ce22a"></script>
+      <script src="../../_static/documentation_options.js?v=0c446633"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -103,9 +103,9 @@
 <dd><p>Score a ScanResult and return a DiagnosisReport.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">opsward.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScanResult</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">diagnose</span><span class="p">(</span><span class="n">ScanResult</span><span class="p">(</span><span class="n">project_root</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s1">&#39;/tmp/empty&#39;</span><span class="p">)))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">diagnose</span><span class="p">(</span><span class="n">ScanResult</span><span class="p">(</span><span class="n">project_root</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s1">'/tmp/empty'</span><span class="p">)))</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="o">.</span><span class="n">grade</span>
-<span class="go">&#39;F&#39;</span>
+<span class="go">'F'</span>
 </pre></div>
 </div>
 </dd></dl>
@@ -118,14 +118,14 @@
 the silent-failure traps: a non-string <code class="docutils literal notranslate"><span class="pre">matcher</span></code>, an unknown event name,
 or an entry with no runnable <code class="docutils literal notranslate"><span class="pre">command</span></code> hook — none of which Claude Code
 honors, so the hook never fires even though the file “looks” configured.</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">validate_hooks_config</span><span class="p">({</span><span class="s1">&#39;hooks&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;PostToolUse&#39;</span><span class="p">:</span> <span class="p">[</span>
-<span class="gp">... </span>    <span class="p">{</span><span class="s1">&#39;matcher&#39;</span><span class="p">:</span> <span class="s1">&#39;Edit&#39;</span><span class="p">,</span> <span class="s1">&#39;hooks&#39;</span><span class="p">:</span> <span class="p">[{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;command&#39;</span><span class="p">,</span> <span class="s1">&#39;command&#39;</span><span class="p">:</span> <span class="s1">&#39;x&#39;</span><span class="p">}]}]}})</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">validate_hooks_config</span><span class="p">({</span><span class="s1">'hooks'</span><span class="p">:</span> <span class="p">{</span><span class="s1">'PostToolUse'</span><span class="p">:</span> <span class="p">[</span>
+<span class="gp">... </span>    <span class="p">{</span><span class="s1">'matcher'</span><span class="p">:</span> <span class="s1">'Edit'</span><span class="p">,</span> <span class="s1">'hooks'</span><span class="p">:</span> <span class="p">[{</span><span class="s1">'type'</span><span class="p">:</span> <span class="s1">'command'</span><span class="p">,</span> <span class="s1">'command'</span><span class="p">:</span> <span class="s1">'x'</span><span class="p">}]}]}})</span>
 <span class="go">[]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">validate_hooks_config</span><span class="p">({</span><span class="s1">&#39;pre_commit&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;ruff&#39;</span><span class="p">]})</span>
-<span class="go">[&#39;no top-level `hooks` key&#39;]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="s1">&#39;matcher&#39;</span> <span class="ow">in</span> <span class="n">validate_hooks_config</span><span class="p">({</span><span class="s1">&#39;hooks&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;PostToolUse&#39;</span><span class="p">:</span> <span class="p">[</span>
-<span class="gp">... </span>    <span class="p">{</span><span class="s1">&#39;matcher&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;tool_name&#39;</span><span class="p">:</span> <span class="s1">&#39;Edit&#39;</span><span class="p">},</span> <span class="s1">&#39;hooks&#39;</span><span class="p">:</span> <span class="p">[</span>
-<span class="gp">... </span>        <span class="p">{</span><span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="s1">&#39;command&#39;</span><span class="p">,</span> <span class="s1">&#39;command&#39;</span><span class="p">:</span> <span class="s1">&#39;x&#39;</span><span class="p">}]}]}})[</span><span class="mi">0</span><span class="p">]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">validate_hooks_config</span><span class="p">({</span><span class="s1">'pre_commit'</span><span class="p">:</span> <span class="p">[</span><span class="s1">'ruff'</span><span class="p">]})</span>
+<span class="go">['no top-level `hooks` key']</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="s1">'matcher'</span> <span class="ow">in</span> <span class="n">validate_hooks_config</span><span class="p">({</span><span class="s1">'hooks'</span><span class="p">:</span> <span class="p">{</span><span class="s1">'PostToolUse'</span><span class="p">:</span> <span class="p">[</span>
+<span class="gp">... </span>    <span class="p">{</span><span class="s1">'matcher'</span><span class="p">:</span> <span class="p">{</span><span class="s1">'tool_name'</span><span class="p">:</span> <span class="s1">'Edit'</span><span class="p">},</span> <span class="s1">'hooks'</span><span class="p">:</span> <span class="p">[</span>
+<span class="gp">... </span>        <span class="p">{</span><span class="s1">'type'</span><span class="p">:</span> <span class="s1">'command'</span><span class="p">,</span> <span class="s1">'command'</span><span class="p">:</span> <span class="s1">'x'</span><span class="p">}]}]}})[</span><span class="mi">0</span><span class="p">]</span>
 <span class="go">True</span>
 </pre></div>
 </div>
@@ -138,8 +138,8 @@ honors, so the hook never fires even though the file “looks” configured.</p>
 <p>Returns a list of human-readable violation strings (empty = compliant).</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">opsward.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">SkillInfo</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">SkillInfo</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;good-skill&#39;</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">),</span> <span class="n">has_skill_md</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="n">frontmatter</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;good-skill&#39;</span><span class="p">,</span> <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Does X.&#39;</span><span class="p">},</span> <span class="n">line_count</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">SkillInfo</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">'good-skill'</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s1">'.'</span><span class="p">),</span> <span class="n">has_skill_md</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">frontmatter</span><span class="o">=</span><span class="p">{</span><span class="s1">'name'</span><span class="p">:</span> <span class="s1">'good-skill'</span><span class="p">,</span> <span class="s1">'description'</span><span class="p">:</span> <span class="s1">'Does X.'</span><span class="p">},</span> <span class="n">line_count</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">validate_skill_spec</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
 <span class="go">[]</span>
 </pre></div>

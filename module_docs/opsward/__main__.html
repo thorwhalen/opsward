@@ -6,7 +6,7 @@
   <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>opsward.__main__ &mdash; opsward 0.0.10 documentation</title>
+  <title>opsward.__main__ &mdash; opsward 0.0.11 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -15,7 +15,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=a83ce22a"></script>
+      <script src="../../_static/documentation_options.js?v=0c446633"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -50,7 +50,10 @@
               <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
 <ul class="current">
 <li class="toctree-l1"><a class="reference internal" href="../opsward.html">opsward</a></li>
-<li class="toctree-l1 current"><a class="current reference internal" href="#">opsward.__main__</a></li>
+<li class="toctree-l1 current"><a class="current reference internal" href="#">opsward.__main__</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#opsward.__main__.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
+</ul>
+</li>
 <li class="toctree-l1"><a class="reference internal" href="base.html">opsward.base</a></li>
 <li class="toctree-l1"><a class="reference internal" href="cli.html">opsward.cli</a></li>
 <li class="toctree-l1"><a class="reference internal" href="data.html">opsward.data</a></li>
@@ -90,7 +93,20 @@
              
   <section id="module-opsward.__main__">
 <span id="opsward-main"></span><h1>opsward.__main__<a class="headerlink" href="#module-opsward.__main__" title="Link to this heading"></a></h1>
-<p>CLI entry point: python -m opsward.</p>
+<p>CLI entry point: <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">opsward</span></code> and the <code class="docutils literal notranslate"><span class="pre">opsward</span></code> console script.</p>
+<p>The command list is <code class="xref py py-data docutils literal notranslate"><span class="pre">opsward.cli._dispatch_funcs</span></code> – one SSOT, no per-command
+registration here. <code class="xref py py-func docutils literal notranslate"><span class="pre">cw.dispatch()</span></code> turns it into an <code class="docutils literal notranslate"><span class="pre">argparse</span></code> parser and runs it,
+reproducing the grammar this CLI has always had (pinned by <code class="docutils literal notranslate"><span class="pre">misc/cli_golden_py*.json</span></code>
+and asserted by <code class="docutils literal notranslate"><span class="pre">tests/test_cli_parity.py</span></code>).</p>
+<p><code class="docutils literal notranslate"><span class="pre">prog</span></code> is deliberately not passed: leaving it to <code class="docutils literal notranslate"><span class="pre">argparse</span></code> keeps the program name
+derived from <code class="docutils literal notranslate"><span class="pre">sys.argv[0]</span></code>, so <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">-m</span> <span class="pre">opsward</span></code> still reports <code class="docutils literal notranslate"><span class="pre">__main__.py</span></code> and
+the console script still reports <code class="docutils literal notranslate"><span class="pre">opsward</span></code>, exactly as before.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="opsward.__main__.main">
+<span class="sig-prename descclassname"><span class="pre">opsward.__main__.</span></span><span class="sig-name descname"><span class="pre">main</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/opsward/__main__.html#main"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.__main__.main" title="Link to this definition"></a></dt>
+<dd><p>Parse <code class="docutils literal notranslate"><span class="pre">sys.argv</span></code> and run the command it names; return its exit code.</p>
+</dd></dl>
+
 </section>
 
 

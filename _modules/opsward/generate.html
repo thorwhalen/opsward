@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>opsward.generate &mdash; opsward 0.0.10 documentation</title>
+  <title>opsward.generate &mdash; opsward 0.0.11 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=a83ce22a"></script>
+      <script src="../../_static/documentation_options.js?v=0c446633"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -86,10 +86,10 @@
            <div itemprop="articleBody">
              
   <h1>Source code for opsward.generate</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Template loading and generation. ScanResult -&gt; list[GeneratedFile].</span>
+<span></span><span class="sd">"""Template loading and generation. ScanResult -&gt; list[GeneratedFile].</span>
 
-<span class="sd">Never overwrites existing files (overwrite_policy=&#39;skip&#39; by default).</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Never overwrites existing files (overwrite_policy='skip' by default).</span>
+<span class="sd">"""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">ast</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">importlib.resources</span>
@@ -100,22 +100,22 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">opsward.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_text_safe</span>
 
 <span class="c1"># Names never shown in a module map (VCS, caches, build/vendor output)</span>
-<span class="n">_MAP_SKIP_NAMES</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="s2">&quot;node_modules&quot;</span><span class="p">,</span> <span class="s2">&quot;__pycache__&quot;</span><span class="p">,</span> <span class="s2">&quot;.git&quot;</span><span class="p">,</span> <span class="s2">&quot;dist&quot;</span><span class="p">,</span> <span class="s2">&quot;build&quot;</span><span class="p">})</span>
+<span class="n">_MAP_SKIP_NAMES</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="s2">"node_modules"</span><span class="p">,</span> <span class="s2">"__pycache__"</span><span class="p">,</span> <span class="s2">".git"</span><span class="p">,</span> <span class="s2">"dist"</span><span class="p">,</span> <span class="s2">"build"</span><span class="p">})</span>
 <span class="c1"># Top-level files worth listing in a module map (config + source)</span>
-<span class="n">_MAP_FILE_SUFFIXES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;.py&quot;</span><span class="p">,</span> <span class="s2">&quot;.ts&quot;</span><span class="p">,</span> <span class="s2">&quot;.js&quot;</span><span class="p">,</span> <span class="s2">&quot;.json&quot;</span><span class="p">,</span> <span class="s2">&quot;.toml&quot;</span><span class="p">,</span> <span class="s2">&quot;.yaml&quot;</span><span class="p">,</span> <span class="s2">&quot;.yml&quot;</span><span class="p">)</span>
+<span class="n">_MAP_FILE_SUFFIXES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">".py"</span><span class="p">,</span> <span class="s2">".ts"</span><span class="p">,</span> <span class="s2">".js"</span><span class="p">,</span> <span class="s2">".json"</span><span class="p">,</span> <span class="s2">".toml"</span><span class="p">,</span> <span class="s2">".yaml"</span><span class="p">,</span> <span class="s2">".yml"</span><span class="p">)</span>
 <span class="c1"># Stand-in when no description can be honestly derived (user fills it in)</span>
-<span class="n">_DESCRIBE_PLACEHOLDER</span> <span class="o">=</span> <span class="s2">&quot;&lt;!-- describe --&gt;&quot;</span>
+<span class="n">_DESCRIBE_PLACEHOLDER</span> <span class="o">=</span> <span class="s2">"&lt;!-- describe --&gt;"</span>
 
 <span class="c1"># Skills that opsward installs — each maps to shared/&lt;name&gt;/SKILL.md template</span>
 <span class="n">_SKILL_NAMES</span> <span class="o">=</span> <span class="p">(</span>
-    <span class="s2">&quot;opsward&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;opsward-diagnose&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;opsward-generate&quot;</span><span class="p">,</span>
-    <span class="s2">&quot;opsward-maintain&quot;</span><span class="p">,</span>
+    <span class="s2">"opsward"</span><span class="p">,</span>
+    <span class="s2">"opsward-diagnose"</span><span class="p">,</span>
+    <span class="s2">"opsward-generate"</span><span class="p">,</span>
+    <span class="s2">"opsward-maintain"</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="c1"># Agent definitions that opsward installs</span>
-<span class="n">_AGENT_NAMES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">&quot;setup-auditor&quot;</span><span class="p">,)</span>
+<span class="n">_AGENT_NAMES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"setup-auditor"</span><span class="p">,)</span>
 
 
 <div class="viewcode-block" id="generate">
@@ -126,14 +126,14 @@
     <span class="n">agents_md</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">hooks</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">GeneratedFile</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Determine which artifacts are missing, render templates, return files to create.</span>
+<span class="w">    </span><span class="sd">"""Determine which artifacts are missing, render templates, return files to create.</span>
 
 <span class="sd">    &gt;&gt;&gt; from pathlib import Path</span>
 <span class="sd">    &gt;&gt;&gt; from opsward.base import ScanResult</span>
-<span class="sd">    &gt;&gt;&gt; files = generate(ScanResult(project_root=Path(&#39;/tmp/empty&#39;)))</span>
-<span class="sd">    &gt;&gt;&gt; any(f.target_path.name == &#39;CLAUDE.md&#39; for f in files)</span>
+<span class="sd">    &gt;&gt;&gt; files = generate(ScanResult(project_root=Path('/tmp/empty')))</span>
+<span class="sd">    &gt;&gt;&gt; any(f.target_path.name == 'CLAUDE.md' for f in files)</span>
 <span class="sd">    True</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">sr</span> <span class="o">=</span> <span class="n">scan_result</span>
     <span class="n">variables</span> <span class="o">=</span> <span class="n">_build_variables</span><span class="p">(</span><span class="n">sr</span><span class="p">)</span>
     <span class="n">docs_path</span> <span class="o">=</span> <span class="n">_docs_path</span><span class="p">(</span><span class="n">sr</span><span class="o">.</span><span class="n">project_type</span><span class="p">)</span>
@@ -147,42 +147,42 @@
     <span class="k">if</span> <span class="n">sr</span><span class="o">.</span><span class="n">claude_md_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
             <span class="n">_render</span><span class="p">(</span>
-                <span class="s2">&quot;shared/claude_md.md&quot;</span><span class="p">,</span>
-                <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span> <span class="o">/</span> <span class="s2">&quot;CLAUDE.md&quot;</span><span class="p">,</span>
+                <span class="s2">"shared/claude_md.md"</span><span class="p">,</span>
+                <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span> <span class="o">/</span> <span class="s2">"CLAUDE.md"</span><span class="p">,</span>
                 <span class="n">variables</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="p">)</span>
 
     <span class="c1"># ---- Documentation layer ----</span>
     <span class="c1"># Always-generated docs</span>
-    <span class="k">for</span> <span class="n">doc_name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;docs_guide&quot;</span><span class="p">,</span> <span class="s2">&quot;architecture&quot;</span><span class="p">,</span> <span class="s2">&quot;known_issues&quot;</span><span class="p">,</span> <span class="s2">&quot;conventions&quot;</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">doc_name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"docs_guide"</span><span class="p">,</span> <span class="s2">"architecture"</span><span class="p">,</span> <span class="s2">"known_issues"</span><span class="p">,</span> <span class="s2">"conventions"</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">doc_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">existing_docs</span><span class="p">:</span>
             <span class="n">template_name</span> <span class="o">=</span> <span class="n">_template_for_doc</span><span class="p">(</span><span class="n">doc_name</span><span class="p">,</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_type</span><span class="p">)</span>
-            <span class="n">target</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span> <span class="o">/</span> <span class="n">docs_path</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">doc_name</span><span class="si">}</span><span class="s2">.md&quot;</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span> <span class="o">/</span> <span class="n">docs_path</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">doc_name</span><span class="si">}</span><span class="s2">.md"</span>
             <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_render</span><span class="p">(</span><span class="n">template_name</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">variables</span><span class="p">))</span>
 
     <span class="c1"># Conditional docs</span>
-    <span class="k">if</span> <span class="n">_has_tests</span><span class="p">(</span><span class="n">sr</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;testing&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">existing_docs</span><span class="p">:</span>
-        <span class="n">template_name</span> <span class="o">=</span> <span class="n">_template_for_doc</span><span class="p">(</span><span class="s2">&quot;testing&quot;</span><span class="p">,</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_type</span><span class="p">)</span>
-        <span class="n">target</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span> <span class="o">/</span> <span class="n">docs_path</span> <span class="o">/</span> <span class="s2">&quot;testing.md&quot;</span>
+    <span class="k">if</span> <span class="n">_has_tests</span><span class="p">(</span><span class="n">sr</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">"testing"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">existing_docs</span><span class="p">:</span>
+        <span class="n">template_name</span> <span class="o">=</span> <span class="n">_template_for_doc</span><span class="p">(</span><span class="s2">"testing"</span><span class="p">,</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_type</span><span class="p">)</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span> <span class="o">/</span> <span class="n">docs_path</span> <span class="o">/</span> <span class="s2">"testing.md"</span>
         <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_render</span><span class="p">(</span><span class="n">template_name</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">variables</span><span class="p">))</span>
 
-    <span class="k">if</span> <span class="n">_has_deploy_artifacts</span><span class="p">(</span><span class="n">sr</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">&quot;deployment&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">existing_docs</span><span class="p">:</span>
-        <span class="n">target</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span> <span class="o">/</span> <span class="n">docs_path</span> <span class="o">/</span> <span class="s2">&quot;deployment.md&quot;</span>
-        <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_render</span><span class="p">(</span><span class="s2">&quot;shared/deployment.md&quot;</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">variables</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">_has_deploy_artifacts</span><span class="p">(</span><span class="n">sr</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">"deployment"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">existing_docs</span><span class="p">:</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span> <span class="o">/</span> <span class="n">docs_path</span> <span class="o">/</span> <span class="s2">"deployment.md"</span>
+        <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_render</span><span class="p">(</span><span class="s2">"shared/deployment.md"</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">variables</span><span class="p">))</span>
 
     <span class="c1"># Offered docs (always generated if missing, low priority)</span>
-    <span class="k">if</span> <span class="s2">&quot;roadmap&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">existing_docs</span><span class="p">:</span>
-        <span class="n">target</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span> <span class="o">/</span> <span class="n">docs_path</span> <span class="o">/</span> <span class="s2">&quot;roadmap.md&quot;</span>
-        <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_render</span><span class="p">(</span><span class="s2">&quot;shared/roadmap.md&quot;</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">variables</span><span class="p">))</span>
+    <span class="k">if</span> <span class="s2">"roadmap"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">existing_docs</span><span class="p">:</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span> <span class="o">/</span> <span class="n">docs_path</span> <span class="o">/</span> <span class="s2">"roadmap.md"</span>
+        <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_render</span><span class="p">(</span><span class="s2">"shared/roadmap.md"</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">variables</span><span class="p">))</span>
 
     <span class="c1"># Decisions template</span>
-    <span class="n">decisions_dir</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span> <span class="o">/</span> <span class="n">docs_path</span> <span class="o">/</span> <span class="s2">&quot;decisions&quot;</span>
-    <span class="n">template_target</span> <span class="o">=</span> <span class="n">decisions_dir</span> <span class="o">/</span> <span class="s2">&quot;0000-template.md&quot;</span>
+    <span class="n">decisions_dir</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span> <span class="o">/</span> <span class="n">docs_path</span> <span class="o">/</span> <span class="s2">"decisions"</span>
+    <span class="n">template_target</span> <span class="o">=</span> <span class="n">decisions_dir</span> <span class="o">/</span> <span class="s2">"0000-template.md"</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">template_target</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
         <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
             <span class="n">_render</span><span class="p">(</span>
-                <span class="s2">&quot;shared/decisions/0000-template.md&quot;</span><span class="p">,</span>
+                <span class="s2">"shared/decisions/0000-template.md"</span><span class="p">,</span>
                 <span class="n">template_target</span><span class="p">,</span>
                 <span class="n">variables</span><span class="p">,</span>
             <span class="p">)</span>
@@ -190,17 +190,17 @@
 
     <span class="c1"># ---- AI configuration layer ----</span>
     <span class="c1"># setup-auditor agent</span>
-    <span class="k">if</span> <span class="s2">&quot;setup-auditor&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">existing_agents</span><span class="p">:</span>
-        <span class="n">target</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span> <span class="o">/</span> <span class="s2">&quot;.claude&quot;</span> <span class="o">/</span> <span class="s2">&quot;agents&quot;</span> <span class="o">/</span> <span class="s2">&quot;setup-auditor.md&quot;</span>
-        <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_render</span><span class="p">(</span><span class="s2">&quot;shared/setup-auditor.md&quot;</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">variables</span><span class="p">))</span>
+    <span class="k">if</span> <span class="s2">"setup-auditor"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">existing_agents</span><span class="p">:</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span> <span class="o">/</span> <span class="s2">".claude"</span> <span class="o">/</span> <span class="s2">"agents"</span> <span class="o">/</span> <span class="s2">"setup-auditor.md"</span>
+        <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_render</span><span class="p">(</span><span class="s2">"shared/setup-auditor.md"</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">variables</span><span class="p">))</span>
 
     <span class="c1"># AI-enhanced skills (invoke opsward CLI + Claude interpretation)</span>
     <span class="k">for</span> <span class="n">skill_name</span> <span class="ow">in</span> <span class="n">_SKILL_NAMES</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">skill_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">existing_skills</span><span class="p">:</span>
-            <span class="n">target</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span> <span class="o">/</span> <span class="s2">&quot;.claude&quot;</span> <span class="o">/</span> <span class="s2">&quot;skills&quot;</span> <span class="o">/</span> <span class="n">skill_name</span> <span class="o">/</span> <span class="s2">&quot;SKILL.md&quot;</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span> <span class="o">/</span> <span class="s2">".claude"</span> <span class="o">/</span> <span class="s2">"skills"</span> <span class="o">/</span> <span class="n">skill_name</span> <span class="o">/</span> <span class="s2">"SKILL.md"</span>
             <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="n">_render</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;shared/</span><span class="si">{</span><span class="n">skill_name</span><span class="si">}</span><span class="s2">/SKILL.md&quot;</span><span class="p">,</span>
+                    <span class="sa">f</span><span class="s2">"shared/</span><span class="si">{</span><span class="n">skill_name</span><span class="si">}</span><span class="s2">/SKILL.md"</span><span class="p">,</span>
                     <span class="n">target</span><span class="p">,</span>
                     <span class="n">variables</span><span class="p">,</span>
                 <span class="p">)</span>
@@ -210,15 +210,15 @@
     <span class="k">if</span> <span class="n">agents_md</span> <span class="ow">and</span> <span class="n">sr</span><span class="o">.</span><span class="n">agents_md_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
             <span class="n">_render</span><span class="p">(</span>
-                <span class="s2">&quot;shared/agents_md.md&quot;</span><span class="p">,</span>
-                <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span> <span class="o">/</span> <span class="s2">&quot;AGENTS.md&quot;</span><span class="p">,</span>
+                <span class="s2">"shared/agents_md.md"</span><span class="p">,</span>
+                <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span> <span class="o">/</span> <span class="s2">"AGENTS.md"</span><span class="p">,</span>
                 <span class="n">variables</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="p">)</span>
 
     <span class="c1"># ---- Hook scaffolding ----</span>
     <span class="k">if</span> <span class="n">hooks</span> <span class="ow">and</span> <span class="n">sr</span><span class="o">.</span><span class="n">hooks_config</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">hooks_file</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span> <span class="o">/</span> <span class="s2">&quot;.claude&quot;</span> <span class="o">/</span> <span class="s2">&quot;hooks.json&quot;</span>
+        <span class="n">hooks_file</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span> <span class="o">/</span> <span class="s2">".claude"</span> <span class="o">/</span> <span class="s2">"hooks.json"</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">hooks_file</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
             <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
                 <span class="n">GeneratedFile</span><span class="p">(</span>
@@ -237,9 +237,9 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_load_template</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load a template file from opsward.data.templates.&quot;&quot;&quot;</span>
-    <span class="n">templates</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">files</span><span class="p">(</span><span class="s2">&quot;opsward.data.templates&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="p">(</span><span class="n">templates</span> <span class="o">/</span> <span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+<span class="w">    </span><span class="sd">"""Load a template file from opsward.data.templates."""</span>
+    <span class="n">templates</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">resources</span><span class="o">.</span><span class="n">files</span><span class="p">(</span><span class="s2">"opsward.data.templates"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">templates</span> <span class="o">/</span> <span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_render</span><span class="p">(</span>
@@ -247,7 +247,7 @@
     <span class="n">target_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span>
     <span class="n">variables</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GeneratedFile</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load template, substitute variables, return a GeneratedFile.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Load template, substitute variables, return a GeneratedFile."""</span>
     <span class="n">raw</span> <span class="o">=</span> <span class="n">_load_template</span><span class="p">(</span><span class="n">template_name</span><span class="p">)</span>
     <span class="c1"># Use safe_substitute so unset variables remain as ${name} (valid markdown)</span>
     <span class="n">content</span> <span class="o">=</span> <span class="n">Template</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span><span class="o">.</span><span class="n">safe_substitute</span><span class="p">(</span><span class="n">variables</span><span class="p">)</span>
@@ -267,28 +267,28 @@
     <span class="n">scan_result</span><span class="p">:</span> <span class="n">ScanResult</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">include_agents</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">GeneratedFile</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Generate only the opsward skill and agent files for *target_dir*.</span>
+<span class="w">    </span><span class="sd">"""Generate only the opsward skill and agent files for *target_dir*.</span>
 
 <span class="sd">    If *scan_result* is provided, template variables are substituted from the</span>
 <span class="sd">    scan.  Otherwise templates are rendered without project-specific</span>
 <span class="sd">    substitution (suitable for global ``~/.claude/`` installation).</span>
 
 <span class="sd">    &gt;&gt;&gt; from pathlib import Path</span>
-<span class="sd">    &gt;&gt;&gt; files = generate_skills(Path(&#39;/tmp/test&#39;))</span>
-<span class="sd">    &gt;&gt;&gt; any(&#39;opsward-diagnose&#39; in str(f.target_path) for f in files)</span>
+<span class="sd">    &gt;&gt;&gt; files = generate_skills(Path('/tmp/test'))</span>
+<span class="sd">    &gt;&gt;&gt; any('opsward-diagnose' in str(f.target_path) for f in files)</span>
 <span class="sd">    True</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">variables</span> <span class="o">=</span> <span class="n">_build_variables</span><span class="p">(</span><span class="n">scan_result</span><span class="p">)</span> <span class="k">if</span> <span class="n">scan_result</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">{}</span>
     <span class="n">files</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">GeneratedFile</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">for</span> <span class="n">skill_name</span> <span class="ow">in</span> <span class="n">_SKILL_NAMES</span><span class="p">:</span>
-        <span class="n">target</span> <span class="o">=</span> <span class="n">target_dir</span> <span class="o">/</span> <span class="s2">&quot;skills&quot;</span> <span class="o">/</span> <span class="n">skill_name</span> <span class="o">/</span> <span class="s2">&quot;SKILL.md&quot;</span>
-        <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_render</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;shared/</span><span class="si">{</span><span class="n">skill_name</span><span class="si">}</span><span class="s2">/SKILL.md&quot;</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">variables</span><span class="p">))</span>
+        <span class="n">target</span> <span class="o">=</span> <span class="n">target_dir</span> <span class="o">/</span> <span class="s2">"skills"</span> <span class="o">/</span> <span class="n">skill_name</span> <span class="o">/</span> <span class="s2">"SKILL.md"</span>
+        <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_render</span><span class="p">(</span><span class="sa">f</span><span class="s2">"shared/</span><span class="si">{</span><span class="n">skill_name</span><span class="si">}</span><span class="s2">/SKILL.md"</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">variables</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="n">include_agents</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">agent_name</span> <span class="ow">in</span> <span class="n">_AGENT_NAMES</span><span class="p">:</span>
-            <span class="n">target</span> <span class="o">=</span> <span class="n">target_dir</span> <span class="o">/</span> <span class="s2">&quot;agents&quot;</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">agent_name</span><span class="si">}</span><span class="s2">.md&quot;</span>
-            <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_render</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;shared/</span><span class="si">{</span><span class="n">agent_name</span><span class="si">}</span><span class="s2">.md&quot;</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">variables</span><span class="p">))</span>
+            <span class="n">target</span> <span class="o">=</span> <span class="n">target_dir</span> <span class="o">/</span> <span class="s2">"agents"</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">agent_name</span><span class="si">}</span><span class="s2">.md"</span>
+            <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_render</span><span class="p">(</span><span class="sa">f</span><span class="s2">"shared/</span><span class="si">{</span><span class="n">agent_name</span><span class="si">}</span><span class="s2">.md"</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">variables</span><span class="p">))</span>
 
     <span class="k">return</span> <span class="n">files</span></div>
 
@@ -300,61 +300,61 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_build_variables</span><span class="p">(</span><span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract template variables from a ScanResult.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Extract template variables from a ScanResult."""</span>
     <span class="n">root</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span>
     <span class="n">project_name</span> <span class="o">=</span> <span class="n">_detect_project_name</span><span class="p">(</span><span class="n">sr</span><span class="p">)</span>
     <span class="n">project_description</span> <span class="o">=</span> <span class="n">_detect_description</span><span class="p">(</span><span class="n">sr</span><span class="p">)</span>
     <span class="n">docs_path</span> <span class="o">=</span> <span class="n">_docs_path</span><span class="p">(</span><span class="n">sr</span><span class="o">.</span><span class="n">project_type</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="p">{</span>
-        <span class="s2">&quot;project_name&quot;</span><span class="p">:</span> <span class="n">project_name</span><span class="p">,</span>
-        <span class="s2">&quot;project_description&quot;</span><span class="p">:</span> <span class="n">project_description</span><span class="p">,</span>
-        <span class="s2">&quot;project_type&quot;</span><span class="p">:</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_type</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
-        <span class="s2">&quot;docs_path&quot;</span><span class="p">:</span> <span class="n">docs_path</span><span class="p">,</span>
-        <span class="s2">&quot;tech_stack&quot;</span><span class="p">:</span> <span class="n">_detect_tech_stack</span><span class="p">(</span><span class="n">sr</span><span class="p">),</span>
-        <span class="s2">&quot;module_map&quot;</span><span class="p">:</span> <span class="n">_detect_module_map</span><span class="p">(</span><span class="n">sr</span><span class="p">),</span>
-        <span class="s2">&quot;commands&quot;</span><span class="p">:</span> <span class="n">_detect_commands</span><span class="p">(</span><span class="n">sr</span><span class="p">),</span>
-        <span class="s2">&quot;conventions&quot;</span><span class="p">:</span> <span class="n">_detect_conventions_summary</span><span class="p">(</span><span class="n">sr</span><span class="p">),</span>
-        <span class="s2">&quot;package_manager&quot;</span><span class="p">:</span> <span class="n">_detect_package_manager</span><span class="p">(</span><span class="n">sr</span><span class="p">),</span>
-        <span class="s2">&quot;formatter&quot;</span><span class="p">:</span> <span class="n">_detect_formatter</span><span class="p">(</span><span class="n">sr</span><span class="p">),</span>
-        <span class="s2">&quot;linter&quot;</span><span class="p">:</span> <span class="n">_detect_linter</span><span class="p">(</span><span class="n">sr</span><span class="p">),</span>
-        <span class="s2">&quot;line_length&quot;</span><span class="p">:</span> <span class="n">_detect_line_length</span><span class="p">(</span><span class="n">sr</span><span class="p">),</span>
-        <span class="s2">&quot;test_framework&quot;</span><span class="p">:</span> <span class="n">_detect_test_framework</span><span class="p">(</span><span class="n">sr</span><span class="p">),</span>
-        <span class="s2">&quot;test_command&quot;</span><span class="p">:</span> <span class="n">_detect_test_command</span><span class="p">(</span><span class="n">sr</span><span class="p">),</span>
-        <span class="s2">&quot;test_dir&quot;</span><span class="p">:</span> <span class="n">_detect_test_dir</span><span class="p">(</span><span class="n">sr</span><span class="p">),</span>
-        <span class="s2">&quot;test_structure&quot;</span><span class="p">:</span> <span class="n">_detect_test_structure</span><span class="p">(</span><span class="n">sr</span><span class="p">),</span>
-        <span class="s2">&quot;coverage_command&quot;</span><span class="p">:</span> <span class="n">_detect_coverage_command</span><span class="p">(</span><span class="n">sr</span><span class="p">),</span>
-        <span class="s2">&quot;additional_docs_table&quot;</span><span class="p">:</span> <span class="n">_build_additional_docs_table</span><span class="p">(</span><span class="n">sr</span><span class="p">),</span>
-        <span class="s2">&quot;glossary_entries&quot;</span><span class="p">:</span> <span class="s2">&quot;| &lt;!-- Add terms here --&gt; | |&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;env_vars_table&quot;</span><span class="p">:</span> <span class="s2">&quot;| &lt;!-- Add variables here --&gt; | | |&quot;</span><span class="p">,</span>
+        <span class="s2">"project_name"</span><span class="p">:</span> <span class="n">project_name</span><span class="p">,</span>
+        <span class="s2">"project_description"</span><span class="p">:</span> <span class="n">project_description</span><span class="p">,</span>
+        <span class="s2">"project_type"</span><span class="p">:</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_type</span><span class="o">.</span><span class="n">value</span><span class="p">,</span>
+        <span class="s2">"docs_path"</span><span class="p">:</span> <span class="n">docs_path</span><span class="p">,</span>
+        <span class="s2">"tech_stack"</span><span class="p">:</span> <span class="n">_detect_tech_stack</span><span class="p">(</span><span class="n">sr</span><span class="p">),</span>
+        <span class="s2">"module_map"</span><span class="p">:</span> <span class="n">_detect_module_map</span><span class="p">(</span><span class="n">sr</span><span class="p">),</span>
+        <span class="s2">"commands"</span><span class="p">:</span> <span class="n">_detect_commands</span><span class="p">(</span><span class="n">sr</span><span class="p">),</span>
+        <span class="s2">"conventions"</span><span class="p">:</span> <span class="n">_detect_conventions_summary</span><span class="p">(</span><span class="n">sr</span><span class="p">),</span>
+        <span class="s2">"package_manager"</span><span class="p">:</span> <span class="n">_detect_package_manager</span><span class="p">(</span><span class="n">sr</span><span class="p">),</span>
+        <span class="s2">"formatter"</span><span class="p">:</span> <span class="n">_detect_formatter</span><span class="p">(</span><span class="n">sr</span><span class="p">),</span>
+        <span class="s2">"linter"</span><span class="p">:</span> <span class="n">_detect_linter</span><span class="p">(</span><span class="n">sr</span><span class="p">),</span>
+        <span class="s2">"line_length"</span><span class="p">:</span> <span class="n">_detect_line_length</span><span class="p">(</span><span class="n">sr</span><span class="p">),</span>
+        <span class="s2">"test_framework"</span><span class="p">:</span> <span class="n">_detect_test_framework</span><span class="p">(</span><span class="n">sr</span><span class="p">),</span>
+        <span class="s2">"test_command"</span><span class="p">:</span> <span class="n">_detect_test_command</span><span class="p">(</span><span class="n">sr</span><span class="p">),</span>
+        <span class="s2">"test_dir"</span><span class="p">:</span> <span class="n">_detect_test_dir</span><span class="p">(</span><span class="n">sr</span><span class="p">),</span>
+        <span class="s2">"test_structure"</span><span class="p">:</span> <span class="n">_detect_test_structure</span><span class="p">(</span><span class="n">sr</span><span class="p">),</span>
+        <span class="s2">"coverage_command"</span><span class="p">:</span> <span class="n">_detect_coverage_command</span><span class="p">(</span><span class="n">sr</span><span class="p">),</span>
+        <span class="s2">"additional_docs_table"</span><span class="p">:</span> <span class="n">_build_additional_docs_table</span><span class="p">(</span><span class="n">sr</span><span class="p">),</span>
+        <span class="s2">"glossary_entries"</span><span class="p">:</span> <span class="s2">"| &lt;!-- Add terms here --&gt; | |"</span><span class="p">,</span>
+        <span class="s2">"env_vars_table"</span><span class="p">:</span> <span class="s2">"| &lt;!-- Add variables here --&gt; | | |"</span><span class="p">,</span>
     <span class="p">}</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_docs_path</span><span class="p">(</span><span class="n">project_type</span><span class="p">:</span> <span class="n">ProjectType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">project_type</span> <span class="o">==</span> <span class="n">ProjectType</span><span class="o">.</span><span class="n">jsts</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;docs&quot;</span>
-    <span class="k">return</span> <span class="s2">&quot;misc/docs&quot;</span>
+        <span class="k">return</span> <span class="s2">"docs"</span>
+    <span class="k">return</span> <span class="s2">"misc/docs"</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_detect_project_name</span><span class="p">(</span><span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="n">root</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span>
     <span class="c1"># Try pyproject.toml</span>
-    <span class="n">pyproject</span> <span class="o">=</span> <span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;pyproject.toml&quot;</span>
+    <span class="n">pyproject</span> <span class="o">=</span> <span class="n">root</span> <span class="o">/</span> <span class="s2">"pyproject.toml"</span>
     <span class="k">if</span> <span class="n">pyproject</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
         <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">read_text_safe</span><span class="p">(</span><span class="n">pyproject</span><span class="p">)</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">):</span>
-                <span class="n">parts</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"name"</span><span class="p">):</span>
+                <span class="n">parts</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"="</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                    <span class="k">return</span> <span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">'"'</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">"'"</span><span class="p">)</span>
     <span class="c1"># Try package.json</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 
-    <span class="n">pkg</span> <span class="o">=</span> <span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;package.json&quot;</span>
+    <span class="n">pkg</span> <span class="o">=</span> <span class="n">root</span> <span class="o">/</span> <span class="s2">"package.json"</span>
     <span class="k">if</span> <span class="n">pkg</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">read_text_safe</span><span class="p">(</span><span class="n">pkg</span><span class="p">))</span>
-            <span class="k">if</span> <span class="s2">&quot;name&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;name&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s2">"name"</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="s2">"name"</span><span class="p">]</span>
         <span class="k">except</span> <span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
             <span class="k">pass</span>
     <span class="k">return</span> <span class="n">root</span><span class="o">.</span><span class="n">name</span>
@@ -362,48 +362,48 @@
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_detect_description</span><span class="p">(</span><span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="n">root</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span>
-    <span class="n">pyproject</span> <span class="o">=</span> <span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;pyproject.toml&quot;</span>
+    <span class="n">pyproject</span> <span class="o">=</span> <span class="n">root</span> <span class="o">/</span> <span class="s2">"pyproject.toml"</span>
     <span class="k">if</span> <span class="n">pyproject</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
         <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">read_text_safe</span><span class="p">(</span><span class="n">pyproject</span><span class="p">)</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;description&quot;</span><span class="p">):</span>
-                <span class="n">parts</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"description"</span><span class="p">):</span>
+                <span class="n">parts</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"="</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-                    <span class="k">return</span> <span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">)</span>
+                    <span class="k">return</span> <span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">'"'</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">"'"</span><span class="p">)</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 
-    <span class="n">pkg</span> <span class="o">=</span> <span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;package.json&quot;</span>
+    <span class="n">pkg</span> <span class="o">=</span> <span class="n">root</span> <span class="o">/</span> <span class="s2">"package.json"</span>
     <span class="k">if</span> <span class="n">pkg</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">read_text_safe</span><span class="p">(</span><span class="n">pkg</span><span class="p">))</span>
-            <span class="k">if</span> <span class="s2">&quot;description&quot;</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="s2">"description"</span> <span class="ow">in</span> <span class="n">data</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">data</span><span class="p">[</span><span class="s2">"description"</span><span class="p">]</span>
         <span class="k">except</span> <span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">JSONDecodeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
             <span class="k">pass</span>
-    <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;A </span><span class="si">{</span><span class="n">sr</span><span class="o">.</span><span class="n">project_type</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2"> project&quot;</span>
+    <span class="k">return</span> <span class="sa">f</span><span class="s2">"A </span><span class="si">{</span><span class="n">sr</span><span class="o">.</span><span class="n">project_type</span><span class="o">.</span><span class="n">value</span><span class="si">}</span><span class="s2"> project"</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_detect_tech_stack</span><span class="p">(</span><span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="n">parts</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">root</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span>
     <span class="k">if</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_type</span> <span class="ow">in</span> <span class="p">(</span><span class="n">ProjectType</span><span class="o">.</span><span class="n">python</span><span class="p">,</span> <span class="n">ProjectType</span><span class="o">.</span><span class="n">mixed</span><span class="p">):</span>
-        <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;Python&quot;</span><span class="p">)</span>
+        <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"Python"</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_type</span> <span class="ow">in</span> <span class="p">(</span><span class="n">ProjectType</span><span class="o">.</span><span class="n">jsts</span><span class="p">,</span> <span class="n">ProjectType</span><span class="o">.</span><span class="n">mixed</span><span class="p">):</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;tsconfig.json&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-            <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;TypeScript&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"tsconfig.json"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"TypeScript"</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">&quot;JavaScript&quot;</span><span class="p">)</span>
+            <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s2">"JavaScript"</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">parts</span><span class="p">:</span>
         <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sr</span><span class="o">.</span><span class="n">project_type</span><span class="o">.</span><span class="n">value</span><span class="p">)</span>
-    <span class="k">return</span> <span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_module_docstring_summary</span><span class="p">(</span><span class="n">py_file</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;First line of a Python module&#39;s top-level docstring, or None.</span>
+<span class="w">    </span><span class="sd">"""First line of a Python module's top-level docstring, or None.</span>
 
 <span class="sd">    Descriptions are *derived*, never guessed: if a module has no docstring (or</span>
 <span class="sd">    fails to parse) we return None so the caller can emit a fill-in placeholder</span>
 <span class="sd">    rather than assert something unverified.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">tree</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">read_text_safe</span><span class="p">(</span><span class="n">py_file</span><span class="p">))</span>
     <span class="k">except</span> <span class="p">(</span><span class="ne">SyntaxError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
@@ -416,8 +416,8 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_package_summary</span><span class="p">(</span><span class="n">directory</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Package description from its ``__init__.py`` docstring, else a placeholder.&quot;&quot;&quot;</span>
-    <span class="n">init</span> <span class="o">=</span> <span class="n">directory</span> <span class="o">/</span> <span class="s2">&quot;__init__.py&quot;</span>
+<span class="w">    </span><span class="sd">"""Package description from its ``__init__.py`` docstring, else a placeholder."""</span>
+    <span class="n">init</span> <span class="o">=</span> <span class="n">directory</span> <span class="o">/</span> <span class="s2">"__init__.py"</span>
     <span class="k">if</span> <span class="n">init</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
         <span class="n">summary</span> <span class="o">=</span> <span class="n">_module_docstring_summary</span><span class="p">(</span><span class="n">init</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">summary</span><span class="p">:</span>
@@ -426,214 +426,214 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_submodule_lines</span><span class="p">(</span><span class="n">package_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Nested bullets for a Python package&#39;s direct ``.py`` submodules (one level).</span>
+<span class="w">    </span><span class="sd">"""Nested bullets for a Python package's direct ``.py`` submodules (one level).</span>
 
 <span class="sd">    Only descends into real packages (those with ``__init__.py``). Private and</span>
 <span class="sd">    dunder modules (``_x.py``, ``__init__.py``, ``__main__.py``) are skipped —</span>
-<span class="sd">    ``__init__``&#39;s docstring is already the package&#39;s own description.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">package_dir</span> <span class="o">/</span> <span class="s2">&quot;__init__.py&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+<span class="sd">    ``__init__``'s docstring is already the package's own description.</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">package_dir</span> <span class="o">/</span> <span class="s2">"__init__.py"</span><span class="p">)</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
         <span class="k">return</span> <span class="p">[]</span>
     <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">sub</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">package_dir</span><span class="o">.</span><span class="n">iterdir</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">sub</span><span class="o">.</span><span class="n">suffix</span> <span class="o">!=</span> <span class="s2">&quot;.py&quot;</span> <span class="ow">or</span> <span class="n">sub</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">sub</span><span class="o">.</span><span class="n">suffix</span> <span class="o">!=</span> <span class="s2">".py"</span> <span class="ow">or</span> <span class="n">sub</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"_"</span><span class="p">):</span>
             <span class="k">continue</span>
         <span class="n">summary</span> <span class="o">=</span> <span class="n">_module_docstring_summary</span><span class="p">(</span><span class="n">sub</span><span class="p">)</span>
-        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;  - `</span><span class="si">{</span><span class="n">sub</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">` — </span><span class="si">{</span><span class="n">summary</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">_DESCRIBE_PLACEHOLDER</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  - `</span><span class="si">{</span><span class="n">sub</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">` — </span><span class="si">{</span><span class="n">summary</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">_DESCRIBE_PLACEHOLDER</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">lines</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_detect_module_map</span><span class="p">(</span><span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="n">root</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">root</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;- </span><span class="si">{</span><span class="n">_DESCRIBE_PLACEHOLDER</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"- </span><span class="si">{</span><span class="n">_DESCRIBE_PLACEHOLDER</span><span class="si">}</span><span class="s2">"</span>
     <span class="n">lines</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">iterdir</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
         <span class="n">name</span> <span class="o">=</span> <span class="n">child</span><span class="o">.</span><span class="n">name</span>
-        <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">_MAP_SKIP_NAMES</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"."</span><span class="p">)</span> <span class="ow">or</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"_"</span><span class="p">)</span> <span class="ow">or</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">_MAP_SKIP_NAMES</span><span class="p">:</span>
             <span class="k">continue</span>
         <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
-            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- `</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">/` — </span><span class="si">{</span><span class="n">_package_summary</span><span class="p">(</span><span class="n">child</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"- `</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">/` — </span><span class="si">{</span><span class="n">_package_summary</span><span class="p">(</span><span class="n">child</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
             <span class="n">lines</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">_submodule_lines</span><span class="p">(</span><span class="n">child</span><span class="p">))</span>
         <span class="k">elif</span> <span class="n">child</span><span class="o">.</span><span class="n">suffix</span> <span class="ow">in</span> <span class="n">_MAP_FILE_SUFFIXES</span><span class="p">:</span>
             <span class="n">summary</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="n">_module_docstring_summary</span><span class="p">(</span><span class="n">child</span><span class="p">)</span> <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s2">&quot;.py&quot;</span> <span class="k">else</span> <span class="kc">None</span>
+                <span class="n">_module_docstring_summary</span><span class="p">(</span><span class="n">child</span><span class="p">)</span> <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="s2">".py"</span> <span class="k">else</span> <span class="kc">None</span>
             <span class="p">)</span>
-            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- `</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">` — </span><span class="si">{</span><span class="n">summary</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">_DESCRIBE_PLACEHOLDER</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="k">if</span> <span class="n">lines</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">&quot;- </span><span class="si">{</span><span class="n">_DESCRIBE_PLACEHOLDER</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"- `</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">` — </span><span class="si">{</span><span class="n">summary</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="n">_DESCRIBE_PLACEHOLDER</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="k">if</span> <span class="n">lines</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">"- </span><span class="si">{</span><span class="n">_DESCRIBE_PLACEHOLDER</span><span class="si">}</span><span class="s2">"</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_detect_commands</span><span class="p">(</span><span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="n">root</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span>
     <span class="n">commands</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">if</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_type</span> <span class="ow">in</span> <span class="p">(</span><span class="n">ProjectType</span><span class="o">.</span><span class="n">python</span><span class="p">,</span> <span class="n">ProjectType</span><span class="o">.</span><span class="n">mixed</span><span class="p">):</span>
-        <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;pyproject.toml&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-            <span class="n">commands</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;```bash</span><span class="se">\n</span><span class="s1">pip install -e &quot;.[dev]&quot;</span><span class="se">\n</span><span class="s1">pytest</span><span class="se">\n</span><span class="s1">```&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"pyproject.toml"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">commands</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">'```bash</span><span class="se">\n</span><span class="s1">pip install -e ".[dev]"</span><span class="se">\n</span><span class="s1">pytest</span><span class="se">\n</span><span class="s1">```'</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_type</span> <span class="ow">in</span> <span class="p">(</span><span class="n">ProjectType</span><span class="o">.</span><span class="n">jsts</span><span class="p">,</span> <span class="n">ProjectType</span><span class="o">.</span><span class="n">mixed</span><span class="p">):</span>
         <span class="n">pm</span> <span class="o">=</span> <span class="n">_detect_package_manager</span><span class="p">(</span><span class="n">sr</span><span class="p">)</span>
-        <span class="n">commands</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;```bash</span><span class="se">\n</span><span class="si">{</span><span class="n">pm</span><span class="si">}</span><span class="s2"> install</span><span class="se">\n</span><span class="si">{</span><span class="n">pm</span><span class="si">}</span><span class="s2"> run build</span><span class="se">\n</span><span class="si">{</span><span class="n">pm</span><span class="si">}</span><span class="s2"> test</span><span class="se">\n</span><span class="s2">```&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">commands</span><span class="p">)</span> <span class="k">if</span> <span class="n">commands</span> <span class="k">else</span> <span class="s2">&quot;&lt;!-- Add build/test/run commands --&gt;&quot;</span>
+        <span class="n">commands</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"```bash</span><span class="se">\n</span><span class="si">{</span><span class="n">pm</span><span class="si">}</span><span class="s2"> install</span><span class="se">\n</span><span class="si">{</span><span class="n">pm</span><span class="si">}</span><span class="s2"> run build</span><span class="se">\n</span><span class="si">{</span><span class="n">pm</span><span class="si">}</span><span class="s2"> test</span><span class="se">\n</span><span class="s2">```"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">commands</span><span class="p">)</span> <span class="k">if</span> <span class="n">commands</span> <span class="k">else</span> <span class="s2">"&lt;!-- Add build/test/run commands --&gt;"</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_detect_package_manager</span><span class="p">(</span><span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="n">root</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;pnpm-lock.yaml&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-        <span class="k">return</span> <span class="s2">&quot;pnpm&quot;</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;yarn.lock&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-        <span class="k">return</span> <span class="s2">&quot;yarn&quot;</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;bun.lockb&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-        <span class="k">return</span> <span class="s2">&quot;bun&quot;</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;package-lock.json&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-        <span class="k">return</span> <span class="s2">&quot;npm&quot;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"pnpm-lock.yaml"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">return</span> <span class="s2">"pnpm"</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"yarn.lock"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">return</span> <span class="s2">"yarn"</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"bun.lockb"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">return</span> <span class="s2">"bun"</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"package-lock.json"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">return</span> <span class="s2">"npm"</span>
     <span class="k">if</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_type</span> <span class="ow">in</span> <span class="p">(</span><span class="n">ProjectType</span><span class="o">.</span><span class="n">jsts</span><span class="p">,</span> <span class="n">ProjectType</span><span class="o">.</span><span class="n">mixed</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s2">&quot;npm&quot;</span>
-    <span class="k">return</span> <span class="s2">&quot;pip&quot;</span>
+        <span class="k">return</span> <span class="s2">"npm"</span>
+    <span class="k">return</span> <span class="s2">"pip"</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_detect_formatter</span><span class="p">(</span><span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="n">root</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span>
-    <span class="n">pyproject_text</span> <span class="o">=</span> <span class="n">read_text_safe</span><span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;pyproject.toml&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="s2">&quot;ruff&quot;</span> <span class="ow">in</span> <span class="n">pyproject_text</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;ruff format&quot;</span>
-    <span class="k">if</span> <span class="s2">&quot;black&quot;</span> <span class="ow">in</span> <span class="n">pyproject_text</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;black&quot;</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;.prettierrc&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">or</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;.prettierrc.json&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-        <span class="k">return</span> <span class="s2">&quot;prettier&quot;</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;biome.json&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-        <span class="k">return</span> <span class="s2">&quot;biome&quot;</span>
-    <span class="k">return</span> <span class="s2">&quot;not configured&quot;</span>
+    <span class="n">pyproject_text</span> <span class="o">=</span> <span class="n">read_text_safe</span><span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"pyproject.toml"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s2">"ruff"</span> <span class="ow">in</span> <span class="n">pyproject_text</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">"ruff format"</span>
+    <span class="k">if</span> <span class="s2">"black"</span> <span class="ow">in</span> <span class="n">pyproject_text</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">"black"</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">".prettierrc"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">or</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">".prettierrc.json"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">return</span> <span class="s2">"prettier"</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"biome.json"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">return</span> <span class="s2">"biome"</span>
+    <span class="k">return</span> <span class="s2">"not configured"</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_detect_linter</span><span class="p">(</span><span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="n">root</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span>
-    <span class="n">pyproject_text</span> <span class="o">=</span> <span class="n">read_text_safe</span><span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;pyproject.toml&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="s2">&quot;ruff&quot;</span> <span class="ow">in</span> <span class="n">pyproject_text</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;ruff&quot;</span>
-    <span class="k">if</span> <span class="s2">&quot;pylint&quot;</span> <span class="ow">in</span> <span class="n">pyproject_text</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;pylint&quot;</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;.eslintrc.json&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">or</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;.eslintrc.js&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-        <span class="k">return</span> <span class="s2">&quot;eslint&quot;</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;biome.json&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-        <span class="k">return</span> <span class="s2">&quot;biome&quot;</span>
-    <span class="k">return</span> <span class="s2">&quot;not configured&quot;</span>
+    <span class="n">pyproject_text</span> <span class="o">=</span> <span class="n">read_text_safe</span><span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"pyproject.toml"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s2">"ruff"</span> <span class="ow">in</span> <span class="n">pyproject_text</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">"ruff"</span>
+    <span class="k">if</span> <span class="s2">"pylint"</span> <span class="ow">in</span> <span class="n">pyproject_text</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">"pylint"</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">".eslintrc.json"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">or</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">".eslintrc.js"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">return</span> <span class="s2">"eslint"</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"biome.json"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">return</span> <span class="s2">"biome"</span>
+    <span class="k">return</span> <span class="s2">"not configured"</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_detect_line_length</span><span class="p">(</span><span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="n">pyproject_text</span> <span class="o">=</span> <span class="n">read_text_safe</span><span class="p">(</span><span class="n">sr</span><span class="o">.</span><span class="n">project_root</span> <span class="o">/</span> <span class="s2">&quot;pyproject.toml&quot;</span><span class="p">)</span>
+    <span class="n">pyproject_text</span> <span class="o">=</span> <span class="n">read_text_safe</span><span class="p">(</span><span class="n">sr</span><span class="o">.</span><span class="n">project_root</span> <span class="o">/</span> <span class="s2">"pyproject.toml"</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">pyproject_text</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
-        <span class="k">if</span> <span class="s2">&quot;line-length&quot;</span> <span class="ow">in</span> <span class="n">line</span> <span class="ow">or</span> <span class="s2">&quot;line_length&quot;</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
-            <span class="n">parts</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;=&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">"line-length"</span> <span class="ow">in</span> <span class="n">line</span> <span class="ow">or</span> <span class="s2">"line_length"</span> <span class="ow">in</span> <span class="n">line</span><span class="p">:</span>
+            <span class="n">parts</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"="</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">parts</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-    <span class="k">return</span> <span class="s2">&quot;88&quot;</span>
+    <span class="k">return</span> <span class="s2">"88"</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_detect_test_framework</span><span class="p">(</span><span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="n">root</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span>
-    <span class="n">pyproject_text</span> <span class="o">=</span> <span class="n">read_text_safe</span><span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;pyproject.toml&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="s2">&quot;pytest&quot;</span> <span class="ow">in</span> <span class="n">pyproject_text</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;pytest&quot;</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;vitest.config.ts&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-        <span class="k">return</span> <span class="s2">&quot;vitest&quot;</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;jest.config.js&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">or</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;jest.config.ts&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-        <span class="k">return</span> <span class="s2">&quot;jest&quot;</span>
-    <span class="k">return</span> <span class="s2">&quot;not detected&quot;</span>
+    <span class="n">pyproject_text</span> <span class="o">=</span> <span class="n">read_text_safe</span><span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"pyproject.toml"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="s2">"pytest"</span> <span class="ow">in</span> <span class="n">pyproject_text</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">"pytest"</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"vitest.config.ts"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">return</span> <span class="s2">"vitest"</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"jest.config.js"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">or</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"jest.config.ts"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">return</span> <span class="s2">"jest"</span>
+    <span class="k">return</span> <span class="s2">"not detected"</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_detect_test_command</span><span class="p">(</span><span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="n">fw</span> <span class="o">=</span> <span class="n">_detect_test_framework</span><span class="p">(</span><span class="n">sr</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">fw</span> <span class="o">==</span> <span class="s2">&quot;pytest&quot;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;pytest&quot;</span>
-    <span class="k">if</span> <span class="n">fw</span> <span class="o">==</span> <span class="s2">&quot;vitest&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">fw</span> <span class="o">==</span> <span class="s2">"pytest"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">"pytest"</span>
+    <span class="k">if</span> <span class="n">fw</span> <span class="o">==</span> <span class="s2">"vitest"</span><span class="p">:</span>
         <span class="n">pm</span> <span class="o">=</span> <span class="n">_detect_package_manager</span><span class="p">(</span><span class="n">sr</span><span class="p">)</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pm</span><span class="si">}</span><span class="s2"> run test&quot;</span>
-    <span class="k">if</span> <span class="n">fw</span> <span class="o">==</span> <span class="s2">&quot;jest&quot;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">pm</span><span class="si">}</span><span class="s2"> run test"</span>
+    <span class="k">if</span> <span class="n">fw</span> <span class="o">==</span> <span class="s2">"jest"</span><span class="p">:</span>
         <span class="n">pm</span> <span class="o">=</span> <span class="n">_detect_package_manager</span><span class="p">(</span><span class="n">sr</span><span class="p">)</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pm</span><span class="si">}</span><span class="s2"> test&quot;</span>
-    <span class="k">return</span> <span class="s2">&quot;# configure test command&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">pm</span><span class="si">}</span><span class="s2"> test"</span>
+    <span class="k">return</span> <span class="s2">"# configure test command"</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_detect_test_dir</span><span class="p">(</span><span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="n">root</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;tests&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
-        <span class="k">return</span> <span class="s2">&quot;tests&quot;</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;test&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
-        <span class="k">return</span> <span class="s2">&quot;test&quot;</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;__tests__&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
-        <span class="k">return</span> <span class="s2">&quot;__tests__&quot;</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;src&quot;</span> <span class="o">/</span> <span class="s2">&quot;__tests__&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
-        <span class="k">return</span> <span class="s2">&quot;src/__tests__&quot;</span>
-    <span class="k">return</span> <span class="s2">&quot;tests&quot;</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"tests"</span><span class="p">)</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+        <span class="k">return</span> <span class="s2">"tests"</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"test"</span><span class="p">)</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+        <span class="k">return</span> <span class="s2">"test"</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"__tests__"</span><span class="p">)</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+        <span class="k">return</span> <span class="s2">"__tests__"</span>
+    <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"src"</span> <span class="o">/</span> <span class="s2">"__tests__"</span><span class="p">)</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+        <span class="k">return</span> <span class="s2">"src/__tests__"</span>
+    <span class="k">return</span> <span class="s2">"tests"</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_detect_coverage_command</span><span class="p">(</span><span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="n">fw</span> <span class="o">=</span> <span class="n">_detect_test_framework</span><span class="p">(</span><span class="n">sr</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">fw</span> <span class="o">==</span> <span class="s2">&quot;pytest&quot;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s2">&quot;pytest --cov&quot;</span>
-    <span class="k">if</span> <span class="n">fw</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;vitest&quot;</span><span class="p">,</span> <span class="s2">&quot;jest&quot;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">fw</span> <span class="o">==</span> <span class="s2">"pytest"</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s2">"pytest --cov"</span>
+    <span class="k">if</span> <span class="n">fw</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"vitest"</span><span class="p">,</span> <span class="s2">"jest"</span><span class="p">):</span>
         <span class="n">pm</span> <span class="o">=</span> <span class="n">_detect_package_manager</span><span class="p">(</span><span class="n">sr</span><span class="p">)</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">pm</span><span class="si">}</span><span class="s2"> run test -- --coverage&quot;</span>
-    <span class="k">return</span> <span class="s2">&quot;# configure coverage command&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">pm</span><span class="si">}</span><span class="s2"> run test -- --coverage"</span>
+    <span class="k">return</span> <span class="s2">"# configure coverage command"</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_find_conftest</span><span class="p">(</span><span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Repo-relative path to a ``conftest.py`` if one exists, else None.</span>
+<span class="w">    </span><span class="sd">"""Repo-relative path to a ``conftest.py`` if one exists, else None.</span>
 
 <span class="sd">    Checks the detected test dir and the root first, then a bounded search,</span>
 <span class="sd">    skipping hidden/vendored trees. Returns None when none exists so generated</span>
-<span class="sd">    docs never assert a conftest that isn&#39;t there.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    docs never assert a conftest that isn't there.</span>
+<span class="sd">    """</span>
     <span class="n">root</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">root</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
         <span class="k">return</span> <span class="kc">None</span>
     <span class="n">test_dir</span> <span class="o">=</span> <span class="n">_detect_test_dir</span><span class="p">(</span><span class="n">sr</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="n">test_dir</span> <span class="o">/</span> <span class="s2">&quot;conftest.py&quot;</span><span class="p">,</span> <span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;conftest.py&quot;</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="n">test_dir</span> <span class="o">/</span> <span class="s2">"conftest.py"</span><span class="p">,</span> <span class="n">root</span> <span class="o">/</span> <span class="s2">"conftest.py"</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">candidate</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
             <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">candidate</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">root</span><span class="p">))</span>
-    <span class="k">for</span> <span class="n">found</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span><span class="s2">&quot;conftest.py&quot;</span><span class="p">)):</span>
+    <span class="k">for</span> <span class="n">found</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">root</span><span class="o">.</span><span class="n">rglob</span><span class="p">(</span><span class="s2">"conftest.py"</span><span class="p">)):</span>
         <span class="n">parts</span> <span class="o">=</span> <span class="n">found</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">root</span><span class="p">)</span><span class="o">.</span><span class="n">parts</span>
-        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">_MAP_SKIP_NAMES</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parts</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"."</span><span class="p">)</span> <span class="ow">or</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">_MAP_SKIP_NAMES</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parts</span><span class="p">):</span>
             <span class="k">continue</span>
         <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">found</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">root</span><span class="p">))</span>
     <span class="k">return</span> <span class="kc">None</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_detect_test_structure</span><span class="p">(</span><span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Bullet list for the testing doc&#39;s &#39;Test Structure&#39; section.</span>
+<span class="w">    </span><span class="sd">"""Bullet list for the testing doc's 'Test Structure' section.</span>
 
 <span class="sd">    The conftest bullet is emitted only when a conftest.py actually exists —</span>
-<span class="sd">    the doc must not claim fixtures live in a file the project doesn&#39;t have.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    the doc must not claim fixtures live in a file the project doesn't have.</span>
+<span class="sd">    """</span>
     <span class="n">test_dir</span> <span class="o">=</span> <span class="n">_detect_test_dir</span><span class="p">(</span><span class="n">sr</span><span class="p">)</span>
     <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span>
-        <span class="sa">f</span><span class="s2">&quot;- Tests live in `</span><span class="si">{</span><span class="n">test_dir</span><span class="si">}</span><span class="s2">/`&quot;</span><span class="p">,</span>
-        <span class="s2">&quot;- Test files follow `test_</span><span class="si">{module_name}</span><span class="s2">.py` naming&quot;</span><span class="p">,</span>
+        <span class="sa">f</span><span class="s2">"- Tests live in `</span><span class="si">{</span><span class="n">test_dir</span><span class="si">}</span><span class="s2">/`"</span><span class="p">,</span>
+        <span class="s2">"- Test files follow `test_</span><span class="si">{module_name}</span><span class="s2">.py` naming"</span><span class="p">,</span>
     <span class="p">]</span>
     <span class="n">conftest</span> <span class="o">=</span> <span class="n">_find_conftest</span><span class="p">(</span><span class="n">sr</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">conftest</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- Fixtures and shared helpers in `</span><span class="si">{</span><span class="n">conftest</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+        <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"- Fixtures and shared helpers in `</span><span class="si">{</span><span class="n">conftest</span><span class="si">}</span><span class="s2">`"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_detect_conventions_summary</span><span class="p">(</span><span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="n">parts</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">formatter</span> <span class="o">=</span> <span class="n">_detect_formatter</span><span class="p">(</span><span class="n">sr</span><span class="p">)</span>
     <span class="n">linter</span> <span class="o">=</span> <span class="n">_detect_linter</span><span class="p">(</span><span class="n">sr</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">formatter</span> <span class="o">!=</span> <span class="s2">&quot;not configured&quot;</span><span class="p">:</span>
-        <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- Use `</span><span class="si">{</span><span class="n">formatter</span><span class="si">}</span><span class="s2">` for formatting&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">linter</span> <span class="o">!=</span> <span class="s2">&quot;not configured&quot;</span><span class="p">:</span>
-        <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;- Use `</span><span class="si">{</span><span class="n">linter</span><span class="si">}</span><span class="s2">` for linting&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="k">if</span> <span class="n">parts</span> <span class="k">else</span> <span class="s2">&quot;&lt;!-- Add project conventions --&gt;&quot;</span>
+    <span class="k">if</span> <span class="n">formatter</span> <span class="o">!=</span> <span class="s2">"not configured"</span><span class="p">:</span>
+        <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"- Use `</span><span class="si">{</span><span class="n">formatter</span><span class="si">}</span><span class="s2">` for formatting"</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">linter</span> <span class="o">!=</span> <span class="s2">"not configured"</span><span class="p">:</span>
+        <span class="n">parts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"- Use `</span><span class="si">{</span><span class="n">linter</span><span class="si">}</span><span class="s2">` for linting"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span> <span class="k">if</span> <span class="n">parts</span> <span class="k">else</span> <span class="s2">"&lt;!-- Add project conventions --&gt;"</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_build_additional_docs_table</span><span class="p">(</span><span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build markdown table rows for docs beyond the core three.&quot;&quot;&quot;</span>
-    <span class="n">core</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;architecture&quot;</span><span class="p">,</span> <span class="s2">&quot;conventions&quot;</span><span class="p">,</span> <span class="s2">&quot;known_issues&quot;</span><span class="p">,</span> <span class="s2">&quot;docs_guide&quot;</span><span class="p">}</span>
+<span class="w">    </span><span class="sd">"""Build markdown table rows for docs beyond the core three."""</span>
+    <span class="n">core</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"architecture"</span><span class="p">,</span> <span class="s2">"conventions"</span><span class="p">,</span> <span class="s2">"known_issues"</span><span class="p">,</span> <span class="s2">"docs_guide"</span><span class="p">}</span>
     <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">sr</span><span class="o">.</span><span class="n">docs</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">doc</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">core</span><span class="p">:</span>
-            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;| [</span><span class="si">{</span><span class="n">doc</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.md](</span><span class="si">{</span><span class="n">doc</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.md) | | |&quot;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="k">if</span> <span class="n">lines</span> <span class="k">else</span> <span class="s2">&quot;| *No additional docs yet* | | |&quot;</span>
+            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"| [</span><span class="si">{</span><span class="n">doc</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.md](</span><span class="si">{</span><span class="n">doc</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.md) | | |"</span><span class="p">)</span>
+    <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="k">if</span> <span class="n">lines</span> <span class="k">else</span> <span class="s2">"| *No additional docs yet* | | |"</span>
 
 
 <span class="c1"># ---------------------------------------------------------------------------</span>
@@ -642,81 +642,81 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_template_for_doc</span><span class="p">(</span><span class="n">doc_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">project_type</span><span class="p">:</span> <span class="n">ProjectType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the best template path for a doc, preferring type-specific.&quot;&quot;&quot;</span>
-    <span class="n">type_key</span> <span class="o">=</span> <span class="s2">&quot;python&quot;</span> <span class="k">if</span> <span class="n">project_type</span> <span class="o">!=</span> <span class="n">ProjectType</span><span class="o">.</span><span class="n">jsts</span> <span class="k">else</span> <span class="s2">&quot;jsts&quot;</span>
-    <span class="n">type_specific</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">type_key</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">doc_name</span><span class="si">}</span><span class="s2">.md&quot;</span>
+<span class="w">    </span><span class="sd">"""Return the best template path for a doc, preferring type-specific."""</span>
+    <span class="n">type_key</span> <span class="o">=</span> <span class="s2">"python"</span> <span class="k">if</span> <span class="n">project_type</span> <span class="o">!=</span> <span class="n">ProjectType</span><span class="o">.</span><span class="n">jsts</span> <span class="k">else</span> <span class="s2">"jsts"</span>
+    <span class="n">type_specific</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">type_key</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">doc_name</span><span class="si">}</span><span class="s2">.md"</span>
 
     <span class="c1"># Check if type-specific template exists</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">_load_template</span><span class="p">(</span><span class="n">type_specific</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">type_specific</span>
     <span class="k">except</span> <span class="p">(</span><span class="ne">FileNotFoundError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">,</span> <span class="ne">OSError</span><span class="p">):</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;shared/</span><span class="si">{</span><span class="n">doc_name</span><span class="si">}</span><span class="s2">.md&quot;</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">"shared/</span><span class="si">{</span><span class="n">doc_name</span><span class="si">}</span><span class="s2">.md"</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_has_tests</span><span class="p">(</span><span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
     <span class="n">root</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span>
     <span class="k">return</span> <span class="p">(</span>
-        <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;tests&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span>
-        <span class="ow">or</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;test&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span>
-        <span class="ow">or</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;__tests__&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span>
-        <span class="ow">or</span> <span class="n">_detect_test_framework</span><span class="p">(</span><span class="n">sr</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">&quot;not detected&quot;</span>
+        <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"tests"</span><span class="p">)</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span>
+        <span class="ow">or</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"test"</span><span class="p">)</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span>
+        <span class="ow">or</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"__tests__"</span><span class="p">)</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span>
+        <span class="ow">or</span> <span class="n">_detect_test_framework</span><span class="p">(</span><span class="n">sr</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">"not detected"</span>
     <span class="p">)</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_build_starter_hooks</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Build a starter hooks.json with common hook patterns.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Build a starter hooks.json with common hook patterns."""</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 
-    <span class="c1"># NOTE: `matcher` must be a STRING regex matching tool names (e.g. &quot;Edit|Write&quot;),</span>
+    <span class="c1"># NOTE: `matcher` must be a STRING regex matching tool names (e.g. "Edit|Write"),</span>
     <span class="c1"># NOT a dict. Claude Code does not honor a dict matcher, so the hook would</span>
     <span class="c1"># silently never fire. The command bodies below are intentionally no-op</span>
     <span class="c1"># placeholders for the user to customize.</span>
     <span class="n">hooks</span> <span class="o">=</span> <span class="p">{</span>
-        <span class="s2">&quot;hooks&quot;</span><span class="p">:</span> <span class="p">{</span>
-            <span class="s2">&quot;PostToolUse&quot;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="s2">"hooks"</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">"PostToolUse"</span><span class="p">:</span> <span class="p">[</span>
                 <span class="p">{</span>
-                    <span class="s2">&quot;matcher&quot;</span><span class="p">:</span> <span class="s2">&quot;Edit|Write|MultiEdit&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;hooks&quot;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="s2">"matcher"</span><span class="p">:</span> <span class="s2">"Edit|Write|MultiEdit"</span><span class="p">,</span>
+                    <span class="s2">"hooks"</span><span class="p">:</span> <span class="p">[</span>
                         <span class="p">{</span>
-                            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;command&quot;</span><span class="p">,</span>
-                            <span class="s2">&quot;command&quot;</span><span class="p">:</span> <span class="s2">&quot;echo &#39;File modified — consider running formatter&#39;&quot;</span><span class="p">,</span>
+                            <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"command"</span><span class="p">,</span>
+                            <span class="s2">"command"</span><span class="p">:</span> <span class="s2">"echo 'File modified — consider running formatter'"</span><span class="p">,</span>
                         <span class="p">}</span>
                     <span class="p">],</span>
                 <span class="p">}</span>
             <span class="p">],</span>
-            <span class="s2">&quot;SessionStart&quot;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="s2">"SessionStart"</span><span class="p">:</span> <span class="p">[</span>
                 <span class="p">{</span>
-                    <span class="s2">&quot;matcher&quot;</span><span class="p">:</span> <span class="s2">&quot;startup&quot;</span><span class="p">,</span>
-                    <span class="s2">&quot;hooks&quot;</span><span class="p">:</span> <span class="p">[</span>
+                    <span class="s2">"matcher"</span><span class="p">:</span> <span class="s2">"startup"</span><span class="p">,</span>
+                    <span class="s2">"hooks"</span><span class="p">:</span> <span class="p">[</span>
                         <span class="p">{</span>
-                            <span class="s2">&quot;type&quot;</span><span class="p">:</span> <span class="s2">&quot;command&quot;</span><span class="p">,</span>
-                            <span class="s2">&quot;command&quot;</span><span class="p">:</span> <span class="s1">&#39;echo &quot;Session started in $(pwd) on $(date +%Y-%m-</span><span class="si">%d</span><span class="s1">)&quot;&#39;</span><span class="p">,</span>
+                            <span class="s2">"type"</span><span class="p">:</span> <span class="s2">"command"</span><span class="p">,</span>
+                            <span class="s2">"command"</span><span class="p">:</span> <span class="s1">'echo "Session started in $(pwd) on $(date +%Y-%m-</span><span class="si">%d</span><span class="s1">)"'</span><span class="p">,</span>
                         <span class="p">}</span>
                     <span class="p">],</span>
                 <span class="p">}</span>
             <span class="p">],</span>
         <span class="p">}</span>
     <span class="p">}</span>
-    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">hooks</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span>
+    <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">hooks</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span> <span class="o">+</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_has_deploy_artifacts</span><span class="p">(</span><span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;True only for genuine deployment signals.</span>
+<span class="w">    </span><span class="sd">"""True only for genuine deployment signals.</span>
 
 <span class="sd">    Note: the presence of ``.github/workflows/`` is deliberately NOT a signal —</span>
 <span class="sd">    almost every library has CI workflows (test/lint/publish) without being a</span>
 <span class="sd">    deployed application. Treating CI as deployment would mis-fire on essentially</span>
 <span class="sd">    every project with CI and contradict the minimal-generation principle.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">root</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span>
     <span class="k">return</span> <span class="p">(</span>
-        <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;Dockerfile&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
-        <span class="ow">or</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;docker-compose.yml&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
-        <span class="ow">or</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;docker-compose.yaml&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
-        <span class="ow">or</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;Procfile&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
-        <span class="ow">or</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;fly.toml&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
-        <span class="ow">or</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;render.yaml&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+        <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"Dockerfile"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+        <span class="ow">or</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"docker-compose.yml"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+        <span class="ow">or</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"docker-compose.yaml"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+        <span class="ow">or</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"Procfile"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+        <span class="ow">or</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"fly.toml"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+        <span class="ow">or</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"render.yaml"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
     <span class="p">)</span>
 </pre></div>
 

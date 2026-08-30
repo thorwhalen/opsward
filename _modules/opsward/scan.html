@@ -5,7 +5,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>opsward.scan &mdash; opsward 0.0.10 documentation</title>
+  <title>opsward.scan &mdash; opsward 0.0.11 documentation</title>
       <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
       <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=9edc463e" />
       <link rel="stylesheet" type="text/css" href="../../_static/copybutton.css?v=76b2166b" />
@@ -14,7 +14,7 @@
   
       <script src="../../_static/jquery.js?v=5d32c60e"></script>
       <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="../../_static/documentation_options.js?v=a83ce22a"></script>
+      <script src="../../_static/documentation_options.js?v=0c446633"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/toggleprompt.js?v=d7ede5d2"></script>
@@ -86,10 +86,10 @@
            <div itemprop="articleBody">
              
   <h1>Source code for opsward.scan</h1><div class="highlight"><pre>
-<span></span><span class="sd">&quot;&quot;&quot;Read-only scanner: inspect a project and return a ScanResult.</span>
+<span></span><span class="sd">"""Read-only scanner: inspect a project and return a ScanResult.</span>
 
 <span class="sd">This module NEVER writes to the target project.</span>
-<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">"""</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 
@@ -107,13 +107,13 @@
 <div class="viewcode-block" id="scan">
 <a class="viewcode-back" href="../../module_docs/opsward/scan.html#opsward.scan.scan">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">scan</span><span class="p">(</span><span class="n">project_root</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ScanResult</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Scan *project_root* and return a ScanResult.</span>
+<span class="w">    </span><span class="sd">"""Scan *project_root* and return a ScanResult.</span>
 
 <span class="sd">    &gt;&gt;&gt; import tempfile, pathlib</span>
 <span class="sd">    &gt;&gt;&gt; r = scan(pathlib.Path(tempfile.mkdtemp()))</span>
 <span class="sd">    &gt;&gt;&gt; r.project_type</span>
-<span class="sd">    &lt;ProjectType.unknown: &#39;unknown&#39;&gt;</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &lt;ProjectType.unknown: 'unknown'&gt;</span>
+<span class="sd">    """</span>
     <span class="n">project_root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">project_root</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
     <span class="n">result</span> <span class="o">=</span> <span class="n">ScanResult</span><span class="p">(</span><span class="n">project_root</span><span class="o">=</span><span class="n">project_root</span><span class="p">)</span>
 
@@ -123,10 +123,10 @@
     <span class="n">result</span><span class="o">.</span><span class="n">claude_md_path</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">claude_md_content</span> <span class="o">=</span> <span class="n">_find_claude_md</span><span class="p">(</span><span class="n">project_root</span><span class="p">)</span>
 
     <span class="c1"># .claude/ sub-directories</span>
-    <span class="n">claude_dir</span> <span class="o">=</span> <span class="n">project_root</span> <span class="o">/</span> <span class="s2">&quot;.claude&quot;</span>
-    <span class="n">result</span><span class="o">.</span><span class="n">skills</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">_scan_skills</span><span class="p">(</span><span class="n">claude_dir</span> <span class="o">/</span> <span class="s2">&quot;skills&quot;</span><span class="p">))</span>
-    <span class="n">result</span><span class="o">.</span><span class="n">agents</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">_scan_agents</span><span class="p">(</span><span class="n">claude_dir</span> <span class="o">/</span> <span class="s2">&quot;agents&quot;</span><span class="p">))</span>
-    <span class="n">result</span><span class="o">.</span><span class="n">rules</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">_scan_rules</span><span class="p">(</span><span class="n">claude_dir</span> <span class="o">/</span> <span class="s2">&quot;rules&quot;</span><span class="p">))</span>
+    <span class="n">claude_dir</span> <span class="o">=</span> <span class="n">project_root</span> <span class="o">/</span> <span class="s2">".claude"</span>
+    <span class="n">result</span><span class="o">.</span><span class="n">skills</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">_scan_skills</span><span class="p">(</span><span class="n">claude_dir</span> <span class="o">/</span> <span class="s2">"skills"</span><span class="p">))</span>
+    <span class="n">result</span><span class="o">.</span><span class="n">agents</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">_scan_agents</span><span class="p">(</span><span class="n">claude_dir</span> <span class="o">/</span> <span class="s2">"agents"</span><span class="p">))</span>
+    <span class="n">result</span><span class="o">.</span><span class="n">rules</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">_scan_rules</span><span class="p">(</span><span class="n">claude_dir</span> <span class="o">/</span> <span class="s2">"rules"</span><span class="p">))</span>
 
     <span class="c1"># Hooks config</span>
     <span class="n">result</span><span class="o">.</span><span class="n">hooks_path</span><span class="p">,</span> <span class="n">result</span><span class="o">.</span><span class="n">hooks_config</span> <span class="o">=</span> <span class="n">_find_hooks</span><span class="p">(</span><span class="n">claude_dir</span><span class="p">)</span>
@@ -137,7 +137,7 @@
     <span class="p">)</span>
 
     <span class="c1"># AGENTS.md</span>
-    <span class="n">agents_md</span> <span class="o">=</span> <span class="n">project_root</span> <span class="o">/</span> <span class="s2">&quot;AGENTS.md&quot;</span>
+    <span class="n">agents_md</span> <span class="o">=</span> <span class="n">project_root</span> <span class="o">/</span> <span class="s2">"AGENTS.md"</span>
     <span class="k">if</span> <span class="n">agents_md</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
         <span class="n">result</span><span class="o">.</span><span class="n">agents_md_path</span> <span class="o">=</span> <span class="n">agents_md</span>
         <span class="n">result</span><span class="o">.</span><span class="n">agents_md_content</span> <span class="o">=</span> <span class="n">read_text_safe</span><span class="p">(</span><span class="n">agents_md</span><span class="p">)</span>
@@ -156,12 +156,12 @@
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_detect_project_type</span><span class="p">(</span><span class="n">root</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ProjectType</span><span class="p">:</span>
     <span class="n">has_python</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;pyproject.toml&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
-        <span class="ow">or</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;setup.py&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
-        <span class="ow">or</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;setup.cfg&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
-        <span class="ow">or</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;requirements.txt&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+        <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"pyproject.toml"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+        <span class="ow">or</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"setup.py"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+        <span class="ow">or</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"setup.cfg"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+        <span class="ow">or</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"requirements.txt"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
     <span class="p">)</span>
-    <span class="n">has_jsts</span> <span class="o">=</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;package.json&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">or</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;tsconfig.json&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+    <span class="n">has_jsts</span> <span class="o">=</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"package.json"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">or</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"tsconfig.json"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">has_python</span> <span class="ow">and</span> <span class="n">has_jsts</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">ProjectType</span><span class="o">.</span><span class="n">mixed</span>
     <span class="k">if</span> <span class="n">has_python</span><span class="p">:</span>
@@ -172,17 +172,17 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_find_claude_md</span><span class="p">(</span><span class="n">root</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
-    <span class="k">for</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;CLAUDE.md&quot;</span><span class="p">,</span> <span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;.claude&quot;</span> <span class="o">/</span> <span class="s2">&quot;CLAUDE.md&quot;</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"CLAUDE.md"</span><span class="p">,</span> <span class="n">root</span> <span class="o">/</span> <span class="s2">".claude"</span> <span class="o">/</span> <span class="s2">"CLAUDE.md"</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">candidate</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
             <span class="k">return</span> <span class="n">candidate</span><span class="p">,</span> <span class="n">read_text_safe</span><span class="p">(</span><span class="n">candidate</span><span class="p">)</span>
-    <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="s2">""</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_scan_skills</span><span class="p">(</span><span class="n">skills_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
     <span class="k">for</span> <span class="n">skill_path</span> <span class="ow">in</span> <span class="n">iter_subdirs</span><span class="p">(</span><span class="n">skills_dir</span><span class="p">):</span>
-        <span class="n">skill_md</span> <span class="o">=</span> <span class="n">skill_path</span> <span class="o">/</span> <span class="s2">&quot;SKILL.md&quot;</span>
+        <span class="n">skill_md</span> <span class="o">=</span> <span class="n">skill_path</span> <span class="o">/</span> <span class="s2">"SKILL.md"</span>
         <span class="n">has_skill_md</span> <span class="o">=</span> <span class="n">skill_md</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span>
-        <span class="n">description</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">description</span> <span class="o">=</span> <span class="s2">""</span>
         <span class="n">frontmatter</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="n">line_count</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">if</span> <span class="n">has_skill_md</span><span class="p">:</span>
@@ -190,8 +190,8 @@
             <span class="n">description</span> <span class="o">=</span> <span class="n">_first_line</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
             <span class="n">line_count</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">content</span><span class="o">.</span><span class="n">splitlines</span><span class="p">())</span>
             <span class="n">frontmatter</span> <span class="o">=</span> <span class="n">_parse_frontmatter</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">description</span> <span class="ow">and</span> <span class="s2">&quot;description&quot;</span> <span class="ow">in</span> <span class="n">frontmatter</span><span class="p">:</span>
-                <span class="n">description</span> <span class="o">=</span> <span class="n">frontmatter</span><span class="p">[</span><span class="s2">&quot;description&quot;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">description</span> <span class="ow">and</span> <span class="s2">"description"</span> <span class="ow">in</span> <span class="n">frontmatter</span><span class="p">:</span>
+                <span class="n">description</span> <span class="o">=</span> <span class="n">frontmatter</span><span class="p">[</span><span class="s2">"description"</span><span class="p">]</span>
         <span class="k">yield</span> <span class="n">SkillInfo</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="n">skill_path</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
             <span class="n">path</span><span class="o">=</span><span class="n">skill_path</span><span class="p">,</span>
@@ -203,7 +203,7 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_scan_agents</span><span class="p">(</span><span class="n">agents_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
-    <span class="k">for</span> <span class="n">agent_file</span> <span class="ow">in</span> <span class="n">iter_files</span><span class="p">(</span><span class="n">agents_dir</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.md&quot;</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">agent_file</span> <span class="ow">in</span> <span class="n">iter_files</span><span class="p">(</span><span class="n">agents_dir</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">".md"</span><span class="p">):</span>
         <span class="n">content</span> <span class="o">=</span> <span class="n">read_text_safe</span><span class="p">(</span><span class="n">agent_file</span><span class="p">)</span>
         <span class="k">yield</span> <span class="n">AgentInfo</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="n">agent_file</span><span class="o">.</span><span class="n">stem</span><span class="p">,</span>
@@ -213,7 +213,7 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_scan_rules</span><span class="p">(</span><span class="n">rules_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
-    <span class="k">for</span> <span class="n">rule_file</span> <span class="ow">in</span> <span class="n">iter_files</span><span class="p">(</span><span class="n">rules_dir</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.md&quot;</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">rule_file</span> <span class="ow">in</span> <span class="n">iter_files</span><span class="p">(</span><span class="n">rules_dir</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">".md"</span><span class="p">):</span>
         <span class="n">content</span> <span class="o">=</span> <span class="n">read_text_safe</span><span class="p">(</span><span class="n">rule_file</span><span class="p">)</span>
         <span class="k">yield</span> <span class="n">RuleInfo</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="n">rule_file</span><span class="o">.</span><span class="n">stem</span><span class="p">,</span>
@@ -224,7 +224,7 @@
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_find_hooks</span><span class="p">(</span><span class="n">claude_dir</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="nb">dict</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
     <span class="c1"># hooks.json takes priority, then settings.local.json</span>
-    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;hooks.json&quot;</span><span class="p">,</span> <span class="s2">&quot;settings.local.json&quot;</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"hooks.json"</span><span class="p">,</span> <span class="s2">"settings.local.json"</span><span class="p">):</span>
         <span class="n">candidate</span> <span class="o">=</span> <span class="n">claude_dir</span> <span class="o">/</span> <span class="n">name</span>
         <span class="k">if</span> <span class="n">candidate</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">read_json_safe</span><span class="p">(</span><span class="n">candidate</span><span class="p">)</span>
@@ -234,10 +234,10 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_scan_docs</span><span class="p">(</span><span class="n">root</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">DocSpec</span><span class="p">],</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
-    <span class="n">docs_dir</span> <span class="o">=</span> <span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;docs&quot;</span>
+    <span class="n">docs_dir</span> <span class="o">=</span> <span class="n">root</span> <span class="o">/</span> <span class="s2">"docs"</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">docs_dir</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
         <span class="c1"># Also check misc/docs</span>
-        <span class="n">docs_dir</span> <span class="o">=</span> <span class="n">root</span> <span class="o">/</span> <span class="s2">&quot;misc&quot;</span> <span class="o">/</span> <span class="s2">&quot;docs&quot;</span>
+        <span class="n">docs_dir</span> <span class="o">=</span> <span class="n">root</span> <span class="o">/</span> <span class="s2">"misc"</span> <span class="o">/</span> <span class="s2">"docs"</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">docs_dir</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
         <span class="k">return</span> <span class="p">[],</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">None</span>
 
@@ -245,9 +245,9 @@
     <span class="n">docs_guide_path</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="n">has_docs_guide</span> <span class="o">=</span> <span class="kc">False</span>
 
-    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">iter_files</span><span class="p">(</span><span class="n">docs_dir</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">&quot;.md&quot;</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">iter_files</span><span class="p">(</span><span class="n">docs_dir</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">".md"</span><span class="p">):</span>
         <span class="n">docs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">DocSpec</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">stem</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">size_bytes</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_size</span><span class="p">))</span>
-        <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">&quot;docs_guide.md&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">"docs_guide.md"</span><span class="p">:</span>
             <span class="n">has_docs_guide</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="n">docs_guide_path</span> <span class="o">=</span> <span class="n">f</span>
 
@@ -255,49 +255,49 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_detect_monorepo</span><span class="p">(</span><span class="n">root</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Detect monorepo structures (packages/, apps/, workspaces).</span>
+<span class="w">    </span><span class="sd">"""Detect monorepo structures (packages/, apps/, workspaces).</span>
 
 <span class="sd">    Returns (is_monorepo, list of package directory names).</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">packages</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="c1"># Common monorepo container directories</span>
-    <span class="k">for</span> <span class="n">container_name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;packages&quot;</span><span class="p">,</span> <span class="s2">&quot;apps&quot;</span><span class="p">,</span> <span class="s2">&quot;libs&quot;</span><span class="p">,</span> <span class="s2">&quot;modules&quot;</span><span class="p">,</span> <span class="s2">&quot;services&quot;</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">container_name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"packages"</span><span class="p">,</span> <span class="s2">"apps"</span><span class="p">,</span> <span class="s2">"libs"</span><span class="p">,</span> <span class="s2">"modules"</span><span class="p">,</span> <span class="s2">"services"</span><span class="p">):</span>
         <span class="n">container</span> <span class="o">=</span> <span class="n">root</span> <span class="o">/</span> <span class="n">container_name</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">container</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
             <span class="k">continue</span>
         <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">container</span><span class="o">.</span><span class="n">iterdir</span><span class="p">()):</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">child</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span> <span class="ow">or</span> <span class="n">child</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">child</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span> <span class="ow">or</span> <span class="n">child</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"."</span><span class="p">):</span>
                 <span class="k">continue</span>
             <span class="c1"># Check if sub-package has its own manifest</span>
             <span class="k">if</span> <span class="p">(</span>
-                <span class="p">(</span><span class="n">child</span> <span class="o">/</span> <span class="s2">&quot;package.json&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
-                <span class="ow">or</span> <span class="p">(</span><span class="n">child</span> <span class="o">/</span> <span class="s2">&quot;pyproject.toml&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
-                <span class="ow">or</span> <span class="p">(</span><span class="n">child</span> <span class="o">/</span> <span class="s2">&quot;setup.py&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+                <span class="p">(</span><span class="n">child</span> <span class="o">/</span> <span class="s2">"package.json"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+                <span class="ow">or</span> <span class="p">(</span><span class="n">child</span> <span class="o">/</span> <span class="s2">"pyproject.toml"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+                <span class="ow">or</span> <span class="p">(</span><span class="n">child</span> <span class="o">/</span> <span class="s2">"setup.py"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
             <span class="p">):</span>
-                <span class="n">packages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">container_name</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">child</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+                <span class="n">packages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">container_name</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">child</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
     <span class="c1"># Also check for pnpm-workspace.yaml or lerna.json</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">packages</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">signal</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;pnpm-workspace.yaml&quot;</span><span class="p">,</span> <span class="s2">&quot;lerna.json&quot;</span><span class="p">,</span> <span class="s2">&quot;nx.json&quot;</span><span class="p">,</span> <span class="s2">&quot;turbo.json&quot;</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">signal</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"pnpm-workspace.yaml"</span><span class="p">,</span> <span class="s2">"lerna.json"</span><span class="p">,</span> <span class="s2">"nx.json"</span><span class="p">,</span> <span class="s2">"turbo.json"</span><span class="p">):</span>
             <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="n">signal</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-                <span class="c1"># It&#39;s a monorepo but we couldn&#39;t enumerate packages</span>
+                <span class="c1"># It's a monorepo but we couldn't enumerate packages</span>
                 <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="p">[]</span>
 
     <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">packages</span><span class="p">),</span> <span class="n">packages</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_parse_frontmatter</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Extract YAML frontmatter from a SKILL.md file as a simple dict.</span>
+<span class="w">    </span><span class="sd">"""Extract YAML frontmatter from a SKILL.md file as a simple dict.</span>
 
 <span class="sd">    Handles the subset of YAML used in agentskills.io spec frontmatter</span>
 <span class="sd">    without requiring a YAML library.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    """</span>
     <span class="n">lines</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">lines</span> <span class="ow">or</span> <span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">&quot;---&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">lines</span> <span class="ow">or</span> <span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">"---"</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">{}</span>
     <span class="n">end</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="mi">1</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;---&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s2">"---"</span><span class="p">:</span>
             <span class="n">end</span> <span class="o">=</span> <span class="n">i</span>
             <span class="k">break</span>
     <span class="k">if</span> <span class="n">end</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -307,35 +307,35 @@
     <span class="n">current_key</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="n">end</span><span class="p">]:</span>
         <span class="n">stripped</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">stripped</span> <span class="ow">or</span> <span class="n">stripped</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">stripped</span> <span class="ow">or</span> <span class="n">stripped</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"#"</span><span class="p">):</span>
             <span class="k">continue</span>
         <span class="c1"># Indented line = continuation of previous key (nested YAML)</span>
-        <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">,</span> <span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">current_key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">" "</span><span class="p">,</span> <span class="s2">"</span><span class="se">\t</span><span class="s2">"</span><span class="p">)</span> <span class="ow">and</span> <span class="n">current_key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># Simple nested key-value → store under parent as dict</span>
-            <span class="k">if</span> <span class="s2">&quot;:&quot;</span> <span class="ow">in</span> <span class="n">stripped</span><span class="p">:</span>
-                <span class="n">k</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">stripped</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="s2">":"</span> <span class="ow">in</span> <span class="n">stripped</span><span class="p">:</span>
+                <span class="n">k</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">stripped</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">":"</span><span class="p">)</span>
                 <span class="n">k</span> <span class="o">=</span> <span class="n">k</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-                <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">)</span>
+                <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">'"'</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">"'"</span><span class="p">)</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">current_key</span><span class="p">),</span> <span class="nb">dict</span><span class="p">):</span>
                     <span class="n">result</span><span class="p">[</span><span class="n">current_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
                 <span class="n">result</span><span class="p">[</span><span class="n">current_key</span><span class="p">][</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
             <span class="k">continue</span>
-        <span class="k">if</span> <span class="s2">&quot;:&quot;</span> <span class="ow">in</span> <span class="n">stripped</span><span class="p">:</span>
-            <span class="n">k</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">stripped</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">&quot;:&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s2">":"</span> <span class="ow">in</span> <span class="n">stripped</span><span class="p">:</span>
+            <span class="n">k</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">stripped</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">":"</span><span class="p">)</span>
             <span class="n">k</span> <span class="o">=</span> <span class="n">k</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-            <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">)</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s1">'"'</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(</span><span class="s2">"'"</span><span class="p">)</span>
             <span class="n">result</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">v</span>
             <span class="n">current_key</span> <span class="o">=</span> <span class="n">k</span>
     <span class="k">return</span> <span class="n">result</span>
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_first_line</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Return the first non-empty, non-heading line of *text*.&quot;&quot;&quot;</span>
+<span class="w">    </span><span class="sd">"""Return the first non-empty, non-heading line of *text*."""</span>
     <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">text</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
         <span class="n">stripped</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">stripped</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">stripped</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;#&quot;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">stripped</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">stripped</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"#"</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">stripped</span>
-    <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+    <span class="k">return</span> <span class="s2">""</span>
 </pre></div>
 
            </div>
