@@ -190,9 +190,14 @@ def maintain(
 
 
 def _relative_path(path: Path, base: Path) -> str:
-    """Return path relative to base, or absolute if not under base."""
+    """Return path relative to base, or absolute if not under base.
+
+    Rendered with forward slashes regardless of host OS (#21): this is display
+    text, not a filesystem path, and a Windows-separated path leaking into
+    printed output (or into generated doc content) is not portable.
+    """
     try:
-        return str(path.relative_to(base))
+        return path.relative_to(base).as_posix()
     except ValueError:
         return str(path)
 

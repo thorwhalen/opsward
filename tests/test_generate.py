@@ -379,7 +379,10 @@ def test_python_docs_path():
         )
         doc_files = [f for f in files if "docs_guide.md" == f.target_path.name]
         assert doc_files
-        assert "misc/docs" in str(doc_files[0].target_path)
+        # .as_posix(), not str(): target_path is a real filesystem Path (a WindowsPath
+        # renders with backslashes on Windows, correctly, since it is used to write the
+        # file to disk) -- the assertion is about the logical path, not the OS rendering.
+        assert "misc/docs" in doc_files[0].target_path.as_posix()
 
 
 def test_jsts_docs_path():
@@ -393,6 +396,7 @@ def test_jsts_docs_path():
         )
         doc_files = [f for f in files if "docs_guide.md" == f.target_path.name]
         assert doc_files
-        path_str = str(doc_files[0].target_path)
+        # .as_posix(), not str() -- see test_python_docs_path.
+        path_str = doc_files[0].target_path.as_posix()
         assert "misc/docs" not in path_str
         assert "/docs/" in path_str

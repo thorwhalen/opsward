@@ -488,6 +488,10 @@ def _find_conftest(sr: ScanResult) -> str | None:
     Checks the detected test dir and the root first, then a bounded search,
     skipping hidden/vendored trees. Returns None when none exists so generated
     docs never assert a conftest that isn't there.
+
+    Rendered with forward slashes regardless of host OS (#21): this path is
+    embedded in generated doc content that ships to readers on every platform,
+    so it must not carry the host's separator.
     """
     root = sr.project_root
     if not root.is_dir():
@@ -495,12 +499,12 @@ def _find_conftest(sr: ScanResult) -> str | None:
     test_dir = _detect_test_dir(sr)
     for candidate in (root / test_dir / "conftest.py", root / "conftest.py"):
         if candidate.is_file():
-            return str(candidate.relative_to(root))
+            return candidate.relative_to(root).as_posix()
     for found in sorted(root.rglob("conftest.py")):
         parts = found.relative_to(root).parts
         if any(p.startswith(".") or p in _MAP_SKIP_NAMES for p in parts):
             continue
-        return str(found.relative_to(root))
+        return found.relative_to(root).as_posix()
     return None
 
 
