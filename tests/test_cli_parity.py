@@ -21,14 +21,12 @@ To add a Python version to CI, record a golden for it (see CLAUDE.md, "CLI Patte
 unrecorded version fails loudly rather than silently skipping: a parity test that quietly
 does nothing is worse than no parity test.
 
-**Windows** is asserted too, minus the six cases in :data:`WINDOWS_CONTENT_DIFFS`. Those
-six differ for reasons that have nothing to do with the command line and everything to do
-with opsward's own output: it prints ``misc\\docs\\...`` where POSIX prints
-``misc/docs/...``, and it reports file sizes inflated by CRLF checkout (a 37-byte stub
-measures 40). Both are the pre-existing Windows bugs tracked in issue #21 -- argh printed
-exactly the same thing -- and they are listed rather than skipped so that everything else
-on Windows, the whole grammar included, stays asserted. That matters: the ``.exe`` defect
-this migration found in cw lived precisely there.
+**Windows** is asserted in full, with no content exceptions. It used to need six --
+opsward printed ``misc\\docs\\...`` where POSIX printed ``misc/docs/...``, and reported
+file sizes inflated by CRLF checkout (a 37-byte stub measured 40) -- but both were fixed
+in #21 (display paths now render via ``PurePath.as_posix()``; ``.gitattributes`` pins
+``eol=lf`` so a Windows checkout no longer inflates byte counts), so nothing is exempted
+any more.
 """
 
 import shutil
@@ -40,19 +38,10 @@ import pytest
 REPO_ROOT = Path(__file__).resolve().parent.parent
 GOLDEN_DIR = REPO_ROOT / "misc"
 
-#: Cases whose *content* differs on Windows because of opsward's own output, not because of
-#: anything about the command line: printed paths use the OS separator, and reported file
-#: sizes count CRLF line endings. Tracked in issue #21; unchanged by the migration to cw.
-#: If one of these starts matching, the test fails with `unexpected-match` -- which is the
-#: correct outcome, and means #21 was fixed and the entry should be deleted.
-WINDOWS_CONTENT_DIFFS = [
-    ["generate", "tests/fixtures/bare_project"],
-    ["generate", "tests/fixtures/bare_project", "--agents-md", "--hooks"],
-    ["generate", "tests/fixtures/bare_project", "-a"],
-    ["maintain", "tests/fixtures/stale_project"],
-    ["diagnose", "--verbose", "tests/fixtures/python_project"],
-    ["diagnose", "-v", "tests/fixtures/python_project"],
-]
+#: Previously the six cases whose *content* differed on Windows because of opsward's own
+#: output (OS-separated paths, CRLF-inflated byte counts) -- fixed in #21. Kept as an empty
+#: tuple, rather than deleted, so `expect_diff=` below still documents what it is for.
+WINDOWS_CONTENT_DIFFS: list[list[str]] = []
 
 
 def _golden_for_this_python() -> Path:

@@ -1,1 +1,6 @@
 *.ipynb linguist-documentation
+
+# Force LF checkout for text files regardless of host OS (#21): Windows CI
+# checked fixtures/templates out with CRLF, inflating every reported byte
+# size opsward computes from disk (a 37-byte stub measured 40).
+* text=auto eol=lf
