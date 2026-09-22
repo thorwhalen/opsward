@@ -72,16 +72,22 @@ analysis of 2,500+ AGENTS.md files).
 
 **Detection:** Heuristic — look for imperative verbs, code blocks, specific file references. Flag sentences that contain "appropriate", "as needed", "consider" without specifics.
 
-## Skill Quality Score (0-100, per skill)
+## Skill Quality Score (0-100, overall — averaged across a project's skills)
 
-| Dimension | Weight | Criteria |
+Implemented in `score.py::_score_skills`. Each skill earns a quality fraction
+in `[0, 1]`, and the score is the average across skills scaled to 100:
+
+| Component | Weight | Criteria |
 |-----------|--------|----------|
-| Frontmatter valid | 20 | Has `name` and `description` in YAML frontmatter |
-| Description quality | 20 | Description explains WHEN to use it, not just WHAT it does |
-| Size | 15 | Under 500 lines (as recommended by Anthropic) |
-| Instructions clarity | 20 | Steps are numbered or clearly structured |
-| References present | 10 | Links to supporting files if skill is complex |
-| Tool restrictions | 15 | Uses `allowed-tools` if skill should be read-only or limited |
+| Has a SKILL.md | 40% | `skill.has_skill_md` |
+| Has a description | 30% | `skill.description` is non-empty |
+| agentskills.io spec compliance | 30% | Zero violations from `validate_skill_spec` (name format, frontmatter, size ≤500 lines — see `validate_skill_spec` in `score.py`) |
+
+A project with no skills at all scores 0 for this component (not averaged
+over zero skills). There is no per-dimension weighting for "instructions
+clarity", "references present" or "tool restrictions" — those were an earlier
+proposal that was never implemented; use `validate_skill_spec`'s violation
+list for spec-level detail.
 
 ## Documentation Completeness Score (0-100)
 

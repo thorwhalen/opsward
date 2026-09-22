@@ -4,6 +4,11 @@ This document specifies every artifact that opsward can generate or maintain
 in a target project. Each artifact has a purpose, a location (which varies by
 project type), and a generation strategy.
 
+`docs_catalog.md` is the SSOT for *why* each doc type is named and structured
+the way it is; this document adds the path-per-project-type and
+generation-strategy detail that `docs_catalog.md` doesn't cover. If the two
+disagree on rationale, `docs_catalog.md` wins.
+
 ## Artifact Categories
 
 ### 1. Documentation Layer
@@ -43,9 +48,18 @@ These are Claude Code (and cross-agent) configuration files.
 |----------|----------|-------------------|
 | `CLAUDE.md` | `{project_root}/CLAUDE.md` | Core template populated from scan. Includes project overview, tech stack, module map, commands, conventions, and pointer to `docs_guide.md`. |
 | `setup-auditor` agent | `.claude/agents/setup-auditor.md` | Read-only diagnostic subagent with `allowed-tools: Read, Glob, Grep`. |
-| `diagnose-setup` skill | `.claude/skills/diagnose-setup/SKILL.md` | Skill that runs the diagnosis workflow. References the auditor subagent. |
-| `maintain-docs` skill | `.claude/skills/maintain-docs/SKILL.md` | Skill that checks doc freshness, cross-references, and drift. |
+| `opsward-diagnose` skill | `.claude/skills/opsward-diagnose/SKILL.md` | Skill that runs the diagnosis workflow. References the auditor subagent. |
+| `opsward-maintain` skill | `.claude/skills/opsward-maintain/SKILL.md` | Skill that checks doc freshness, cross-references, and drift. |
+| `opsward-generate` skill | `.claude/skills/opsward-generate/SKILL.md` | Skill that runs the artifact-generation workflow. |
+| `opsward` skill | `.claude/skills/opsward/SKILL.md` | Top-level entry-point skill dispatching to diagnose/generate/maintain. |
 | Rules files | `.claude/rules/` | Only if specific conventions detected (e.g., a `no-any.md` rule if TypeScript strict mode is on). |
+
+Contributor/dev skills (`opsward-dev`, `opsward-add-template`, `opsward-add-scoring`,
+`opsward-add-recommendation`) are local-only, hand-written skills that teach an agent
+opsward's *own* internals — a different artifact class from the ones above, which
+opsward generates *for a target project*. See thorwhalen/opsward#4 for the (not yet
+implemented) proposal to offer contributor-skill scaffolding as a generated artifact
+class too.
 
 ### 3. Cross-Agent Compatibility
 
@@ -53,10 +67,11 @@ For projects that use multiple AI agents (not just Claude Code):
 
 | Artifact | Location | Purpose |
 |----------|----------|---------|
-| `AGENTS.md` symlink | `{project_root}/AGENTS.md → CLAUDE.md` | Compatibility with OpenAI Codex, Copilot, and other agents that read AGENTS.md |
-| `.agents/skills/` symlinks | `.agents/skills/ → .claude/skills/` | Cross-agent skill discovery per the Agent Skills open standard |
+| `AGENTS.md` | `{project_root}/AGENTS.md` | A real generated file (from `shared/agents_md.md`, populated with the cross-platform subset of CLAUDE.md content), not a symlink — opt in via `opsward generate --agents-md`. |
 
-These symlinks are optional and only created if the user opts in (`--cross-agent` flag).
+There is currently no `.agents/skills/` symlinking and no `--cross-agent` flag —
+that was an earlier proposal that was never implemented. If cross-agent skill
+discovery is wanted, it does not exist yet; don't document it as shipped.
 
 ## CLAUDE.md Template Structure
 
