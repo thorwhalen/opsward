@@ -2,20 +2,18 @@
 
 # About this build
 
-This documentation was built on **2026-09-22 13:29 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/f0ce2bdbf1ca7ae44031d649870acf0f8b39323a"><code>f0ce2bd</code></a> on branch <code>main</code>, for **opsward 0.0.12** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-09-22 13:58 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/3aefd3ebba64f402644c839c71aa9900aba5e39d"><code>3aefd3e</code></a> on branch <code>main</code>, for **opsward 0.0.14** (from <code>pyproject.toml</code>).
 
-#### WARNING
-The documentation and the package may be misaligned:
-
-- The documented version (0.0.12) is behind the latest release on PyPI (0.0.13): `pip install opsward` gives newer code than these docs describe.
+#### NOTE
+Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
 
 ## Source
 
 |                     |                                                                                                                                                           |
 |---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/opsward/commit/f0ce2bdbf1ca7ae44031d649870acf0f8b39323a"><code>f0ce2bdbf1ca7ae44031d649870acf0f8b39323a</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/opsward/commit/3aefd3ebba64f402644c839c71aa9900aba5e39d"><code>3aefd3ebba64f402644c839c71aa9900aba5e39d</code></a> |
 | Branch              | <code>main</code>                                                                                                                                         |
-| Tags at this commit | none                                                                                                                                                      |
+| Tags at this commit | <code>0.0.14</code>                                                                                                                                       |
 | Working tree        | clean                                                                                                                                                     |
 | Remote              | <code>https://github.com/thorwhalen/opsward</code>                                                                                                        |
 
@@ -24,9 +22,9 @@ The documentation and the package may be misaligned:
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/opsward</code>                                                            |
-| Run          | <a href="https://github.com/thorwhalen/opsward/actions/runs/35733576816">35733576816</a>   |
+| Run          | <a href="https://github.com/thorwhalen/opsward/actions/runs/35736549131">35736549131</a>   |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>f0ce2bdbf1ca7ae44031d649870acf0f8b39323a</code> (in the history of the built commit) |
+| Event commit | <code>7b5d14f40d8df83ae6fac021129d21a219300e4f</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -51,13 +49,13 @@ The documentation and the package may be misaligned:
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/opsward/0.0.13/">0.0.13</a>, newer than the documented version (0.0.12).
+Latest release: <a href="https://pypi.org/project/opsward/0.0.14/">0.0.14</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/opsward && cd opsward
-git checkout f0ce2bdbf1ca7ae44031d649870acf0f8b39323a
+git checkout 3aefd3ebba64f402644c839c71aa9900aba5e39d
 pip install "epythet==0.2.12"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

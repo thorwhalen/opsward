@@ -1,32 +1,34 @@
 {
   "schema_version": 1,
-  "built_at": "2026-09-22T13:29:11Z",
+  "built_at": "2026-09-22T13:58:04Z",
   "package": {
     "name": "opsward",
-    "version": "0.0.12",
+    "version": "0.0.14",
     "display_name": "opsward",
     "source": "pyproject.toml"
   },
   "git": {
     "available": true,
-    "commit": "f0ce2bdbf1ca7ae44031d649870acf0f8b39323a",
-    "short_commit": "f0ce2bd",
+    "commit": "3aefd3ebba64f402644c839c71aa9900aba5e39d",
+    "short_commit": "3aefd3e",
     "branch": "main",
-    "tags": [],
+    "tags": [
+      "0.0.14"
+    ],
     "dirty": false,
     "remote_url": "https://github.com/thorwhalen/opsward",
-    "commit_url": "https://github.com/thorwhalen/opsward/commit/f0ce2bdbf1ca7ae44031d649870acf0f8b39323a",
+    "commit_url": "https://github.com/thorwhalen/opsward/commit/3aefd3ebba64f402644c839c71aa9900aba5e39d",
     "error": null
   },
   "ci": {
     "provider": "github",
     "repository": "thorwhalen/opsward",
-    "sha": "f0ce2bdbf1ca7ae44031d649870acf0f8b39323a",
+    "sha": "7b5d14f40d8df83ae6fac021129d21a219300e4f",
     "sha_in_history": true,
     "ref": "refs/heads/main",
     "ref_name": "main",
-    "run_id": "35733576816",
-    "run_url": "https://github.com/thorwhalen/opsward/actions/runs/35733576816",
+    "run_id": "35736549131",
+    "run_url": "https://github.com/thorwhalen/opsward/actions/runs/35736549131",
     "server_url": "https://github.com"
   },
   "tools": {
@@ -60,16 +62,14 @@
   },
   "pypi": {
     "checked": true,
-    "latest": "0.0.13",
-    "relation": "behind",
+    "latest": "0.0.14",
+    "relation": "same",
     "error": null
   },
-  "reproduce": "git clone https://github.com/thorwhalen/opsward && cd opsward\ngit checkout f0ce2bdbf1ca7ae44031d649870acf0f8b39323a\npip install \"epythet==0.2.12\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
+  "reproduce": "git clone https://github.com/thorwhalen/opsward && cd opsward\ngit checkout 3aefd3ebba64f402644c839c71aa9900aba5e39d\npip install \"epythet==0.2.12\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
   "warnings": [],
   "alignment": {
-    "aligned": false,
-    "notes": [
-      "The documented version (0.0.12) is behind the latest release on PyPI (0.0.13): `pip install opsward` gives newer code than these docs describe."
-    ]
+    "aligned": true,
+    "notes": []
   }
 }
