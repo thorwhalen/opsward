@@ -63,6 +63,23 @@ def scan(project_root: Path) -> ScanResult:
 # ---------------------------------------------------------------------------
 
 
+def _content_size(path: Path) -> int:
+    """Byte size of *path* with line endings normalized to LF.
+
+    The size feeds stub heuristics (``maintain``'s ``_MIN_DOC_BYTES``, ``score``'s
+    empty-doc check) and is printed by ``diagnose -v``. Using the raw on-disk size
+    made those host-dependent: Git for Windows defaults to ``core.autocrlf=true``,
+    so the same doc measured larger there and could stop being flagged as a stub.
+
+    >>> import tempfile, pathlib
+    >>> d = pathlib.Path(tempfile.mkdtemp())
+    >>> _ = (d / 'a.md').write_bytes(b'a\\r\\nb\\r\\n')
+    >>> _content_size(d / 'a.md')
+    4
+    """
+    return len(path.read_bytes().replace(b"\r\n", b"\n"))
+
+
 def _detect_project_type(root: Path) -> ProjectType:
     has_python = (
         (root / "pyproject.toml").exists()
@@ -155,7 +172,7 @@ def _scan_docs(root: Path) -> tuple[list[DocSpec], bool, Path | None]:
     has_docs_guide = False
 
     for f in iter_files(docs_dir, suffix=".md"):
-        docs.append(DocSpec(name=f.stem, path=f, size_bytes=f.stat().st_size))
+        docs.append(DocSpec(name=f.stem, path=f, size_bytes=_content_size(f)))
         if f.name == "docs_guide.md":
             has_docs_guide = True
             docs_guide_path = f
