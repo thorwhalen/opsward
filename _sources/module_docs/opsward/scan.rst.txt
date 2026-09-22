@@ -1,4 +1,0 @@
-opsward.scan
-============
-.. automodule:: opsward.scan
-   :members:

@@ -1,0 +1,17 @@
+opsward.cli
+===========
+
+.. automodule:: opsward.cli
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      diagnose
+      find
+      generate
+      install_skills
+      maintain
+      recommend
+   

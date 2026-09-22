@@ -1,4 +1,0 @@
-opsward.recommend
-=================
-.. automodule:: opsward.recommend
-   :members:

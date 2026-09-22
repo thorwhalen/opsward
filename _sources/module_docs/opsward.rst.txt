@@ -1,4 +1,0 @@
-opsward
-=======
-.. automodule:: opsward
-   :members:

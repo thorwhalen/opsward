@@ -1,4 +1,0 @@
-opsward.score
-=============
-.. automodule:: opsward.score
-   :members:

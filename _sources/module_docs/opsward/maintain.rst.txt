@@ -1,4 +1,0 @@
-opsward.maintain
-================
-.. automodule:: opsward.maintain
-   :members:

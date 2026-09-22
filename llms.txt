@@ -1,0 +1,31 @@
+# opsward
+
+> Diagnose, generate, and maintain the AI agent setup of your projects — CLAUDE.md, skills, subagents, rules, and supporting docs.
+
+
+## Pages
+
+- [opsward](index.html.md): Diagnose, generate, and maintain the AI agent setup of your projects —
+- [API reference](api.html.md): | &#96;opsward&#96;   | Diagnose, generate, and maintain the AI agent setup of your projects.   |
+- [opsward](_autosummary/opsward.html.md): Diagnose, generate, and maintain the AI agent setup of your projects.
+- [opsward.base](_autosummary/opsward.base.html.md): All dataclasses and type definitions for opsward.
+- [opsward.cli](_autosummary/opsward.cli.html.md): CLI dispatch for opsward.
+- [opsward.data](_autosummary/opsward.data.html.md): Bundled package resources for opsward, accessed via &#96;importlib.resources.files("opsward.data")&#96;.
+- [opsward.data.templates](_autosummary/opsward.data.templates.html.md): Generation templates organized by target project type.
+- [opsward.discover](_autosummary/opsward.discover.html.md): Optional cross-repo asset discovery, delegating to the &#96;toolery&#96; package.
+- [opsward.generate](_autosummary/opsward.generate.html.md): Determine which artifacts are missing, render templates, return files to create.
+- [opsward.maintain](_autosummary/opsward.maintain.html.md): Detect maintenance issues and return suggestions.
+- [opsward.recommend](_autosummary/opsward.recommend.html.md): Recommend skills from the ecosystem based on project tech stack.
+- [opsward.scan](_autosummary/opsward.scan.html.md): Scan &#42;project_root&#42; and return a ScanResult.
+- [opsward.score](_autosummary/opsward.score.html.md): Pure scoring functions. ScanResult -&gt; DiagnosisReport.
+- [opsward.util](_autosummary/opsward.util.html.md): Shared helpers for opsward.
+- [For AI agents](ai-agents.html.md): &#96;opsward&#96; ships artifacts for coding agents alongside its code. This page lists
+- [About this build](about-this-build.html.md): This documentation was built on &#42;&#42;2026-09-22 13:29 UTC&#42;&#42; from commit &lt;a href="https://github.com/tho...
+
+## Optional
+
+- [opsward.md](opsward.md): Complete documentation in a single file.
+
+## Build
+
+- [build_info.json](build_info.json): build provenance (commit, version, tool versions, whether the docs match the package)

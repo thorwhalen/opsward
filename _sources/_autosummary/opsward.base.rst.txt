@@ -1,0 +1,21 @@
+opsward.base
+============
+
+.. automodule:: opsward.base
+
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      AgentInfo
+      ComponentScore
+      DiagnosisReport
+      DocSpec
+      GeneratedFile
+      MaintenanceSuggestion
+      ProjectType
+      RuleInfo
+      ScanResult
+      SkillInfo
+   

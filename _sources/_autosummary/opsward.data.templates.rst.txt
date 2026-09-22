@@ -1,0 +1,6 @@
+opsward.data.templates
+======================
+
+.. automodule:: opsward.data.templates
+
+   

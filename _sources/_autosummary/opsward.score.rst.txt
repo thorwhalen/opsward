@@ -1,0 +1,14 @@
+opsward.score
+=============
+
+.. automodule:: opsward.score
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      diagnose
+      validate_hooks_config
+      validate_skill_spec
+   

@@ -1,4 +1,0 @@
-opsward.data
-============
-.. automodule:: opsward.data
-   :members:

@@ -1,0 +1,6 @@
+opsward.scan
+============
+
+.. currentmodule:: opsward
+
+.. autofunction:: scan

@@ -1,0 +1,18 @@
+opsward.recommend
+=================
+
+.. automodule:: opsward.recommend
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      recommend_skills
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      SkillRecommendation
+   

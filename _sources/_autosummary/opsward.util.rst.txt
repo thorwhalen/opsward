@@ -1,0 +1,15 @@
+opsward.util
+============
+
+.. automodule:: opsward.util
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      iter_files
+      iter_subdirs
+      read_json_safe
+      read_text_safe
+   

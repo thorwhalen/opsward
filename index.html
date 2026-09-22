@@ -1,203 +1,452 @@
-
-
 <!DOCTYPE html>
-<html class="writer-html5" lang="en" data-content_root="./">
+<html lang="en" data-accent-color="crimson" data-content_root="./">
 <head>
-  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
-
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Welcome to opsward’s documentation! &mdash; opsward 0.0.11 documentation</title>
-      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
-      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=9edc463e" />
-      <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
-      <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=4ae1632d" />
-
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>opsward</title><link rel="index" title="Index" href="genindex.html" /><link rel="search" title="Search" href="search.html" /><link rel="next" title="API reference" href="api.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d88b86f9" />
+    <link rel="stylesheet" type="text/css" href="_static/shibuya.css?v=2ceb65ce" />
+    <link rel="stylesheet" type="text/css" href="_static/copybutton.css?v=76b2166b" />
+    <link media="print" rel="stylesheet" type="text/css" href="_static/print.css?v=20ff2c19" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    
+  <meta property="og:type" content="website"/><meta property="og:title" content="opsward"/>
+    <meta name="twitter:card" content="summary"/>
   
-      <script src="_static/jquery.js?v=5d32c60e"></script>
-      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
-      <script src="_static/documentation_options.js?v=0c446633"></script>
+<link rel="alternate" type="text/markdown" href="index.html.md">
+<link rel="describedby" href="llms.txt" type="text/markdown">
+</head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="#">
+      
+      
+      <strong>opsward</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials">
+  <a href="https://github.com/thorwhalen/opsward" aria-label="GitHub">
+    <iconify-icon icon="simple-icons:github"></iconify-icon>
+  </a></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2"></span>
+          <span class="hamburger_3"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="0"><ul>
+<li class="toctree-l1"><a class="reference internal" href="api.html">API reference</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="_autosummary/opsward.html">opsward</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/opsward.base.html">opsward.base</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/opsward.cli.html">opsward.cli</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/opsward.data.html">opsward.data</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="_autosummary/opsward.data.templates.html">opsward.data.templates</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/opsward.discover.html">opsward.discover</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/opsward.generate.html">opsward.generate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/opsward.maintain.html">opsward.maintain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/opsward.recommend.html">opsward.recommend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/opsward.scan.html">opsward.scan</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/opsward.score.html">opsward.score</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/opsward.util.html">opsward.util</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="ai-agents.html">For AI agents</a></li>
+</ul>
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#install">Install</a></li>
+<li><a class="reference internal" href="#cli-mode-no-ai">CLI Mode (no AI)</a><ul>
+<li><a class="reference internal" href="#diagnose">Diagnose</a></li>
+<li><a class="reference internal" href="#generate">Generate</a></li>
+<li><a class="reference internal" href="#maintain">Maintain</a></li>
+<li><a class="reference internal" href="#output-formats">Output Formats</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#claude-code-mode-ai-enhanced">Claude Code Mode (AI-enhanced)</a><ul>
+<li><a class="reference internal" href="#install-skills">Install Skills</a></li>
+<li><a class="reference internal" href="#what-the-skills-do">What the Skills Do</a></li>
+<li><a class="reference internal" href="#how-it-works">How It Works</a></li>
+<li><a class="reference internal" href="#permissions">Permissions</a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#what-it-checks">What It Checks</a></li>
+<li><a class="reference internal" href="#python-api">Python API</a></li>
+<li><a class="reference internal" href="#ci-integration">CI Integration</a></li>
+<li><a class="reference internal" href="#related-work">Related Work</a></li>
+</ul>
+</div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="#"><span itemprop="name">opsward</span></a>
+        <meta itemprop="position" content="1" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+  <article class="yue dark-code" role="main">
+          <!-- generated by epythet -->
+<section id="opsward">
+<h1>opsward<a class="headerlink" href="#opsward" title="Link to this heading">#</a></h1>
+<p>Diagnose, generate, and maintain the AI agent setup of your projects —
+CLAUDE.md, skills, subagents, rules, and supporting docs.</p>
+<p>Opsward works in two modes:</p>
+<ul class="simple">
+<li><p><strong>CLI mode</strong> — deterministic, pure-code analysis you run directly. No AI involved.</p></li>
+<li><p><strong>Claude Code mode</strong> — install opsward as Claude Code skills so that Claude runs the
+CLI tools, interprets results intelligently, and acts on suggestions. No API keys
+needed — Claude Code is the AI engine.</p></li>
+</ul>
+<section id="install">
+<h2>Install<a class="headerlink" href="#install" title="Link to this heading">#</a></h2>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">pip<span class="w"> </span>install<span class="w"> </span>opsward
+</span></pre></div>
+</div>
+</section>
+<hr class="docutils" />
+<section id="cli-mode-no-ai">
+<h2>CLI Mode (no AI)<a class="headerlink" href="#cli-mode-no-ai" title="Link to this heading">#</a></h2>
+<p>These commands are deterministic Python code — regex scoring, filesystem checks,
+template substitution. Same input always gives the same output.</p>
+<section id="diagnose">
+<h3>Diagnose<a class="headerlink" href="#diagnose" title="Link to this heading">#</a></h3>
+<p>Score your project’s AI setup health:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">opsward<span class="w"> </span>diagnose<span class="w"> </span>.
+</span></pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="n">Diagnosis</span> <span class="n">Report</span><span class="p">:</span> <span class="n">myproject</span>
+</span><span data-line="2"><span class="n">Project</span> <span class="nb">type</span><span class="p">:</span> <span class="n">python</span>
+</span><span data-line="3"><span class="n">Overall</span> <span class="n">score</span><span class="p">:</span> <span class="mi">72</span><span class="o">/</span><span class="mi">100</span>  <span class="p">(</span><span class="n">Grade</span><span class="p">:</span> <span class="n">C</span><span class="p">)</span>
+</span><span data-line="4">
+</span><span data-line="5"><span class="n">Components</span><span class="p">:</span>
+</span><span data-line="6">  <span class="n">CLAUDE</span><span class="o">.</span><span class="n">md</span> <span class="n">quality</span>         <span class="p">[</span><span class="c1">################....] 81/100</span>
+</span><span data-line="7">  <span class="n">Documentation</span>             <span class="p">[</span><span class="c1">##############......] 70/100</span>
+</span><span data-line="8">  <span class="n">Skills</span>                    <span class="p">[</span><span class="c1">############........] 60/100</span>
+</span><span data-line="9">  <span class="n">Setup</span> <span class="p">(</span><span class="n">rules</span><span class="o">/</span><span class="n">agents</span><span class="o">/</span><span class="n">hooks</span><span class="p">)</span> <span class="p">[</span><span class="c1">##########..........] 50/100</span>
+</span><span data-line="10">  <span class="n">Cross</span><span class="o">-</span><span class="n">references</span>          <span class="p">[</span><span class="c1">####################] 100/100</span>
+</span><span data-line="11">
+</span><span data-line="12"><span class="n">Missing</span><span class="p">:</span>
+</span><span data-line="13">  <span class="p">[</span> <span class="p">]</span> <span class="n">docs_guide</span><span class="o">.</span><span class="n">md</span>
+</span><span data-line="14">  <span class="p">[</span> <span class="p">]</span> <span class="n">docs</span><span class="o">/</span><span class="n">known_issues</span><span class="o">.</span><span class="n">md</span>
+</span><span data-line="15">
+</span><span data-line="16"><span class="n">Suggestions</span><span class="p">:</span>
+</span><span data-line="17">  <span class="mf">1.</span> <span class="n">Create</span> <span class="n">a</span> <span class="n">docs_guide</span><span class="o">.</span><span class="n">md</span> <span class="n">to</span> <span class="n">index</span> <span class="n">your</span> <span class="n">documentation</span>
+</span><span data-line="18">  <span class="mf">2.</span> <span class="n">Consider</span> <span class="n">adding</span> <span class="n">hooks</span> <span class="ow">in</span> <span class="o">.</span><span class="n">claude</span><span class="o">/</span><span class="n">hooks</span><span class="o">.</span><span class="n">json</span>
+</span></pre></div>
+</div>
+</section>
+<section id="generate">
+<h3>Generate<a class="headerlink" href="#generate" title="Link to this heading">#</a></h3>
+<p>Create missing artifacts (dry run by default):</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">opsward<span class="w"> </span>generate<span class="w"> </span>.
+</span><span data-line="2">opsward<span class="w"> </span>generate<span class="w"> </span>.<span class="w"> </span>--write<span class="w">   </span><span class="c1"># actually create files</span>
+</span></pre></div>
+</div>
+<p>Generates CLAUDE.md, docs (architecture, conventions, known_issues, etc.),
+skill templates, and agents — only what’s missing, never overwrites existing files.</p>
+</section>
+<section id="maintain">
+<h3>Maintain<a class="headerlink" href="#maintain" title="Link to this heading">#</a></h3>
+<p>Find stale references and drift:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">opsward<span class="w"> </span>maintain<span class="w"> </span>.
+</span></pre></div>
+</div>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1">myproject: 3 issue(s)
+</span><span data-line="2">
+</span><span data-line="3">  [stale_path] CLAUDE.md references `src/old_module.py` but it does not exist
+</span><span data-line="4">  [sync_issue] `new_doc.md` exists in docs/ but is not listed in docs_guide.md
+</span><span data-line="5">  [empty_doc] `conventions.md` appears to be an empty stub (12 bytes)
+</span></pre></div>
+</div>
+</section>
+<section id="output-formats">
+<h3>Output Formats<a class="headerlink" href="#output-formats" title="Link to this heading">#</a></h3>
+<p>All CLI commands support <code class="docutils literal notranslate"><span class="pre">--format</span> <span class="pre">json</span></code> for machine-parseable output:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">opsward<span class="w"> </span>diagnose<span class="w"> </span>.<span class="w"> </span>--format<span class="w"> </span>json
+</span><span data-line="2">opsward<span class="w"> </span>generate<span class="w"> </span>.<span class="w"> </span>--format<span class="w"> </span>json
+</span><span data-line="3">opsward<span class="w"> </span>maintain<span class="w"> </span>.<span class="w"> </span>--format<span class="w"> </span>json
+</span></pre></div>
+</div>
+</section>
+</section>
+<hr class="docutils" />
+<section id="claude-code-mode-ai-enhanced">
+<h2>Claude Code Mode (AI-enhanced)<a class="headerlink" href="#claude-code-mode-ai-enhanced" title="Link to this heading">#</a></h2>
+<p>Install opsward’s skills into Claude Code, and Claude becomes an intelligent
+layer on top of the deterministic tools. It doesn’t just run opsward — it goes
+beyond the heuristic scores by reading actual source code, reasoning about
+accuracy, and making intelligent edits.</p>
+<section id="install-skills">
+<h3>Install Skills<a class="headerlink" href="#install-skills" title="Link to this heading">#</a></h3>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">opsward<span class="w"> </span>install-skills<span class="w"> </span>--write<span class="w">                    </span><span class="c1"># into ./.claude/ (project-level)</span>
+</span><span data-line="2">opsward<span class="w"> </span>install-skills<span class="w"> </span>--global-install<span class="w"> </span>--write<span class="w">   </span><span class="c1"># into ~/.claude/ (all projects)</span>
+</span></pre></div>
+</div>
+</section>
+<section id="what-the-skills-do">
+<h3>What the Skills Do<a class="headerlink" href="#what-the-skills-do" title="Link to this heading">#</a></h3>
+<p>Once installed, these skills activate automatically in Claude Code when you ask
+the right thing:</p>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Skill</p></th>
+<th class="head"><p>Trigger</p></th>
+<th class="head"><p>What it does</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">opsward</span></code></p></td>
+<td><p>“check my setup”, “opsward”</p></td>
+<td><p>Diagnose → decide next step → generate or maintain → re-diagnose</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">opsward-diagnose</span></code></p></td>
+<td><p>“audit my AI config”</p></td>
+<td><p>Run <code class="docutils literal notranslate"><span class="pre">opsward</span> <span class="pre">diagnose</span></code>, then read code to assess semantic quality, offer fixes</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">opsward-generate</span></code></p></td>
+<td><p>“scaffold AI setup”</p></td>
+<td><p>Run <code class="docutils literal notranslate"><span class="pre">opsward</span> <span class="pre">generate</span></code>, then read the codebase and replace templates with real content</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">opsward-maintain</span></code></p></td>
+<td><p>“check for staleness”</p></td>
+<td><p>Run <code class="docutils literal notranslate"><span class="pre">opsward</span> <span class="pre">maintain</span></code>, then check for semantic drift (docs that no longer match code)</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+</section>
+<section id="how-it-works">
+<h3>How It Works<a class="headerlink" href="#how-it-works" title="Link to this heading">#</a></h3>
+<ol class="arabic simple">
+<li><p><strong>Opsward CLI</strong> runs deterministic checks (regex scoring, path validation, template substitution) — fast, reproducible, no AI</p></li>
+<li><p><strong>Claude reads the output</strong> and adds deeper analysis: reads actual source code, checks if docs match reality, verifies commands are correct</p></li>
+<li><p><strong>Claude proposes fixes</strong> — not just what opsward suggests, but what it discovers by understanding the code</p></li>
+<li><p><strong>Claude applies fixes</strong> with user approval, then re-runs opsward to show improvement</p></li>
+</ol>
+<p>The CLI provides the structural analysis. Claude provides the semantic understanding and action.</p>
+</section>
+<section id="permissions">
+<h3>Permissions<a class="headerlink" href="#permissions" title="Link to this heading">#</a></h3>
+<p>The skills use Claude Code’s standard permission model — no special permissions are
+assumed or required:</p>
+<ul class="simple">
+<li><p><strong>Read-only operations</strong> (reading files, searching code, running <code class="docutils literal notranslate"><span class="pre">opsward</span> <span class="pre">diagnose</span></code>): always safe, used freely</p></li>
+<li><p><strong>Write operations</strong> (creating docs, editing CLAUDE.md): Claude Code prompts the user for each action per their permission settings</p></li>
+<li><p><strong>Destructive operations</strong> (deleting files, removing content): always ask for explicit confirmation</p></li>
+</ul>
+<p>If you want faster workflows (e.g., auto-approve file creation during generation),
+you can configure that in your Claude Code permission settings — but opsward skills
+never assume it.</p>
+</section>
+</section>
+<hr class="docutils" />
+<section id="what-it-checks">
+<h2>What It Checks<a class="headerlink" href="#what-it-checks" title="Link to this heading">#</a></h2>
+<p><strong>CLAUDE.md quality</strong> (6 dimensions):</p>
+<ul class="simple">
+<li><p>Commands &amp; workflows — are build/test/lint commands documented?</p></li>
+<li><p>Architecture clarity — is there a module map with role descriptions?</p></li>
+<li><p>Conventions — are project-specific style rules present?</p></li>
+<li><p>Conciseness — is the file scannable, not bloated?</p></li>
+<li><p>Currency — do referenced paths actually exist?</p></li>
+<li><p>Actionability — are instructions specific enough to act on?</p></li>
+</ul>
+<p><strong>Documentation completeness</strong>: docs_guide.md, architecture.md, conventions.md,
+known_issues.md, and content quality.</p>
+<p><strong>Skills &amp; agents</strong>: SKILL.md presence, descriptions, setup-auditor agent.</p>
+<p><strong>Cross-references</strong>: paths in CLAUDE.md validated against the filesystem.</p>
+<p><strong>Overall health</strong>: weighted score (A–F grade) combining all components.</p>
+</section>
+<section id="python-api">
+<h2>Python API<a class="headerlink" href="#python-api" title="Link to this heading">#</a></h2>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+</span><span data-line="2"><span class="kn">from</span><span class="w"> </span><span class="nn">opsward</span><span class="w"> </span><span class="kn">import</span> <span class="n">scan</span><span class="p">,</span> <span class="n">diagnose</span><span class="p">,</span> <span class="n">generate</span><span class="p">,</span> <span class="n">generate_skills</span><span class="p">,</span> <span class="n">maintain</span>
+</span><span data-line="3"><span class="kn">from</span><span class="w"> </span><span class="nn">opsward</span><span class="w"> </span><span class="kn">import</span> <span class="n">recommend_skills</span><span class="p">,</span> <span class="n">validate_skill_spec</span>
+</span><span data-line="4">
+</span><span data-line="5"><span class="n">sr</span> <span class="o">=</span> <span class="n">scan</span><span class="p">(</span><span class="s2">"."</span><span class="p">)</span>
+</span><span data-line="6"><span class="n">report</span> <span class="o">=</span> <span class="n">diagnose</span><span class="p">(</span><span class="n">sr</span><span class="p">)</span>
+</span><span data-line="7"><span class="nb">print</span><span class="p">(</span><span class="n">report</span><span class="p">)</span>  <span class="c1"># human-readable report card</span>
+</span><span data-line="8"><span class="nb">print</span><span class="p">(</span><span class="n">report</span><span class="o">.</span><span class="n">grade</span><span class="p">)</span>  <span class="c1"># 'A', 'B', 'C', 'D', or 'F'</span>
+</span><span data-line="9">
+</span><span data-line="10"><span class="n">files</span> <span class="o">=</span> <span class="n">generate</span><span class="p">(</span><span class="n">sr</span><span class="p">)</span>  <span class="c1"># list[GeneratedFile]</span>
+</span><span data-line="11"><span class="n">issues</span> <span class="o">=</span> <span class="n">maintain</span><span class="p">(</span><span class="n">sr</span><span class="p">)</span>  <span class="c1"># list[MaintenanceSuggestion]</span>
+</span><span data-line="12">
+</span><span data-line="13"><span class="c1"># Recommend ecosystem skills based on tech stack</span>
+</span><span data-line="14"><span class="n">recs</span> <span class="o">=</span> <span class="n">recommend_skills</span><span class="p">(</span><span class="n">sr</span><span class="p">)</span>  <span class="c1"># list[SkillRecommendation]</span>
+</span><span data-line="15">
+</span><span data-line="16"><span class="c1"># Validate skills against agentskills.io spec</span>
+</span><span data-line="17"><span class="k">for</span> <span class="n">skill</span> <span class="ow">in</span> <span class="n">sr</span><span class="o">.</span><span class="n">skills</span><span class="p">:</span>
+</span><span data-line="18">    <span class="n">violations</span> <span class="o">=</span> <span class="n">validate_skill_spec</span><span class="p">(</span><span class="n">skill</span><span class="p">)</span>
+</span><span data-line="19">
+</span><span data-line="20"><span class="c1"># Install skills programmatically</span>
+</span><span data-line="21"><span class="n">skill_files</span> <span class="o">=</span> <span class="n">generate_skills</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">".claude"</span><span class="p">)</span>
+</span></pre></div>
+</div>
+</section>
+<section id="ci-integration">
+<h2>CI Integration<a class="headerlink" href="#ci-integration" title="Link to this heading">#</a></h2>
+<p>Use opsward in CI to enforce AI setup quality:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># Fail if overall score drops below 60</span>
+</span><span data-line="2">opsward<span class="w"> </span>diagnose<span class="w"> </span>.<span class="w"> </span>--min-score<span class="w"> </span><span class="m">60</span>
+</span><span data-line="3">
+</span><span data-line="4"><span class="c1"># Machine-parseable output for CI tooling</span>
+</span><span data-line="5">opsward<span class="w"> </span>diagnose<span class="w"> </span>.<span class="w"> </span>--format<span class="w"> </span>json<span class="w"> </span>--min-score<span class="w"> </span><span class="m">60</span>
+</span></pre></div>
+</div>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># .github/workflows/ai-setup-check.yml</span>
+</span><span data-line="2"><span class="nt">name</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">AI Setup Check</span>
+</span><span data-line="3"><span class="nt">on</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">pull_request</span><span class="p p-Indicator">]</span>
+</span><span data-line="4"><span class="nt">jobs</span><span class="p">:</span>
+</span><span data-line="5"><span class="w">  </span><span class="nt">check</span><span class="p">:</span>
+</span><span data-line="6"><span class="w">    </span><span class="nt">runs-on</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">ubuntu-latest</span>
+</span><span data-line="7"><span class="w">    </span><span class="nt">steps</span><span class="p">:</span>
+</span><span data-line="8"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/checkout@v4</span>
+</span><span data-line="9"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">actions/setup-python@v5</span>
+</span><span data-line="10"><span class="w">        </span><span class="nt">with</span><span class="p">:</span>
+</span><span data-line="11"><span class="w">          </span><span class="nt">python-version</span><span class="p">:</span><span class="w"> </span><span class="s">"3.12"</span>
+</span><span data-line="12"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">pip install opsward</span>
+</span><span data-line="13"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">opsward diagnose . --min-score 60</span>
+</span></pre></div>
+</div>
+</section>
+<section id="related-work">
+<h2>Related Work<a class="headerlink" href="#related-work" title="Link to this heading">#</a></h2>
+<div class="table-wrapper colwidths-auto docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Project</p></th>
+<th class="head"><p>Relationship</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><a class="reference external" href="https://github.com/github/spec-kit">spec-kit</a> (GitHub)</p></td>
+<td><p>Template-based scaffolding for 20+ AI agents. No diagnosis/scoring/maintenance.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://github.com/alirezarezvani/claude-code-skill-factory">claude-code-skill-factory</a></p></td>
+<td><p>Inside-agent builders for skills, agents, hooks. Good for interactive authoring.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://github.com/nyatinte/ccexp">ccexp</a></p></td>
+<td><p>Interactive TUI for browsing Claude Code config files. Complements opsward.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://github.com/vercel-labs/skills">npx skills</a> (Vercel)</p></td>
+<td><p>Cross-platform skill package manager. Opsward-generated skills are compatible.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://github.com/VoltAgent/awesome-agent-skills">awesome-agent-skills</a></p></td>
+<td><p>549+ community skills from official dev teams.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://github.com/hesreallyhim/awesome-claude-code">awesome-claude-code</a></p></td>
+<td><p>Best single index of the Claude Code ecosystem.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference external" href="https://github.com/wshobson/agents">wshobson/agents</a></p></td>
+<td><p>Pre-built plugin monorepo (72 plugins, 112 agents, 146 skills).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference external" href="https://www.mintlify.com/blog/skill-md">Mintlify skill.md</a></p></td>
+<td><p>Auto-generates skill.md from docs sites. Same philosophy, different input.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="epythet-aggregates">This documentation as a single file: <a href="opsward.md">opsward.md</a> (Markdown, for agents).</p>
+<div class="toctree-wrapper compound">
+</div>
+</section>
+</section>
+
+<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-09-22 13:29 UTC from <a href="https://github.com/thorwhalen/opsward/commit/f0ce2bdbf1ca7ae44031d649870acf0f8b39323a">f0ce2bd</a> (main) · opsward 0.0.12 · <a href="about-this-build.html">about this build</a></p>
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"><div class="navigation-next">
+    <a href="api.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title">API reference</div>
+      </div>
+      <i class="i-lucide chevron-right"></i>
+    </a>
+  </div></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright">
+  <p>
+    Made with
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials">
+  <a href="https://github.com/thorwhalen/opsward" aria-label="GitHub">
+    <iconify-icon icon="simple-icons:github"></iconify-icon>
+  </a></div>
+    </div>
+  </div>
+</footer>
+      <script src="_static/documentation_options.js?v=3bbcec59"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
-      <script src="_static/toggleprompt.js?v=d7ede5d2"></script>
       <script src="_static/clipboard.min.js?v=a7894cd8"></script>
-      <script src="_static/copybutton.js?v=f281be69"></script>
-    <script src="_static/js/theme.js"></script>
-    <link rel="index" title="Index" href="genindex.html" />
-    <link rel="search" title="Search" href="search.html" />
-    <link rel="next" title="opsward" href="module_docs/opsward.html" /> 
-</head>
-
-<body class="wy-body-for-nav"> 
-  <div class="wy-grid-for-nav">
-    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
-      <div class="wy-side-scroll">
-        <div class="wy-side-nav-search" >
-
-          
-          
-          <a href="#" class="icon icon-home">
-            opsward
-          </a>
-<div role="search">
-  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
-    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
-    <input type="hidden" name="check_keywords" value="yes" />
-    <input type="hidden" name="area" value="default" />
-  </form>
-</div>
-        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
-              <p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/opsward.html">opsward</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/opsward/__main__.html">opsward.__main__</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/opsward/base.html">opsward.base</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/opsward/cli.html">opsward.cli</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/opsward/data.html">opsward.data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/opsward/data/templates.html">opsward.data.templates</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/opsward/discover.html">opsward.discover</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/opsward/generate.html">opsward.generate</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/opsward/maintain.html">opsward.maintain</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/opsward/recommend.html">opsward.recommend</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/opsward/scan.html">opsward.scan</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/opsward/score.html">opsward.score</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/opsward/util.html">opsward.util</a></li>
-</ul>
-
-        </div>
-      </div>
-    </nav>
-
-    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
-          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
-          <a href="#">opsward</a>
-      </nav>
-
-      <div class="wy-nav-content">
-        <div class="rst-content">
-          <div role="navigation" aria-label="Page navigation">
-  <ul class="wy-breadcrumbs">
-      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
-      <li class="breadcrumb-item active">Welcome to opsward’s documentation!</li>
-      <li class="wy-breadcrumbs-aside">
-            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
-      </li>
-  </ul>
-  <hr/>
-</div>
-          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
-           <div itemprop="articleBody">
-             
-  <section id="welcome-to-opsward-s-documentation">
-<h1>Welcome to opsward’s documentation!<a class="headerlink" href="#welcome-to-opsward-s-documentation" title="Link to this heading"></a></h1>
-<div class="toctree-wrapper compound">
-<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
-<ul>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/opsward.html">opsward</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/opsward/__main__.html">opsward.__main__</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/opsward/__main__.html#opsward.__main__.main"><code class="docutils literal notranslate"><span class="pre">main()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/opsward/base.html">opsward.base</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/opsward/base.html#opsward.base.AgentInfo"><code class="docutils literal notranslate"><span class="pre">AgentInfo</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/opsward/base.html#opsward.base.ComponentScore"><code class="docutils literal notranslate"><span class="pre">ComponentScore</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/opsward/base.html#opsward.base.DiagnosisReport"><code class="docutils literal notranslate"><span class="pre">DiagnosisReport</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/opsward/base.html#opsward.base.DocSpec"><code class="docutils literal notranslate"><span class="pre">DocSpec</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/opsward/base.html#opsward.base.GeneratedFile"><code class="docutils literal notranslate"><span class="pre">GeneratedFile</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/opsward/base.html#opsward.base.MaintenanceSuggestion"><code class="docutils literal notranslate"><span class="pre">MaintenanceSuggestion</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/opsward/base.html#opsward.base.ProjectType"><code class="docutils literal notranslate"><span class="pre">ProjectType</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/opsward/base.html#opsward.base.RuleInfo"><code class="docutils literal notranslate"><span class="pre">RuleInfo</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/opsward/base.html#opsward.base.ScanResult"><code class="docutils literal notranslate"><span class="pre">ScanResult</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/opsward/base.html#opsward.base.SkillInfo"><code class="docutils literal notranslate"><span class="pre">SkillInfo</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/opsward/cli.html">opsward.cli</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/opsward/cli.html#opsward.cli.diagnose"><code class="docutils literal notranslate"><span class="pre">diagnose()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/opsward/cli.html#opsward.cli.find"><code class="docutils literal notranslate"><span class="pre">find()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/opsward/cli.html#opsward.cli.generate"><code class="docutils literal notranslate"><span class="pre">generate()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/opsward/cli.html#opsward.cli.install_skills"><code class="docutils literal notranslate"><span class="pre">install_skills()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/opsward/cli.html#opsward.cli.maintain"><code class="docutils literal notranslate"><span class="pre">maintain()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/opsward/cli.html#opsward.cli.recommend"><code class="docutils literal notranslate"><span class="pre">recommend()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/opsward/data.html">opsward.data</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/opsward/data/templates.html">opsward.data.templates</a></li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/opsward/discover.html">opsward.discover</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/opsward/discover.html#opsward.discover.find_assets"><code class="docutils literal notranslate"><span class="pre">find_assets()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/opsward/generate.html">opsward.generate</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/opsward/generate.html#opsward.generate.generate"><code class="docutils literal notranslate"><span class="pre">generate()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/opsward/generate.html#opsward.generate.generate_skills"><code class="docutils literal notranslate"><span class="pre">generate_skills()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/opsward/maintain.html">opsward.maintain</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/opsward/maintain.html#opsward.maintain.maintain"><code class="docutils literal notranslate"><span class="pre">maintain()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/opsward/recommend.html">opsward.recommend</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/opsward/recommend.html#opsward.recommend.SkillRecommendation"><code class="docutils literal notranslate"><span class="pre">SkillRecommendation</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/opsward/recommend.html#opsward.recommend.recommend_skills"><code class="docutils literal notranslate"><span class="pre">recommend_skills()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/opsward/scan.html">opsward.scan</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/opsward/scan.html#opsward.scan.scan"><code class="docutils literal notranslate"><span class="pre">scan()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/opsward/score.html">opsward.score</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/opsward/score.html#opsward.score.diagnose"><code class="docutils literal notranslate"><span class="pre">diagnose()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/opsward/score.html#opsward.score.validate_hooks_config"><code class="docutils literal notranslate"><span class="pre">validate_hooks_config()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/opsward/score.html#opsward.score.validate_skill_spec"><code class="docutils literal notranslate"><span class="pre">validate_skill_spec()</span></code></a></li>
-</ul>
-</li>
-<li class="toctree-l1"><a class="reference internal" href="module_docs/opsward/util.html">opsward.util</a><ul>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/opsward/util.html#opsward.util.iter_files"><code class="docutils literal notranslate"><span class="pre">iter_files()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/opsward/util.html#opsward.util.iter_subdirs"><code class="docutils literal notranslate"><span class="pre">iter_subdirs()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/opsward/util.html#opsward.util.read_json_safe"><code class="docutils literal notranslate"><span class="pre">read_json_safe()</span></code></a></li>
-<li class="toctree-l2"><a class="reference internal" href="module_docs/opsward/util.html#opsward.util.read_text_safe"><code class="docutils literal notranslate"><span class="pre">read_text_safe()</span></code></a></li>
-</ul>
-</li>
-</ul>
-</div>
-</section>
-<section id="indices-and-tables">
-<h1>Indices and tables<a class="headerlink" href="#indices-and-tables" title="Link to this heading"></a></h1>
-<ul class="simple">
-<li><p><a class="reference internal" href="genindex.html"><span class="std std-ref">Index</span></a></p></li>
-<li><p><a class="reference internal" href="py-modindex.html"><span class="std std-ref">Module Index</span></a></p></li>
-<li><p><a class="reference internal" href="search.html"><span class="std std-ref">Search Page</span></a></p></li>
-</ul>
-<p>Release: 0.0.11</p>
-<p>Last change: Aug 30, 2026</p>
-</section>
-
-
-           </div>
-          </div>
-          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
-        <a href="module_docs/opsward.html" class="btn btn-neutral float-right" title="opsward" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
-    </div>
-
-  <hr/>
-
-  <div role="contentinfo">
-    <p></p>
-  </div>
-
-  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
-    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
-    provided by <a href="https://readthedocs.org">Read the Docs</a>.
-   
-
-</footer>
-        </div>
-      </div>
-    </section>
-  </div>
-  <script>
-      jQuery(function () {
-          SphinxRtdTheme.Navigation.enable(true);
-      });
-  </script> 
-
-</body>
+      <script src="_static/copybutton.js?v=fd10adb8"></script>
+      <script src="_static/shibuya.js?v=50760d75"></script></body>
 </html>

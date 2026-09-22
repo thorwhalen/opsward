@@ -1,0 +1,12 @@
+opsward.discover
+================
+
+.. automodule:: opsward.discover
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      find_assets
+   

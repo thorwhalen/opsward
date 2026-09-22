@@ -1,0 +1,22 @@
+﻿opsward
+=======
+
+.. automodule:: opsward
+
+   
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+   base
+   cli
+   data
+   discover
+   generate
+   maintain
+   recommend
+   scan
+   score
+   util

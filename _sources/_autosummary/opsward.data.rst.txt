@@ -1,0 +1,13 @@
+opsward.data
+============
+
+.. automodule:: opsward.data
+
+   
+.. rubric:: Modules
+
+.. autosummary::
+   :toctree:
+   :recursive:
+
+   templates

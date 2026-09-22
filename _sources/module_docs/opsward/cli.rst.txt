@@ -1,4 +1,0 @@
-opsward.cli
-===========
-.. automodule:: opsward.cli
-   :members:

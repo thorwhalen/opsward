@@ -1,0 +1,6 @@
+opsward.generate
+================
+
+.. currentmodule:: opsward
+
+.. autofunction:: generate

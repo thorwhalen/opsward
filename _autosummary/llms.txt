@@ -1,0 +1,23 @@
+# opsward
+
+> Diagnose, generate, and maintain the AI agent setup of your projects — CLAUDE.md, skills, subagents, rules, and supporting docs.
+
+
+## Pages in this subsection
+
+- [opsward](opsward.html.md): Diagnose, generate, and maintain the AI agent setup of your projects.
+- [opsward.base](opsward.base.html.md): All dataclasses and type definitions for opsward.
+- [opsward.cli](opsward.cli.html.md): CLI dispatch for opsward.
+- [opsward.data](opsward.data.html.md): Bundled package resources for opsward, accessed via &#96;importlib.resources.files("opsward.data")&#96;.
+- [opsward.data.templates](opsward.data.templates.html.md): Generation templates organized by target project type.
+- [opsward.discover](opsward.discover.html.md): Optional cross-repo asset discovery, delegating to the &#96;toolery&#96; package.
+- [opsward.generate](opsward.generate.html.md): Determine which artifacts are missing, render templates, return files to create.
+- [opsward.maintain](opsward.maintain.html.md): Detect maintenance issues and return suggestions.
+- [opsward.recommend](opsward.recommend.html.md): Recommend skills from the ecosystem based on project tech stack.
+- [opsward.scan](opsward.scan.html.md): Scan &#42;project_root&#42; and return a ScanResult.
+- [opsward.score](opsward.score.html.md): Pure scoring functions. ScanResult -&gt; DiagnosisReport.
+- [opsward.util](opsward.util.html.md): Shared helpers for opsward.
+
+## Optional
+
+- [Top-level llms.txt](../llms.txt): Complete documentation index.
