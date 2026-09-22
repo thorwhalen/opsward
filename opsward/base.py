@@ -56,7 +56,7 @@ class DocSpec:
 
     name: str
     path: Path
-    size_bytes: int = 0
+    size_bytes: int = 0  # content size, line endings normalized to LF
 
 
 # ---------------------------------------------------------------------------

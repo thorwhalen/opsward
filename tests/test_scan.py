@@ -123,6 +123,24 @@ def test_docs_guide_detected(python_project):
     assert result.docs_guide_path is not None
 
 
+def test_doc_size_ignores_crlf_line_endings(tmp_path):
+    """A CRLF checkout (Git for Windows' default) must not change reported doc sizes.
+
+    Regression: sizes were raw ``st_size``, so the stub heuristics that use them
+    (``maintain``'s minimum-size check, ``score``'s empty-doc check) gave different
+    answers for the same repo depending on the host's line endings.
+    """
+    body = "# Stub\n\nTODO\nTODO\nTODO\nTODO\nTODO\nTODO\nTODO\n"
+    sizes = {}
+    for eol in ("\n", "\r\n"):
+        root = tmp_path / repr(eol)
+        (root / "docs").mkdir(parents=True)
+        (root / "docs" / "stub.md").write_bytes(body.replace("\n", eol).encode())
+        (doc,) = scan(root).docs
+        sizes[eol] = doc.size_bytes
+    assert sizes["\r\n"] == sizes["\n"] == len(body.encode())
+
+
 def test_no_docs(bare_project):
     result = scan(bare_project)
     assert result.docs == []
