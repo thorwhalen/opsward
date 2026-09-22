@@ -120,6 +120,13 @@ Based on research across the ecosystem, here's the proposed **docs structure** �
 
 ### 2.1 The Docs Catalog
 
+> This table is the original research proposal (March 2026), kept for its
+> rationale. `docs_catalog.md` is the current SSOT for the actual doc-type
+> list opsward implements — it has since diverged in one place: opsward
+> does not generate `CHANGELOG.md` (out of scope; every wads-managed repo
+> already gets one another way). Consult `docs_catalog.md`, not this table,
+> for what opsward actually does.
+
 | Document | Filename | Purpose |
 |----------|----------|---------|
 | **Docs Guide** | `docs_guide.md` | Entry point. Lists all docs with descriptions. CLAUDE.md points here. |
@@ -147,6 +154,16 @@ These names were chosen for maximum ecosystem compatibility:
 ---
 
 ## 3. Proposed Meta-Tooling Design
+
+> **Superseded by the shipped CLI.** Sections 3 and 4 are the original design
+> proposal (skill + subagent + command trio, `/diagnose-setup` /
+> `/generate-docs` / `/maintain-setup` slash commands). What actually shipped
+> is an external CLI (`opsward diagnose|generate|maintain|recommend|find`,
+> see `architecture.md` and `README.md`) plus a set of `.claude/skills/`
+> wrappers around it (`opsward`, `opsward-diagnose`, `opsward-generate`,
+> `opsward-maintain`) — not the slash-command names below. Kept for the
+> original rationale; don't treat the command names or file layout here as
+> current.
 
 ### 3.1 Architecture Overview
 

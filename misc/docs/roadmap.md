@@ -1,6 +1,12 @@
-# Opsward Roadmap
+# Opsward Roadmap — v1 (largely completed)
 
-Generated from competitive landscape analysis (March 2026).
+Generated from competitive landscape analysis (March 2026). Verified against
+the codebase 2026-09-22: 10 of the 12 "Concrete Next Actions" below have
+shipped. Archived rather than rewritten, so the original rationale stays
+readable; each shipped action is marked **[SHIPPED]**. Open items: action 9
+(AGENTS.md/CLAUDE.md consistency checking in `diagnose` — not built), and
+action 12 (submitting opsward to awesome-claude-code — outward-facing,
+needs Thor).
 
 ## Integrate (use or defer to these established tools)
 
@@ -95,26 +101,26 @@ Add a "Related Work" section to the README acknowledging these projects:
 
 Ordered by effort/impact ratio (best first):
 
-1. **Add agentskills.io validation to `score.py`**: Add `validate_skill_spec()` that checks SKILL.md frontmatter (name format, description length, directory name match, size ≤500 lines). Wire into `diagnose`. ~50 lines of code.
+1. **[SHIPPED]** ~~Add agentskills.io validation to `score.py`~~: `validate_skill_spec()` checks SKILL.md frontmatter (name format, description length, directory name match, size ≤500 lines) and is wired into `diagnose`.
 
-2. **Add `--format json` to `diagnose`**: Make `DiagnosisReport` serializable to JSON. Add `--format` flag to CLI. Enables CI integration. ~30 lines.
+2. **[SHIPPED]** ~~Add `--format json` to `diagnose`~~: `DiagnosisReport` is JSON-serializable via the `--format json` flag.
 
-3. **Add `--ci` flag to `diagnose`**: Return exit code 1 if any score below `--min-score` threshold. ~15 lines in `cli.py`.
+3. **[SHIPPED]** ~~Add `--ci` flag to `diagnose`~~: implemented as `--min-score` (exit 1 if the worst component score is below it), not a separate `--ci` flag — same effect, different name.
 
-4. **Add AGENTS.md template and `--agents-md` flag to `generate`**: Create `opsward/data/templates/shared/AGENTS.md.template` with cross-platform sections (build commands, code style, project structure). Add flag to `generate` command. ~60 lines.
+4. **[SHIPPED]** ~~Add AGENTS.md template and `--agents-md` flag to `generate`~~: `opsward generate --agents-md` emits AGENTS.md from `shared/agents_md.md`.
 
-5. **Add hook templates**: Create three starter hook scripts in `opsward/data/templates/shared/hooks/` (auto-format, skill-activation, session-context). Add `--hooks` flag to `generate`. ~100 lines of templates + 30 lines of generation logic.
+5. **[SHIPPED]** ~~Add hook templates~~: starter hook scripts ship under `opsward/data/templates/shared/hooks/`, generated via `opsward generate --hooks`.
 
-6. **Add hook diagnosis**: In `score.py`, check if any hooks are configured. If none, include a suggestion in `DiagnosisReport`. ~20 lines.
+6. **[SHIPPED]** ~~Add hook diagnosis~~: `score.py` scores rules/agents/hooks as part of "Setup" (see `scoring_rubric.md`), including `validate_hooks_config`.
 
-7. **Add Related Work section to README**: List the peer projects from the table above. ~30 lines of markdown.
+7. **[SHIPPED]** ~~Add Related Work section to README~~: see README's "Related Work" section.
 
-8. **Add `recommend.py` for ecosystem skill recommendations**: Match project dependencies against a curated tech→skill mapping. Start with 10-15 popular tech stacks. ~80 lines.
+8. **[SHIPPED]** ~~Add `recommend.py` for ecosystem skill recommendations~~: `opsward/recommend.py` + `opsward recommend` CLI command.
 
-9. **Add AGENTS.md consistency check to `diagnose`**: If both CLAUDE.md and AGENTS.md exist, check that build commands and project structure are consistent between them. ~40 lines.
+9. **Open.** Add AGENTS.md consistency check to `diagnose`: if both CLAUDE.md and AGENTS.md exist, check that build commands and project structure are consistent between them. Not built — no code in `score.py`/`maintain.py` compares the two files.
 
-10. **Add monorepo detection to `scan.py`**: Detect multi-package structures. Use in scoped AGENTS.md generation. ~60 lines.
+10. **[SHIPPED]** ~~Add monorepo detection to `scan.py`~~: `scan.py::_detect_monorepo` populates `ScanResult.is_monorepo` / `monorepo_packages`.
 
-11. **Add GitHub Actions CI example**: Create `.github/workflows/ai-setup-check.yml` example in docs or templates showing `opsward diagnose --ci` in a workflow. ~20 lines.
+11. **[SHIPPED]** ~~Add GitHub Actions CI example~~: README documents `opsward diagnose . --min-score 60` in a workflow step.
 
-12. **Submit opsward to awesome-claude-code**: Open a PR to hesreallyhim/awesome-claude-code adding opsward to the Tooling section.
+12. **Open, outward-facing — needs Thor.** Submit opsward to awesome-claude-code: opening a PR against someone else's repo is a decision for Thor, not an agent.

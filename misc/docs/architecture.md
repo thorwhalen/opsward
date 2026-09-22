@@ -40,7 +40,7 @@ Target Project ──► scan.py ──► ScanResult ──► score.py ──�
 5. Returns `list[GeneratedFile]` — each is a `(target_path, content, overwrite_policy)` tuple.
 6. CLI presents diffs and asks for confirmation before writing.
 
-Generated artifacts include CLAUDE.md, docs, skills, agents, and rules. Future: AGENTS.md generation (cross-platform agent instructions, see `ai_setup_meta_tooling.md` Section 1.5).
+Generated artifacts include CLAUDE.md, docs, skills, agents, and rules, plus optional AGENTS.md (cross-platform agent instructions — `--agents-md` flag, shipped; see `ai_setup_meta_tooling.md` Section 1.5).
 
 ### Maintain
 
@@ -61,6 +61,7 @@ Generated artifacts include CLAUDE.md, docs, skills, agents, and rules. Future: 
 | `score.py` | Pure scoring logic | `ScanResult → DiagnosisReport` |
 | `generate.py` | Template loading + rendering | `ScanResult → list[GeneratedFile]` |
 | `maintain.py` | Drift/staleness detection | `ScanResult → list[MaintenanceSuggestion]` |
+| `recommend.py` | Maps detected dependencies/frameworks to curated ecosystem skills | `ScanResult → list[SkillRecommendation]` |
 | `base.py` | All dataclasses and type definitions | (no I/O) |
 | `cli.py` | command functions + pretty-printing | stdin/stdout |
 | `util.py` | Shared helpers | (internal) |
@@ -72,10 +73,14 @@ Generated artifacts include CLAUDE.md, docs, skills, agents, and rules. Future: 
 - All scoring functions are pure: same input always produces same output.
 - Templates are loaded via `importlib.resources` — never via hardcoded paths.
 
+## Shipped (previously listed here as future extension points)
+
+- **AGENTS.md output**: `generate.py` emits AGENTS.md (cross-platform agent instructions) alongside CLAUDE.md, behind the `--agents-md` flag.
+- **Skill spec validation**: `score.py::validate_skill_spec` validates skills against the agentskills.io specification (name format, frontmatter fields, size limits) and feeds both `diagnose` and the Skills score.
+
 ## Extension Points
 
-- **Custom rubrics**: Users can provide a rubric override file (YAML) to adjust scoring weights.
 - **Custom templates**: Users can point to a directory of custom templates that override built-in ones.
 - **Project type plugins**: The detection logic in `scan.py` uses a registry pattern — new project types can be added by registering detection functions and doc-path conventions.
-- **AGENTS.md output**: `generate.py` can be extended to emit AGENTS.md (cross-platform agent instructions) alongside CLAUDE.md.
-- **Skill spec validation**: `score.py` can validate skills against the agentskills.io specification (name format, frontmatter fields, size limits, directory structure).
+
+Note: the rubric in `score.py` is hardcoded module constants, not an external override file — see `.claude/rules/scoring-invariants.md`. There is no "custom rubric" extension point.
