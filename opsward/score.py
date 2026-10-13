@@ -335,7 +335,7 @@ def claude_md_size_overrun(
     The penalty is proportional to the overrun: ``_CONCISE_SIZE_PENALTY_MAX``
     points at twice the threshold (at least 1 once over it).
 
-    >>> claude_md_size_overrun("# t\\n\\n## A\\nx\\n", max_chars=5).penalty
+    >>> claude_md_size_overrun("x" * 11, max_chars=10).penalty
     1
     >>> claude_md_size_overrun("short", max_chars=10) is None
     True
