@@ -48,6 +48,8 @@ analysis of 2,500+ AGENTS.md files).
 | 8-11 | 80-200 lines, mostly signal |
 | 12-15 | Under 80 lines, dense and scannable |
 
+**Size signal:** a CLAUDE.md over 10,000 chars (`_CONCISENESS_MAX_CHARS`; `diagnose(..., claude_md_max_chars=)` / `maintain(..., claude_md_max_chars=)`) loses up to 6 further points, proportional to the overrun (full at 2x). The note names the three longest H2 sections with their sizes and the docs path to move each to; `maintain` reports the same finding as a `claude_md_size` suggestion.
+
 **Detection:** Line count. Ratio of headings to content. Presence of long prose paragraphs (bad) vs. bullet points and code blocks (good).
 
 ### 5. Currency (0-15)

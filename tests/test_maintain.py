@@ -154,3 +154,27 @@ def test_all_categories_known(stale_scan):
         assert s.category in _KNOWN_CATEGORIES, (
             f'Unknown category: {s.category}'
         )
+
+
+# -- CLAUDE.md size (thorwhalen/opsward#30) --
+
+
+def _scan_with_claude_md(content):
+    from opsward.base import ScanResult
+
+    return ScanResult(project_root=Path('/tmp/x'), claude_md_content=content)
+
+
+def test_maintain_flags_oversized_claude_md():
+    content = '# P\n\n## Narrative\n' + 'story line\n' * 2000
+    found = [s for s in maintain(_scan_with_claude_md(content)) if s.category == 'claude_md_size']
+    assert len(found) == 1
+    assert 'Narrative' in found[0].description
+
+
+def test_maintain_size_threshold_is_keyword_both_sides():
+    content = '# P\n\n## A\n' + 'x' * 2000
+    sr = _scan_with_claude_md(content)
+    cats = lambda **kw: {s.category for s in maintain(sr, **kw)}
+    assert 'claude_md_size' not in cats()
+    assert 'claude_md_size' in cats(claude_md_max_chars=1000)

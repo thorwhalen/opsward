@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Optional
 
 from opsward.base import DiagnosisReport, MaintenanceSuggestion, ScanResult
+from opsward.score import _CONCISENESS_MAX_CHARS, claude_md_size_overrun, docs_dir_hint
 from opsward.util import read_text_safe
 
 
@@ -17,6 +18,7 @@ def maintain(
     scan_result: ScanResult,
     *,
     previous_report: Optional[DiagnosisReport] = None,
+    claude_md_max_chars: int = _CONCISENESS_MAX_CHARS,
 ) -> list[MaintenanceSuggestion]:
     """Detect maintenance issues and return suggestions.
 
@@ -28,6 +30,7 @@ def maintain(
     suggestions: list[MaintenanceSuggestion] = []
 
     suggestions.extend(_check_stale_paths(scan_result))
+    suggestions.extend(_check_claude_md_size(scan_result, claude_md_max_chars))
     suggestions.extend(_check_docs_guide_sync(scan_result))
     suggestions.extend(_check_doc_freshness(scan_result))
     suggestions.extend(_check_skills_without_description(scan_result))
@@ -56,6 +59,24 @@ def _check_stale_paths(sr: ScanResult) -> Iterable[MaintenanceSuggestion]:
                     f"CLAUDE.md references `{path_str}` but it does not exist"
                 ),
             )
+
+
+# ---------------------------------------------------------------------------
+# CLAUDE.md size
+# ---------------------------------------------------------------------------
+
+
+def _check_claude_md_size(
+    sr: ScanResult, max_chars: int
+) -> Iterable[MaintenanceSuggestion]:
+    """Flag a CLAUDE.md over the size budget (same finding as ``diagnose``)."""
+    overrun = claude_md_size_overrun(
+        sr.claude_md_content, max_chars=max_chars, docs_dir=docs_dir_hint(sr)
+    )
+    if overrun is not None:
+        yield MaintenanceSuggestion(
+            category="claude_md_size", description=overrun.describe()
+        )
 
 
 # ---------------------------------------------------------------------------

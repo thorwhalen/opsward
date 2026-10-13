@@ -5,9 +5,17 @@ All functions are pure — same input, same output.
 
 import re
 from collections.abc import Sequence
+from dataclasses import dataclass
 from pathlib import Path
+from typing import Optional
 
-from opsward.base import ComponentScore, DiagnosisReport, ScanResult, SkillInfo
+from opsward.base import (
+    ComponentScore,
+    DiagnosisReport,
+    ProjectType,
+    ScanResult,
+    SkillInfo,
+)
 
 
 # ---------------------------------------------------------------------------
@@ -22,12 +30,27 @@ _OVERALL_WEIGHTS: dict[str, float] = {
     "Cross-references": 0.10,
 }
 
+#: CLAUDE.md size (chars) above which Conciseness loses points. An always-loaded
+#: file is paid for on every request; narrative belongs in docs/.
+_CONCISENESS_MAX_CHARS = 10_000
+#: Most Conciseness points the size overrun can cost (reached at 2x the threshold).
+_CONCISE_SIZE_PENALTY_MAX = 6
+#: How many of the longest H2 sections a size finding names.
+_SIZE_TOP_SECTIONS = 3
+
 # Core docs the rubric expects
 _CORE_DOCS = {"architecture", "known_issues", "conventions"}
 
 
-def diagnose(scan_result: ScanResult) -> DiagnosisReport:
+def diagnose(
+    scan_result: ScanResult,
+    *,
+    claude_md_max_chars: int = _CONCISENESS_MAX_CHARS,
+) -> DiagnosisReport:
     """Score a ScanResult and return a DiagnosisReport.
+
+    ``claude_md_max_chars`` is the CLAUDE.md size above which Conciseness
+    loses points (see :func:`claude_md_size_overrun`).
 
     >>> from pathlib import Path
     >>> from opsward.base import ScanResult
@@ -45,6 +68,8 @@ def diagnose(scan_result: ScanResult) -> DiagnosisReport:
         scan_result.project_root,
         missing=missing,
         suggestions=suggestions,
+        max_chars=claude_md_max_chars,
+        docs_dir=docs_dir_hint(scan_result),
     )
     scores.append(claude_score)
 
@@ -102,6 +127,8 @@ def _score_claude_md(
     *,
     missing: list[str],
     suggestions: list[str],
+    max_chars: int = _CONCISENESS_MAX_CHARS,
+    docs_dir: str = "misc/docs",
 ) -> ComponentScore:
     if not content:
         missing.append("CLAUDE.md")
@@ -116,7 +143,7 @@ def _score_claude_md(
     total += _dim_commands(content, notes)
     total += _dim_architecture(content, notes)
     total += _dim_conventions(content, notes)
-    total += _dim_conciseness(content, notes)
+    total += _dim_conciseness(content, notes, max_chars=max_chars, docs_dir=docs_dir)
     total += _dim_currency(content, project_root, notes)
     total += _dim_actionability(content, notes)
 
@@ -228,8 +255,25 @@ def _dim_conventions(content: str, notes: list[str]) -> int:
     return 5
 
 
-def _dim_conciseness(content: str, notes: list[str]) -> int:
-    """Conciseness (0-15)."""
+def _dim_conciseness(
+    content: str,
+    notes: list[str],
+    *,
+    max_chars: int = _CONCISENESS_MAX_CHARS,
+    docs_dir: str = "misc/docs",
+) -> int:
+    """Conciseness (0-15): line count, minus a deduction for a file over *max_chars*."""
+    base = _conciseness_by_lines(content, notes)
+    if base == 0:
+        return 0
+    overrun = claude_md_size_overrun(content, max_chars=max_chars, docs_dir=docs_dir)
+    if overrun is None:
+        return base
+    notes.append(overrun.describe())
+    return max(0, base - overrun.penalty)
+
+
+def _conciseness_by_lines(content: str, notes: list[str]) -> int:
     line_count = len(content.splitlines())
 
     if line_count == 0:
@@ -253,6 +297,92 @@ def _dim_conciseness(content: str, notes: list[str]) -> int:
         "→ extract sections into docs/ and reference them from a short CLAUDE.md"
     )
     return 2
+
+
+@dataclass(frozen=True)
+class SizeOverrun:
+    """A CLAUDE.md over its size budget, with the sections worth moving out."""
+
+    chars: int
+    max_chars: int
+    penalty: int
+    sections: tuple[tuple[str, int], ...]  # (H2 title, chars), longest first
+    docs_dir: str
+
+    def describe(self) -> str:
+        """One-paragraph finding naming the longest sections and where to move them."""
+        moves = "; ".join(
+            f"\"{title}\" ({size:,} chars) → move to `{self.docs_dir}/{_slug(title)}.md`"
+            for title, size in self.sections
+        )
+        return (
+            f"Conciseness: CLAUDE.md is {self.chars:,} chars, over the "
+            f"{self.max_chars:,} budget (-{self.penalty}) "
+            f"→ move narrative sections out and leave a one-line pointer. "
+            f"Longest sections: {moves}"
+        )
+
+
+def claude_md_size_overrun(
+    content: str,
+    *,
+    max_chars: int = _CONCISENESS_MAX_CHARS,
+    docs_dir: str = "misc/docs",
+    top: int = _SIZE_TOP_SECTIONS,
+) -> Optional[SizeOverrun]:
+    """Return a :class:`SizeOverrun` if *content* exceeds *max_chars*, else None.
+
+    The penalty is proportional to the overrun: ``_CONCISE_SIZE_PENALTY_MAX``
+    points at twice the threshold (at least 1 once over it).
+
+    >>> claude_md_size_overrun("# t\n\n## A\nx\n", max_chars=5).penalty
+    1
+    >>> claude_md_size_overrun("short", max_chars=10) is None
+    True
+    """
+    chars = len(content)
+    if chars <= max_chars:
+        return None
+    ratio = (chars - max_chars) / max_chars
+    penalty = max(1, min(_CONCISE_SIZE_PENALTY_MAX, round(_CONCISE_SIZE_PENALTY_MAX * ratio)))
+    sizes = sorted(_h2_section_sizes(content), key=lambda t: -t[1])[:top]
+    return SizeOverrun(chars, max_chars, penalty, tuple(sizes), docs_dir)
+
+
+def _h2_section_sizes(content: str) -> list[tuple[str, int]]:
+    """(title, chars) for every H2 section; fenced code is never read as headings."""
+    sections: list[tuple[str, int]] = []
+    title: Optional[str] = None
+    size = 0
+    in_fence = False
+    for line in content.splitlines(keepends=True):
+        if line.lstrip().startswith(("```", "~~~")):
+            in_fence = not in_fence
+        m = None if in_fence else re.match(r"##\s+(.+?)\s*#*\s*$", line)
+        if m:
+            if title is not None:
+                sections.append((title, size))
+            title, size = m.group(1), 0
+        if title is not None:
+            size += len(line)
+    if title is not None:
+        sections.append((title, size))
+    return sections
+
+
+def _slug(title: str) -> str:
+    return re.sub(r"[^a-z0-9]+", "_", title.lower()).strip("_") or "section"
+
+
+def docs_dir_hint(sr: ScanResult) -> str:
+    """Project-relative docs dir to suggest moving sections into."""
+    for path in (sr.docs_guide_path, *(d.path for d in sr.docs)):
+        if path is not None:
+            try:
+                return path.parent.relative_to(sr.project_root).as_posix()
+            except ValueError:
+                pass
+    return "docs" if sr.project_type is ProjectType.jsts else "misc/docs"
 
 
 def _dim_currency(content: str, project_root: Path, notes: list[str]) -> int:
