@@ -326,7 +326,7 @@ class SizeOverrun:
         if not self.sections:
             return head + f" in `{self.docs_dir}/`"
         moves = "; ".join(
-            f"\"{title}\" ({size:,} chars) → move to `{self.docs_dir}/{_slug(title)}.md`"
+            f'"{title}" ({size:,} chars) → move to `{self.docs_dir}/{_slug(title)}.md`'
             for title, size in self.sections
         )
         return f"{head}. Longest sections: {moves}"
@@ -355,10 +355,14 @@ def claude_md_size_overrun(
     if chars <= max_chars:
         return None
     ratio = (chars - max_chars) / max_chars
-    penalty = max(1, min(_CONCISE_SIZE_PENALTY_MAX, round(_CONCISE_SIZE_PENALTY_MAX * ratio)))
+    penalty = max(
+        1, min(_CONCISE_SIZE_PENALTY_MAX, round(_CONCISE_SIZE_PENALTY_MAX * ratio))
+    )
     merged: dict[str, int] = {}
     for title, size in _h2_section_sizes(content):
-        merged[title] = merged.get(title, 0) + size  # repeated titles share one target file
+        merged[title] = (
+            merged.get(title, 0) + size
+        )  # repeated titles share one target file
     sizes = sorted(merged.items(), key=lambda t: -t[1])[:top]
     return SizeOverrun(chars, max_chars, penalty, tuple(sizes), docs_dir)
 
