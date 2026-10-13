@@ -1,6 +1,6 @@
 # opsward.maintain
 
-### opsward.maintain(scan_result, , previous_report=None)
+### opsward.maintain(scan_result, , previous_report=None, claude_md_max_chars=10000)
 
 Detect maintenance issues and return suggestions.
 

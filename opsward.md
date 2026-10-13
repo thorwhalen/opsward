@@ -1,4 +1,4 @@
-> built 2026-09-22 17:17 UTC from abc162c (main) · opsward 0.0.14. Details: build_info.json
+> built 2026-10-13 17:05 UTC from f1b5e90 (main) · opsward 0.0.15. Details: build_info.json
 
 # index.html.md
 
@@ -498,24 +498,24 @@ Diagnose, generate, and maintain the AI agent setup of your projects.
 
 ### Modules
 
-| [`base`](_autosummary/opsward.base.html.md#module-opsward.base)                                       | All dataclasses and type definitions for opsward.                                                |
-|-----------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
-| [`cli`](_autosummary/opsward.cli.html.md#module-opsward.cli)                                         | CLI dispatch for opsward.                                                                        |
-| [`data`](_autosummary/opsward.data.html.md#module-opsward.data)                                       | Bundled package resources for opsward, accessed via `importlib.resources.files("opsward.data")`. |
-| [`discover`](_autosummary/opsward.discover.html.md#module-opsward.discover)                               | Optional cross-repo asset discovery, delegating to the `toolery` package.                        |
-| [`generate`](_autosummary/opsward.generate.html.md#opsward.generate)(scan_result, \*[, agents_md, hooks]) | Determine which artifacts are missing, render templates, return files to create.                 |
-| [`maintain`](_autosummary/opsward.maintain.html.md#opsward.maintain)(scan_result, \*[, previous_report])  | Detect maintenance issues and return suggestions.                                                |
-| [`recommend`](_autosummary/opsward.recommend.html.md#module-opsward.recommend)                             | Recommend skills from the ecosystem based on project tech stack.                                 |
-| [`scan`](_autosummary/opsward.scan.html.md#opsward.scan)(project_root)                                | Scan *project_root* and return a ScanResult.                                                     |
-| [`score`](_autosummary/opsward.score.html.md#module-opsward.score)                                     | Pure scoring functions.                                                                          |
-| [`util`](_autosummary/opsward.util.html.md#module-opsward.util)                                       | Shared helpers for opsward.                                                                      |
+| [`base`](_autosummary/opsward.base.html.md#module-opsward.base)                                           | All dataclasses and type definitions for opsward.                                                |
+|---------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
+| [`cli`](_autosummary/opsward.cli.html.md#module-opsward.cli)                                             | CLI dispatch for opsward.                                                                        |
+| [`data`](_autosummary/opsward.data.html.md#module-opsward.data)                                           | Bundled package resources for opsward, accessed via `importlib.resources.files("opsward.data")`. |
+| [`discover`](_autosummary/opsward.discover.html.md#module-opsward.discover)                                   | Optional cross-repo asset discovery, delegating to the `toolery` package.                        |
+| [`generate`](_autosummary/opsward.generate.html.md#opsward.generate)(scan_result, \*[, agents_md, hooks])     | Determine which artifacts are missing, render templates, return files to create.                 |
+| [`maintain`](_autosummary/opsward.maintain.html.md#opsward.maintain)(scan_result, \*[, previous_report, ...]) | Detect maintenance issues and return suggestions.                                                |
+| [`recommend`](_autosummary/opsward.recommend.html.md#module-opsward.recommend)                                 | Recommend skills from the ecosystem based on project tech stack.                                 |
+| [`scan`](_autosummary/opsward.scan.html.md#opsward.scan)(project_root)                                    | Scan *project_root* and return a ScanResult.                                                     |
+| [`score`](_autosummary/opsward.score.html.md#module-opsward.score)                                         | Pure scoring functions.                                                                          |
+| [`util`](_autosummary/opsward.util.html.md#module-opsward.util)                                           | Shared helpers for opsward.                                                                      |
 
 
 # _autosummary/opsward.maintain.html.md
 
 # opsward.maintain
 
-### opsward.maintain(scan_result, , previous_report=None)
+### opsward.maintain(scan_result, , previous_report=None, claude_md_max_chars=10000)
 
 Detect maintenance issues and return suggestions.
 
@@ -598,14 +598,57 @@ All functions are pure — same input, same output.
 
 ### Functions
 
-| [`diagnose`](_autosummary/opsward.score.html.md#opsward.score.diagnose)(scan_result)      | Score a ScanResult and return a DiagnosisReport.               |
-|-----------------------------------------------------------------------------|----------------------------------------------------------------|
-| [`validate_hooks_config`](_autosummary/opsward.score.html.md#opsward.score.validate_hooks_config)(cfg) | Validate a hooks config against Claude Code's expected shape.  |
-| [`validate_skill_spec`](_autosummary/opsward.score.html.md#opsward.score.validate_skill_spec)(skill) | Validate a SkillInfo against the agentskills.io specification. |
+| [`claude_md_size_overrun`](_autosummary/opsward.score.html.md#opsward.score.claude_md_size_overrun)(content, \*[, ...])       | Return a [`SizeOverrun`](_autosummary/opsward.score.html.md#opsward.score.SizeOverrun) if *content* exceeds *max_chars*, else None.   |
+|---------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------|
+| [`diagnose`](_autosummary/opsward.score.html.md#opsward.score.diagnose)(scan_result, \*[, claude_md_max_chars]) | Score a ScanResult and return a DiagnosisReport.                                                                     |
+| [`docs_dir_hint`](_autosummary/opsward.score.html.md#opsward.score.docs_dir_hint)(sr)                                | Project-relative docs dir to suggest moving sections into.                                                           |
+| [`validate_hooks_config`](_autosummary/opsward.score.html.md#opsward.score.validate_hooks_config)(cfg)                       | Validate a hooks config against Claude Code's expected shape.                                                        |
+| [`validate_skill_spec`](_autosummary/opsward.score.html.md#opsward.score.validate_skill_spec)(skill)                       | Validate a SkillInfo against the agentskills.io specification.                                                       |
 
-### opsward.score.diagnose(scan_result)
+### Classes
+
+| [`SizeOverrun`](_autosummary/opsward.score.html.md#opsward.score.SizeOverrun)(chars, max_chars, penalty, ...)   | A CLAUDE.md over its size budget, with the sections worth moving out.   |
+|------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------|
+
+### *class* opsward.score.SizeOverrun(chars, max_chars, penalty, sections, docs_dir)
+
+Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
+
+A CLAUDE.md over its size budget, with the sections worth moving out.
+
+#### describe(, deducted=None)
+
+One-paragraph finding naming the longest sections and where to move them.
+
+`deducted` is the points actually lost (the line-count rule may have
+left fewer than `penalty` to take); omit it to leave the figure out.
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
+
+### opsward.score.claude_md_size_overrun(content, , max_chars=10000, docs_dir='misc/docs', top=3)
+
+Return a [`SizeOverrun`](_autosummary/opsward.score.html.md#opsward.score.SizeOverrun) if *content* exceeds *max_chars*, else None.
+
+The penalty is proportional to the overrun: `_CONCISE_SIZE_PENALTY_MAX`
+points at twice the threshold (at least 1 once over it).
+
+* **Return type:**
+  [`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`SizeOverrun`](_autosummary/opsward.score.html.md#opsward.score.SizeOverrun)]
+
+```pycon
+>>> claude_md_size_overrun("x" * 11, max_chars=10).penalty
+1
+>>> claude_md_size_overrun("short", max_chars=10) is None
+True
+```
+
+### opsward.score.diagnose(scan_result, , claude_md_max_chars=10000)
 
 Score a ScanResult and return a DiagnosisReport.
+
+`claude_md_max_chars` is the CLAUDE.md size above which Conciseness
+loses points (see [`claude_md_size_overrun()`](_autosummary/opsward.score.html.md#opsward.score.claude_md_size_overrun)).
 
 * **Return type:**
   [`DiagnosisReport`](_autosummary/opsward.base.html.md#opsward.base.DiagnosisReport)
@@ -617,6 +660,13 @@ Score a ScanResult and return a DiagnosisReport.
 >>> r.grade
 'F'
 ```
+
+### opsward.score.docs_dir_hint(sr)
+
+Project-relative docs dir to suggest moving sections into.
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 
 ### opsward.score.validate_hooks_config(cfg)
 
@@ -710,18 +760,18 @@ Read a text file, returning ‘’ if it doesn’t exist or can’t be decoded.
 
 # About this build
 
-This documentation was built on **2026-09-22 17:17 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/abc162ca99dc88196ee52dbcd08ae0e614db7dd9"><code>abc162c</code></a> on branch <code>main</code>, for **opsward 0.0.14** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-10-13 17:05 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/f1b5e90df11737113119d84d00483ba86ac8f422"><code>f1b5e90</code></a> on branch <code>main</code>, for **opsward 0.0.15** (from <code>pyproject.toml</code>).
 
 #### WARNING
 The documentation and the package may be misaligned:
 
-- The documented version (0.0.14) is behind the latest release on PyPI (0.0.15): `pip install opsward` gives newer code than these docs describe.
+- The documented version (0.0.15) is behind the latest release on PyPI (0.0.16): `pip install opsward` gives newer code than these docs describe.
 
 ## Source
 
 |                     |                                                                                                                                                           |
 |---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/opsward/commit/abc162ca99dc88196ee52dbcd08ae0e614db7dd9"><code>abc162ca99dc88196ee52dbcd08ae0e614db7dd9</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/opsward/commit/f1b5e90df11737113119d84d00483ba86ac8f422"><code>f1b5e90df11737113119d84d00483ba86ac8f422</code></a> |
 | Branch              | <code>main</code>                                                                                                                                         |
 | Tags at this commit | none                                                                                                                                                      |
 | Working tree        | clean                                                                                                                                                     |
@@ -732,18 +782,18 @@ The documentation and the package may be misaligned:
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/opsward</code>                                                            |
-| Run          | <a href="https://github.com/thorwhalen/opsward/actions/runs/35759548607">35759548607</a>   |
+| Run          | <a href="https://github.com/thorwhalen/opsward/actions/runs/38435116015">38435116015</a>   |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>abc162ca99dc88196ee52dbcd08ae0e614db7dd9</code> (in the history of the built commit) |
+| Event commit | <code>f1b5e90df11737113119d84d00483ba86ac8f422</code> (in the history of the built commit) |
 
 ## Tools
 
 |          |         |
 |----------|---------|
-| epythet  | 0.2.12  |
+| epythet  | 0.2.17  |
 | Sphinx   | 9.1.0   |
 | docutils | 0.22.4  |
-| Python   | 3.12.14 |
+| Python   | 3.12.15 |
 
 ## Configuration as resolved
 
@@ -759,14 +809,14 @@ The documentation and the package may be misaligned:
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/opsward/0.0.15/">0.0.15</a>, newer than the documented version (0.0.14).
+Latest release: <a href="https://pypi.org/project/opsward/0.0.16/">0.0.16</a>, newer than the documented version (0.0.15).
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/opsward && cd opsward
-git checkout abc162ca99dc88196ee52dbcd08ae0e614db7dd9
-pip install "epythet==0.2.12"
+git checkout f1b5e90df11737113119d84d00483ba86ac8f422
+pip install "epythet==0.2.17"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
 

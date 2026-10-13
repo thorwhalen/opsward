@@ -8,7 +8,15 @@ opsward.score
 
    .. autosummary::
    
+      claude_md_size_overrun
       diagnose
+      docs_dir_hint
       validate_hooks_config
       validate_skill_spec
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      SizeOverrun
    

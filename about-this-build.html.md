@@ -2,18 +2,18 @@
 
 # About this build
 
-This documentation was built on **2026-09-22 17:17 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/abc162ca99dc88196ee52dbcd08ae0e614db7dd9"><code>abc162c</code></a> on branch <code>main</code>, for **opsward 0.0.14** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-10-13 17:05 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/f1b5e90df11737113119d84d00483ba86ac8f422"><code>f1b5e90</code></a> on branch <code>main</code>, for **opsward 0.0.15** (from <code>pyproject.toml</code>).
 
 #### WARNING
 The documentation and the package may be misaligned:
 
-- The documented version (0.0.14) is behind the latest release on PyPI (0.0.15): `pip install opsward` gives newer code than these docs describe.
+- The documented version (0.0.15) is behind the latest release on PyPI (0.0.16): `pip install opsward` gives newer code than these docs describe.
 
 ## Source
 
 |                     |                                                                                                                                                           |
 |---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/opsward/commit/abc162ca99dc88196ee52dbcd08ae0e614db7dd9"><code>abc162ca99dc88196ee52dbcd08ae0e614db7dd9</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/opsward/commit/f1b5e90df11737113119d84d00483ba86ac8f422"><code>f1b5e90df11737113119d84d00483ba86ac8f422</code></a> |
 | Branch              | <code>main</code>                                                                                                                                         |
 | Tags at this commit | none                                                                                                                                                      |
 | Working tree        | clean                                                                                                                                                     |
@@ -24,18 +24,18 @@ The documentation and the package may be misaligned:
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/opsward</code>                                                            |
-| Run          | <a href="https://github.com/thorwhalen/opsward/actions/runs/35759548607">35759548607</a>   |
+| Run          | <a href="https://github.com/thorwhalen/opsward/actions/runs/38435116015">38435116015</a>   |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>abc162ca99dc88196ee52dbcd08ae0e614db7dd9</code> (in the history of the built commit) |
+| Event commit | <code>f1b5e90df11737113119d84d00483ba86ac8f422</code> (in the history of the built commit) |
 
 ## Tools
 
 |          |         |
 |----------|---------|
-| epythet  | 0.2.12  |
+| epythet  | 0.2.17  |
 | Sphinx   | 9.1.0   |
 | docutils | 0.22.4  |
-| Python   | 3.12.14 |
+| Python   | 3.12.15 |
 
 ## Configuration as resolved
 
@@ -51,14 +51,14 @@ The documentation and the package may be misaligned:
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/opsward/0.0.15/">0.0.15</a>, newer than the documented version (0.0.14).
+Latest release: <a href="https://pypi.org/project/opsward/0.0.16/">0.0.16</a>, newer than the documented version (0.0.15).
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/opsward && cd opsward
-git checkout abc162ca99dc88196ee52dbcd08ae0e614db7dd9
-pip install "epythet==0.2.12"
+git checkout f1b5e90df11737113119d84d00483ba86ac8f422
+pip install "epythet==0.2.17"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
 

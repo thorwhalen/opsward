@@ -1,39 +1,39 @@
 {
   "schema_version": 1,
-  "built_at": "2026-09-22T17:17:36Z",
+  "built_at": "2026-10-13T17:05:15Z",
   "package": {
     "name": "opsward",
-    "version": "0.0.14",
+    "version": "0.0.15",
     "display_name": "opsward",
     "source": "pyproject.toml"
   },
   "git": {
     "available": true,
-    "commit": "abc162ca99dc88196ee52dbcd08ae0e614db7dd9",
-    "short_commit": "abc162c",
+    "commit": "f1b5e90df11737113119d84d00483ba86ac8f422",
+    "short_commit": "f1b5e90",
     "branch": "main",
     "tags": [],
     "dirty": false,
     "remote_url": "https://github.com/thorwhalen/opsward",
-    "commit_url": "https://github.com/thorwhalen/opsward/commit/abc162ca99dc88196ee52dbcd08ae0e614db7dd9",
+    "commit_url": "https://github.com/thorwhalen/opsward/commit/f1b5e90df11737113119d84d00483ba86ac8f422",
     "error": null
   },
   "ci": {
     "provider": "github",
     "repository": "thorwhalen/opsward",
-    "sha": "abc162ca99dc88196ee52dbcd08ae0e614db7dd9",
+    "sha": "f1b5e90df11737113119d84d00483ba86ac8f422",
     "sha_in_history": true,
     "ref": "refs/heads/main",
     "ref_name": "main",
-    "run_id": "35759548607",
-    "run_url": "https://github.com/thorwhalen/opsward/actions/runs/35759548607",
+    "run_id": "38435116015",
+    "run_url": "https://github.com/thorwhalen/opsward/actions/runs/38435116015",
     "server_url": "https://github.com"
   },
   "tools": {
-    "epythet": "0.2.12",
+    "epythet": "0.2.17",
     "sphinx": "9.1.0",
     "docutils": "0.22.4",
-    "python": "3.12.14"
+    "python": "3.12.15"
   },
   "config": {
     "theme": "auto",
@@ -56,20 +56,20 @@
   },
   "site": {
     "modules_documented": 12,
-    "objects_documented": 31
+    "objects_documented": 35
   },
   "pypi": {
     "checked": true,
-    "latest": "0.0.15",
+    "latest": "0.0.16",
     "relation": "behind",
     "error": null
   },
-  "reproduce": "git clone https://github.com/thorwhalen/opsward && cd opsward\ngit checkout abc162ca99dc88196ee52dbcd08ae0e614db7dd9\npip install \"epythet==0.2.12\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
+  "reproduce": "git clone https://github.com/thorwhalen/opsward && cd opsward\ngit checkout f1b5e90df11737113119d84d00483ba86ac8f422\npip install \"epythet==0.2.17\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
   "warnings": [],
   "alignment": {
     "aligned": false,
     "notes": [
-      "The documented version (0.0.14) is behind the latest release on PyPI (0.0.15): `pip install opsward` gives newer code than these docs describe."
+      "The documented version (0.0.15) is behind the latest release on PyPI (0.0.16): `pip install opsward` gives newer code than these docs describe."
     ]
   }
 }
