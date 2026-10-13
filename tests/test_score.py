@@ -441,3 +441,131 @@ def test_diagnose_is_pure(python_scan):
     assert len(r1.scores) == len(r2.scores)
     for s1, s2 in zip(r1.scores, r2.scores):
         assert s1.score == s2.score
+
+
+# ---------------------------------------------------------------------------
+# CLAUDE.md size signal (thorwhalen/opsward#30)
+# ---------------------------------------------------------------------------
+
+
+def _sized_claude_md(total_chars: int) -> str:
+    """A short-line CLAUDE.md of roughly *total_chars*, three unequal H2 sections + a small one."""
+    line = "narrative line " * 6 + "\n"
+    sections = {"Big": 5, "Medium": 3, "Smaller": 2, "Tiny": 0}
+    unit = max(1, (total_chars - 200) // (10 * len(line)))
+    body = "# P\n\n"
+    for title, weight in sections.items():
+        body += f"## {title}\n" + line * (unit * weight + 1)
+    return body
+
+
+def _component_with(scan_result: ScanResult, **kwargs):
+    """The CLAUDE.md quality ComponentScore with diagnose() keyword overrides."""
+    report = diagnose(scan_result, **kwargs)
+    return next(s for s in report.scores if s.name == "CLAUDE.md quality")
+
+
+def _conciseness_note(cs) -> str:
+    return next((n for n in cs.notes if n.startswith("Conciseness: CLAUDE.md is")), "")
+
+
+def test_oversized_claude_md_deducts_and_names_longest_sections():
+    content = _sized_claude_md(30_000)
+    assert len(content) > 10_000
+    cs = _component(_claude(content), "CLAUDE.md quality")
+    note = _conciseness_note(cs)
+    assert note and FIX_ARROW in note
+    # the three longest sections, longest first, each with its target docs path
+    assert note.index('"Big"') < note.index('"Medium"') < note.index('"Smaller"')
+    assert '"Tiny"' not in note
+    assert "`misc/docs/big.md`" in note
+    # points were actually lost relative to the same file with the check disabled
+    off = _component_with(_claude(content), claude_md_max_chars=10**9)
+    assert cs.score < off.score
+
+
+def test_small_claude_md_loses_nothing():
+    content = _sized_claude_md(7_000)
+    assert len(content) < 10_000
+    cs = _component(_claude(content), "CLAUDE.md quality")
+    assert not _conciseness_note(cs)
+    off = _component_with(_claude(content), claude_md_max_chars=10**9)
+    assert cs.score == off.score
+
+
+def test_size_threshold_is_keyword_argument_with_both_sides():
+    content = _sized_claude_md(7_000)
+    low = _component_with(_claude(content), claude_md_max_chars=5_000)
+    high = _component_with(_claude(content), claude_md_max_chars=10_000)
+    assert _conciseness_note(low) and not _conciseness_note(high)
+    assert low.score < high.score
+
+
+def test_size_penalty_is_proportional_to_overrun():
+    from opsward.score import claude_md_size_overrun
+
+    small = claude_md_size_overrun("x" * 11_000, max_chars=10_000)
+    big = claude_md_size_overrun("x" * 30_000, max_chars=10_000)
+    assert 1 <= small.penalty < big.penalty
+
+
+def test_size_docs_dir_follows_project_type_and_existing_docs():
+    content = _sized_claude_md(30_000)
+    js = ScanResult(
+        project_root=Path("/tmp/x"),
+        project_type=ProjectType.jsts,
+        claude_md_content=content,
+    )
+    assert "`docs/big.md`" in _conciseness_note(_component(js, "CLAUDE.md quality"))
+
+
+def test_size_ignores_headings_inside_code_fences():
+    from opsward.score import claude_md_size_overrun
+
+    content = "## Real\n```\n## Fake\n```\n" + "x" * 100
+    o = claude_md_size_overrun(content, max_chars=10)
+    assert [t for t, _ in o.sections] == ["Real"]
+
+
+def test_size_duplicate_h2_titles_are_merged():
+    from opsward.score import claude_md_size_overrun
+
+    content = "## Setup\n" + "a" * 50 + "\n## Other\n" + "b" * 40 + "\n## Setup\n" + "c" * 50 + "\n"
+    o = claude_md_size_overrun(content, max_chars=10)
+    titles = [t for t, _ in o.sections]
+    assert titles == ["Setup", "Other"]
+    assert o.sections[0][1] > 100
+
+
+def test_size_without_h2_has_no_dangling_section_list():
+    from opsward.score import claude_md_size_overrun
+
+    o = claude_md_size_overrun("x" * 50, max_chars=10)
+    assert o.sections == ()
+    assert "Longest sections" not in o.describe()
+
+
+def test_size_note_reports_points_actually_lost():
+    # >500 lines: line-count rule already leaves only 2 points, so at most 2 can go
+    content = "# P\n\n## Big\n" + "x\n" * 12000
+    cs = _component(_claude(content), "CLAUDE.md quality")
+    assert "(-2)" in _conciseness_note(cs)
+
+
+def test_size_rejects_non_positive_threshold():
+    from opsward.score import claude_md_size_overrun
+
+    with pytest.raises(ValueError):
+        claude_md_size_overrun("x", max_chars=0)
+
+
+def test_size_fence_rules_and_heading_titles():
+    from opsward.score import claude_md_size_overrun
+
+    content = (
+        "## C#\n````\n```\n## Fake\n```\n````\n"
+        "~~~\n## AlsoFake\n```\n## StillFake\n~~~\n"
+        "## Real ##\n" + "x" * 100
+    )
+    o = claude_md_size_overrun(content, max_chars=10)
+    assert sorted(t for t, _ in o.sections) == ["C#", "Real"]
