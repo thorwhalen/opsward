@@ -269,8 +269,9 @@ def _dim_conciseness(
     overrun = claude_md_size_overrun(content, max_chars=max_chars, docs_dir=docs_dir)
     if overrun is None:
         return base
-    notes.append(overrun.describe())
-    return max(0, base - overrun.penalty)
+    score = max(0, base - overrun.penalty)
+    notes.append(overrun.describe(deducted=base - score))
+    return score
 
 
 def _conciseness_by_lines(content: str, notes: list[str]) -> int:
@@ -309,18 +310,26 @@ class SizeOverrun:
     sections: tuple[tuple[str, int], ...]  # (H2 title, chars), longest first
     docs_dir: str
 
-    def describe(self) -> str:
-        """One-paragraph finding naming the longest sections and where to move them."""
+    def describe(self, *, deducted: Optional[int] = None) -> str:
+        """One-paragraph finding naming the longest sections and where to move them.
+
+        ``deducted`` is the points actually lost (the line-count rule may have
+        left fewer than ``penalty`` to take); omit it to leave the figure out.
+        """
+        head = (
+            f"Conciseness: CLAUDE.md is {self.chars:,} chars, over the "
+            f"{self.max_chars:,} budget"
+        )
+        if deducted is not None:
+            head += f" (-{deducted})"
+        head += " → move narrative sections out and leave a one-line pointer"
+        if not self.sections:
+            return head + f" in `{self.docs_dir}/`"
         moves = "; ".join(
             f"\"{title}\" ({size:,} chars) → move to `{self.docs_dir}/{_slug(title)}.md`"
             for title, size in self.sections
         )
-        return (
-            f"Conciseness: CLAUDE.md is {self.chars:,} chars, over the "
-            f"{self.max_chars:,} budget (-{self.penalty}) "
-            f"→ move narrative sections out and leave a one-line pointer. "
-            f"Longest sections: {moves}"
-        )
+        return f"{head}. Longest sections: {moves}"
 
 
 def claude_md_size_overrun(
@@ -340,12 +349,17 @@ def claude_md_size_overrun(
     >>> claude_md_size_overrun("short", max_chars=10) is None
     True
     """
+    if max_chars <= 0:
+        raise ValueError(f"max_chars must be positive, got {max_chars!r}")
     chars = len(content)
     if chars <= max_chars:
         return None
     ratio = (chars - max_chars) / max_chars
     penalty = max(1, min(_CONCISE_SIZE_PENALTY_MAX, round(_CONCISE_SIZE_PENALTY_MAX * ratio)))
-    sizes = sorted(_h2_section_sizes(content), key=lambda t: -t[1])[:top]
+    merged: dict[str, int] = {}
+    for title, size in _h2_section_sizes(content):
+        merged[title] = merged.get(title, 0) + size  # repeated titles share one target file
+    sizes = sorted(merged.items(), key=lambda t: -t[1])[:top]
     return SizeOverrun(chars, max_chars, penalty, tuple(sizes), docs_dir)
 
 
@@ -354,11 +368,16 @@ def _h2_section_sizes(content: str) -> list[tuple[str, int]]:
     sections: list[tuple[str, int]] = []
     title: Optional[str] = None
     size = 0
-    in_fence = False
+    fence: Optional[str] = None  # the opening fence run (e.g. "```"), while inside one
     for line in content.splitlines(keepends=True):
-        if line.lstrip().startswith(("```", "~~~")):
-            in_fence = not in_fence
-        m = None if in_fence else re.match(r"##\s+(.+?)\s*#*\s*$", line)
+        run = re.match(r"\s*(`{3,}|~{3,})", line)
+        if run:
+            marker = run.group(1)
+            if fence is None:
+                fence = marker
+            elif marker[0] == fence[0] and len(marker) >= len(fence):
+                fence = None
+        m = None if fence else re.match(r"##\s+(.+?)(?:\s+#+)?\s*$", line)
         if m:
             if title is not None:
                 sections.append((title, size))
@@ -371,7 +390,7 @@ def _h2_section_sizes(content: str) -> list[tuple[str, int]]:
 
 
 def _slug(title: str) -> str:
-    return re.sub(r"[^a-z0-9]+", "_", title.lower()).strip("_") or "section"
+    return re.sub(r"[\W_]+", "_", title.lower()).strip("_") or "section"
 
 
 def docs_dir_hint(sr: ScanResult) -> str:

@@ -525,3 +525,47 @@ def test_size_ignores_headings_inside_code_fences():
     content = "## Real\n```\n## Fake\n```\n" + "x" * 100
     o = claude_md_size_overrun(content, max_chars=10)
     assert [t for t, _ in o.sections] == ["Real"]
+
+
+def test_size_duplicate_h2_titles_are_merged():
+    from opsward.score import claude_md_size_overrun
+
+    content = "## Setup\n" + "a" * 50 + "\n## Other\n" + "b" * 40 + "\n## Setup\n" + "c" * 50 + "\n"
+    o = claude_md_size_overrun(content, max_chars=10)
+    titles = [t for t, _ in o.sections]
+    assert titles == ["Setup", "Other"]
+    assert o.sections[0][1] > 100
+
+
+def test_size_without_h2_has_no_dangling_section_list():
+    from opsward.score import claude_md_size_overrun
+
+    o = claude_md_size_overrun("x" * 50, max_chars=10)
+    assert o.sections == ()
+    assert "Longest sections" not in o.describe()
+
+
+def test_size_note_reports_points_actually_lost():
+    # >500 lines: line-count rule already leaves only 2 points, so at most 2 can go
+    content = "# P\n\n## Big\n" + "x\n" * 12000
+    cs = _component(_claude(content), "CLAUDE.md quality")
+    assert "(-2)" in _conciseness_note(cs)
+
+
+def test_size_rejects_non_positive_threshold():
+    from opsward.score import claude_md_size_overrun
+
+    with pytest.raises(ValueError):
+        claude_md_size_overrun("x", max_chars=0)
+
+
+def test_size_fence_rules_and_heading_titles():
+    from opsward.score import claude_md_size_overrun
+
+    content = (
+        "## C#\n````\n```\n## Fake\n```\n````\n"
+        "~~~\n## AlsoFake\n```\n## StillFake\n~~~\n"
+        "## Real ##\n" + "x" * 100
+    )
+    o = claude_md_size_overrun(content, max_chars=10)
+    assert sorted(t for t, _ in o.sections) == ["C#", "Real"]

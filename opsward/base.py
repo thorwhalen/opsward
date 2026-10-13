@@ -209,6 +209,6 @@ class GeneratedFile:
 class MaintenanceSuggestion:
     """A single maintenance action proposed by maintain.py."""
 
-    category: str  # e.g. 'stale_path', 'outdated_doc', 'sync_issue'
+    category: str  # e.g. 'stale_path', 'outdated_doc', 'sync_issue', 'claude_md_size'
     description: str
     diff: str = ""

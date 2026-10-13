@@ -143,7 +143,7 @@ def test_maintain_returns_list(stale_scan):
 
 
 _KNOWN_CATEGORIES = {
-    'stale_path', 'sync_issue', 'outdated_doc',
+    'stale_path', 'sync_issue', 'outdated_doc', 'claude_md_size',
     'incomplete_skill', 'empty_doc',
 }
 
