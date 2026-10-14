@@ -569,3 +569,60 @@ def test_size_fence_rules_and_heading_titles():
     )
     o = claude_md_size_overrun(content, max_chars=10)
     assert sorted(t for t, _ in o.sections) == ["C#", "Real"]
+
+
+# opsward#32: setext (underlined) H2 headings name sections too.
+def test_size_names_setext_h2_sections():
+    from opsward.score import _h2_section_sizes, claude_md_size_overrun
+
+    content = (
+        "Intro paragraph.\n\n"
+        "Setup\n-----\n" + "a" * 50 + "\n\n"
+        "## Atx\n" + "b" * 20 + "\n\n"
+        "Usage\n---\n" + "c" * 30 + "\n"
+    )
+    o = claude_md_size_overrun(content, max_chars=10)
+    assert [t for t, _ in o.sections] == ["Setup", "Usage", "Atx"]
+    sizes = dict(_h2_section_sizes(content))
+    # every char from the first heading on belongs to exactly one section
+    assert sum(sizes.values()) == len(content) - len("Intro paragraph.\n\n")
+
+
+def test_size_dashes_that_are_not_setext_underlines():
+    from opsward.score import _h2_section_sizes
+
+    content = (
+        "---\nname: x\n---\n"  # front matter: its closing --- is no underline
+        "## Real\n"
+        "- a list item\n---\n"  # a list item is no setext title
+        "text\n\n---\n"  # after a blank line, --- is a thematic break
+        "```\nFake\n---\n```\n"  # nor inside a fence
+        "    indented code\n---\n"  # nor indented code
+    )
+    assert [t for t, _ in _h2_section_sizes(content)] == ["Real"]
+
+
+def test_a_leading_rule_is_not_front_matter():
+    """opsward#32 review: a doc opening with a decorative rule kept its ATX H2s."""
+    from opsward.score import _h2_section_sizes
+
+    content = "---\n\n## A\nxxx\n\n---\n\n## B\nyy\n"
+    assert [t for t, _ in _h2_section_sizes(content)] == ["A", "B"]
+
+
+def test_a_multi_line_paragraph_is_one_setext_title():
+    from opsward.score import _h2_section_sizes
+
+    content = "## A\nx\n\nLine one\nLine two\n---\nbody\n"
+    sizes = _h2_section_sizes(content)
+    assert [t for t, _ in sizes] == ["A", "Line one Line two"]
+    assert sizes[0][1] == len("## A\nx\n\n")
+
+
+@pytest.mark.parametrize(
+    "block", ["<div>\nhi\n</div>\n", "<!-- c -->\n", "[foo]: /url\n", "\tcode\n"]
+)
+def test_html_link_definitions_and_tab_code_are_no_setext_titles(block):
+    from opsward.score import _h2_section_sizes
+
+    assert [t for t, _ in _h2_section_sizes("## Real\n" + block + "---\n")] == ["Real"]
