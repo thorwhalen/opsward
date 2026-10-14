@@ -16,11 +16,23 @@ Run opsward to assess and improve this project’s AI agent setup. Use when the 
 
 Source: [`.claude/skills/opsward`](https://github.com/thorwhalen/opsward/tree/HEAD/.claude/skills/opsward).
 
+### `opsward-add-drift-check`
+
+Add a new staleness or drift check to opsward’s maintain stage (maintain.py), so `opsward maintain` reports a new kind of MaintenanceSuggestion — a stale reference, an out-of-sync index, an outdated or empty doc, an incomplete skill. Use when extending what `opsward maintain` detects, adding a suggestion category, or deciding whether a finding belongs in maintain or in the diagnose score. Covers the check-generator shape, categories, the diff field, the exit-code contract, and the CLI golden it can move.
+
+Source: [`.claude/skills/opsward-add-drift-check`](https://github.com/thorwhalen/opsward/tree/HEAD/.claude/skills/opsward-add-drift-check).
+
 ### `opsward-add-recommendation`
 
 Add a tech-stack→skill mapping to opsward’s recommendation engine in recommend.py, so `opsward recommend` suggests an ecosystem skill when it detects a dependency or framework (e.g. Supabase, FastAPI, Tailwind). Use when extending the curated `_RECOMMENDATIONS` list, adding a new detection signal, or changing where recommended skills are sourced from.
 
 Source: [`.claude/skills/opsward-add-recommendation`](https://github.com/thorwhalen/opsward/tree/HEAD/.claude/skills/opsward-add-recommendation).
+
+### `opsward-add-scan-field`
+
+Add a new fact that opsward learns about a target project — a field on ScanResult populated by scan.py — and consume it downstream in score/generate/maintain/recommend. Use when a new check, score, template variable, or drift detector needs data the scan does not yet collect (a new config file, a new .claude/ inventory, a project signal), or when changing project-type detection. Covers the read-only contract, the dataclass-default rule, the util read helpers, and the CLI goldens a scan change can move.
+
+Source: [`.claude/skills/opsward-add-scan-field`](https://github.com/thorwhalen/opsward/tree/HEAD/.claude/skills/opsward-add-scan-field).
 
 ### `opsward-add-scoring`
 

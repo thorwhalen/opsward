@@ -97,7 +97,9 @@ data-aria-dark="Switch to auto color mode">
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
 <li><a class="reference internal" href="#skills">Skills</a><ul>
 <li><a class="reference internal" href="#opsward"><code class="docutils literal notranslate"><span class="pre">opsward</span></code></a></li>
+<li><a class="reference internal" href="#opsward-add-drift-check"><code class="docutils literal notranslate"><span class="pre">opsward-add-drift-check</span></code></a></li>
 <li><a class="reference internal" href="#opsward-add-recommendation"><code class="docutils literal notranslate"><span class="pre">opsward-add-recommendation</span></code></a></li>
+<li><a class="reference internal" href="#opsward-add-scan-field"><code class="docutils literal notranslate"><span class="pre">opsward-add-scan-field</span></code></a></li>
 <li><a class="reference internal" href="#opsward-add-scoring"><code class="docutils literal notranslate"><span class="pre">opsward-add-scoring</span></code></a></li>
 <li><a class="reference internal" href="#opsward-add-template"><code class="docutils literal notranslate"><span class="pre">opsward-add-template</span></code></a></li>
 <li><a class="reference internal" href="#opsward-dev"><code class="docutils literal notranslate"><span class="pre">opsward-dev</span></code></a></li>
@@ -156,10 +158,20 @@ machine-readable copies of this documentation.</p>
 <p>Run opsward to assess and improve this project’s AI agent setup. Use when the user says ‘opsward’, ‘check my setup’, ‘improve my AI config’, or wants a full audit and remediation.</p>
 <p>Source: <a class="reference external" href="https://github.com/thorwhalen/opsward/tree/HEAD/.claude/skills/opsward"><code class="docutils literal notranslate"><span class="pre">.claude/skills/opsward</span></code></a>.</p>
 </section>
+<section id="opsward-add-drift-check">
+<h3><code class="docutils literal notranslate"><span class="pre">opsward-add-drift-check</span></code><a class="headerlink" href="#opsward-add-drift-check" title="Link to this heading">#</a></h3>
+<p>Add a new staleness or drift check to opsward’s maintain stage (maintain.py), so <code class="docutils literal notranslate"><span class="pre">opsward</span> <span class="pre">maintain</span></code> reports a new kind of MaintenanceSuggestion — a stale reference, an out-of-sync index, an outdated or empty doc, an incomplete skill. Use when extending what <code class="docutils literal notranslate"><span class="pre">opsward</span> <span class="pre">maintain</span></code> detects, adding a suggestion category, or deciding whether a finding belongs in maintain or in the diagnose score. Covers the check-generator shape, categories, the diff field, the exit-code contract, and the CLI golden it can move.</p>
+<p>Source: <a class="reference external" href="https://github.com/thorwhalen/opsward/tree/HEAD/.claude/skills/opsward-add-drift-check"><code class="docutils literal notranslate"><span class="pre">.claude/skills/opsward-add-drift-check</span></code></a>.</p>
+</section>
 <section id="opsward-add-recommendation">
 <h3><code class="docutils literal notranslate"><span class="pre">opsward-add-recommendation</span></code><a class="headerlink" href="#opsward-add-recommendation" title="Link to this heading">#</a></h3>
 <p>Add a tech-stack→skill mapping to opsward’s recommendation engine in recommend.py, so <code class="docutils literal notranslate"><span class="pre">opsward</span> <span class="pre">recommend</span></code> suggests an ecosystem skill when it detects a dependency or framework (e.g. Supabase, FastAPI, Tailwind). Use when extending the curated <code class="docutils literal notranslate"><span class="pre">_RECOMMENDATIONS</span></code> list, adding a new detection signal, or changing where recommended skills are sourced from.</p>
 <p>Source: <a class="reference external" href="https://github.com/thorwhalen/opsward/tree/HEAD/.claude/skills/opsward-add-recommendation"><code class="docutils literal notranslate"><span class="pre">.claude/skills/opsward-add-recommendation</span></code></a>.</p>
+</section>
+<section id="opsward-add-scan-field">
+<h3><code class="docutils literal notranslate"><span class="pre">opsward-add-scan-field</span></code><a class="headerlink" href="#opsward-add-scan-field" title="Link to this heading">#</a></h3>
+<p>Add a new fact that opsward learns about a target project — a field on ScanResult populated by scan.py — and consume it downstream in score/generate/maintain/recommend. Use when a new check, score, template variable, or drift detector needs data the scan does not yet collect (a new config file, a new .claude/ inventory, a project signal), or when changing project-type detection. Covers the read-only contract, the dataclass-default rule, the util read helpers, and the CLI goldens a scan change can move.</p>
+<p>Source: <a class="reference external" href="https://github.com/thorwhalen/opsward/tree/HEAD/.claude/skills/opsward-add-scan-field"><code class="docutils literal notranslate"><span class="pre">.claude/skills/opsward-add-scan-field</span></code></a>.</p>
 </section>
 <section id="opsward-add-scoring">
 <h3><code class="docutils literal notranslate"><span class="pre">opsward-add-scoring</span></code><a class="headerlink" href="#opsward-add-scoring" title="Link to this heading">#</a></h3>
@@ -253,7 +265,7 @@ machine-readable copies of this documentation.</p>
     </div>
   </div>
 </footer>
-      <script src="_static/documentation_options.js?v=c7cdf6fe"></script>
+      <script src="_static/documentation_options.js?v=63b572e7"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="_static/clipboard.min.js?v=a7894cd8"></script>
