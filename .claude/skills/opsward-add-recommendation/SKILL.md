@@ -10,13 +10,13 @@ ecosystem skills for the detected stack. All logic is in `opsward/recommend.py`.
 
 ## How matching works
 
-`recommend_skills(scan_result)` (`recommend.py:153`) →
-`_iter_recommendations` (`recommend.py:164`):
+`recommend_skills(scan_result)` (`def recommend_skills`) →
+`_iter_recommendations` (`def _iter_recommendations`):
 
 1. `_build_signal_corpus(sr)` concatenates and **lowercases** the text of the
    project's dependency files — `pyproject.toml`, `setup.py`, `setup.cfg`,
    `requirements.txt`, `package.json`, `Dockerfile`, `docker-compose.yml/.yaml`
-   (`recommend.py:181`).
+   (`def _build_signal_corpus`).
 2. For each `(signal_keywords, SkillRecommendation)` entry in `_RECOMMENDATIONS`,
    if **any** keyword is a substring of the corpus, the recommendation is
    yielded.
@@ -25,7 +25,7 @@ ecosystem skills for the detected stack. All logic is in `opsward/recommend.py`.
 
 ## Add an entry
 
-Append a tuple to `_RECOMMENDATIONS` (`recommend.py:29`):
+Append a tuple to `_RECOMMENDATIONS` (`_RECOMMENDATIONS: list[` in `recommend.py`):
 
 ```python
 (
@@ -55,7 +55,7 @@ Guidelines:
 ## If you need a new detection signal
 
 To match on a file not already scanned, add its filename to the tuple in
-`_build_signal_corpus` (`recommend.py:185`). It is read with `read_text_safe`
+`def _build_signal_corpus`. It is read with `read_text_safe`
 (missing files are ignored), keeping the function read-only.
 
 ## Verify
@@ -69,4 +69,4 @@ pytest
 Add a test in `tests/`: build a `ScanResult` (or a temp project) whose dep file
 contains the signal and assert your recommendation appears — and that it is
 suppressed when an equally-named skill already exists. The doctest on
-`recommend_skills` (`recommend.py:156`) shows the empty-project baseline.
+`def recommend_skills` shows the empty-project baseline.
