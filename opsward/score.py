@@ -374,15 +374,29 @@ _SETEXT_H2_UNDERLINE = re.compile(r" {0,3}-+\s*$")
 #: Lines that cannot be a setext title: blank, indented code, an ATX heading,
 #: a list item, a block quote, or an underline itself (``---`` after a blank is
 #: a thematic break, not a heading).
-_NOT_A_SETEXT_TITLE = re.compile(r"\s*$| {4,}|\s{0,3}(#|>|[-*+]\s|\d+[.)]\s|[-=]+\s*$)")
+_NOT_A_SETEXT_TITLE = re.compile(
+    r"\s*$| {4,}|\t|\s{0,3}(#|>|<|\[[^\]]+\]:|[-*+]\s|\d+[.)]\s|[-=]+\s*$)"
+)
+#: A YAML front matter key line (``name: x``), the only thing that may open one.
+_FRONT_MATTER_KEY = re.compile(r"[\w-]+\s*:")
 
 
 def _front_matter_end(lines: list[str]) -> int:
-    """Index of the first line after a leading ``---`` front matter block, else 0."""
-    if lines and lines[0].strip() == "---":
-        for i, line in enumerate(lines[1:], start=1):
-            if line.strip() in ("---", "..."):
-                return i + 1
+    """Index of the first line after a leading ``---`` front matter block, else 0.
+
+    Only a block that starts with a ``key:`` line and closes before any blank
+    line counts: a document opening with a decorative rule must not have
+    everything up to its next rule skipped.
+    """
+    if len(lines) < 2 or lines[0].strip() != "---":
+        return 0
+    if not _FRONT_MATTER_KEY.match(lines[1]):
+        return 0
+    for i, line in enumerate(lines[1:], start=1):
+        if line.strip() in ("---", "..."):
+            return i + 1
+        if not line.strip():
+            return 0
     return 0
 
 
@@ -390,18 +404,19 @@ def _h2_section_sizes(content: str) -> list[tuple[str, int]]:
     r"""(title, chars) for every H2 section; fenced code is never read as headings.
 
     Both H2 spellings count: ATX (``## Title``) and setext (``Title`` over a
-    line of dashes, opsward#32). A leading front matter block is skipped, so
-    its closing ``---`` is not read as an underline.
+    line of dashes, opsward#32; a multi-line paragraph over the dashes is one
+    title, as in CommonMark). A leading front matter block is skipped, so its
+    closing ``---`` is not read as an underline.
 
-    >>> _h2_section_sizes("## A\nxx\nB\n---\nyyy\n")
-    [('A', 8), ('B', 10)]
+    >>> _h2_section_sizes("## A\nxx\n\nB\n---\nyyy\n")
+    [('A', 9), ('B', 10)]
     """
     lines = content.splitlines(keepends=True)
     sections: list[tuple[str, int]] = []
     title: Optional[str] = None
     size = 0
     fence: Optional[str] = None  # the opening fence run (e.g. "```"), while inside one
-    prev: Optional[str] = None  # the previous line, while it could be a setext title
+    para: list[str] = []  # the paragraph just above, while it could be a setext title
     for line in lines[_front_matter_end(lines) :]:
         run = re.match(r"\s*(`{3,}|~{3,})", line)
         if run:
@@ -415,15 +430,19 @@ def _h2_section_sizes(content: str) -> list[tuple[str, int]]:
             if title is not None:
                 sections.append((title, size))
             title, size = atx.group(1), 0
-        elif prev is not None and _SETEXT_H2_UNDERLINE.match(line):
-            # The title line was counted in the section it closes; move it.
+        elif para and _SETEXT_H2_UNDERLINE.match(line):
+            # The title lines were counted in the section they close; move them.
+            moved = sum(map(len, para))
             if title is not None:
-                sections.append((title, size - len(prev)))
-            title, size = prev.strip(), len(prev)
+                sections.append((title, size - moved))
+            title, size = " ".join(p.strip() for p in para), moved
         if title is not None:
             size += len(line)
         settled = not (fence or run or atx)
-        prev = line if settled and not _NOT_A_SETEXT_TITLE.match(line) else None
+        if settled and not _NOT_A_SETEXT_TITLE.match(line):
+            para.append(line)
+        else:
+            para = []
     if title is not None:
         sections.append((title, size))
     return sections
