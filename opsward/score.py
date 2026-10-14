@@ -367,13 +367,42 @@ def claude_md_size_overrun(
     return SizeOverrun(chars, max_chars, penalty, tuple(sizes), docs_dir)
 
 
+#: An ATX H2 line: ``## Title`` (optional closing ``#``s).
+_ATX_H2 = re.compile(r"##\s+(.+?)(?:\s+#+)?\s*$")
+#: A setext H2 underline: up to 3 spaces, then dashes only.
+_SETEXT_H2_UNDERLINE = re.compile(r" {0,3}-+\s*$")
+#: Lines that cannot be a setext title: blank, indented code, an ATX heading,
+#: a list item, a block quote, or an underline itself (``---`` after a blank is
+#: a thematic break, not a heading).
+_NOT_A_SETEXT_TITLE = re.compile(r"\s*$| {4,}|\s{0,3}(#|>|[-*+]\s|\d+[.)]\s|[-=]+\s*$)")
+
+
+def _front_matter_end(lines: list[str]) -> int:
+    """Index of the first line after a leading ``---`` front matter block, else 0."""
+    if lines and lines[0].strip() == "---":
+        for i, line in enumerate(lines[1:], start=1):
+            if line.strip() in ("---", "..."):
+                return i + 1
+    return 0
+
+
 def _h2_section_sizes(content: str) -> list[tuple[str, int]]:
-    """(title, chars) for every H2 section; fenced code is never read as headings."""
+    r"""(title, chars) for every H2 section; fenced code is never read as headings.
+
+    Both H2 spellings count: ATX (``## Title``) and setext (``Title`` over a
+    line of dashes, opsward#32). A leading front matter block is skipped, so
+    its closing ``---`` is not read as an underline.
+
+    >>> _h2_section_sizes("## A\nxx\nB\n---\nyyy\n")
+    [('A', 8), ('B', 10)]
+    """
+    lines = content.splitlines(keepends=True)
     sections: list[tuple[str, int]] = []
     title: Optional[str] = None
     size = 0
     fence: Optional[str] = None  # the opening fence run (e.g. "```"), while inside one
-    for line in content.splitlines(keepends=True):
+    prev: Optional[str] = None  # the previous line, while it could be a setext title
+    for line in lines[_front_matter_end(lines) :]:
         run = re.match(r"\s*(`{3,}|~{3,})", line)
         if run:
             marker = run.group(1)
@@ -381,13 +410,20 @@ def _h2_section_sizes(content: str) -> list[tuple[str, int]]:
                 fence = marker
             elif marker[0] == fence[0] and len(marker) >= len(fence):
                 fence = None
-        m = None if fence else re.match(r"##\s+(.+?)(?:\s+#+)?\s*$", line)
-        if m:
+        atx = None if fence or run else _ATX_H2.match(line)
+        if atx:
             if title is not None:
                 sections.append((title, size))
-            title, size = m.group(1), 0
+            title, size = atx.group(1), 0
+        elif prev is not None and _SETEXT_H2_UNDERLINE.match(line):
+            # The title line was counted in the section it closes; move it.
+            if title is not None:
+                sections.append((title, size - len(prev)))
+            title, size = prev.strip(), len(prev)
         if title is not None:
             size += len(line)
+        settled = not (fence or run or atx)
+        prev = line if settled and not _NOT_A_SETEXT_TITLE.match(line) else None
     if title is not None:
         sections.append((title, size))
     return sections
