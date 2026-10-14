@@ -42,15 +42,22 @@ Target Project ──► scan.py ──► ScanResult ──► score.py ──�
 
 Generated artifacts include CLAUDE.md, docs, skills, agents, and rules, plus optional AGENTS.md (cross-platform agent instructions — `--agents-md` flag, shipped; see `ai_setup_meta_tooling.md` Section 1.5).
 
+### Recommend
+
+1. Takes a `ScanResult`; reads the dependency files at its root (`pyproject.toml`, `package.json`, …).
+2. Matches them against the curated `_RECOMMENDATIONS` table and skips skills already installed.
+3. Returns `list[SkillRecommendation]`. Advisory only: not part of the diagnosis score. Full design, heuristics and limits: `recommend_design.md`.
+
 ### Maintain
 
 1. Takes a `ScanResult` and optionally a previous `DiagnosisReport`.
-2. Checks for:
-   - Stale paths in CLAUDE.md (referenced files that no longer exist)
-   - Docs whose `Last Updated` date is old relative to code changes
-   - Skills with descriptions that don't match current project state
-   - `docs_guide.md` out of sync with actual docs directory contents
-   - `known_issues.md` items that reference closed GitHub issues
+2. Runs one `_check_*` generator per kind of drift (in `def maintain`, `maintain.py`):
+   - `stale_path`: paths referenced in CLAUDE.md that no longer exist
+   - `claude_md_size`: CLAUDE.md over the size budget (the same finding `diagnose` scores)
+   - `sync_issue`: `docs_guide.md` out of sync with the actual docs directory contents
+   - `outdated_doc`: docs with no git commit in the last 90 days (skipped outside a git repo)
+   - `incomplete_skill`: skills with no SKILL.md or no description
+   - `empty_doc`: docs under 50 bytes (stubs)
 3. Returns `list[MaintenanceSuggestion]` — each with a category, description, and optional diff.
 
 ## Module Responsibilities
@@ -61,12 +68,14 @@ Generated artifacts include CLAUDE.md, docs, skills, agents, and rules, plus opt
 | `score.py` | Pure scoring logic | `ScanResult → DiagnosisReport` |
 | `generate.py` | Template loading + rendering | `ScanResult → list[GeneratedFile]` |
 | `maintain.py` | Drift/staleness detection | `ScanResult → list[MaintenanceSuggestion]` |
-| `recommend.py` | Maps detected dependencies/frameworks to curated ecosystem skills | `ScanResult → list[SkillRecommendation]` |
+| `recommend.py` | Maps detected dependencies/frameworks to curated ecosystem skills (design: `recommend_design.md`) | `ScanResult → list[SkillRecommendation]` |
 | `base.py` | All dataclasses and type definitions | (no I/O) |
 | `cli.py` | command functions + pretty-printing | stdin/stdout |
 | `util.py` | Shared helpers | (internal) |
 
 ## Key Invariants
+
+The rationale and evidence for these live in `decisions/` (indexed by `decisions/README.md`).
 
 - `scan.py` NEVER writes to the target project. It is purely read-only.
 - `generate.py` NEVER overwrites existing files without explicit policy.

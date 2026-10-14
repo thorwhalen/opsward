@@ -22,7 +22,7 @@ scan.py        ScanResult        (read the project — NEVER writes)
    └── recommend.py -> list[SkillRecommendation]   (tech-stack -> skills)
 
 base.py    all dataclasses + ProjectType enum (the shared vocabulary)
-cli.py     argh dispatch over the public functions
+cli.py     cw dispatch over the public functions (_dispatch_funcs)
 __init__.py the facade — what library users import
 ```
 
@@ -43,8 +43,8 @@ extend the scan first (keeping it read-only), then consume it downstream.
    conditionals/loops in templates — split into separate template files per
    variant instead. Keep dependencies light; do not add a templating engine.
 4. **Bundled data is read via `importlib.resources.files("opsward.data...")`** —
-   never hardcode filesystem paths to package data. See `_load_template` in
-   `generate.py:140`.
+   never hardcode filesystem paths to package data. See `def _load_template` in
+   `generate.py`.
 5. **Scoring functions are pure** — `(ScanResult) -> ...`, no I/O, no side
    effects beyond appending to the passed-in `missing`/`suggestions` lists.
 
@@ -64,8 +64,8 @@ extend the scan first (keeping it read-only), then consume it downstream.
 | Add/edit a generated doc, skill, or agent template | `data/templates/` + `generate.py` | **opsward-add-template** |
 | Add/adjust a quality score or weighting | `score.py` | **opsward-add-scoring** |
 | Map a dependency/framework to a recommended skill | `recommend.py` | **opsward-add-recommendation** |
-| Surface new facts about a project | `scan.py` + a field on `ScanResult` (`base.py`) | — |
-| Detect a new kind of staleness/drift | `maintain.py` | — |
+| Surface new facts about a project | `scan.py` + a field on `ScanResult` (`base.py`) | **opsward-add-scan-field** |
+| Detect a new kind of staleness/drift | `maintain.py` | **opsward-add-drift-check** |
 | Expose a new CLI command | add a function, append it to `_dispatch_funcs` (`cli.py`) | — |
 | Change the public API | update imports in `__init__.py` (the facade) | — |
 

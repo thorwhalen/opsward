@@ -7,14 +7,14 @@ description: Add or adjust opsward's quality scoring — a CLAUDE.md sub-dimensi
 
 All scoring lives in `opsward/score.py` and is **pure**: functions take a
 `ScanResult` (and helper lists) and return data — no I/O, no writes. The entry
-point is `diagnose(scan_result) -> DiagnosisReport` (`score.py:29`).
+point is `diagnose(scan_result) -> DiagnosisReport` (`def diagnose` in `score.py`).
 
 ## The two levels of score
 
 ### 1. Components (the top level)
 
 `diagnose` builds a `list[ComponentScore]`, each 0–100, then computes a weighted
-overall via `_OVERALL_WEIGHTS` (`score.py:17`):
+overall via `_OVERALL_WEIGHTS` (`_OVERALL_WEIGHTS: dict[str, float] =` in `score.py`):
 
 ```python
 _OVERALL_WEIGHTS = {
@@ -36,7 +36,7 @@ and **rebalance the other weights so the total stays 1.0**.
 
 ### 2. CLAUDE.md dimensions (inside the "CLAUDE.md quality" component)
 
-`_score_claude_md` (`score.py:99`) sums six `_dim_*` helpers whose maxes are
+`_score_claude_md` (`def _score_claude_md`) sums six `_dim_*` helpers whose maxes are
 declared as constants and **must sum to 100**:
 
 ```python
@@ -46,7 +46,7 @@ _CMD_MAX=20  _ARCH_MAX=20  _CONV_MAX=15  _CONCISE_MAX=15  _CURRENCY_MAX=15  _ACT
 To add/replace a dimension: add a `_dim_<name>(content, notes) -> int` returning
 0..max, call it in `_score_claude_md`, and adjust the `_*_MAX` constants so they
 still total 100. Each `_dim_*` is a small pure function over the CLAUDE.md text
-(regex/heuristics) — see `_dim_commands` (`score.py:126`) as the template.
+(regex/heuristics) — see `def _dim_commands` as the template.
 
 ## Conventions for score helpers
 
@@ -59,12 +59,12 @@ still total 100. Each `_dim_*` is a small pure function over the CLAUDE.md text
 
 ## Skill spec validation
 
-`validate_skill_spec(skill) -> list[str]` (`score.py:365`, public, exported from
-`__init__`) checks a `SkillInfo` against the agentskills.io spec — `name`
+`validate_skill_spec(skill) -> list[str]` (`def validate_skill_spec`, public, exported from
+`__init__`; the checks live in `def _validate_skill_spec`) checks a `SkillInfo` against the agentskills.io spec — `name`
 pattern/length, `name` matches directory, `description` present/length,
 `compatibility` length, and SKILL.md line cap. Constants: `_NAME_PATTERN`,
 `_MAX_SKILL_LINES`, `_MAX_NAME_LEN`, `_MAX_DESC_LEN`, `_MAX_COMPAT_LEN`
-(`score.py:380`). It feeds the "Skills" component (`_score_skills`). Add a check
+(declared just above `def _validate_skill_spec`). It feeds the "Skills" component (`_score_skills`). Add a check
 by appending to `violations`; add a constant rather than inlining a magic number.
 
 ## After changing scores
@@ -73,7 +73,7 @@ by appending to `violations`; add a constant rather than inlining a magic number
    Pattern") — keep it in sync. Mention non-obvious weighting in
    `misc/docs/architecture.md` if relevant.
 2. **Test.** Extend `tests/` — assert grade boundaries or a known fixture's
-   component scores. Doctests on `diagnose` (`score.py:32`) show the style.
+   component scores. The doctest in `def diagnose`'s docstring shows the style.
 3. **Sanity-check the math:** weights sum to 1.0; dimension maxes sum to 100.
 
 ```bash

@@ -55,7 +55,7 @@ These are Claude Code (and cross-agent) configuration files.
 | Rules files | `.claude/rules/` | Only if specific conventions detected (e.g., a `no-any.md` rule if TypeScript strict mode is on). |
 
 Contributor/dev skills (`opsward-dev`, `opsward-add-template`, `opsward-add-scoring`,
-`opsward-add-recommendation`) are local-only, hand-written skills that teach an agent
+`opsward-add-recommendation`, `opsward-add-scan-field`, `opsward-add-drift-check`) are local-only, hand-written skills that teach an agent
 opsward's *own* internals — a different artifact class from the ones above, which
 opsward generates *for a target project*. See thorwhalen/opsward#4 for the (not yet
 implemented) proposal to offer contributor-skill scaffolding as a generated artifact
