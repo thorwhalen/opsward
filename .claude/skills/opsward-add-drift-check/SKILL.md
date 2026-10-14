@@ -46,7 +46,7 @@ Then add one line to `def maintain`: `suggestions.extend(_check_<thing>(scan_res
 
 ## The exit-code contract
 
-`opsward maintain` (`def maintain` in `cli.py`) exits **1 if any suggestion is produced**, 0 otherwise. A new check therefore can turn a previously clean project's CI red. Make sure it does not fire on healthy projects (run it on opsward itself) and that it is not noisy on edge cases.
+`opsward maintain` (`def maintain` in `cli.py`) exits **1 if any suggestion is produced**, 0 otherwise (and 2 for a missing root, like every command). A new check therefore can turn a previously clean project's CI red. Make sure it does not fire on healthy projects (run it on opsward itself) and that it is not noisy on edge cases.
 
 ## Tests and goldens
 

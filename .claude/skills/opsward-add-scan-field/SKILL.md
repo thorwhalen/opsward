@@ -54,7 +54,7 @@ A scan field with no consumer is dead weight: `is_monorepo` / `monorepo_packages
 
 ## CLI goldens
 
-`tests/test_cli_parity.py` replays `misc/cli_golden_py<major><minor>.json`, which records the output of `diagnose`, `diagnose -v`, `maintain` and `recommend` on the fixture projects (`misc/cli_cases.txt`). A new scan field alone changes nothing printed, but changing a fixture, the `-v` inventory, or a consumer that prints will move a golden. Re-record each golden on its own interpreter as `CLAUDE.md` ("The CLI surface is pinned") describes, read the diff, and put it in the PR.
+`tests/test_cli_parity.py` replays `misc/cli_golden_py<major><minor>.json`, which records the output of `diagnose`, `diagnose -v`, `maintain` and `recommend` on the fixture projects (plus two `generate` dry-runs on `bare_project`, which a field that changes conditional emission would move) (`misc/cli_cases.txt`). A new scan field alone changes nothing printed, but changing a fixture, the `-v` inventory, or a consumer that prints will move a golden. Re-record each golden on its own interpreter as `CLAUDE.md` ("The CLI surface is pinned") describes, read the diff, and put it in the PR.
 
 ## Verify
 

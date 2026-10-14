@@ -9,7 +9,7 @@
 | Public function | `recommend_skills(scan_result: ScanResult) -> list[SkillRecommendation]`, exported from `opsward/__init__.py` |
 | Input | a `ScanResult` from `scan.py`. Only two fields are used: `project_root` (to locate dependency files) and `skills` (to skip skills already installed) |
 | Output | a list of `SkillRecommendation(name, reason, source)` — a frozen dataclass defined in `recommend.py` itself, not in `base.py` |
-| CLI | `opsward recommend [ROOT ...] [--format text\|json]` (`def recommend` in `cli.py`): one block per root in text mode, one flat JSON list of `{name, reason, source}` across all roots in JSON mode. Always exits 0 — a recommendation is advice, never a failure |
+| CLI | `opsward recommend [ROOT ...] [--format text\|json]` (`def recommend` in `cli.py`): one block per root in text mode, one flat JSON list of `{name, reason, source}` across all roots in JSON mode. Exits 0 for any existing root, never 1 on content (a recommendation is advice, not a failure); 2 for a missing root, like every command |
 | Side effects | none. Files are read with `read_text_safe`; nothing is written or fetched from the network |
 
 ## How it works
@@ -26,7 +26,7 @@ Every current entry points `source` at the VoltAgent `awesome-agent-skills` cata
 
 The matcher is deliberately crude — substring search over raw file text, no dependency parsing — because it keeps the module dependency-free (no TOML/JSON parser, no lockfile reader) and cheap enough to run on every project. The price is precision:
 
-- **Substring, not package-name, matching.** Keywords are found anywhere in the file text, including project descriptions, keywords and comments. Concretely, opsward itself gets an `anthropic-sdk` recommendation because the `claude` keyword appears in its `pyproject.toml` `keywords` list, not because it depends on the Anthropic SDK. Short keywords are the riskiest: `next` (in the Next.js entry) matches any file containing the word "next".
+- **Substring, not package-name, matching.** Keywords are found anywhere in the file text, including project descriptions, keywords and comments. Concretely, opsward itself gets an `anthropic-sdk` recommendation because `claude` appears in its `pyproject.toml` (the `keywords` list, and the `description`'s mention of CLAUDE.md), not because it depends on the Anthropic SDK. Short keywords are the riskiest: `next` (in the Next.js entry) matches any file containing the word "next".
 - **Case.** The corpus is lowercased but keywords are not, so a keyword must be written in lowercase to ever match. The `"Dockerfile"` keyword in the Docker entry can never match; the entry only works through its other keyword, `docker`.
 - **Root only.** Only files at `project_root` are read. A monorepo's per-package manifests (which `scan.py` does detect, as `monorepo_packages`) are not consulted, and neither are lockfiles or `requirements/*.txt` variants.
 - **Name-based dedup.** "Already installed" means a skill directory with exactly the recommendation's `name`. A differently named skill covering the same tool does not suppress the recommendation.

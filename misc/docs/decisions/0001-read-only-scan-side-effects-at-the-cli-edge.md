@@ -18,7 +18,7 @@ opsward runs against projects it does not own — any repo a user points it at, 
 
 - Any opsward command except `generate --write` / `install-skills --write` is safe to run on any directory, which is what makes multi-root `diagnose` and CI gating (`--min-score`) practical.
 - Every library function is testable without a temp-dir write; tests never assert that scanning produced files.
-- `GeneratedFile.overwrite_policy` has `'overwrite'` and `'merge'` values, but the CLI currently skips every existing file regardless; updating an existing artifact is left to the AI skill layer (see [0004](0004-shipped-skills-wrap-the-deterministic-cli.md)).
+- `GeneratedFile.overwrite_policy` mentions `'overwrite'` and `'merge'` in a comment (no code sets them), and the CLI currently skips every existing file regardless; updating an existing artifact is left to the AI skill layer (see [0004](0004-shipped-skills-wrap-the-deterministic-cli.md)).
 - `maintain` still runs a read-only `git log` subprocess for doc freshness; read-only, not side-effect-free in the strict sense.
 - New facts must be added to the scan, not gathered by downstream writers (see the `opsward-add-scan-field` dev skill).
 
