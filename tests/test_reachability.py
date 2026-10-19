@@ -4,6 +4,8 @@ import os
 import tempfile
 from pathlib import Path
 
+import pytest
+
 from opsward.scan import default_claude_config_dir, scan
 from opsward.score import _LISTING_BUDGET_CHARS, diagnose, skill_reachability_findings
 
@@ -13,6 +15,14 @@ def _skill(root: Path, rel: str, name: str, description: str = "Does the thing. 
     d.mkdir(parents=True, exist_ok=True)
     (d / "SKILL.md").write_text(f"---\nname: {name}\ndescription: {description}\n---\n\nBody.\n")
     return d
+
+
+def _symlink(target, link) -> None:
+    """Create a symlink, or skip the test where the platform refuses (Windows without the privilege)."""
+    try:
+        os.symlink(target, link, target_is_directory=True)  # Windows needs the kind stated
+    except (OSError, NotImplementedError) as exc:  # pragma: no cover - platform dependent
+        pytest.skip(f"symlinks not available here: {exc}")
 
 
 def _skills_component(report):
@@ -36,7 +46,7 @@ def test_scan_reads_the_global_scope_through_the_seam():
 def test_default_config_dir_honours_the_env_var(monkeypatch):
     monkeypatch.setenv("CLAUDE_CONFIG_DIR", "/tmp/elsewhere")
     assert default_claude_config_dir() == Path("/tmp/elsewhere")
-    monkeypatch.delenv("CLAUDE_CONFIG_DIR")
+    monkeypatch.delenv("CLAUDE_CONFIG_DIR", raising=False)
     assert default_claude_config_dir() == Path.home() / ".claude"
 
 
@@ -54,7 +64,7 @@ def test_shadowed_project_skill_is_reported_unless_it_is_the_same_file():
         # a global link to this very project copy is not shadowing
         os.remove(cfg / "skills" / "lint" / "SKILL.md")
         os.rmdir(cfg / "skills" / "lint")
-        os.symlink(proj / ".claude" / "skills" / "lint", cfg / "skills" / "lint")
+        _symlink(proj / ".claude" / "skills" / "lint", cfg / "skills" / "lint")
         sr = scan(proj, claude_config_dir=cfg)
         assert skill_reachability_findings(sr, suggestions=[]) == []
 
@@ -78,7 +88,7 @@ def test_unmigrated_bridge_is_reported_and_a_symlink_bridge_is_not():
         import shutil
 
         shutil.rmtree(proj / ".claude" / "skills" / "lint")
-        os.symlink("../../skills/lint", proj / ".claude" / "skills" / "lint")
+        _symlink("../../skills/lint", proj / ".claude" / "skills" / "lint")
         sr = scan(proj, claude_config_dir=None)
         lint = next(s for s in sr.skills if s.name == "lint")
         assert lint.is_link and lint.canonical_path is None
