@@ -9,7 +9,7 @@ from pathlib import Path
 from string import Template
 
 from opsward.base import GeneratedFile, ProjectType, ScanResult
-from opsward.subagents import subagent_files
+from opsward.subagents import subagent_files, twin_for_rendered_skill
 from opsward.util import read_text_safe
 
 # Names never shown in a module map (VCS, caches, build/vendor output)
@@ -116,13 +116,12 @@ def generate(
     for skill_name in _SKILL_NAMES:
         if skill_name not in existing_skills:
             target = sr.project_root / ".claude" / "skills" / skill_name / "SKILL.md"
-            files.append(
-                _render(
-                    f"shared/{skill_name}/SKILL.md",
-                    target,
-                    variables,
-                )
-            )
+            rendered = _render(f"shared/{skill_name}/SKILL.md", target, variables)
+            files.append(rendered)
+            # A shipped skill that declares a twin gets it in the same run.
+            twin = twin_for_rendered_skill(rendered.content, target, sr.project_root)
+            if twin is not None and twin.target_path.stem not in existing_agents:
+                files.append(twin)
 
     # ---- AGENTS.md (cross-platform agent instructions) ----
     if agents_md and sr.agents_md_path is None:
@@ -198,7 +197,19 @@ def generate_skills(
 
     for skill_name in _SKILL_NAMES:
         target = target_dir / "skills" / skill_name / "SKILL.md"
-        files.append(_render(f"shared/{skill_name}/SKILL.md", target, variables))
+        rendered = _render(f"shared/{skill_name}/SKILL.md", target, variables)
+        files.append(rendered)
+        if include_agents:
+            # ``target_dir`` is the ``.claude`` dir itself; its parent is the root the
+            # twin's source path is relative to.
+            twin = twin_for_rendered_skill(rendered.content, target, target_dir.parent)
+            if twin is not None:
+                files.append(
+                    GeneratedFile(
+                        target_path=target_dir / "agents" / twin.target_path.name,
+                        content=twin.content,
+                    )
+                )
 
     if include_agents:
         for agent_name in _AGENT_NAMES:

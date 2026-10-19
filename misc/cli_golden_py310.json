@@ -105,7 +105,7 @@
       ],
       "returncode": 0,
       "stderr": "",
-      "stdout": "bare_project: 13 artifact(s)\n\n  Would create CLAUDE.md\n  Would create misc/docs/docs_guide.md\n  Would create misc/docs/architecture.md\n  Would create misc/docs/known_issues.md\n  Would create misc/docs/conventions.md\n  Would create misc/docs/roadmap.md\n  Would create misc/docs/decisions/0000-template.md\n  Would create .claude/agents/setup-auditor.md\n  Would create .claude/skills/opsward/SKILL.md\n  Would create .claude/skills/opsward-diagnose/SKILL.md\n  Would create .claude/skills/opsward-generate/SKILL.md\n  Would create .claude/skills/opsward-maintain/SKILL.md\n  Would create .claude/skills/opsward-subagents/SKILL.md\n\nDry run — pass --write to create files.\n",
+      "stdout": "bare_project: 14 artifact(s)\n\n  Would create CLAUDE.md\n  Would create misc/docs/docs_guide.md\n  Would create misc/docs/architecture.md\n  Would create misc/docs/known_issues.md\n  Would create misc/docs/conventions.md\n  Would create misc/docs/roadmap.md\n  Would create misc/docs/decisions/0000-template.md\n  Would create .claude/agents/setup-auditor.md\n  Would create .claude/skills/opsward/SKILL.md\n  Would create .claude/skills/opsward-diagnose/SKILL.md\n  Would create .claude/skills/opsward-generate/SKILL.md\n  Would create .claude/skills/opsward-maintain/SKILL.md\n  Would create .claude/skills/opsward-subagents/SKILL.md\n  Would create .claude/agents/opsward-subagents.md\n\nDry run — pass --write to create files.\n",
       "tier": 1,
       "usage": ""
     },
@@ -231,7 +231,7 @@
       ],
       "returncode": 0,
       "stderr": "",
-      "stdout": "bare_project: 15 artifact(s)\n\n  Would create CLAUDE.md\n  Would create misc/docs/docs_guide.md\n  Would create misc/docs/architecture.md\n  Would create misc/docs/known_issues.md\n  Would create misc/docs/conventions.md\n  Would create misc/docs/roadmap.md\n  Would create misc/docs/decisions/0000-template.md\n  Would create .claude/agents/setup-auditor.md\n  Would create .claude/skills/opsward/SKILL.md\n  Would create .claude/skills/opsward-diagnose/SKILL.md\n  Would create .claude/skills/opsward-generate/SKILL.md\n  Would create .claude/skills/opsward-maintain/SKILL.md\n  Would create .claude/skills/opsward-subagents/SKILL.md\n  Would create AGENTS.md\n  Would create .claude/hooks.json\n\nDry run — pass --write to create files.\n",
+      "stdout": "bare_project: 16 artifact(s)\n\n  Would create CLAUDE.md\n  Would create misc/docs/docs_guide.md\n  Would create misc/docs/architecture.md\n  Would create misc/docs/known_issues.md\n  Would create misc/docs/conventions.md\n  Would create misc/docs/roadmap.md\n  Would create misc/docs/decisions/0000-template.md\n  Would create .claude/agents/setup-auditor.md\n  Would create .claude/skills/opsward/SKILL.md\n  Would create .claude/skills/opsward-diagnose/SKILL.md\n  Would create .claude/skills/opsward-generate/SKILL.md\n  Would create .claude/skills/opsward-maintain/SKILL.md\n  Would create .claude/skills/opsward-subagents/SKILL.md\n  Would create .claude/agents/opsward-subagents.md\n  Would create AGENTS.md\n  Would create .claude/hooks.json\n\nDry run — pass --write to create files.\n",
       "tier": 1,
       "usage": ""
     },
@@ -243,7 +243,7 @@
       ],
       "returncode": 0,
       "stderr": "",
-      "stdout": "bare_project: 14 artifact(s)\n\n  Would create CLAUDE.md\n  Would create misc/docs/docs_guide.md\n  Would create misc/docs/architecture.md\n  Would create misc/docs/known_issues.md\n  Would create misc/docs/conventions.md\n  Would create misc/docs/roadmap.md\n  Would create misc/docs/decisions/0000-template.md\n  Would create .claude/agents/setup-auditor.md\n  Would create .claude/skills/opsward/SKILL.md\n  Would create .claude/skills/opsward-diagnose/SKILL.md\n  Would create .claude/skills/opsward-generate/SKILL.md\n  Would create .claude/skills/opsward-maintain/SKILL.md\n  Would create .claude/skills/opsward-subagents/SKILL.md\n  Would create AGENTS.md\n\nDry run — pass --write to create files.\n",
+      "stdout": "bare_project: 15 artifact(s)\n\n  Would create CLAUDE.md\n  Would create misc/docs/docs_guide.md\n  Would create misc/docs/architecture.md\n  Would create misc/docs/known_issues.md\n  Would create misc/docs/conventions.md\n  Would create misc/docs/roadmap.md\n  Would create misc/docs/decisions/0000-template.md\n  Would create .claude/agents/setup-auditor.md\n  Would create .claude/skills/opsward/SKILL.md\n  Would create .claude/skills/opsward-diagnose/SKILL.md\n  Would create .claude/skills/opsward-generate/SKILL.md\n  Would create .claude/skills/opsward-maintain/SKILL.md\n  Would create .claude/skills/opsward-subagents/SKILL.md\n  Would create .claude/agents/opsward-subagents.md\n  Would create AGENTS.md\n\nDry run — pass --write to create files.\n",
       "tier": 1,
       "usage": ""
     },

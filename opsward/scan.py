@@ -113,11 +113,9 @@ def _scan_skills(skills_dir: Path):
         line_count = 0
         if has_skill_md:
             content = read_text_safe(skill_md)
-            description = _first_line(content)
             line_count = len(content.splitlines())
             frontmatter = _parse_frontmatter(content)
-            if not description and "description" in frontmatter:
-                description = frontmatter["description"]
+            description = _description_of(content, frontmatter)
         yield SkillInfo(
             name=skill_path.name,
             path=skill_path,
@@ -131,10 +129,12 @@ def _scan_skills(skills_dir: Path):
 def _scan_agents(agents_dir: Path):
     for agent_file in iter_files(agents_dir, suffix=".md"):
         content = read_text_safe(agent_file)
+        frontmatter = _parse_frontmatter(content)
+        name = str(frontmatter.get("name") or "").strip() or agent_file.stem
         yield AgentInfo(
-            name=agent_file.stem,
+            name=name,
             path=agent_file,
-            description=_first_line(content),
+            description=_description_of(content, frontmatter),
         )
 
 
@@ -212,11 +212,47 @@ def _detect_monorepo(root: Path) -> tuple[bool, list[str]]:
     return bool(packages), packages
 
 
+def _strip_inline_comment(value: str) -> str:
+    """Drop a trailing ``# comment`` from an unquoted YAML scalar."""
+    if value.startswith(("'", '"')):
+        return value
+    cut = value.find(" #")
+    return value[:cut].rstrip() if cut >= 0 else value
+
+
+def _unquote(value: str) -> str:
+    value = _strip_inline_comment(value.strip())
+    if len(value) >= 2 and value[0] == value[-1] and value[0] in ("'", '"'):
+        return value[1:-1]
+    return value
+
+
+def _parse_flow_map(value: str) -> dict:
+    """``{a: 1, b: two}`` -> ``{'a': '1', 'b': 'two'}`` (one level, no nesting)."""
+    out: dict = {}
+    for part in value.strip()[1:-1].split(","):
+        if ":" in part:
+            k, _, v = part.partition(":")
+            out[k.strip()] = _unquote(v)
+    return out
+
+
+_BLOCK_SCALARS = frozenset({">", ">-", ">+", "|", "|-", "|+"})
+
+
 def _parse_frontmatter(text: str) -> dict:
-    """Extract YAML frontmatter from a SKILL.md file as a simple dict.
+    r"""Extract YAML frontmatter from a SKILL.md file as a simple dict.
 
     Handles the subset of YAML used in agentskills.io spec frontmatter
-    without requiring a YAML library.
+    without requiring a YAML library: scalars (with ``# comments`` stripped),
+    one level of nested keys (``metadata:``), inline flow maps
+    (``metadata: {subagent: true}``), and folded/literal block scalars
+    (``description: >-`` followed by indented lines).
+
+    >>> _parse_frontmatter('---\nname: x\ndescription: >-\n  Line one,\n  line two: with colon.\nmetadata:\n  subagent: true  # opt in\n---\n')
+    {'name': 'x', 'description': 'Line one, line two: with colon.', 'metadata': {'subagent': 'true'}}
+    >>> _parse_frontmatter('---\nmetadata: {subagent: "true", subagent-model: haiku}\n---\n')['metadata']
+    {'subagent': 'true', 'subagent-model': 'haiku'}
     """
     lines = text.splitlines()
     if not lines or lines[0].strip() != "---":
@@ -231,28 +267,67 @@ def _parse_frontmatter(text: str) -> dict:
 
     result: dict = {}
     current_key = None
+    block: list[str] | None = None  # continuation lines of a block scalar
+    block_style = ""
     for line in lines[1:end]:
         stripped = line.strip()
+        indented = bool(line) and line[0] in (" ", "\t")
+        if block is not None and (indented or not stripped):
+            block.append(stripped)
+            continue
+        if block is not None:
+            result[current_key] = _join_block(block, block_style)
+            block = None
         if not stripped or stripped.startswith("#"):
             continue
-        # Indented line = continuation of previous key (nested YAML)
-        if line[0] in (" ", "\t") and current_key is not None:
-            # Simple nested key-value → store under parent as dict
-            if ":" in stripped:
+        if indented and current_key is not None:
+            # Indented line = continuation of previous key (nested YAML)
+            current = result.get(current_key)
+            if ":" in stripped and not (isinstance(current, str) and current):
                 k, _, v = stripped.partition(":")
-                k = k.strip()
-                v = v.strip().strip('"').strip("'")
-                if not isinstance(result.get(current_key), dict):
+                if not isinstance(current, dict):
                     result[current_key] = {}
-                result[current_key][k] = v
+                result[current_key][k.strip()] = _unquote(v)
+            elif isinstance(current, str):
+                # plain multi-line scalar
+                result[current_key] = (result[current_key] + " " + _unquote(stripped)).strip()
             continue
         if ":" in stripped:
             k, _, v = stripped.partition(":")
             k = k.strip()
-            v = v.strip().strip('"').strip("'")
-            result[k] = v
+            v = _strip_inline_comment(v.strip())
             current_key = k
+            if v in _BLOCK_SCALARS:
+                block, block_style = [], v
+                result[k] = ""
+            elif v.startswith("{") and v.endswith("}"):
+                result[k] = _parse_flow_map(v)
+            else:
+                result[k] = _unquote(v)
+    if block is not None and current_key is not None:
+        result[current_key] = _join_block(block, block_style)
     return result
+
+
+def _join_block(lines: list, style: str) -> str:
+    """Join a block scalar's lines: folded (``>``) with spaces, literal (``|``) with newlines."""
+    while lines and not lines[-1]:
+        lines.pop()
+    sep = "\n" if style.startswith("|") else " "
+    return sep.join(lines).strip()
+
+
+def _description_of(content: str, frontmatter: dict) -> str:
+    """The frontmatter ``description`` if it is a usable string, else the body's first line."""
+    desc = frontmatter.get("description")
+    if isinstance(desc, str) and desc.strip():
+        return " ".join(desc.split())
+    body = content
+    if content.startswith("---"):
+        fence = content.find("\n---", 3)
+        if fence > 0:
+            body = content[fence + 4 :]
+    return _first_line(body)
 
 
 def _first_line(text: str) -> str:
