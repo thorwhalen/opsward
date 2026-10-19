@@ -100,6 +100,9 @@ class ScanResult:
     is_monorepo: bool = False
     monorepo_packages: list[str] = field(default_factory=list)
 
+    # Decision records: ``<docs>/decisions/*.md`` (ADRs, the log, the template)
+    decisions: list[DocSpec] = field(default_factory=list)
+
     # The user's global skill scope (``$CLAUDE_CONFIG_DIR/skills`` or ``~/.claude/skills``),
     # read so that shadowing and the listing budget can be judged; empty when disabled.
     global_skills: list[SkillInfo] = field(default_factory=list)

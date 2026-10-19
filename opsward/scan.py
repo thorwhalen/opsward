@@ -68,6 +68,14 @@ def scan(project_root: Path, *, claude_config_dir: object = _USER_CONFIG) -> Sca
         project_root
     )
 
+    # Decision records live next to the docs
+    docs_dir = result.docs_guide_path.parent if result.docs_guide_path else _docs_dir(project_root)
+    if docs_dir is not None and (docs_dir / "decisions").is_dir():
+        result.decisions = [
+            DocSpec(name=f.stem, path=f, size_bytes=_content_size(f))
+            for f in iter_files(docs_dir / "decisions", suffix=".md")
+        ]
+
     # AGENTS.md
     agents_md = project_root / "AGENTS.md"
     if agents_md.is_file():
@@ -219,12 +227,17 @@ def _find_hooks(claude_dir: Path) -> tuple[Path | None, dict | None]:
     return None, None
 
 
+def _docs_dir(root: Path) -> Optional[Path]:
+    """``docs/`` if present, else ``misc/docs/``, else ``None``."""
+    for cand in (root / "docs", root / "misc" / "docs"):
+        if cand.is_dir():
+            return cand
+    return None
+
+
 def _scan_docs(root: Path) -> tuple[list[DocSpec], bool, Path | None]:
-    docs_dir = root / "docs"
-    if not docs_dir.is_dir():
-        # Also check misc/docs
-        docs_dir = root / "misc" / "docs"
-    if not docs_dir.is_dir():
+    docs_dir = _docs_dir(root)
+    if docs_dir is None:
         return [], False, None
 
     docs = []

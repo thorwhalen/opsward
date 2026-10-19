@@ -6,9 +6,9 @@
       ],
       "returncode": 0,
       "stderr": "",
-      "stdout": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find} ...\n\npositional arguments:\n  {diagnose,generate,maintain,recommend,install-skills,find}\n    diagnose            Diagnose the AI agent setup of one or more projects. :param project_roots:\n                        one or more paths to project directories :param format: output format —\n                        'text' or 'json' :param verbose: show additional detail in text output\n                        :param min_score: minimum overall score to pass (exit 0); below this exits\n                        1\n    generate            Generate missing AI setup artifacts for one or more projects. By default,\n                        shows what would be created (dry run). Use --write to actually write\n                        files. Existing files are never overwritten. :param project_roots: one or\n                        more paths to project directories :param write: actually write files\n                        (default: dry run) :param format: output format — 'text' or 'json' :param\n                        agents_md: also generate AGENTS.md (cross-platform agent instructions)\n                        :param hooks: also generate starter hook scripts\n    maintain            Check for stale references, out-of-sync docs, and other drift. :param\n                        project_roots: one or more paths to project directories :param format:\n                        output format — 'text' or 'json'\n    recommend           Recommend ecosystem skills based on the project's tech stack. Analyzes\n                        dependencies and suggests skills from the community catalog. :param\n                        project_roots: one or more paths to project directories :param format:\n                        output format — 'text' or 'json'\n    install-skills      Install opsward's Claude Code skills (and agents) into a project or\n                        globally. By default, shows what would be created (dry run). Use --write\n                        to actually write files. Existing files are never overwritten. :param\n                        target: project directory (ignored when --global is set) :param\n                        global_install: install into ~/.claude/ instead of the project :param\n                        agents: also install agent definitions (default: True) :param write:\n                        actually write files (default: dry run)\n    find                Find assets (skills, agents, docs) across one or more projects by QUERY.\n                        Cross-repo asset discovery via the toolery package (install with: pip\n                        install 'opsward[discovery]'). :param query: search query :param\n                        project_roots: one or more project directories (default: current dir)\n                        :param kinds: comma-separated asset kinds — skill, agent, doc :param\n                        semantic: use toolery's ir semantic backend (needs toolery[ir]) :param\n                        limit: max results to show\n\noptions:\n  -h, --help            show this help message and exit\n",
+      "stdout": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,decision} ...\n\npositional arguments:\n  {diagnose,generate,maintain,recommend,install-skills,find,decision}\n    diagnose            Diagnose the AI agent setup of one or more projects. :param project_roots:\n                        one or more paths to project directories :param format: output format —\n                        'text' or 'json' :param verbose: show additional detail in text output\n                        :param min_score: minimum overall score to pass (exit 0); below this exits\n                        1\n    generate            Generate missing AI setup artifacts for one or more projects. By default,\n                        shows what would be created (dry run). Use --write to actually write\n                        files. Existing files are never overwritten. :param project_roots: one or\n                        more paths to project directories :param write: actually write files\n                        (default: dry run) :param format: output format — 'text' or 'json' :param\n                        agents_md: also generate AGENTS.md (cross-platform agent instructions)\n                        :param hooks: also generate starter hook scripts\n    maintain            Check for stale references, out-of-sync docs, and other drift. :param\n                        project_roots: one or more paths to project directories :param format:\n                        output format — 'text' or 'json'\n    recommend           Recommend ecosystem skills based on the project's tech stack. Analyzes\n                        dependencies and suggests skills from the community catalog. :param\n                        project_roots: one or more paths to project directories :param format:\n                        output format — 'text' or 'json'\n    install-skills      Install opsward's Claude Code skills (and agents) into a project or\n                        globally. By default, shows what would be created (dry run). Use --write\n                        to actually write files. Existing files are never overwritten. :param\n                        target: project directory (ignored when --global is set) :param\n                        global_install: install into ~/.claude/ instead of the project :param\n                        agents: also install agent definitions (default: True) :param write:\n                        actually write files (default: dry run)\n    find                Find assets (skills, agents, docs) across one or more projects by QUERY.\n                        Cross-repo asset discovery via the toolery package (install with: pip\n                        install 'opsward[discovery]'). :param query: search query :param\n                        project_roots: one or more project directories (default: current dir)\n                        :param kinds: comma-separated asset kinds — skill, agent, doc :param\n                        semantic: use toolery's ir semantic backend (needs toolery[ir]) :param\n                        limit: max results to show\n    decision\n\noptions:\n  -h, --help            show this help message and exit\n",
       "tier": 3,
-      "usage": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find} ..."
+      "usage": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,decision} ..."
     },
     {
       "argv": [
@@ -78,6 +78,41 @@
     },
     {
       "argv": [
+        "decision",
+        "--help"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "usage: opsward decision [-h] {new,note} ...\n\npositional arguments:\n  {new,note}\n    new       Allocate the next numbered ADR for TITLE (dry run unless --write; never overwrites).\n              :param title: the decision's title; the file name is derived from it :param write:\n              actually write the file (default: dry run) :param project_root: the project\n              directory (default: current dir) :param status: initial status — Proposed (default)\n              or Accepted :param evidence: the issue, discussion or PR this rests on (a URL or #N)\n    note      Append TEXT as a dated one-line decision (a Y-statement) to decisions/log.md (dry\n              run unless --write). :param text: the decision: \"In the context of …, facing …, we\n              decided for …, because …\" :param write: actually append (default: dry run); the log\n              is created from its template when missing :param project_root: the project directory\n              (default: current dir)\n\noptions:\n  -h, --help  show this help message and exit\n",
+      "tier": 3,
+      "usage": "usage: opsward decision [-h] {new,note} ..."
+    },
+    {
+      "argv": [
+        "decision",
+        "new",
+        "--help"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "usage: opsward decision new [-h] [-w] [-p PROJECT_ROOT] [-s STATUS] [-e EVIDENCE] title\n\nAllocate the next numbered ADR for TITLE (dry run unless --write; never overwrites).\n\n:param title: the decision's title; the file name is derived from it\n:param write: actually write the file (default: dry run)\n:param project_root: the project directory (default: current dir)\n:param status: initial status — Proposed (default) or Accepted\n:param evidence: the issue, discussion or PR this rests on (a URL or #N)\n\npositional arguments:\n  title                 -\n\noptions:\n  -h, --help            show this help message and exit\n  -w, --write           False\n  -p PROJECT_ROOT, --project-root PROJECT_ROOT\n                        '.'\n  -s STATUS, --status STATUS\n                        'Proposed'\n  -e EVIDENCE, --evidence EVIDENCE\n                        ''\n",
+      "tier": 3,
+      "usage": "usage: opsward decision new [-h] [-w] [-p PROJECT_ROOT] [-s STATUS] [-e EVIDENCE] title"
+    },
+    {
+      "argv": [
+        "decision",
+        "note",
+        "--help"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "usage: opsward decision note [-h] [-w] [-p PROJECT_ROOT] text\n\nAppend TEXT as a dated one-line decision (a Y-statement) to decisions/log.md (dry run unless --write).\n\n:param text: the decision: \"In the context of …, facing …, we decided for …, because …\"\n:param write: actually append (default: dry run); the log is created from its template when missing\n:param project_root: the project directory (default: current dir)\n\npositional arguments:\n  text                  -\n\noptions:\n  -h, --help            show this help message and exit\n  -w, --write           False\n  -p PROJECT_ROOT, --project-root PROJECT_ROOT\n                        '.'\n",
+      "tier": 3,
+      "usage": "usage: opsward decision note [-h] [-w] [-p PROJECT_ROOT] text"
+    },
+    {
+      "argv": [
         "diagnose",
         "tests/fixtures/bare_project"
       ],
@@ -128,6 +163,34 @@
       "returncode": 0,
       "stderr": "",
       "stdout": "python_project: no skill recommendations\n",
+      "tier": 1,
+      "usage": ""
+    },
+    {
+      "argv": [
+        "decision",
+        "new",
+        "Pin the thing",
+        "--project-root",
+        "tests/fixtures/python_project"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "Would create docs/decisions/0001-pin-the-thing.md\n\nDry run — pass --write to create it.\n",
+      "tier": 1,
+      "usage": ""
+    },
+    {
+      "argv": [
+        "decision",
+        "note",
+        "In the context of goldens, facing drift, we pinned the config dir.",
+        "-p",
+        "tests/fixtures/python_project"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "Would create docs/decisions/log.md a dated entry: In the context of goldens, facing drift, we pinned the config dir.\n\nDry run — pass --write to do it.\n",
       "tier": 1,
       "usage": ""
     },
@@ -273,19 +336,19 @@
       "argv": [],
       "returncode": 0,
       "stderr": "",
-      "stdout": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find} ...\n",
+      "stdout": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,decision} ...\n",
       "tier": 1,
-      "usage": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find} ..."
+      "usage": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,decision} ..."
     },
     {
       "argv": [
         "nosuchcommand"
       ],
       "returncode": 2,
-      "stderr": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find} ...\nopsward: error: argument {diagnose,generate,maintain,recommend,install-skills,find}: invalid choice: 'nosuchcommand' (choose from 'diagnose', 'generate', 'maintain', 'recommend', 'install-skills', 'find')\n",
+      "stderr": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,decision} ...\nopsward: error: argument {diagnose,generate,maintain,recommend,install-skills,find,decision}: invalid choice: 'nosuchcommand' (choose from 'diagnose', 'generate', 'maintain', 'recommend', 'install-skills', 'find', 'decision')\n",
       "stdout": "",
       "tier": 1,
-      "usage": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find} ... opsward: error: argument {diagnose,generate,maintain,recommend,install-skills,find}: invalid choice: 'nosuchcommand' (choose from 'diagnose', 'generate', 'maintain', 'recommend', 'install-skills', 'find')"
+      "usage": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,decision} ... opsward: error: argument {diagnose,generate,maintain,recommend,install-skills,find,decision}: invalid choice: 'nosuchcommand' (choose from 'diagnose', 'generate', 'maintain', 'recommend', 'install-skills', 'find', 'decision')"
     },
     {
       "argv": [
@@ -293,10 +356,10 @@
         "--nosuchflag"
       ],
       "returncode": 2,
-      "stderr": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find} ...\nopsward: error: unrecognized arguments: --nosuchflag\n",
+      "stderr": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,decision} ...\nopsward: error: unrecognized arguments: --nosuchflag\n",
       "stdout": "",
       "tier": 1,
-      "usage": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find} ... opsward: error: unrecognized arguments: --nosuchflag"
+      "usage": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,decision} ... opsward: error: unrecognized arguments: --nosuchflag"
     },
     {
       "argv": [
@@ -330,10 +393,10 @@
         "tests/fixtures/bare_project"
       ],
       "returncode": 2,
-      "stderr": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find} ...\nopsward: error: unrecognized arguments: --nosuchflag\n",
+      "stderr": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,decision} ...\nopsward: error: unrecognized arguments: --nosuchflag\n",
       "stdout": "",
       "tier": 1,
-      "usage": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find} ... opsward: error: unrecognized arguments: --nosuchflag"
+      "usage": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,decision} ... opsward: error: unrecognized arguments: --nosuchflag"
     },
     {
       "argv": [
@@ -344,6 +407,27 @@
       "stdout": "",
       "tier": 1,
       "usage": "usage: opsward find [-h] [-k KINDS] [-s] [-l LIMIT] query [project-roots ...] opsward find: error: the following arguments are required: query, project-roots"
+    },
+    {
+      "argv": [
+        "decision"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,decision} ...\n",
+      "tier": 1,
+      "usage": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,decision} ..."
+    },
+    {
+      "argv": [
+        "decision",
+        "new"
+      ],
+      "returncode": 2,
+      "stderr": "usage: opsward decision new [-h] [-w] [-p PROJECT_ROOT] [-s STATUS] [-e EVIDENCE] title\nopsward decision new: error: the following arguments are required: title\n",
+      "stdout": "",
+      "tier": 1,
+      "usage": "usage: opsward decision new [-h] [-w] [-p PROJECT_ROOT] [-s STATUS] [-e EVIDENCE] title opsward decision new: error: the following arguments are required: title"
     },
     {
       "argv": [

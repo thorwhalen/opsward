@@ -11,6 +11,7 @@ from typing import Optional
 
 from opsward.base import DiagnosisReport, MaintenanceSuggestion, ScanResult
 from opsward.score import _CONCISENESS_MAX_CHARS, claude_md_size_overrun, docs_dir_hint
+from opsward.decisions import check_decisions
 from opsward.subagents import check_subagent_twins
 from opsward.util import read_text_safe
 
@@ -37,6 +38,7 @@ def maintain(
     suggestions.extend(_check_skills_without_description(scan_result))
     suggestions.extend(_check_empty_docs(scan_result))
     suggestions.extend(check_subagent_twins(scan_result))
+    suggestions.extend(check_decisions(scan_result))
 
     return suggestions
 
