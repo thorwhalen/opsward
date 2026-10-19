@@ -50,7 +50,6 @@ _LISTING_BUDGET_CHARS = 30_000
 _LISTING_ENTRY_DESC_CAP = 1_536
 
 
-
 def diagnose(
     scan_result: ScanResult,
     *,
@@ -89,7 +88,10 @@ def diagnose(
 
     # 3. Skills (max 100)
     skills_score = _score_skills(
-        scan_result, missing=missing, suggestions=suggestions, listing_budget_chars=listing_budget_chars
+        scan_result,
+        missing=missing,
+        suggestions=suggestions,
+        listing_budget_chars=listing_budget_chars,
     )
     scores.append(skills_score)
 
@@ -655,7 +657,9 @@ def _score_skills(
 
     # Reachability findings (opsward#35): advisory, no points either way.
     notes.extend(
-        skill_reachability_findings(sr, suggestions=suggestions, listing_budget_chars=listing_budget_chars)
+        skill_reachability_findings(
+            sr, suggestions=suggestions, listing_budget_chars=listing_budget_chars
+        )
     )
 
     score = round(100 * quality / len(sr.skills))
@@ -667,7 +671,11 @@ def _listed(skills):
     for s in skills:
         if not s.has_skill_md:
             continue
-        if str(s.frontmatter.get("disable-model-invocation", "")).strip().lower() in ("true", "yes", "1"):
+        if str(s.frontmatter.get("disable-model-invocation", "")).strip().lower() in (
+            "true",
+            "yes",
+            "1",
+        ):
             continue
         yield s
 
@@ -687,7 +695,10 @@ def _listing_chars(skills) -> int:
 
 
 def skill_reachability_findings(
-    sr: ScanResult, *, suggestions: list[str], listing_budget_chars: int = _LISTING_BUDGET_CHARS
+    sr: ScanResult,
+    *,
+    suggestions: list[str],
+    listing_budget_chars: int = _LISTING_BUDGET_CHARS,
 ) -> list[str]:
     """Why a project skill may never trigger, as note lines (and one suggestion each).
 
@@ -711,7 +722,9 @@ def skill_reachability_findings(
     1
     """
     notes: list[str] = []
-    global_by_name = {g.name: g for g in sr.global_skills if g.has_skill_md}  # no SKILL.md, no skill
+    global_by_name = {
+        g.name: g for g in sr.global_skills if g.has_skill_md
+    }  # no SKILL.md, no skill
 
     shadowed = [
         s
@@ -731,7 +744,9 @@ def skill_reachability_findings(
             + ", ".join(s.name for s in shadowed)
         )
 
-    unmigrated = [s for s in sr.skills if not s.is_link and s.canonical_path is not None]
+    unmigrated = [
+        s for s in sr.skills if not s.is_link and s.canonical_path is not None
+    ]
     for s in unmigrated:
         try:
             canonical = s.canonical_path.relative_to(sr.project_root).as_posix()
@@ -747,7 +762,10 @@ def skill_reachability_findings(
             + ", ".join(s.name for s in unmigrated)
         )
 
-    listed_global, listed_project = list(_listed(sr.global_skills)), list(_listed(sr.skills))
+    listed_global, listed_project = (
+        list(_listed(sr.global_skills)),
+        list(_listed(sr.skills)),
+    )
     if listed_global and listed_project:
         g_chars, p_chars = _listing_chars(listed_global), _listing_chars(listed_project)
         if g_chars + p_chars > listing_budget_chars:

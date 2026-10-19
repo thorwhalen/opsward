@@ -19,7 +19,9 @@ from opsward.base import (
 from opsward.util import iter_files, iter_subdirs, read_json_safe, read_text_safe
 
 
-_USER_CONFIG = object()  # sentinel: "the user's Claude config dir", resolved at call time
+_USER_CONFIG = (
+    object()
+)  # sentinel: "the user's Claude config dir", resolved at call time
 
 
 def default_claude_config_dir() -> Path:
@@ -53,7 +55,11 @@ def scan(project_root: Path, *, claude_config_dir: object = _USER_CONFIG) -> Sca
     result.skills = list(_scan_skills(claude_dir / "skills", project_root=project_root))
 
     # The user's global skill scope
-    cfg = default_claude_config_dir() if claude_config_dir is _USER_CONFIG else claude_config_dir
+    cfg = (
+        default_claude_config_dir()
+        if claude_config_dir is _USER_CONFIG
+        else claude_config_dir
+    )
     if cfg is not None and (Path(cfg) / "skills").is_dir():
         result.global_skills_dir = Path(cfg) / "skills"
         result.global_skills = list(_scan_skills(result.global_skills_dir))
@@ -146,7 +152,9 @@ def _scan_skills(skills_dir: Path, *, project_root: Optional[Path] = None):
             real_path = None
         canonical = None
         if project_root is not None and not is_link:
-            canonical = _canonical_skill_location(project_root, skill_path.name, skill_path)
+            canonical = _canonical_skill_location(
+                project_root, skill_path.name, skill_path
+            )
         yield SkillInfo(
             name=skill_path.name,
             path=skill_path,
@@ -160,7 +168,9 @@ def _scan_skills(skills_dir: Path, *, project_root: Optional[Path] = None):
         )
 
 
-def _canonical_skill_location(project_root: Path, name: str, exclude: Path) -> Optional[Path]:
+def _canonical_skill_location(
+    project_root: Path, name: str, exclude: Path
+) -> Optional[Path]:
     """``skills/<name>`` or ``<pkg>/data/skills/<name>`` holding a SKILL.md, other than *exclude*.
 
     These are the two real locations skill-package-setup allows; a real directory
@@ -175,7 +185,11 @@ def _canonical_skill_location(project_root: Path, name: str, exclude: Path) -> O
         except OSError:
             continue
         for child in children:
-            if child.is_dir() and not child.name.startswith(".") and (child / "__init__.py").is_file():
+            if (
+                child.is_dir()
+                and not child.name.startswith(".")
+                and (child / "__init__.py").is_file()
+            ):
                 candidates.append(child / "data" / "skills" / name)
     for cand in candidates:
         try:

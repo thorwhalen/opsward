@@ -30,9 +30,13 @@ class SkillInfo:
     description: str = ""
     frontmatter: dict = field(default_factory=dict)
     line_count: int = 0
-    is_link: bool = False  # the .claude/skills entry is a symlink (the canonical bridge)
+    is_link: bool = (
+        False  # the .claude/skills entry is a symlink (the canonical bridge)
+    )
     real_path: Optional[Path] = None  # where the entry resolves to
-    canonical_path: Optional[Path] = None  # a `skills/<name>` or `<pkg>/data/skills/<name>` twin, if the entry is a real dir
+    canonical_path: Optional[Path] = (
+        None  # a `skills/<name>` or `<pkg>/data/skills/<name>` twin, if the entry is a real dir
+    )
 
 
 @dataclass(frozen=True)
