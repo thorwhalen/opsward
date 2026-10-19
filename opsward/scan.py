@@ -237,8 +237,8 @@ def _docs_dir(root: Path) -> Optional[Path]:
 
 def docs_dir_for(root: Path, project_type: ProjectType, docs_guide_path: Optional[Path] = None) -> Path:
     """The one docs folder every stage agrees on: the docs_guide's folder, else the
-    existing ``docs/`` or ``misc/docs/``, else the convention for the project type
-    (``misc/docs`` for Python, ``docs`` otherwise). Read-only; the folder may not exist.
+    existing ``docs/`` or ``misc/docs/``, else the convention ``generate`` scaffolds
+    (``docs`` for JS/TS, ``misc/docs`` otherwise). Read-only; the folder may not exist.
 
     >>> import tempfile
     >>> root = Path(tempfile.mkdtemp())
@@ -246,13 +246,17 @@ def docs_dir_for(root: Path, project_type: ProjectType, docs_guide_path: Optiona
     'misc/docs'
     >>> docs_dir_for(root, ProjectType.jsts).relative_to(root).as_posix()
     'docs'
+    >>> docs_dir_for(root, ProjectType.unknown).relative_to(root).as_posix()
+    'misc/docs'
     """
+    from opsward.generate import _docs_path  # the one convention `generate` scaffolds with
+
     if docs_guide_path is not None:
         return docs_guide_path.parent
     existing = _docs_dir(root)
     if existing is not None:
         return existing
-    return root / ("misc/docs" if project_type == ProjectType.python else "docs")
+    return root / _docs_path(project_type)
 
 
 def _scan_docs(root: Path) -> tuple[list[DocSpec], bool, Path | None]:

@@ -90,14 +90,15 @@ def test_closed_adrs_skip_the_path_check_and_status_formats_are_recognised():
         d.mkdir(parents=True)
         (root / "package.json").write_text("{}")
         (d / "0001-old.md").write_text("# 0001 — Old\n\n## Status\n\nSuperseded by [0002](0002-new.md)\n\nUsed `pkg/gone.py`.\n")
-        (d / "0002-new.md").write_text("---\nstatus: accepted\n---\n# 0002 — New\n\nMoved `pkg/gone.py` to `pkg/here.py`.\n")
+        (d / "0002-new.md").write_text("---\nstatus: accepted\n---\n# 0002 — New\n\nMoved `pkg/gone.py` to `pkg/here.py`.\n\nIt also relies on `pkg/also-gone.py`.\n")
         (d / "0003-line.md").write_text("# 0003 — Line\n\n**Status:** Accepted\n\nSee [0002](0002-new.md) and [research](../research/gone.md).\n")
         (root / "pkg").mkdir()
         (root / "pkg" / "here.py").write_text("")
         findings = list(check_decisions(scan(root, claude_config_dir=None)))
         by = {f.description.split("`")[1]: f.description for f in findings}
         assert "docs/decisions/0001-old.md" not in by  # superseded: history, not checked
-        assert "`pkg/gone.py`" in by["docs/decisions/0002-new.md"]  # the live record still cites a gone path
+        # the live record names the old path as history ("moved from … to"), so only the other gone path is reported
+        assert "`pkg/also-gone.py`" in by["docs/decisions/0002-new.md"] and "`pkg/gone.py`" not in by["docs/decisions/0002-new.md"]
         assert "`../research/gone.md`" in by["docs/decisions/0003-line.md"] and "0002-new.md" not in by["docs/decisions/0003-line.md"]
 
 
@@ -119,6 +120,18 @@ def test_numbering_counts_any_numbered_file_and_log_read_is_strict():
         rc, _, err = _run(["decision", "note", "new entry", "-p", str(root), "--write"])
         assert rc == 2 and "nothing written" in err
         assert (log_dir / "log.md").read_bytes().endswith(b"latin-1 byte\n")
+
+
+def test_decision_new_and_generate_agree_on_the_docs_folder():
+    from opsward.generate import generate
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = (Path(tmp) / "bare").resolve()
+        root.mkdir()  # unknown project type, no docs folder yet
+        rc, out, _ = _run(["decision", "new", "first", "-p", str(root)])
+        assert "misc/docs/decisions/0001-first.md" in out
+        scaffold = {f.target_path.relative_to(root).as_posix() for f in generate(scan(root, claude_config_dir=None))}
+        assert "misc/docs/decisions/0000-template.md" in scaffold
 
 
 def test_decision_new_rejects_empty_title_and_unknown_status():

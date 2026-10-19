@@ -25,12 +25,14 @@ from opsward.util import read_text_safe
 
 _ADR_FILE_RE = re.compile(r"^(?P<number>\d{4})[-_](?P<slug>[^/]*)\.md$")  # any numbered .md counts for numbering
 _STATUS_HEADING_RE = re.compile(r"^#{2,3}\s+Status\s*$\n+(?P<text>[^\n]*)", re.M)
-_STATUS_LINE_RE = re.compile(r"^\**Status:?\**\s*:?\s*(?P<text>[^\n]+)$", re.M | re.I)
+_STATUS_LINE_RE = re.compile(r"^\**Status\**\s*:\**\s*(?P<text>[^\n]+)$", re.M | re.I)  # the colon is required
 _FRONTMATTER_STATUS_RE = re.compile(r"\A---\n(?:.*\n)*?status:\s*(?P<text>[^\n]+)\n(?:.*\n)*?---", re.M)
 _CLOSED_STATUSES = ("superseded", "deprecated", "rejected")
 _FENCE_RE = re.compile(r"^(`{3,}|~{3,}).*?^\1[ \t]*$", re.M | re.S)
 _LINK_RE = re.compile(r"\]\(([^)\s#]+)(?:#[^)]*)?\)")
-_DOMAIN_RE = re.compile(r"^[\w-]+\.(com|org|net|io|dev|ai|co|md)$")
+_DOMAIN_RE = re.compile(r"^[\w-]+(\.[\w-]+)*\.[a-z]{2,6}$")  # a host name, not a file: no slash yet, dotted labels
+_STRIKE_RE = re.compile(r"~~.*?~~", re.S)
+_HISTORICAL_RE = re.compile(r"\b(was|were|formerly|previously|moved|migrated|renamed|replaced|removed|from)\b", re.I)
 _LOG_NAME = "log.md"
 _TEMPLATE_NAME = "0000-template.md"
 _SLUG_MAX = 60
@@ -162,23 +164,42 @@ def status_of(content: str) -> Optional[str]:
 
 
 def cited_paths(content: str) -> list[str]:
-    r"""Paths an ADR cites, outside fenced code: bare path tokens and Markdown link targets
-    (relative ones only; URLs and bare domains are not paths).
+    r"""Paths an ADR cites as current, outside fenced code: bare path tokens and Markdown
+    link targets (relative ones only; URLs and host names are not paths).
 
-    >>> cited_paths("See `pkg/a.py`, [0002](0002-x.md), [doc](../research/r.md), https://x.io/a/b.py, github.com/o/r/f.py\n```\nsrc/in/fence.py\n```")
+    A path the record cites as history is not checked: wrap it in ``~~strikethrough~~``,
+    or say so on the line (``was``, ``formerly``, ``moved``, ``renamed``, ``replaced``,
+    ``removed``, ``from``), as in "we moved `pkg/old.py` to `pkg/new.py`" — there
+    only `pkg/new.py` must exist.
+
+    >>> cited_paths("See `pkg/a.py`, [0002](0002-x.md), [doc](../research/r.md), https://x.io/a/b.py, docs.github.com/en/x.md\n```\nsrc/in/fence.py\n```")
     ['../research/r.md', '0002-x.md', 'pkg/a.py']
+    >>> cited_paths("We moved `pkg/old.py` to `pkg/new.py`; ~~`pkg/gone.py`~~ is history.")
+    ['pkg/new.py']
     """
     from opsward.maintain import _extract_paths  # the same extractor CLAUDE.md uses
 
-    prose = _FENCE_RE.sub("", content)
+    prose = _STRIKE_RE.sub("", _FENCE_RE.sub("", content))
     found = set()
-    for p in _extract_paths(prose):
-        if not _DOMAIN_RE.match(p.split("/", 1)[0]):
+    for line in prose.splitlines():
+        historical = bool(_HISTORICAL_RE.search(line))
+        for p in _extract_paths(line):
+            if _DOMAIN_RE.match(p.split("/", 1)[0]):
+                continue
+            if historical and not _is_destination(line, p):
+                continue
             found.add(p)
-    for target in _LINK_RE.findall(prose):
-        if "://" not in target and not target.startswith(("mailto:", "/")):
-            found.add(target)
+        for target in _LINK_RE.findall(line):
+            if "://" not in target and not target.startswith(("mailto:", "/")):
+                found.add(target)
     return sorted(found)
+
+
+def _is_destination(line: str, path: str) -> bool:
+    """On a historical line, the path after "to"/"into"/"now" is the current one."""
+    at = line.find(path)
+    before = line[:at].lower()
+    return bool(re.search(r"\b(to|into|now|now at|lives in|is now)\s*[`\[]?$", before.rstrip()))
 
 
 def check_decisions(sr: ScanResult) -> Iterable[MaintenanceSuggestion]:
@@ -210,7 +231,8 @@ def check_decisions(sr: ScanResult) -> Iterable[MaintenanceSuggestion]:
                 category="stale_adr",
                 description=(
                     f"`{rel}` cites path(s) that no longer exist: {', '.join(f'`{p}`' for p in missing[:5])}"
-                    f"{' …' if len(missing) > 5 else ''} — write a superseding ADR (or a log entry) that says where it went; "
+                    f"{' …' if len(missing) > 5 else ''} — write a superseding ADR (or a log entry) that says where it went "
+                    "(\"moved from `old` to `new`\", or ~~old~~, keeps the old path out of this check); "
                     "the accepted one is only edited to point at its successor"
                 ),
             )
