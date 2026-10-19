@@ -282,10 +282,10 @@
         "nosuchcommand"
       ],
       "returncode": 2,
-      "stderr": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find} ...\nopsward: error: argument {diagnose,generate,maintain,recommend,install-skills,find}: invalid choice: 'nosuchcommand' (choose from diagnose, generate, maintain, recommend, install-skills, find)\n",
+      "stderr": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find} ...\nopsward: error: argument {diagnose,generate,maintain,recommend,install-skills,find}: invalid choice: 'nosuchcommand' (choose from 'diagnose', 'generate', 'maintain', 'recommend', 'install-skills', 'find')\n",
       "stdout": "",
       "tier": 1,
-      "usage": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find} ... opsward: error: argument {diagnose,generate,maintain,recommend,install-skills,find}: invalid choice: 'nosuchcommand' (choose from diagnose, generate, maintain, recommend, install-skills, find)"
+      "usage": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find} ... opsward: error: argument {diagnose,generate,maintain,recommend,install-skills,find}: invalid choice: 'nosuchcommand' (choose from 'diagnose', 'generate', 'maintain', 'recommend', 'install-skills', 'find')"
     },
     {
       "argv": [
@@ -340,10 +340,10 @@
         "find"
       ],
       "returncode": 2,
-      "stderr": "usage: opsward find [-h] [-k KINDS] [-s] [-l LIMIT] query [project-roots ...]\nopsward find: error: the following arguments are required: query\n",
+      "stderr": "usage: opsward find [-h] [-k KINDS] [-s] [-l LIMIT] query [project-roots ...]\nopsward find: error: the following arguments are required: query, project-roots\n",
       "stdout": "",
       "tier": 1,
-      "usage": "usage: opsward find [-h] [-k KINDS] [-s] [-l LIMIT] query [project-roots ...] opsward find: error: the following arguments are required: query"
+      "usage": "usage: opsward find [-h] [-k KINDS] [-s] [-l LIMIT] query [project-roots ...] opsward find: error: the following arguments are required: query, project-roots"
     },
     {
       "argv": [
@@ -367,7 +367,7 @@
     "TERM": "dumb"
   },
   "newlines": "lf",
-  "note": null,
+  "note": "argh 0.31.3, opsward 4e0b04f, pre-cw-migration, CPython 3.10",
   "prog": [
     "opsward"
   ],
