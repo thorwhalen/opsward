@@ -1,32 +1,32 @@
 {
   "schema_version": 1,
-  "built_at": "2026-10-19T13:16:12Z",
+  "built_at": "2026-10-19T13:28:40Z",
   "package": {
     "name": "opsward",
-    "version": "0.0.22",
+    "version": "0.0.23",
     "display_name": "opsward",
     "source": "pyproject.toml"
   },
   "git": {
     "available": true,
-    "commit": "d97f69cf44835a1830bbcbe97f885cac4c9b972f",
-    "short_commit": "d97f69c",
+    "commit": "9ea0403de3e91eee3fb25586f625ee6f57cdf5e1",
+    "short_commit": "9ea0403",
     "branch": "main",
     "tags": [],
     "dirty": false,
     "remote_url": "https://github.com/thorwhalen/opsward",
-    "commit_url": "https://github.com/thorwhalen/opsward/commit/d97f69cf44835a1830bbcbe97f885cac4c9b972f",
+    "commit_url": "https://github.com/thorwhalen/opsward/commit/9ea0403de3e91eee3fb25586f625ee6f57cdf5e1",
     "error": null
   },
   "ci": {
     "provider": "github",
     "repository": "thorwhalen/opsward",
-    "sha": "d97f69cf44835a1830bbcbe97f885cac4c9b972f",
+    "sha": "9ea0403de3e91eee3fb25586f625ee6f57cdf5e1",
     "sha_in_history": true,
     "ref": "refs/heads/main",
     "ref_name": "main",
-    "run_id": "39258486445",
-    "run_url": "https://github.com/thorwhalen/opsward/actions/runs/39258486445",
+    "run_id": "39260265485",
+    "run_url": "https://github.com/thorwhalen/opsward/actions/runs/39260265485",
     "server_url": "https://github.com"
   },
   "tools": {
@@ -61,15 +61,13 @@
   "pypi": {
     "checked": true,
     "latest": "0.0.23",
-    "relation": "behind",
+    "relation": "same",
     "error": null
   },
-  "reproduce": "git clone https://github.com/thorwhalen/opsward && cd opsward\ngit checkout d97f69cf44835a1830bbcbe97f885cac4c9b972f\npip install \"epythet==0.2.18\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
+  "reproduce": "git clone https://github.com/thorwhalen/opsward && cd opsward\ngit checkout 9ea0403de3e91eee3fb25586f625ee6f57cdf5e1\npip install \"epythet==0.2.18\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
   "warnings": [],
   "alignment": {
-    "aligned": false,
-    "notes": [
-      "The documented version (0.0.22) is behind the latest release on PyPI (0.0.23): `pip install opsward` gives newer code than these docs describe."
-    ]
+    "aligned": true,
+    "notes": []
   }
 }

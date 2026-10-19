@@ -180,13 +180,33 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="41">
 <div class="viewcode-block" id="iter_files">
 <a class="viewcode-back" href="../../_autosummary/opsward.util.html#opsward.util.iter_files">[docs]</a>
-</span><span data-line="42"><span class="k">def</span><span class="w"> </span><span class="nf">iter_files</span><span class="p">(</span><span class="n">directory</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">suffix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">):</span>
-</span><span data-line="43"><span class="w">    </span><span class="sd">"""Yield files in *directory* (non-recursive), optionally filtered by suffix."""</span>
-</span><span data-line="44">    <span class="k">if</span> <span class="ow">not</span> <span class="n">directory</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
-</span><span data-line="45">        <span class="k">return</span>
-</span><span data-line="46">    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">directory</span><span class="o">.</span><span class="n">iterdir</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">):</span>
-</span><span data-line="47">        <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">suffix</span> <span class="ow">or</span> <span class="n">p</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="n">suffix</span><span class="p">):</span>
-</span><span data-line="48">            <span class="k">yield</span> <span class="n">p</span></div>
+</span><span data-line="42"><span class="k">def</span><span class="w"> </span><span class="nf">iter_files</span><span class="p">(</span><span class="n">directory</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">suffix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span> <span class="n">recursive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">_seen</span><span class="p">:</span> <span class="nb">set</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+</span><span data-line="43"><span class="w">    </span><span class="sd">"""Yield files in *directory*, optionally filtered by suffix.</span>
+</span><span data-line="44">
+</span><span data-line="45"><span class="sd">    ``recursive=True`` walks subdirectories too, depth-first in name order. Hidden</span>
+</span><span data-line="46"><span class="sd">    folders are skipped (opsward's choice: ``.trash`` and the like are not agents),</span>
+</span><span data-line="47"><span class="sd">    a folder already visited through a symlink is not re-entered, and a folder that</span>
+</span><span data-line="48"><span class="sd">    cannot be read is skipped rather than raised.</span>
+</span><span data-line="49"><span class="sd">    """</span>
+</span><span data-line="50">    <span class="k">if</span> <span class="ow">not</span> <span class="n">directory</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+</span><span data-line="51">        <span class="k">return</span>
+</span><span data-line="52">    <span class="n">seen</span> <span class="o">=</span> <span class="n">_seen</span> <span class="k">if</span> <span class="n">_seen</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">set</span><span class="p">()</span>
+</span><span data-line="53">    <span class="k">try</span><span class="p">:</span>
+</span><span data-line="54">        <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">directory</span><span class="o">.</span><span class="n">resolve</span><span class="p">())</span>
+</span><span data-line="55">        <span class="n">entries</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">directory</span><span class="o">.</span><span class="n">iterdir</span><span class="p">(),</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">p</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+</span><span data-line="56">    <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+</span><span data-line="57">        <span class="k">return</span>
+</span><span data-line="58">    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">entries</span><span class="p">:</span>
+</span><span data-line="59">        <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span> <span class="ow">and</span> <span class="p">(</span><span class="ow">not</span> <span class="n">suffix</span> <span class="ow">or</span> <span class="n">p</span><span class="o">.</span><span class="n">suffix</span> <span class="o">==</span> <span class="n">suffix</span><span class="p">):</span>
+</span><span data-line="60">            <span class="k">yield</span> <span class="n">p</span>
+</span><span data-line="61">        <span class="k">elif</span> <span class="n">recursive</span> <span class="ow">and</span> <span class="n">p</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"."</span><span class="p">):</span>
+</span><span data-line="62">            <span class="k">try</span><span class="p">:</span>
+</span><span data-line="63">                <span class="n">real</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+</span><span data-line="64">            <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+</span><span data-line="65">                <span class="k">continue</span>
+</span><span data-line="66">            <span class="k">if</span> <span class="n">real</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+</span><span data-line="67">                <span class="k">continue</span>
+</span><span data-line="68">            <span class="k">yield from</span> <span class="n">iter_files</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="n">suffix</span><span class="p">,</span> <span class="n">recursive</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">_seen</span><span class="o">=</span><span class="n">seen</span><span class="p">)</span></div>
 
 </span></pre></div>
         </article><button class="back-to-top" type="button">
@@ -215,7 +235,7 @@ data-aria-dark="Switch to auto color mode">
     </div>
   </div>
 </footer>
-      <script src="../../_static/documentation_options.js?v=96ec9c95"></script>
+      <script src="../../_static/documentation_options.js?v=3294188c"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>

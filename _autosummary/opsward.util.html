@@ -147,8 +147,8 @@ data-aria-dark="Switch to auto color mode">
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.util.iter_files" title="opsward.util.iter_files"><code class="xref py py-obj docutils literal notranslate"><span class="pre">iter_files</span></code></a>(directory, *[, suffix])</p></td>
-<td><p>Yield files in <em>directory</em> (non-recursive), optionally filtered by suffix.</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.util.iter_files" title="opsward.util.iter_files"><code class="xref py py-obj docutils literal notranslate"><span class="pre">iter_files</span></code></a>(directory, *[, suffix, ...])</p></td>
+<td><p>Yield files in <em>directory</em>, optionally filtered by suffix.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#opsward.util.iter_subdirs" title="opsward.util.iter_subdirs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">iter_subdirs</span></code></a>(directory)</p></td>
 <td><p>Yield immediate subdirectories of <em>directory</em>, sorted by name.</p></td>
@@ -164,8 +164,12 @@ data-aria-dark="Switch to auto color mode">
 </div>
 <dl class="py function">
 <dt class="sig sig-object py" id="opsward.util.iter_files">
-<span class="sig-prename descclassname"><span class="pre">opsward.util.</span></span><span class="sig-name descname"><span class="pre">iter_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">suffix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/util.html#iter_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.util.iter_files" title="Link to this definition">#</a></dt>
-<dd><p>Yield files in <em>directory</em> (non-recursive), optionally filtered by suffix.</p>
+<span class="sig-prename descclassname"><span class="pre">opsward.util.</span></span><span class="sig-name descname"><span class="pre">iter_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">suffix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recursive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_seen</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/util.html#iter_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.util.iter_files" title="Link to this definition">#</a></dt>
+<dd><p>Yield files in <em>directory</em>, optionally filtered by suffix.</p>
+<p><code class="docutils literal notranslate"><span class="pre">recursive=True</span></code> walks subdirectories too, depth-first in name order. Hidden
+folders are skipped (opsward’s choice: <code class="docutils literal notranslate"><span class="pre">.trash</span></code> and the like are not agents),
+a folder already visited through a symlink is not re-entered, and a folder that
+cannot be read is skipped rather than raised.</p>
 <dl class="field-list simple">
 </dl>
 </dd></dl>
@@ -247,7 +251,7 @@ data-aria-dark="Switch to auto color mode">
     </div>
   </div>
 </footer>
-      <script src="../_static/documentation_options.js?v=96ec9c95"></script>
+      <script src="../_static/documentation_options.js?v=3294188c"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>

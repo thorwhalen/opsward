@@ -1,4 +1,4 @@
-> built 2026-10-19 13:16 UTC from d97f69c (main) · opsward 0.0.22. Details: build_info.json
+> built 2026-10-19 13:28 UTC from 9ea0403 (main) · opsward 0.0.23. Details: build_info.json
 
 # index.html.md
 
@@ -1136,15 +1136,20 @@ Shared helpers for opsward.
 
 ### Functions
 
-| [`iter_files`](_autosummary/opsward.util.html.md#opsward.util.iter_files)(directory, \*[, suffix])   | Yield files in *directory* (non-recursive), optionally filtered by suffix.   |
-|----------------------------------------------------------------------------------------|------------------------------------------------------------------------------|
-| [`iter_subdirs`](_autosummary/opsward.util.html.md#opsward.util.iter_subdirs)(directory)               | Yield immediate subdirectories of *directory*, sorted by name.               |
-| [`read_json_safe`](_autosummary/opsward.util.html.md#opsward.util.read_json_safe)(path)                  | Read a JSON file, returning None on any failure.                             |
-| [`read_text_safe`](_autosummary/opsward.util.html.md#opsward.util.read_text_safe)(path)                  | Read a text file, returning '' if it doesn't exist or can't be decoded.      |
+| [`iter_files`](_autosummary/opsward.util.html.md#opsward.util.iter_files)(directory, \*[, suffix, ...])   | Yield files in *directory*, optionally filtered by suffix.              |
+|---------------------------------------------------------------------------------------------|-------------------------------------------------------------------------|
+| [`iter_subdirs`](_autosummary/opsward.util.html.md#opsward.util.iter_subdirs)(directory)                    | Yield immediate subdirectories of *directory*, sorted by name.          |
+| [`read_json_safe`](_autosummary/opsward.util.html.md#opsward.util.read_json_safe)(path)                       | Read a JSON file, returning None on any failure.                        |
+| [`read_text_safe`](_autosummary/opsward.util.html.md#opsward.util.read_text_safe)(path)                       | Read a text file, returning '' if it doesn't exist or can't be decoded. |
 
-### opsward.util.iter_files(directory, , suffix='')
+### opsward.util.iter_files(directory, , suffix='', recursive=False, \_seen=None)
 
-Yield files in *directory* (non-recursive), optionally filtered by suffix.
+Yield files in *directory*, optionally filtered by suffix.
+
+`recursive=True` walks subdirectories too, depth-first in name order. Hidden
+folders are skipped (opsward’s choice: `.trash` and the like are not agents),
+a folder already visited through a symlink is not re-entered, and a folder that
+cannot be read is skipped rather than raised.
 
 ### opsward.util.iter_subdirs(directory)
 
@@ -1177,18 +1182,16 @@ Read a text file, returning ‘’ if it doesn’t exist or can’t be decoded.
 
 # About this build
 
-This documentation was built on **2026-10-19 13:16 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/d97f69cf44835a1830bbcbe97f885cac4c9b972f"><code>d97f69c</code></a> on branch <code>main</code>, for **opsward 0.0.22** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-10-19 13:28 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/9ea0403de3e91eee3fb25586f625ee6f57cdf5e1"><code>9ea0403</code></a> on branch <code>main</code>, for **opsward 0.0.23** (from <code>pyproject.toml</code>).
 
-#### WARNING
-The documentation and the package may be misaligned:
-
-- The documented version (0.0.22) is behind the latest release on PyPI (0.0.23): `pip install opsward` gives newer code than these docs describe.
+#### NOTE
+Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
 
 ## Source
 
 |                     |                                                                                                                                                           |
 |---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/opsward/commit/d97f69cf44835a1830bbcbe97f885cac4c9b972f"><code>d97f69cf44835a1830bbcbe97f885cac4c9b972f</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/opsward/commit/9ea0403de3e91eee3fb25586f625ee6f57cdf5e1"><code>9ea0403de3e91eee3fb25586f625ee6f57cdf5e1</code></a> |
 | Branch              | <code>main</code>                                                                                                                                         |
 | Tags at this commit | none                                                                                                                                                      |
 | Working tree        | clean                                                                                                                                                     |
@@ -1199,9 +1202,9 @@ The documentation and the package may be misaligned:
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/opsward</code>                                                            |
-| Run          | <a href="https://github.com/thorwhalen/opsward/actions/runs/39258486445">39258486445</a>   |
+| Run          | <a href="https://github.com/thorwhalen/opsward/actions/runs/39260265485">39260265485</a>   |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>d97f69cf44835a1830bbcbe97f885cac4c9b972f</code> (in the history of the built commit) |
+| Event commit | <code>9ea0403de3e91eee3fb25586f625ee6f57cdf5e1</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -1226,13 +1229,13 @@ The documentation and the package may be misaligned:
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/opsward/0.0.23/">0.0.23</a>, newer than the documented version (0.0.22).
+Latest release: <a href="https://pypi.org/project/opsward/0.0.23/">0.0.23</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/opsward && cd opsward
-git checkout d97f69cf44835a1830bbcbe97f885cac4c9b972f
+git checkout 9ea0403de3e91eee3fb25586f625ee6f57cdf5e1
 pip install "epythet==0.2.18"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
