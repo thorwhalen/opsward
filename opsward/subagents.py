@@ -37,7 +37,13 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Iterable, Iterator, Optional
 
-from opsward.base import AgentInfo, GeneratedFile, MaintenanceSuggestion, ScanResult, SkillInfo
+from opsward.base import (
+    AgentInfo,
+    GeneratedFile,
+    MaintenanceSuggestion,
+    ScanResult,
+    SkillInfo,
+)
 from opsward.util import read_text_safe
 
 _META_FLAG = "subagent"
@@ -67,7 +73,9 @@ class SubagentSpec:
 
     def source_hash(self) -> str:
         """Hash of everything the rendered twin depends on, so drift is detectable."""
-        payload = json.dumps({**self.__dict__, "render": _RENDER_VERSION}, sort_keys=True)
+        payload = json.dumps(
+            {**self.__dict__, "render": _RENDER_VERSION}, sort_keys=True
+        )
         return hashlib.sha256(payload.encode("utf-8")).hexdigest()[:12]
 
     def problems(self) -> list[str]:
@@ -124,7 +132,9 @@ def subagent_spec(skill: SkillInfo) -> Optional[SubagentSpec]:
         reply_lines = int(_text(get("reply-lines", _DEFAULT_REPLY_LINES)))
     except ValueError:
         reply_lines = _DEFAULT_REPLY_LINES
-    description = _text(skill.frontmatter.get("description"))  # the body is not a trigger
+    description = _text(
+        skill.frontmatter.get("description")
+    )  # the body is not a trigger
     model = _text(get("model")) or None
     return SubagentSpec(
         skill_name=skill.name,
@@ -196,7 +206,9 @@ class TwinStatus:
 
     skill: str
     agent: str
-    state: str  # 'in_sync' | 'stale' | 'missing' | 'handwritten' | 'invalid' | 'duplicate'
+    state: (
+        str  # 'in_sync' | 'stale' | 'missing' | 'handwritten' | 'invalid' | 'duplicate'
+    )
     declared: bool = False  # the skill declares a twin
     content: str = ""  # the rendered twin, for a diff or a write
     detail: str = ""  # problems, or the other skill a duplicate collides with
@@ -252,32 +264,50 @@ def twin_status(sr: ScanResult) -> Iterator[TwinStatus]:
         declared_skills.add(skill.name)
         problems = spec.problems()
         if problems:
-            yield TwinStatus(skill.name, spec.name, "invalid", True, detail="; ".join(problems))
+            yield TwinStatus(
+                skill.name, spec.name, "invalid", True, detail="; ".join(problems)
+            )
             continue
         if spec.name in taken:
-            yield TwinStatus(skill.name, spec.name, "duplicate", True, detail=taken[spec.name])
+            yield TwinStatus(
+                skill.name, spec.name, "duplicate", True, detail=taken[spec.name]
+            )
             continue
         taken[spec.name] = skill.name
-        content = render_subagent(spec, source=_source_rel(skill.path / "SKILL.md", sr.project_root))
-        agent = agents.get(spec.name) or by_stem.get(spec.name)  # a file in the way counts too
+        content = render_subagent(
+            spec, source=_source_rel(skill.path / "SKILL.md", sr.project_root)
+        )
+        agent = agents.get(spec.name) or by_stem.get(
+            spec.name
+        )  # a file in the way counts too
         if agent is None:
             yield TwinStatus(skill.name, spec.name, "missing", True, content)
             continue
         marker = _read_marker(agent)
         if marker is None:
-            yield TwinStatus(skill.name, spec.name, "handwritten", True, content, path=rel(agent))
+            yield TwinStatus(
+                skill.name, spec.name, "handwritten", True, content, path=rel(agent)
+            )
         elif marker[1] != spec.source_hash():
-            yield TwinStatus(skill.name, spec.name, "stale", True, content, path=rel(agent))
+            yield TwinStatus(
+                skill.name, spec.name, "stale", True, content, path=rel(agent)
+            )
         else:
-            yield TwinStatus(skill.name, spec.name, "in_sync", True, content, path=rel(agent))
+            yield TwinStatus(
+                skill.name, spec.name, "in_sync", True, content, path=rel(agent)
+            )
     for skill in sr.skills:
         if skill.name in declared_skills:
             continue
         twin = agents.get(skill.name)
         if twin is None:
-            twin = next((a for a in sr.agents if skill.name in _preloaded_skills(a)), None)
+            twin = next(
+                (a for a in sr.agents if skill.name in _preloaded_skills(a)), None
+            )
         if twin is not None and _read_marker(twin) is None:
-            yield TwinStatus(skill.name, twin.name, "handwritten", False, path=rel(twin))
+            yield TwinStatus(
+                skill.name, twin.name, "handwritten", False, path=rel(twin)
+            )
 
 
 def subagent_files(sr: ScanResult) -> Iterator[GeneratedFile]:
@@ -291,10 +321,14 @@ def subagent_files(sr: ScanResult) -> Iterator[GeneratedFile]:
     agents_dir = sr.project_root / ".claude" / "agents"
     for t in twin_status(sr):
         if t.declared and t.state in ("missing", "stale", "in_sync"):
-            yield GeneratedFile(target_path=agents_dir / f"{t.agent}.md", content=t.content)
+            yield GeneratedFile(
+                target_path=agents_dir / f"{t.agent}.md", content=t.content
+            )
 
 
-def twin_for_rendered_skill(skill_md_text: str, skill_md_path: Path, root: Path) -> Optional[GeneratedFile]:
+def twin_for_rendered_skill(
+    skill_md_text: str, skill_md_path: Path, root: Path
+) -> Optional[GeneratedFile]:
     """The twin of a skill that is about to be written (so one ``generate`` run creates both).
 
     >>> from pathlib import Path
@@ -348,11 +382,13 @@ def check_subagent_twins(sr: ScanResult) -> Iterable[MaintenanceSuggestion]:
         elif t.state == "handwritten":
             text = (
                 f"Agent `{agent_path}` is a hand-written twin of skill `{t.skill}` — declare "
-                "`metadata: subagent: \"true\"` in the skill and let opsward generate it, so the two cannot drift"
+                '`metadata: subagent: "true"` in the skill and let opsward generate it, so the two cannot drift'
             )
         else:
             continue
-        yield MaintenanceSuggestion(category=_SUGGESTION_CATEGORY, description=text, diff=t.content)
+        yield MaintenanceSuggestion(
+            category=_SUGGESTION_CATEGORY, description=text, diff=t.content
+        )
 
 
 def twin_summary(sr: ScanResult) -> dict[str, int]:

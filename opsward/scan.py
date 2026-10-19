@@ -318,7 +318,9 @@ def _parse_frontmatter(text: str) -> dict:
                 result[current_key][k.strip()] = _unquote(v)
             elif isinstance(current, str):
                 # plain multi-line scalar
-                result[current_key] = (result[current_key] + " " + _unquote(stripped)).strip()
+                result[current_key] = (
+                    result[current_key] + " " + _unquote(stripped)
+                ).strip()
             continue
         if ":" in stripped:
             k, _, v = stripped.partition(":")
