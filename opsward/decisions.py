@@ -143,10 +143,10 @@ def check_decisions(sr: ScanResult) -> Iterable[MaintenanceSuggestion]:
                 category="stale_adr",
                 description=f"`{rel}` has no `## Status` section — an ADR without a status cannot be superseded",
             )
-        # a cited path may be repo-relative or relative to the ADR's own folder (a sibling file)
-        missing = sorted(
-            {p for p in _extract_paths(content) if not ((sr.project_root / p).exists() or (doc.path.parent / p).exists())}
-        )
+        # a cited path may be repo-relative, relative to the ADR's folder (a sibling), or
+        # relative to the docs folder above it (`decisions/README.md` from `misc/docs`)
+        bases = (sr.project_root, doc.path.parent, doc.path.parent.parent)
+        missing = sorted({p for p in _extract_paths(content) if not any((b / p).exists() for b in bases)})
         if missing:
             yield MaintenanceSuggestion(
                 category="stale_adr",
