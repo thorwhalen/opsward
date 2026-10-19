@@ -74,11 +74,11 @@ class SubagentSpec:
         """Why this declaration cannot be rendered (empty = fine).
 
         >>> SubagentSpec('s', '../x', '', 'Bash: all', None, 0).problems()
-        ['no description (the twin reuses it)', 'subagent-name `../x` is not a valid agent name', 'subagent-reply-lines must be at least 1', 'subagent-tools must not contain `: `']
+        ['no frontmatter description (the twin reuses it as its trigger)', 'subagent-name `../x` is not a valid agent name', 'subagent-reply-lines must be at least 1', 'subagent-tools must not contain `: `']
         """
         out = []
         if not self.description:
-            out.append("no description (the twin reuses it)")
+            out.append("no frontmatter description (the twin reuses it as its trigger)")
         if not _NAME_RE.match(self.name):
             out.append(f"subagent-name `{self.name}` is not a valid agent name")
         if self.reply_lines < 1:
@@ -124,7 +124,7 @@ def subagent_spec(skill: SkillInfo) -> Optional[SubagentSpec]:
         reply_lines = int(_text(get("reply-lines", _DEFAULT_REPLY_LINES)))
     except ValueError:
         reply_lines = _DEFAULT_REPLY_LINES
-    description = _text(skill.frontmatter.get("description")) or _text(skill.description)
+    description = _text(skill.frontmatter.get("description"))  # the body is not a trigger
     model = _text(get("model")) or None
     return SubagentSpec(
         skill_name=skill.name,
@@ -179,7 +179,7 @@ def _yaml_scalar(text: str) -> str:
     if not text:
         return '""'
     if any(c in text for c in ":#{}[],&*!|>'\"%@`") or text[0] in "-?":
-        return json.dumps(text)
+        return json.dumps(text, ensure_ascii=False)
     return text
 
 
@@ -200,6 +200,7 @@ class TwinStatus:
     declared: bool = False  # the skill declares a twin
     content: str = ""  # the rendered twin, for a diff or a write
     detail: str = ""  # problems, or the other skill a duplicate collides with
+    path: str = ""  # the agent file, repo-relative, when one exists
 
 
 def _read_marker(agent: AgentInfo) -> Optional[tuple[str, str]]:
@@ -243,6 +244,8 @@ def twin_status(sr: ScanResult) -> Iterator[TwinStatus]:
       preloading it via ``skills:`` (``declared=False``).
     """
     agents = {a.name: a for a in sr.agents}
+    by_stem = {a.path.stem: a for a in sr.agents}
+    rel = lambda a: _source_rel(a.path, sr.project_root)  # noqa: E731
     taken: dict[str, str] = {}
     declared_skills: set[str] = set()
     for skill, spec in _declared(sr):
@@ -256,17 +259,17 @@ def twin_status(sr: ScanResult) -> Iterator[TwinStatus]:
             continue
         taken[spec.name] = skill.name
         content = render_subagent(spec, source=_source_rel(skill.path / "SKILL.md", sr.project_root))
-        agent = agents.get(spec.name)
+        agent = agents.get(spec.name) or by_stem.get(spec.name)  # a file in the way counts too
         if agent is None:
             yield TwinStatus(skill.name, spec.name, "missing", True, content)
             continue
         marker = _read_marker(agent)
         if marker is None:
-            yield TwinStatus(skill.name, spec.name, "handwritten", True, content)
+            yield TwinStatus(skill.name, spec.name, "handwritten", True, content, path=rel(agent))
         elif marker[1] != spec.source_hash():
-            yield TwinStatus(skill.name, spec.name, "stale", True, content)
+            yield TwinStatus(skill.name, spec.name, "stale", True, content, path=rel(agent))
         else:
-            yield TwinStatus(skill.name, spec.name, "in_sync", True, content)
+            yield TwinStatus(skill.name, spec.name, "in_sync", True, content, path=rel(agent))
     for skill in sr.skills:
         if skill.name in declared_skills:
             continue
@@ -274,7 +277,7 @@ def twin_status(sr: ScanResult) -> Iterator[TwinStatus]:
         if twin is None:
             twin = next((a for a in sr.agents if skill.name in _preloaded_skills(a)), None)
         if twin is not None and _read_marker(twin) is None:
-            yield TwinStatus(skill.name, twin.name, "handwritten", False)
+            yield TwinStatus(skill.name, twin.name, "handwritten", False, path=rel(twin))
 
 
 def subagent_files(sr: ScanResult) -> Iterator[GeneratedFile]:
@@ -322,7 +325,7 @@ def twin_for_rendered_skill(skill_md_text: str, skill_md_path: Path, root: Path)
 def check_subagent_twins(sr: ScanResult) -> Iterable[MaintenanceSuggestion]:
     """``maintain`` check: every twin that is not generated and current."""
     for t in twin_status(sr):
-        agent_path = f".claude/agents/{t.agent}.md"
+        agent_path = t.path or f".claude/agents/{t.agent}.md"
         if t.state == "invalid":
             text = f"Skill `{t.skill}` declares a subagent twin that cannot be rendered: {t.detail}"
         elif t.state == "duplicate":

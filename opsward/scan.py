@@ -3,6 +3,7 @@
 This module NEVER writes to the target project.
 """
 
+import json
 from pathlib import Path
 
 from opsward.base import (
@@ -213,17 +214,44 @@ def _detect_monorepo(root: Path) -> tuple[bool, list[str]]:
 
 
 def _strip_inline_comment(value: str) -> str:
-    """Drop a trailing ``# comment`` from an unquoted YAML scalar."""
-    if value.startswith(("'", '"')):
+    r"""Drop a trailing ``# comment`` from a YAML scalar, quoted or not.
+
+    >>> _strip_inline_comment('plain  # c'), _strip_inline_comment('"q # not" # c'), _strip_inline_comment("'a''b'  # c")
+    ('plain', '"q # not"', "'a''b'")
+    """
+    value = value.strip()
+    if value[:1] in ("'", '"'):
+        q = value[0]
+        i = 1
+        while i < len(value):
+            if q == "'" and value[i] == "'" and value[i + 1 : i + 2] == "'":
+                i += 2
+                continue
+            if q == '"' and value[i] == "\\":
+                i += 2
+                continue
+            if value[i] == q:
+                return value[: i + 1]
+            i += 1
         return value
     cut = value.find(" #")
     return value[:cut].rstrip() if cut >= 0 else value
 
 
 def _unquote(value: str) -> str:
-    value = _strip_inline_comment(value.strip())
-    if len(value) >= 2 and value[0] == value[-1] and value[0] in ("'", '"'):
-        return value[1:-1]
+    r"""Strip a comment, then quotes, decoding the escapes each quoting style allows.
+
+    >>> _unquote('"a \\"b\\" \\u2014 c"  # x'), _unquote("'it''s'"), _unquote("bare  # x")
+    ('a "b" — c', "it's", 'bare')
+    """
+    value = _strip_inline_comment(value)
+    if len(value) >= 2 and value[0] == value[-1] == '"':
+        try:
+            return str(json.loads(value))
+        except ValueError:
+            return value[1:-1]
+    if len(value) >= 2 and value[0] == value[-1] == "'":
+        return value[1:-1].replace("''", "'")
     return value
 
 

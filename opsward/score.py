@@ -852,9 +852,9 @@ def _score_setup(sr: ScanResult, *, suggestions: list[str]) -> ComponentScore:
             "Skill/subagent twins: "
             + ", ".join(f"{n} {state}" for state, n in sorted(twins.items()))
         )
-        if twins.get("missing") or twins.get("stale"):
+        if any(twins.get(k) for k in ("missing", "stale", "invalid", "duplicate")):
             suggestions.append(
-                "Regenerate the subagent twins declared by skills — "
+                "Fix or regenerate the subagent twins declared by skills — "
                 "`opsward maintain` lists them under [subagent_twin]"
             )
 

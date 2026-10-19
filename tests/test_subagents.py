@@ -165,6 +165,39 @@ def test_declaration_survives_comments_block_scalars_and_flow_maps():
         assert 'description: "Sweep every repo: report what drifted. Use when asked for a fleet status."' in text
 
 
+def test_quoted_values_with_comments_and_escapes():
+    skill = (
+        '---\nname: "fleet-sweep"  # the name\n'
+        'description: "Sweep \\"every\\" repo \\u2014 report drift."\n'
+        'metadata:\n  subagent: "true"   # opt in\n  subagent-model: \'haiku\'  # cheap\n---\n\nSteps.\n'
+    )
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _project(Path(tmp), skill=skill)
+        spec = subagent_spec(next(s for s in scan(root).skills if s.name == "fleet-sweep"))
+        assert spec is not None and spec.model == "haiku"
+        assert spec.description == 'Sweep "every" repo — report drift.'
+        text = render_subagent(spec, source="x")
+        assert 'description: "Sweep \\"every\\" repo — report drift."' in text  # non-ASCII kept, quotes escaped
+
+
+def test_skill_without_frontmatter_description_is_invalid():
+    skill = '---\nname: fleet-sweep\nmetadata:\n  subagent: "true"\n---\n\nRun the thing.\n'
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _project(Path(tmp), skill=skill)
+        (status,) = list(twin_status(scan(root)))
+        assert status.state == "invalid" and "frontmatter description" in status.detail
+
+
+def test_file_in_the_way_with_another_name_is_reported_as_handwritten():
+    agent = "---\nname: other\ndescription: Something else.\n---\nX.\n"
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _project(Path(tmp), agent=agent)  # written as fleet-sweep.md but named `other`
+        (status,) = list(twin_status(scan(root)))
+        assert status.state == "handwritten" and status.declared and status.path.endswith("fleet-sweep.md")
+        (finding,) = list(check_subagent_twins(scan(root)))
+        assert ".claude/agents/fleet-sweep.md" in finding.description
+
+
 def test_block_list_preload_and_whole_name_matching():
     agent = "---\nname: auditor\ndescription: Audits.\nskills:\n  - fleet-sweep-extra\n  - conventions\n---\nAudit.\n"
     with tempfile.TemporaryDirectory() as tmp:
