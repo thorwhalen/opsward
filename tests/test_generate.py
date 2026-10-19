@@ -140,7 +140,7 @@ def test_generate_skills_no_agents():
     with tempfile.TemporaryDirectory() as tmpdir:
         target = Path(tmpdir) / ".claude"
         files = generate_skills(target, include_agents=False)
-        agent_files = [f for f in files if "agents" in str(f.target_path)]
+        agent_files = [f for f in files if f.target_path.parent.name == "agents"]
         assert len(agent_files) == 0
 
 

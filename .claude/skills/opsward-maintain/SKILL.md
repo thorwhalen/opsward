@@ -19,7 +19,7 @@ Requires `opsward` to be installed (`pip install opsward`). If the command is no
 opsward maintain . --format json
 ```
 
-This returns issues categorized as: stale_path, sync_issue, outdated_doc, incomplete_skill, empty_doc. Also run the text version:
+This returns issues categorized as: stale_path, sync_issue, outdated_doc, incomplete_skill, empty_doc, subagent_twin (a skill's declared subagent twin is missing, stale, or hand-written; see the `opsward-subagents` skill). Also run the text version:
 
 ```bash
 opsward maintain .

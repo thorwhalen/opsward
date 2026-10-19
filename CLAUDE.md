@@ -39,11 +39,12 @@ Key docs to read before starting work:
   - `generate.py` — template rendering and file generation (never overwrites without confirmation). Also provides `generate_skills()` for targeted skill/agent installation.
   - `maintain.py` — staleness detection, update suggestions, drift analysis
   - `recommend.py` — map detected tech-stack signals (deps, frameworks) to curated ecosystem skill recommendations
+  - `subagents.py` — a skill's declared subagent twin (`metadata: subagent: true`): spec, rendered `.claude/agents/<name>.md` preloading the skill, sync states; used by generate, maintain and the diagnosis note (ADR 0009)
   - `cli.py` — CLI command functions (the `_dispatch_funcs` SSOT)
   - `util.py` — internal helpers (underscore-prefixed)
   - `data/` — bundled package resources (accessed via `importlib.resources.files`)
     - `templates/` — generation templates organized by target project type
-      - `shared/` — templates that work for any project type. **This is also where the installable Claude Code skills live**, as `opsward/data/templates/shared/<skill-name>/SKILL.md` (opsward, opsward-diagnose, opsward-generate, opsward-maintain) plus the `opsward/data/templates/shared/setup-auditor.md` agent. `generate.py` installs these into a target project's `.claude/`.
+      - `shared/` — templates that work for any project type. **This is also where the installable Claude Code skills live**, as `opsward/data/templates/shared/<skill-name>/SKILL.md` (opsward, opsward-diagnose, opsward-generate, opsward-maintain, opsward-subagents) plus the `opsward/data/templates/shared/setup-auditor.md` agent. `generate.py` installs these into a target project's `.claude/`.
       - `python/` — Python-specific templates (paths use `misc/docs/`)
       - `jsts/` — JS/TS-specific templates (paths use `docs/`)
 - `tests/` — pytest tests
@@ -174,6 +175,7 @@ When generating for a target project, opsward can produce:
 - `.claude/skills/opsward-diagnose/SKILL.md` — run `opsward diagnose`, interpret scores, offer fixes
 - `.claude/skills/opsward-generate/SKILL.md` — run `opsward generate`, customize with real content
 - `.claude/skills/opsward-maintain/SKILL.md` — run `opsward maintain`, prioritize and fix issues
+- `.claude/skills/opsward-subagents/SKILL.md` — decide which skills should also run as subagents, declare it in the skill, generate the twins (ADR 0009)
 - `.claude/agents/setup-auditor.md` — read-only auditor subagent (uses opsward CLI)
 - `.claude/rules/` files if appropriate
 

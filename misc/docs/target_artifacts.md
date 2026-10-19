@@ -52,6 +52,8 @@ These are Claude Code (and cross-agent) configuration files.
 | `opsward-maintain` skill | `.claude/skills/opsward-maintain/SKILL.md` | Skill that checks doc freshness, cross-references, and drift. |
 | `opsward-generate` skill | `.claude/skills/opsward-generate/SKILL.md` | Skill that runs the artifact-generation workflow. |
 | `opsward` skill | `.claude/skills/opsward/SKILL.md` | Top-level entry-point skill dispatching to diagnose/generate/maintain. |
+| `opsward-subagents` skill | `.claude/skills/opsward-subagents/SKILL.md` | Decides which of the project's skills should also run as subagents, declares it in each skill's `metadata`, runs the generator. Declares its own twin. |
+| Subagent twins | `.claude/agents/<skill>.md` | One per skill that declares `metadata: subagent: true`: preloads the skill via `skills:`, restricts tools, states the reply contract, carries a generated-by marker. `maintain` reports missing/stale/hand-written twins (ADR 0009). |
 | Rules files | `.claude/rules/` | Only if specific conventions detected (e.g., a `no-any.md` rule if TypeScript strict mode is on). |
 
 Contributor/dev skills (`opsward-dev`, `opsward-add-template`, `opsward-add-scoring`,

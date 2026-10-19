@@ -12,6 +12,7 @@ Architectural decision records (MADR-style) for opsward: the load-bearing, expen
 | [0006](0006-evidence-gated-generation.md) | Generated content asserts only what the scan can back up; absent evidence means omit, not guess | PRs #5, #11 |
 | [0007](0007-dependency-light-core-optional-extras.md) | One runtime dependency (`cw`); heavier capabilities are lazily-imported optional extras | PR #25, commit 9d22c4f |
 | [0008](0008-cli-surface-pinned-by-goldens.md) | The CLI surface is pinned by per-CPython golden recordings replayed in the test suite | PR #25 |
+| [0009](0009-skills-declare-their-subagent-twin.md) | A skill opts into a subagent twin with `metadata: subagent: true`; `generate` renders `.claude/agents/<name>.md` preloading it, `maintain` checks the sync; `context: fork` is the alternative for delegate-only skills | issue #26 |
 
 PR and issue numbers refer to [thorwhalen/opsward](https://github.com/thorwhalen/opsward); each ADR links them in full.
 

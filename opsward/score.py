@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
+from opsward.subagents import twin_summary
 from opsward.base import (
     ComponentScore,
     DiagnosisReport,
@@ -843,6 +844,19 @@ def _score_setup(sr: ScanResult, *, suggestions: list[str]) -> ComponentScore:
                 notes.append(f'Agent "{a.name}": no description')
     else:
         notes.append("No agents defined")
+
+    # Skills reused as subagents (ADR 0009): report the twins, no points either way.
+    twins = twin_summary(sr)
+    if twins:
+        notes.append(
+            "Skill/subagent twins: "
+            + ", ".join(f"{n} {state}" for state, n in sorted(twins.items()))
+        )
+        if any(twins.get(k) for k in ("missing", "stale", "invalid", "duplicate")):
+            suggestions.append(
+                "Fix or regenerate the subagent twins declared by skills — "
+                "`opsward maintain` lists them under [subagent_twin]"
+            )
 
     # Hooks (30) — score validity, not mere presence (issue #6).
     if sr.hooks_config:
