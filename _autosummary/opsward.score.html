@@ -7,6 +7,7 @@
     setColorMode(localStorage._theme||"auto");
   </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d88b86f9" />
     <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=2ceb65ce" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx_autodoc_typehints.css?v=057ac668" />
     <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
     <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -206,17 +207,17 @@ left fewer than <code class="docutils literal notranslate"><span class="pre">pen
 <dd><p>Return a <a class="reference internal" href="#opsward.score.SizeOverrun" title="opsward.score.SizeOverrun"><code class="xref py py-class docutils literal notranslate"><span class="pre">SizeOverrun</span></code></a> if <em>content</em> exceeds <em>max_chars</em>, else None.</p>
 <p>The penalty is proportional to the overrun: <code class="docutils literal notranslate"><span class="pre">_CONCISE_SIZE_PENALTY_MAX</span></code>
 points at twice the threshold (at least 1 once over it).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference internal" href="#opsward.score.SizeOverrun" title="opsward.score.SizeOverrun"><code class="xref py py-class docutils literal notranslate"><span class="pre">SizeOverrun</span></code></a>]</span></p>
-</dd>
-</dl>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="gp">&gt;&gt;&gt; </span><span class="n">claude_md_size_overrun</span><span class="p">(</span><span class="s2">"x"</span> <span class="o">*</span> <span class="mi">11</span><span class="p">,</span> <span class="n">max_chars</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">penalty</span>
 </span><span data-line="2"><span class="go">1</span>
 </span><span data-line="3"><span class="gp">&gt;&gt;&gt; </span><span class="n">claude_md_size_overrun</span><span class="p">(</span><span class="s2">"short"</span><span class="p">,</span> <span class="n">max_chars</span><span class="o">=</span><span class="mi">10</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span>
 </span><span data-line="4"><span class="go">True</span>
 </span></pre></div>
 </div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference internal" href="#opsward.score.SizeOverrun" title="opsward.score.SizeOverrun"><code class="xref py py-class docutils literal notranslate"><span class="pre">SizeOverrun</span></code></a>]</span></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -225,11 +226,6 @@ points at twice the threshold (at least 1 once over it).</p>
 <dd><p>Score a ScanResult and return a DiagnosisReport.</p>
 <p><code class="docutils literal notranslate"><span class="pre">claude_md_max_chars</span></code> is the CLAUDE.md size above which Conciseness
 loses points (see <a class="reference internal" href="#opsward.score.claude_md_size_overrun" title="opsward.score.claude_md_size_overrun"><code class="xref py py-func docutils literal notranslate"><span class="pre">claude_md_size_overrun()</span></code></a>).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="opsward.base.html#opsward.base.DiagnosisReport" title="opsward.base.DiagnosisReport"><code class="xref py py-class docutils literal notranslate"><span class="pre">DiagnosisReport</span></code></a></span></p>
-</dd>
-</dl>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 </span><span data-line="2"><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">opsward.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScanResult</span>
 </span><span data-line="3"><span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">diagnose</span><span class="p">(</span><span class="n">ScanResult</span><span class="p">(</span><span class="n">project_root</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s1">'/tmp/empty'</span><span class="p">)))</span>
@@ -237,6 +233,11 @@ loses points (see <a class="reference internal" href="#opsward.score.claude_md_s
 </span><span data-line="5"><span class="go">'F'</span>
 </span></pre></div>
 </div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="opsward.base.html#opsward.base.DiagnosisReport" title="opsward.base.DiagnosisReport"><code class="xref py py-class docutils literal notranslate"><span class="pre">DiagnosisReport</span></code></a></span></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -258,11 +259,6 @@ loses points (see <a class="reference internal" href="#opsward.score.claude_md_s
 the silent-failure traps: a non-string <code class="docutils literal notranslate"><span class="pre">matcher</span></code>, an unknown event name,
 or an entry with no runnable <code class="docutils literal notranslate"><span class="pre">command</span></code> hook — none of which Claude Code
 honors, so the hook never fires even though the file “looks” configured.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span></p>
-</dd>
-</dl>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="gp">&gt;&gt;&gt; </span><span class="n">validate_hooks_config</span><span class="p">({</span><span class="s1">'hooks'</span><span class="p">:</span> <span class="p">{</span><span class="s1">'PostToolUse'</span><span class="p">:</span> <span class="p">[</span>
 </span><span data-line="2"><span class="gp">... </span>    <span class="p">{</span><span class="s1">'matcher'</span><span class="p">:</span> <span class="s1">'Edit'</span><span class="p">,</span> <span class="s1">'hooks'</span><span class="p">:</span> <span class="p">[{</span><span class="s1">'type'</span><span class="p">:</span> <span class="s1">'command'</span><span class="p">,</span> <span class="s1">'command'</span><span class="p">:</span> <span class="s1">'x'</span><span class="p">}]}]}})</span>
 </span><span data-line="3"><span class="go">[]</span>
@@ -274,6 +270,11 @@ honors, so the hook never fires even though the file “looks” configured.</p>
 </span><span data-line="9"><span class="go">True</span>
 </span></pre></div>
 </div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py function">
@@ -281,11 +282,6 @@ honors, so the hook never fires even though the file “looks” configured.</p>
 <span class="sig-prename descclassname"><span class="pre">opsward.score.</span></span><span class="sig-name descname"><span class="pre">validate_skill_spec</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skill</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/score.html#validate_skill_spec"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.score.validate_skill_spec" title="Link to this definition">#</a></dt>
 <dd><p>Validate a SkillInfo against the agentskills.io specification.</p>
 <p>Returns a list of human-readable violation strings (empty = compliant).</p>
-<dl class="field-list simple">
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span></p>
-</dd>
-</dl>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 </span><span data-line="2"><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">opsward.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">SkillInfo</span>
 </span><span data-line="3"><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="n">SkillInfo</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">'good-skill'</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s1">'.'</span><span class="p">),</span> <span class="n">has_skill_md</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
@@ -294,6 +290,11 @@ honors, so the hook never fires even though the file “looks” configured.</p>
 </span><span data-line="6"><span class="go">[]</span>
 </span></pre></div>
 </div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span></p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>
@@ -338,7 +339,7 @@ honors, so the hook never fires even though the file “looks” configured.</p>
     </div>
   </div>
 </footer>
-      <script src="../_static/documentation_options.js?v=63b572e7"></script>
+      <script src="../_static/documentation_options.js?v=8bafd125"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>

@@ -24,12 +24,12 @@ A recommended skill from the ecosystem.
 
 Recommend ecosystem skills based on detected tech stack.
 
-* **Return type:**
-  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`SkillRecommendation`](#opsward.recommend.SkillRecommendation)]
-
 ```pycon
 >>> from pathlib import Path
 >>> from opsward.base import ScanResult
 >>> recommend_skills(ScanResult(project_root=Path('/tmp/empty')))
 []
 ```
+
+* **Return type:**
+  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`SkillRecommendation`](#opsward.recommend.SkillRecommendation)]

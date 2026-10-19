@@ -4,9 +4,6 @@
 
 Determine which artifacts are missing, render templates, return files to create.
 
-* **Return type:**
-  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`GeneratedFile`](opsward.base.html.md#opsward.base.GeneratedFile)]
-
 ```pycon
 >>> from pathlib import Path
 >>> from opsward.base import ScanResult
@@ -14,3 +11,6 @@ Determine which artifacts are missing, render templates, return files to create.
 >>> any(f.target_path.name == 'CLAUDE.md' for f in files)
 True
 ```
+
+* **Return type:**
+  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`GeneratedFile`](opsward.base.html.md#opsward.base.GeneratedFile)]

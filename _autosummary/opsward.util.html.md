@@ -29,11 +29,11 @@ Read a JSON file, returning None on any failure.
 
 Read a text file, returning ‘’ if it doesn’t exist or can’t be decoded.
 
-* **Return type:**
-  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
-
 ```pycon
 >>> from pathlib import Path
 >>> read_text_safe(Path('/nonexistent/file.txt'))
 ''
 ```
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)

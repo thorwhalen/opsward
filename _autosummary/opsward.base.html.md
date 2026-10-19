@@ -22,13 +22,13 @@ Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
 An agent found in .claude/agents/.
 
-### *class* opsward.base.ComponentScore(name, score, max_score=100, notes=<factory>)
+### *class* opsward.base.ComponentScore(name, score, max_score=100, notes=list())
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
 Score for a single component (0–100) with optional notes.
 
-### *class* opsward.base.DiagnosisReport(project_root, project_type, scores=<factory>, missing_items=<factory>, suggestions=<factory>, weighted_score=0.0)
+### *class* opsward.base.DiagnosisReport(project_root, project_type, scores=list(), missing_items=list(), suggestions=list(), weighted_score=0.0)
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
@@ -75,13 +75,13 @@ Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
 A rule found in .claude/rules/.
 
-### *class* opsward.base.ScanResult(project_root, project_type=ProjectType.unknown, claude_md_path=None, claude_md_content='', skills=<factory>, agents=<factory>, rules=<factory>, hooks_path=None, hooks_config=None, docs=<factory>, has_docs_guide=False, docs_guide_path=None, agents_md_path=None, agents_md_content='', is_monorepo=False, monorepo_packages=<factory>)
+### *class* opsward.base.ScanResult(project_root, project_type=ProjectType.unknown, claude_md_path=None, claude_md_content='', skills=list(), agents=list(), rules=list(), hooks_path=None, hooks_config=None, docs=list(), has_docs_guide=False, docs_guide_path=None, agents_md_path=None, agents_md_content='', is_monorepo=False, monorepo_packages=list())
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
 Everything we learned by reading (never writing) a target project.
 
-### *class* opsward.base.SkillInfo(name, path, has_skill_md=False, description='', frontmatter=<factory>, line_count=0)
+### *class* opsward.base.SkillInfo(name, path, has_skill_md=False, description='', frontmatter=dict(), line_count=0)
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 

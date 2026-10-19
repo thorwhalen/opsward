@@ -41,15 +41,15 @@ Return a [`SizeOverrun`](#opsward.score.SizeOverrun) if *content* exceeds *max_c
 The penalty is proportional to the overrun: `_CONCISE_SIZE_PENALTY_MAX`
 points at twice the threshold (at least 1 once over it).
 
-* **Return type:**
-  [`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`SizeOverrun`](#opsward.score.SizeOverrun)]
-
 ```pycon
 >>> claude_md_size_overrun("x" * 11, max_chars=10).penalty
 1
 >>> claude_md_size_overrun("short", max_chars=10) is None
 True
 ```
+
+* **Return type:**
+  [`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`SizeOverrun`](#opsward.score.SizeOverrun)]
 
 ### opsward.score.diagnose(scan_result, , claude_md_max_chars=10000)
 
@@ -58,9 +58,6 @@ Score a ScanResult and return a DiagnosisReport.
 `claude_md_max_chars` is the CLAUDE.md size above which Conciseness
 loses points (see [`claude_md_size_overrun()`](#opsward.score.claude_md_size_overrun)).
 
-* **Return type:**
-  [`DiagnosisReport`](opsward.base.html.md#opsward.base.DiagnosisReport)
-
 ```pycon
 >>> from pathlib import Path
 >>> from opsward.base import ScanResult
@@ -68,6 +65,9 @@ loses points (see [`claude_md_size_overrun()`](#opsward.score.claude_md_size_ove
 >>> r.grade
 'F'
 ```
+
+* **Return type:**
+  [`DiagnosisReport`](opsward.base.html.md#opsward.base.DiagnosisReport)
 
 ### opsward.score.docs_dir_hint(sr)
 
@@ -85,9 +85,6 @@ the silent-failure traps: a non-string `matcher`, an unknown event name,
 or an entry with no runnable `command` hook — none of which Claude Code
 honors, so the hook never fires even though the file “looks” configured.
 
-* **Return type:**
-  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
-
 ```pycon
 >>> validate_hooks_config({'hooks': {'PostToolUse': [
 ...     {'matcher': 'Edit', 'hooks': [{'type': 'command', 'command': 'x'}]}]}})
@@ -100,14 +97,14 @@ honors, so the hook never fires even though the file “looks” configured.
 True
 ```
 
+* **Return type:**
+  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
+
 ### opsward.score.validate_skill_spec(skill)
 
 Validate a SkillInfo against the agentskills.io specification.
 
 Returns a list of human-readable violation strings (empty = compliant).
-
-* **Return type:**
-  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
 
 ```pycon
 >>> from pathlib import Path
@@ -117,3 +114,6 @@ Returns a list of human-readable violation strings (empty = compliant).
 >>> validate_skill_spec(s)
 []
 ```
+
+* **Return type:**
+  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]

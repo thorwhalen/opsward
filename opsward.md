@@ -1,4 +1,4 @@
-> built 2026-10-14 05:16 UTC from f78e1da (main) · opsward 0.0.17. Details: build_info.json
+> built 2026-10-19 11:01 UTC from 4f0194b (main) · opsward 0.0.18. Details: build_info.json
 
 # index.html.md
 
@@ -263,13 +263,13 @@ Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
 An agent found in .claude/agents/.
 
-### *class* opsward.base.ComponentScore(name, score, max_score=100, notes=<factory>)
+### *class* opsward.base.ComponentScore(name, score, max_score=100, notes=list())
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
 Score for a single component (0–100) with optional notes.
 
-### *class* opsward.base.DiagnosisReport(project_root, project_type, scores=<factory>, missing_items=<factory>, suggestions=<factory>, weighted_score=0.0)
+### *class* opsward.base.DiagnosisReport(project_root, project_type, scores=list(), missing_items=list(), suggestions=list(), weighted_score=0.0)
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
@@ -316,13 +316,13 @@ Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
 A rule found in .claude/rules/.
 
-### *class* opsward.base.ScanResult(project_root, project_type=ProjectType.unknown, claude_md_path=None, claude_md_content='', skills=<factory>, agents=<factory>, rules=<factory>, hooks_path=None, hooks_config=None, docs=<factory>, has_docs_guide=False, docs_guide_path=None, agents_md_path=None, agents_md_content='', is_monorepo=False, monorepo_packages=<factory>)
+### *class* opsward.base.ScanResult(project_root, project_type=ProjectType.unknown, claude_md_path=None, claude_md_content='', skills=list(), agents=list(), rules=list(), hooks_path=None, hooks_config=None, docs=list(), has_docs_guide=False, docs_guide_path=None, agents_md_path=None, agents_md_content='', is_monorepo=False, monorepo_packages=list())
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
 Everything we learned by reading (never writing) a target project.
 
-### *class* opsward.base.SkillInfo(name, path, has_skill_md=False, description='', frontmatter=<factory>, line_count=0)
+### *class* opsward.base.SkillInfo(name, path, has_skill_md=False, description='', frontmatter=dict(), line_count=0)
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
@@ -478,9 +478,6 @@ backend (needs `toolery[ir]`). Defaults to the current directory when no roots g
 
 Determine which artifacts are missing, render templates, return files to create.
 
-* **Return type:**
-  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`GeneratedFile`](_autosummary/opsward.base.html.md#opsward.base.GeneratedFile)]
-
 ```pycon
 >>> from pathlib import Path
 >>> from opsward.base import ScanResult
@@ -488,6 +485,9 @@ Determine which artifacts are missing, render templates, return files to create.
 >>> any(f.target_path.name == 'CLAUDE.md' for f in files)
 True
 ```
+
+* **Return type:**
+  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`GeneratedFile`](_autosummary/opsward.base.html.md#opsward.base.GeneratedFile)]
 
 
 # _autosummary/opsward.html.md
@@ -519,15 +519,15 @@ Diagnose, generate, and maintain the AI agent setup of your projects.
 
 Detect maintenance issues and return suggestions.
 
-* **Return type:**
-  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`MaintenanceSuggestion`](_autosummary/opsward.base.html.md#opsward.base.MaintenanceSuggestion)]
-
 ```pycon
 >>> from pathlib import Path
 >>> from opsward.base import ScanResult
 >>> maintain(ScanResult(project_root=Path('/tmp/empty')))
 []
 ```
+
+* **Return type:**
+  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`MaintenanceSuggestion`](_autosummary/opsward.base.html.md#opsward.base.MaintenanceSuggestion)]
 
 
 # _autosummary/opsward.recommend.html.md
@@ -558,15 +558,15 @@ A recommended skill from the ecosystem.
 
 Recommend ecosystem skills based on detected tech stack.
 
-* **Return type:**
-  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`SkillRecommendation`](_autosummary/opsward.recommend.html.md#opsward.recommend.SkillRecommendation)]
-
 ```pycon
 >>> from pathlib import Path
 >>> from opsward.base import ScanResult
 >>> recommend_skills(ScanResult(project_root=Path('/tmp/empty')))
 []
 ```
+
+* **Return type:**
+  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`SkillRecommendation`](_autosummary/opsward.recommend.html.md#opsward.recommend.SkillRecommendation)]
 
 
 # _autosummary/opsward.scan.html.md
@@ -577,15 +577,15 @@ Recommend ecosystem skills based on detected tech stack.
 
 Scan *project_root* and return a ScanResult.
 
-* **Return type:**
-  [`ScanResult`](_autosummary/opsward.base.html.md#opsward.base.ScanResult)
-
 ```pycon
 >>> import tempfile, pathlib
 >>> r = scan(pathlib.Path(tempfile.mkdtemp()))
 >>> r.project_type
 <ProjectType.unknown: 'unknown'>
 ```
+
+* **Return type:**
+  [`ScanResult`](_autosummary/opsward.base.html.md#opsward.base.ScanResult)
 
 
 # _autosummary/opsward.score.html.md
@@ -633,15 +633,15 @@ Return a [`SizeOverrun`](_autosummary/opsward.score.html.md#opsward.score.SizeOv
 The penalty is proportional to the overrun: `_CONCISE_SIZE_PENALTY_MAX`
 points at twice the threshold (at least 1 once over it).
 
-* **Return type:**
-  [`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`SizeOverrun`](_autosummary/opsward.score.html.md#opsward.score.SizeOverrun)]
-
 ```pycon
 >>> claude_md_size_overrun("x" * 11, max_chars=10).penalty
 1
 >>> claude_md_size_overrun("short", max_chars=10) is None
 True
 ```
+
+* **Return type:**
+  [`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`SizeOverrun`](_autosummary/opsward.score.html.md#opsward.score.SizeOverrun)]
 
 ### opsward.score.diagnose(scan_result, , claude_md_max_chars=10000)
 
@@ -650,9 +650,6 @@ Score a ScanResult and return a DiagnosisReport.
 `claude_md_max_chars` is the CLAUDE.md size above which Conciseness
 loses points (see [`claude_md_size_overrun()`](_autosummary/opsward.score.html.md#opsward.score.claude_md_size_overrun)).
 
-* **Return type:**
-  [`DiagnosisReport`](_autosummary/opsward.base.html.md#opsward.base.DiagnosisReport)
-
 ```pycon
 >>> from pathlib import Path
 >>> from opsward.base import ScanResult
@@ -660,6 +657,9 @@ loses points (see [`claude_md_size_overrun()`](_autosummary/opsward.score.html.m
 >>> r.grade
 'F'
 ```
+
+* **Return type:**
+  [`DiagnosisReport`](_autosummary/opsward.base.html.md#opsward.base.DiagnosisReport)
 
 ### opsward.score.docs_dir_hint(sr)
 
@@ -677,9 +677,6 @@ the silent-failure traps: a non-string `matcher`, an unknown event name,
 or an entry with no runnable `command` hook — none of which Claude Code
 honors, so the hook never fires even though the file “looks” configured.
 
-* **Return type:**
-  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
-
 ```pycon
 >>> validate_hooks_config({'hooks': {'PostToolUse': [
 ...     {'matcher': 'Edit', 'hooks': [{'type': 'command', 'command': 'x'}]}]}})
@@ -692,14 +689,14 @@ honors, so the hook never fires even though the file “looks” configured.
 True
 ```
 
+* **Return type:**
+  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
+
 ### opsward.score.validate_skill_spec(skill)
 
 Validate a SkillInfo against the agentskills.io specification.
 
 Returns a list of human-readable violation strings (empty = compliant).
-
-* **Return type:**
-  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
 
 ```pycon
 >>> from pathlib import Path
@@ -709,6 +706,9 @@ Returns a list of human-readable violation strings (empty = compliant).
 >>> validate_skill_spec(s)
 []
 ```
+
+* **Return type:**
+  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
 
 
 # _autosummary/opsward.util.html.md
@@ -744,14 +744,14 @@ Read a JSON file, returning None on any failure.
 
 Read a text file, returning ‘’ if it doesn’t exist or can’t be decoded.
 
-* **Return type:**
-  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
-
 ```pycon
 >>> from pathlib import Path
 >>> read_text_safe(Path('/nonexistent/file.txt'))
 ''
 ```
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 
 
 # about-this-build.html.md
@@ -760,18 +760,18 @@ Read a text file, returning ‘’ if it doesn’t exist or can’t be decoded.
 
 # About this build
 
-This documentation was built on **2026-10-14 05:16 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/f78e1da44ab293a30f3bbea423c41255d365e8e9"><code>f78e1da</code></a> on branch <code>main</code>, for **opsward 0.0.17** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-10-19 11:01 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/4f0194bdee159ee3d81e33e721e60da51478b188"><code>4f0194b</code></a> on branch <code>main</code>, for **opsward 0.0.18** (from <code>pyproject.toml</code>).
 
 #### WARNING
 The documentation and the package may be misaligned:
 
-- The documented version (0.0.17) is behind the latest release on PyPI (0.0.18): `pip install opsward` gives newer code than these docs describe.
+- The documented version (0.0.18) is behind the latest release on PyPI (0.0.19): `pip install opsward` gives newer code than these docs describe.
 
 ## Source
 
 |                     |                                                                                                                                                           |
 |---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/opsward/commit/f78e1da44ab293a30f3bbea423c41255d365e8e9"><code>f78e1da44ab293a30f3bbea423c41255d365e8e9</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/opsward/commit/4f0194bdee159ee3d81e33e721e60da51478b188"><code>4f0194bdee159ee3d81e33e721e60da51478b188</code></a> |
 | Branch              | <code>main</code>                                                                                                                                         |
 | Tags at this commit | none                                                                                                                                                      |
 | Working tree        | clean                                                                                                                                                     |
@@ -782,9 +782,9 @@ The documentation and the package may be misaligned:
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/opsward</code>                                                            |
-| Run          | <a href="https://github.com/thorwhalen/opsward/actions/runs/38515569842">38515569842</a>   |
+| Run          | <a href="https://github.com/thorwhalen/opsward/actions/runs/39241385053">39241385053</a>   |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>f78e1da44ab293a30f3bbea423c41255d365e8e9</code> (in the history of the built commit) |
+| Event commit | <code>4f0194bdee159ee3d81e33e721e60da51478b188</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -809,13 +809,13 @@ The documentation and the package may be misaligned:
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/opsward/0.0.18/">0.0.18</a>, newer than the documented version (0.0.17).
+Latest release: <a href="https://pypi.org/project/opsward/0.0.19/">0.0.19</a>, newer than the documented version (0.0.18).
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/opsward && cd opsward
-git checkout f78e1da44ab293a30f3bbea423c41255d365e8e9
+git checkout 4f0194bdee159ee3d81e33e721e60da51478b188
 pip install "epythet==0.2.17"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
