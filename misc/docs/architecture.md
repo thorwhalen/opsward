@@ -58,6 +58,7 @@ Generated artifacts include CLAUDE.md, docs, skills, agents, and rules, plus opt
    - `outdated_doc`: docs with no git commit in the last 90 days (skipped outside a git repo)
    - `incomplete_skill`: skills with no SKILL.md or no description
    - `empty_doc`: docs under 50 bytes (stubs)
+   - `subagent_twin`: a skill's declared subagent twin is missing or stale, or a hand-written agent duplicates a skill (`subagents.py`, ADR 0009)
 3. Returns `list[MaintenanceSuggestion]` — each with a category, description, and optional diff.
 
 ## Module Responsibilities
@@ -66,6 +67,7 @@ Generated artifacts include CLAUDE.md, docs, skills, agents, and rules, plus opt
 |--------|---------------|-----|
 | `scan.py` | Read-only filesystem inspection | `Path → ScanResult` |
 | `score.py` | Pure scoring logic | `ScanResult → DiagnosisReport` |
+| `subagents.py` | Skill-declared subagent twins: spec, render, sync state | `SkillInfo → SubagentSpec`, `ScanResult → GeneratedFile / MaintenanceSuggestion` |
 | `generate.py` | Template loading + rendering | `ScanResult → list[GeneratedFile]` |
 | `maintain.py` | Drift/staleness detection | `ScanResult → list[MaintenanceSuggestion]` |
 | `recommend.py` | Maps detected dependencies/frameworks to curated ecosystem skills (design: `recommend_design.md`) | `ScanResult → list[SkillRecommendation]` |

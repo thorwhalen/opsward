@@ -9,6 +9,7 @@ from pathlib import Path
 from string import Template
 
 from opsward.base import GeneratedFile, ProjectType, ScanResult
+from opsward.subagents import subagent_files
 from opsward.util import read_text_safe
 
 # Names never shown in a module map (VCS, caches, build/vendor output)
@@ -24,6 +25,7 @@ _SKILL_NAMES = (
     "opsward-diagnose",
     "opsward-generate",
     "opsward-maintain",
+    "opsward-subagents",
 )
 
 # Agent definitions that opsward installs
@@ -103,6 +105,12 @@ def generate(
     if "setup-auditor" not in existing_agents:
         target = sr.project_root / ".claude" / "agents" / "setup-auditor.md"
         files.append(_render("shared/setup-auditor.md", target, variables))
+
+    # Subagent twins declared by the project's own skills (ADR 0009): the
+    # declaration is the evidence; a twin that already exists is left alone.
+    for gf in subagent_files(sr):
+        if gf.target_path.stem not in existing_agents:
+            files.append(gf)
 
     # AI-enhanced skills (invoke opsward CLI + Claude interpretation)
     for skill_name in _SKILL_NAMES:
