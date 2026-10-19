@@ -13,5 +13,7 @@ opsward.cli
       generate
       install_skills
       maintain
+      new
+      note
       recommend
    

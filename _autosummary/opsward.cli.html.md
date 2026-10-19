@@ -4,13 +4,15 @@ CLI dispatch for opsward.
 
 ### Functions
 
-| [`diagnose`](#opsward.cli.diagnose)(\*project_roots[, format, verbose, ...])   | Diagnose the AI agent setup of one or more projects.                          |
-|------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------|
-| [`find`](#opsward.cli.find)(query, \*project_roots[, kinds, ...])          | Find assets (skills, agents, docs) across one or more projects by QUERY.      |
-| [`generate`](#opsward.cli.generate)(\*project_roots[, write, format, ...])     | Generate missing AI setup artifacts for one or more projects.                 |
-| [`install_skills`](#opsward.cli.install_skills)([target, global_install, ...])       | Install opsward's Claude Code skills (and agents) into a project or globally. |
-| [`maintain`](#opsward.cli.maintain)(\*project_roots[, format])                 | Check for stale references, out-of-sync docs, and other drift.                |
-| [`recommend`](#opsward.cli.recommend)(\*project_roots[, format])                | Recommend ecosystem skills based on the project's tech stack.                 |
+| [`diagnose`](#opsward.cli.diagnose)(\*project_roots[, format, verbose, ...])   | Diagnose the AI agent setup of one or more projects.                                                   |
+|------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------|
+| [`find`](#opsward.cli.find)(query, \*project_roots[, kinds, ...])          | Find assets (skills, agents, docs) across one or more projects by QUERY.                               |
+| [`generate`](#opsward.cli.generate)(\*project_roots[, write, format, ...])     | Generate missing AI setup artifacts for one or more projects.                                          |
+| [`install_skills`](#opsward.cli.install_skills)([target, global_install, ...])       | Install opsward's Claude Code skills (and agents) into a project or globally.                          |
+| [`maintain`](#opsward.cli.maintain)(\*project_roots[, format])                 | Check for stale references, out-of-sync docs, and other drift.                                         |
+| [`new`](#opsward.cli.new)(title[, write, project_root, status, ...])      | Allocate the next numbered ADR for TITLE (dry run unless --write; never overwrites).                   |
+| [`note`](#opsward.cli.note)(text[, write, project_root])                   | Append TEXT as a dated one-line decision (a Y-statement) to decisions/log.md (dry run unless --write). |
+| [`recommend`](#opsward.cli.recommend)(\*project_roots[, format])                | Recommend ecosystem skills based on the project's tech stack.                                          |
 
 ### opsward.cli.diagnose(\*project_roots, format='text', verbose=False, min_score=80)
 
@@ -70,6 +72,26 @@ Check for stale references, out-of-sync docs, and other drift.
 * **Parameters:**
   * **project_roots** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – one or more paths to project directories
   * **format** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – output format — ‘text’ or ‘json’
+
+### opsward.cli.new(title, write=False, project_root='.', status='Proposed', evidence='')
+
+Allocate the next numbered ADR for TITLE (dry run unless –write; never overwrites).
+
+* **Parameters:**
+  * **title** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – the decision’s title; the file name is derived from it
+  * **write** ([`bool`](https://docs.python.org/3/builtins/functions.html#bool)) – actually write the file (default: dry run)
+  * **project_root** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – the project directory (default: current dir)
+  * **status** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – initial status — Proposed (default), or Accepted when the human has accepted it
+  * **evidence** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – the issue, discussion or PR this rests on (a URL or #N)
+
+### opsward.cli.note(text, write=False, project_root='.')
+
+Append TEXT as a dated one-line decision (a Y-statement) to decisions/log.md (dry run unless –write).
+
+* **Parameters:**
+  * **text** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – the decision: “In the context of …, facing …, we decided for …, because …”
+  * **write** ([`bool`](https://docs.python.org/3/builtins/functions.html#bool)) – actually append (default: dry run); the log is created from its template when missing
+  * **project_root** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – the project directory (default: current dir)
 
 ### opsward.cli.recommend(\*project_roots, format='text')
 

@@ -1,4 +1,4 @@
-> built 2026-10-19 11:56 UTC from 54ab417 (main) · opsward 0.0.20. Details: build_info.json
+> built 2026-10-19 12:29 UTC from 8baaa01 (main) · opsward 0.0.21. Details: build_info.json
 
 # index.html.md
 
@@ -316,7 +316,7 @@ Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
 A rule found in .claude/rules/.
 
-### *class* opsward.base.ScanResult(project_root, project_type=ProjectType.unknown, claude_md_path=None, claude_md_content='', skills=list(), agents=list(), rules=list(), hooks_path=None, hooks_config=None, docs=list(), has_docs_guide=False, docs_guide_path=None, agents_md_path=None, agents_md_content='', is_monorepo=False, monorepo_packages=list(), global_skills=list(), global_skills_dir=None)
+### *class* opsward.base.ScanResult(project_root, project_type=ProjectType.unknown, claude_md_path=None, claude_md_content='', skills=list(), agents=list(), rules=list(), hooks_path=None, hooks_config=None, docs=list(), has_docs_guide=False, docs_guide_path=None, agents_md_path=None, agents_md_content='', is_monorepo=False, monorepo_packages=list(), decisions=list(), global_skills=list(), global_skills_dir=None)
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
@@ -337,13 +337,15 @@ CLI dispatch for opsward.
 
 ### Functions
 
-| [`diagnose`](_autosummary/opsward.cli.html.md#opsward.cli.diagnose)(\*project_roots[, format, verbose, ...])   | Diagnose the AI agent setup of one or more projects.                          |
-|------------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------|
-| [`find`](_autosummary/opsward.cli.html.md#opsward.cli.find)(query, \*project_roots[, kinds, ...])          | Find assets (skills, agents, docs) across one or more projects by QUERY.      |
-| [`generate`](_autosummary/opsward.cli.html.md#opsward.cli.generate)(\*project_roots[, write, format, ...])     | Generate missing AI setup artifacts for one or more projects.                 |
-| [`install_skills`](_autosummary/opsward.cli.html.md#opsward.cli.install_skills)([target, global_install, ...])       | Install opsward's Claude Code skills (and agents) into a project or globally. |
-| [`maintain`](_autosummary/opsward.cli.html.md#opsward.cli.maintain)(\*project_roots[, format])                 | Check for stale references, out-of-sync docs, and other drift.                |
-| [`recommend`](_autosummary/opsward.cli.html.md#opsward.cli.recommend)(\*project_roots[, format])                | Recommend ecosystem skills based on the project's tech stack.                 |
+| [`diagnose`](_autosummary/opsward.cli.html.md#opsward.cli.diagnose)(\*project_roots[, format, verbose, ...])   | Diagnose the AI agent setup of one or more projects.                                                   |
+|------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------|
+| [`find`](_autosummary/opsward.cli.html.md#opsward.cli.find)(query, \*project_roots[, kinds, ...])          | Find assets (skills, agents, docs) across one or more projects by QUERY.                               |
+| [`generate`](_autosummary/opsward.cli.html.md#opsward.cli.generate)(\*project_roots[, write, format, ...])     | Generate missing AI setup artifacts for one or more projects.                                          |
+| [`install_skills`](_autosummary/opsward.cli.html.md#opsward.cli.install_skills)([target, global_install, ...])       | Install opsward's Claude Code skills (and agents) into a project or globally.                          |
+| [`maintain`](_autosummary/opsward.cli.html.md#opsward.cli.maintain)(\*project_roots[, format])                 | Check for stale references, out-of-sync docs, and other drift.                                         |
+| [`new`](_autosummary/opsward.cli.html.md#opsward.cli.new)(title[, write, project_root, status, ...])      | Allocate the next numbered ADR for TITLE (dry run unless --write; never overwrites).                   |
+| [`note`](_autosummary/opsward.cli.html.md#opsward.cli.note)(text[, write, project_root])                   | Append TEXT as a dated one-line decision (a Y-statement) to decisions/log.md (dry run unless --write). |
+| [`recommend`](_autosummary/opsward.cli.html.md#opsward.cli.recommend)(\*project_roots[, format])                | Recommend ecosystem skills based on the project's tech stack.                                          |
 
 ### opsward.cli.diagnose(\*project_roots, format='text', verbose=False, min_score=80)
 
@@ -404,6 +406,26 @@ Check for stale references, out-of-sync docs, and other drift.
   * **project_roots** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – one or more paths to project directories
   * **format** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – output format — ‘text’ or ‘json’
 
+### opsward.cli.new(title, write=False, project_root='.', status='Proposed', evidence='')
+
+Allocate the next numbered ADR for TITLE (dry run unless –write; never overwrites).
+
+* **Parameters:**
+  * **title** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – the decision’s title; the file name is derived from it
+  * **write** ([`bool`](https://docs.python.org/3/builtins/functions.html#bool)) – actually write the file (default: dry run)
+  * **project_root** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – the project directory (default: current dir)
+  * **status** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – initial status — Proposed (default), or Accepted when the human has accepted it
+  * **evidence** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – the issue, discussion or PR this rests on (a URL or #N)
+
+### opsward.cli.note(text, write=False, project_root='.')
+
+Append TEXT as a dated one-line decision (a Y-statement) to decisions/log.md (dry run unless –write).
+
+* **Parameters:**
+  * **text** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – the decision: “In the context of …, facing …, we decided for …, because …”
+  * **write** ([`bool`](https://docs.python.org/3/builtins/functions.html#bool)) – actually append (default: dry run); the log is created from its template when missing
+  * **project_root** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – the project directory (default: current dir)
+
 ### opsward.cli.recommend(\*project_roots, format='text')
 
 Recommend ecosystem skills based on the project’s tech stack.
@@ -441,6 +463,179 @@ Generation templates organized by target project type.
 any project; `python/` and `jsts/` hold language-specific variants. The
 generator reads these via `importlib.resources` and substitutes
 `${variable}` placeholders (`string.Template`) before writing to a target.
+
+
+# _autosummary/opsward.decisions.html.md
+
+# opsward.decisions
+
+Decision capture: numbered ADRs, the one-line decision log, and their drift.
+
+Two tiers, per ADR 0010 and `misc/docs/research/adr_and_home_finding.md`: a
+trivial or medium decision is one **Y-statement** line appended to `decisions/log.md`
+(“In the context of …, facing …, we decided for …, to achieve …, accepting …,
+because …”); a load-bearing, expensive-to-reverse one is a numbered **MADR** file
+`decisions/NNNN-slug.md` that is never edited once accepted, only superseded.
+
+Pure functions here; the CLI (`opsward decision new|note`) is the only writer, and
+it never overwrites. `maintain` uses [`check_decisions()`](_autosummary/opsward.decisions.html.md#opsward.decisions.check_decisions) to report an ADR that
+cites a path which no longer exists, or that has no Status, which is how rot shows up.
+
+### Functions
+
+| [`adr_files`](_autosummary/opsward.decisions.html.md#opsward.decisions.adr_files)(decisions_dir)                         | The numbered ADR files in *decisions_dir*, in number order (the template is not one).                                                                   |
+|---------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
+| [`check_decisions`](_autosummary/opsward.decisions.html.md#opsward.decisions.check_decisions)(sr)                              | `maintain` check: ADRs citing paths that no longer exist, or carrying no status.                                                                        |
+| [`cited_paths`](_autosummary/opsward.decisions.html.md#opsward.decisions.cited_paths)(content)                             | Paths an ADR cites as current, outside fenced code: bare path tokens and Markdown link targets (relative ones only; URLs and host names are not paths). |
+| [`clean_title`](_autosummary/opsward.decisions.html.md#opsward.decisions.clean_title)(title)                               | One line, single-spaced; empty is an error the CLI reports.                                                                                             |
+| [`decision_docs`](_autosummary/opsward.decisions.html.md#opsward.decisions.decision_docs)(sr)                                | The ADRs a scan found (`ScanResult.decisions`), numbered files only.                                                                                    |
+| [`log_append`](_autosummary/opsward.decisions.html.md#opsward.decisions.log_append)(decisions_dir, text, \*[, date])      | The log file and the full content it should hold after appending *text*.                                                                                |
+| [`log_entry`](_autosummary/opsward.decisions.html.md#opsward.decisions.log_entry)(text, \*[, date])                      | One Y-statement line for `decisions/log.md`.                                                                                                            |
+| [`new_adr`](_autosummary/opsward.decisions.html.md#opsward.decisions.new_adr)(decisions_dir, title, \*[, status, ...]) | The next numbered ADR for *title*, rendered from the `adr.md` template.                                                                                 |
+| [`next_number`](_autosummary/opsward.decisions.html.md#opsward.decisions.next_number)(decisions_dir)                       | One more than the highest numbered ADR, so numbers never collide (1 for an empty dir).                                                                  |
+| [`slugify`](_autosummary/opsward.decisions.html.md#opsward.decisions.slugify)(title)                                   | A file-name slug: lowercase, hyphens, nothing else, at most 60 characters.                                                                              |
+| [`status_of`](_autosummary/opsward.decisions.html.md#opsward.decisions.status_of)(content)                               | The ADR's status text, from a `## Status` heading, a `**Status:**` line or MADR front matter; `None` when there is none.                                |
+
+### opsward.decisions.adr_files(decisions_dir)
+
+The numbered ADR files in *decisions_dir*, in number order (the template is not one).
+
+* **Return type:**
+  [`Iterator`](https://docs.python.org/3/library/typing.html#typing.Iterator)[[`Path`](https://docs.python.org/3/library/pathlib.html#pathlib.Path)]
+
+### opsward.decisions.check_decisions(sr)
+
+`maintain` check: ADRs citing paths that no longer exist, or carrying no status.
+
+Rot in a decision record is a path that moved: the rationale still reads well and
+points at nothing. Superseded, deprecated and rejected ADRs are history and are not
+checked for paths: the superseding record is where the current paths live. This
+reports; it never rewrites an accepted ADR (ADR 0010).
+
+* **Return type:**
+  [`Iterable`](https://docs.python.org/3/library/typing.html#typing.Iterable)[[`MaintenanceSuggestion`](_autosummary/opsward.base.html.md#opsward.base.MaintenanceSuggestion)]
+
+### opsward.decisions.cited_paths(content)
+
+Paths an ADR cites as current, outside fenced code: bare path tokens and Markdown
+link targets (relative ones only; URLs and host names are not paths).
+
+A path the record cites as history is not checked: wrap it in `~~strikethrough~~`,
+or say so on the line (`formerly`, `previously`, `moved`, `migrated`,
+`renamed`, `replaced`, `removed`, `retired`, `deleted`), as in “we moved `pkg/old.py` to `pkg/new.py`” — there
+only `pkg/new.py` must exist.
+
+```pycon
+>>> cited_paths("See `pkg/a.py`, [0002](0002-x.md), [doc](../research/r.md), https://x.io/a/b.py, docs.github.com/en/x.md\n```\nsrc/in/fence.py\n```")
+['../research/r.md', '0002-x.md', 'pkg/a.py']
+>>> cited_paths("We moved `pkg/old.py` to `pkg/new.py`; ~~`pkg/gone.py`~~ is history.")
+['pkg/new.py']
+>>> cited_paths("It was read from `pkg/live.py`.\nRenamed [old](../old.md) to [new](../new.md).")
+['../new.md', 'pkg/live.py']
+```
+
+* **Return type:**
+  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
+
+### opsward.decisions.clean_title(title)
+
+One line, single-spaced; empty is an error the CLI reports.
+
+```pycon
+>>> clean_title("  two\n lines ")
+'two lines'
+```
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
+
+### opsward.decisions.decision_docs(sr)
+
+The ADRs a scan found (`ScanResult.decisions`), numbered files only.
+
+* **Return type:**
+  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`DocSpec`](_autosummary/opsward.base.html.md#opsward.base.DocSpec)]
+
+### opsward.decisions.log_append(decisions_dir, text, , date=None)
+
+The log file and the full content it should hold after appending *text*.
+
+A missing log starts from the `log.md` template. The existing log is read
+strictly: an unreadable or non-UTF-8 log raises (`OSError` /
+`UnicodeDecodeError`) rather than being replaced by the new line alone. The
+caller writes; this does not.
+
+* **Return type:**
+  [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`Path`](https://docs.python.org/3/library/pathlib.html#pathlib.Path), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
+
+### opsward.decisions.log_entry(text, , date=None)
+
+One Y-statement line for `decisions/log.md`.
+
+```pycon
+>>> log_entry("In the context of goldens, facing drift, we decided for pinning.", date=_dt.date(2026, 10, 19))
+'- 2026-10-19 — In the context of goldens, facing drift, we decided for pinning.'
+```
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
+
+### opsward.decisions.new_adr(decisions_dir, title, , status='Proposed', date=None, evidence='')
+
+The next numbered ADR for *title*, rendered from the `adr.md` template.
+
+*evidence* is the issue, discussion or PR the decision rests on (a URL or `#N`);
+it lands in the Evidence section so the three surfaces stay linked.
+
+```pycon
+>>> import tempfile
+>>> gf = new_adr(Path(tempfile.mkdtemp()), "Pin the CLI surface", date=_dt.date(2026, 10, 19), evidence="#8")
+>>> gf.target_path.name, gf.content.splitlines()[0]
+('0001-pin-the-cli-surface.md', '# 0001 — Pin the CLI surface')
+```
+
+* **Return type:**
+  [`GeneratedFile`](_autosummary/opsward.base.html.md#opsward.base.GeneratedFile)
+
+### opsward.decisions.next_number(decisions_dir)
+
+One more than the highest numbered ADR, so numbers never collide (1 for an empty dir).
+
+```pycon
+>>> import tempfile
+>>> next_number(Path(tempfile.mkdtemp()))
+1
+```
+
+* **Return type:**
+  [`int`](https://docs.python.org/3/builtins/functions.html#int)
+
+### opsward.decisions.slugify(title)
+
+A file-name slug: lowercase, hyphens, nothing else, at most 60 characters.
+
+```pycon
+>>> slugify("Pin the CLI surface by goldens!")
+'pin-the-cli-surface-by-goldens'
+```
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
+
+### opsward.decisions.status_of(content)
+
+The ADR’s status text, from a `## Status` heading, a `**Status:**` line or
+MADR front matter; `None` when there is none.
+
+```pycon
+>>> status_of("# x\n\n## Status\n\nAccepted (2026-01-01)\n")
+'Accepted (2026-01-01)'
+>>> status_of("---\nstatus: accepted\n---\n# x\n"), status_of("**Status:** Superseded by 0003"), status_of("# x\nno status")
+('accepted', 'Superseded by 0003', None)
+```
+
+* **Return type:**
+  [`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
 
 
 # _autosummary/opsward.discover.html.md
@@ -502,6 +697,7 @@ Diagnose, generate, and maintain the AI agent setup of your projects.
 |---------------------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------|
 | [`cli`](_autosummary/opsward.cli.html.md#module-opsward.cli)                                             | CLI dispatch for opsward.                                                                        |
 | [`data`](_autosummary/opsward.data.html.md#module-opsward.data)                                           | Bundled package resources for opsward, accessed via `importlib.resources.files("opsward.data")`. |
+| [`decisions`](_autosummary/opsward.decisions.html.md#module-opsward.decisions)                                 | Decision capture: numbered ADRs, the one-line decision log, and their drift.                     |
 | [`discover`](_autosummary/opsward.discover.html.md#module-opsward.discover)                                   | Optional cross-repo asset discovery, delegating to the `toolery` package.                        |
 | [`generate`](_autosummary/opsward.generate.html.md#opsward.generate)(scan_result, \*[, agents_md, hooks])     | Determine which artifacts are missing, render templates, return files to create.                 |
 | [`maintain`](_autosummary/opsward.maintain.html.md#opsward.maintain)(scan_result, \*[, previous_report, ...]) | Detect maintenance issues and return suggestions.                                                |
@@ -981,7 +1177,7 @@ Read a text file, returning ‘’ if it doesn’t exist or can’t be decoded.
 
 # About this build
 
-This documentation was built on **2026-10-19 11:56 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/54ab41736ff3baf4523314a8b792e03bf2706fda"><code>54ab417</code></a> on branch <code>main</code>, for **opsward 0.0.20** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-10-19 12:29 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/8baaa015bf68fd823bada88d94633f4580345056"><code>8baaa01</code></a> on branch <code>main</code>, for **opsward 0.0.21** (from <code>pyproject.toml</code>).
 
 #### NOTE
 Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
@@ -990,7 +1186,7 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 |                     |                                                                                                                                                           |
 |---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/opsward/commit/54ab41736ff3baf4523314a8b792e03bf2706fda"><code>54ab41736ff3baf4523314a8b792e03bf2706fda</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/opsward/commit/8baaa015bf68fd823bada88d94633f4580345056"><code>8baaa015bf68fd823bada88d94633f4580345056</code></a> |
 | Branch              | <code>main</code>                                                                                                                                         |
 | Tags at this commit | none                                                                                                                                                      |
 | Working tree        | clean                                                                                                                                                     |
@@ -1001,9 +1197,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/opsward</code>                                                            |
-| Run          | <a href="https://github.com/thorwhalen/opsward/actions/runs/39248114099">39248114099</a>   |
+| Run          | <a href="https://github.com/thorwhalen/opsward/actions/runs/39252262828">39252262828</a>   |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>54ab41736ff3baf4523314a8b792e03bf2706fda</code> (in the history of the built commit) |
+| Event commit | <code>8baaa015bf68fd823bada88d94633f4580345056</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -1028,13 +1224,13 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/opsward/0.0.20/">0.0.20</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/opsward/0.0.21/">0.0.21</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/opsward && cd opsward
-git checkout 54ab41736ff3baf4523314a8b792e03bf2706fda
+git checkout 8baaa015bf68fd823bada88d94633f4580345056
 pip install "epythet==0.2.18"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

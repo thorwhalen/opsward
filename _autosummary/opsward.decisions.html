@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="crimson" data-content_root="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>opsward.decisions - opsward</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="opsward.discover" href="opsward.discover.html" /><link rel="prev" title="opsward.data.templates" href="opsward.data.templates.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d88b86f9" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=2ceb65ce" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx_autodoc_typehints.css?v=057ac668" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    
+  <meta property="og:type" content="website"/><meta property="og:title" content="opsward.decisions"/>
+    <meta name="twitter:card" content="summary"/>
+  
+<link rel="alternate" type="text/markdown" href="opsward.decisions.html.md">
+<link rel="describedby" href="../llms.txt" type="text/markdown">
+</head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="../index.html">
+      
+      
+      <strong>opsward</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials">
+  <a href="https://github.com/thorwhalen/opsward" aria-label="GitHub">
+    <iconify-icon icon="simple-icons:github"></iconify-icon>
+  </a></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2"></span>
+          <span class="hamburger_3"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="0"><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="opsward.html">opsward</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="opsward.base.html">opsward.base</a></li>
+<li class="toctree-l3"><a class="reference internal" href="opsward.cli.html">opsward.cli</a></li>
+<li class="toctree-l3"><a class="reference internal" href="opsward.data.html">opsward.data</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="opsward.data.templates.html">opsward.data.templates</a></li>
+</ul>
+</li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">opsward.decisions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="opsward.discover.html">opsward.discover</a></li>
+<li class="toctree-l3"><a class="reference internal" href="opsward.generate.html">opsward.generate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="opsward.maintain.html">opsward.maintain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="opsward.recommend.html">opsward.recommend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="opsward.scan.html">opsward.scan</a></li>
+<li class="toctree-l3"><a class="reference internal" href="opsward.score.html">opsward.score</a></li>
+<li class="toctree-l3"><a class="reference internal" href="opsward.subagents.html">opsward.subagents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="opsward.util.html">opsward.util</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../ai-agents.html">For AI agents</a></li>
+</ul>
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#opsward.decisions.adr_files"><code class="docutils literal notranslate"><span class="pre">adr_files()</span></code></a></li>
+<li><a class="reference internal" href="#opsward.decisions.check_decisions"><code class="docutils literal notranslate"><span class="pre">check_decisions()</span></code></a></li>
+<li><a class="reference internal" href="#opsward.decisions.cited_paths"><code class="docutils literal notranslate"><span class="pre">cited_paths()</span></code></a></li>
+<li><a class="reference internal" href="#opsward.decisions.clean_title"><code class="docutils literal notranslate"><span class="pre">clean_title()</span></code></a></li>
+<li><a class="reference internal" href="#opsward.decisions.decision_docs"><code class="docutils literal notranslate"><span class="pre">decision_docs()</span></code></a></li>
+<li><a class="reference internal" href="#opsward.decisions.log_append"><code class="docutils literal notranslate"><span class="pre">log_append()</span></code></a></li>
+<li><a class="reference internal" href="#opsward.decisions.log_entry"><code class="docutils literal notranslate"><span class="pre">log_entry()</span></code></a></li>
+<li><a class="reference internal" href="#opsward.decisions.new_adr"><code class="docutils literal notranslate"><span class="pre">new_adr()</span></code></a></li>
+<li><a class="reference internal" href="#opsward.decisions.next_number"><code class="docutils literal notranslate"><span class="pre">next_number()</span></code></a></li>
+<li><a class="reference internal" href="#opsward.decisions.slugify"><code class="docutils literal notranslate"><span class="pre">slugify()</span></code></a></li>
+<li><a class="reference internal" href="#opsward.decisions.status_of"><code class="docutils literal notranslate"><span class="pre">status_of()</span></code></a></li>
+</ul>
+</div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html"><span itemprop="name">opsward</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../api.html"><span itemprop="name">API reference</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="2" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="opsward.html"><span itemprop="name">opsward</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="3" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">opsward.decisions</strong>
+        <meta itemprop="position" content="4" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+  <article class="yue dark-code" role="main">
+          <section id="module-opsward.decisions">
+<span id="opsward-decisions"></span><h1>opsward.decisions<a class="headerlink" href="#module-opsward.decisions" title="Link to this heading">#</a></h1>
+<p>Decision capture: numbered ADRs, the one-line decision log, and their drift.</p>
+<p>Two tiers, per ADR 0010 and <code class="docutils literal notranslate"><span class="pre">misc/docs/research/adr_and_home_finding.md</span></code>: a
+trivial or medium decision is one <strong>Y-statement</strong> line appended to <code class="docutils literal notranslate"><span class="pre">decisions/log.md</span></code>
+(“In the context of …, facing …, we decided for …, to achieve …, accepting …,
+because …”); a load-bearing, expensive-to-reverse one is a numbered <strong>MADR</strong> file
+<code class="docutils literal notranslate"><span class="pre">decisions/NNNN-slug.md</span></code> that is never edited once accepted, only superseded.</p>
+<p>Pure functions here; the CLI (<code class="docutils literal notranslate"><span class="pre">opsward</span> <span class="pre">decision</span> <span class="pre">new|note</span></code>) is the only writer, and
+it never overwrites. <code class="docutils literal notranslate"><span class="pre">maintain</span></code> uses <a class="reference internal" href="#opsward.decisions.check_decisions" title="opsward.decisions.check_decisions"><code class="xref py py-func docutils literal notranslate"><span class="pre">check_decisions()</span></code></a> to report an ADR that
+cites a path which no longer exists, or that has no Status, which is how rot shows up.</p>
+<p class="rubric">Functions</p>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.decisions.adr_files" title="opsward.decisions.adr_files"><code class="xref py py-obj docutils literal notranslate"><span class="pre">adr_files</span></code></a>(decisions_dir)</p></td>
+<td><p>The numbered ADR files in <em>decisions_dir</em>, in number order (the template is not one).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#opsward.decisions.check_decisions" title="opsward.decisions.check_decisions"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_decisions</span></code></a>(sr)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">maintain</span></code> check: ADRs citing paths that no longer exist, or carrying no status.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.decisions.cited_paths" title="opsward.decisions.cited_paths"><code class="xref py py-obj docutils literal notranslate"><span class="pre">cited_paths</span></code></a>(content)</p></td>
+<td><p>Paths an ADR cites as current, outside fenced code: bare path tokens and Markdown link targets (relative ones only; URLs and host names are not paths).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#opsward.decisions.clean_title" title="opsward.decisions.clean_title"><code class="xref py py-obj docutils literal notranslate"><span class="pre">clean_title</span></code></a>(title)</p></td>
+<td><p>One line, single-spaced; empty is an error the CLI reports.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.decisions.decision_docs" title="opsward.decisions.decision_docs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">decision_docs</span></code></a>(sr)</p></td>
+<td><p>The ADRs a scan found (<code class="docutils literal notranslate"><span class="pre">ScanResult.decisions</span></code>), numbered files only.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#opsward.decisions.log_append" title="opsward.decisions.log_append"><code class="xref py py-obj docutils literal notranslate"><span class="pre">log_append</span></code></a>(decisions_dir, text, *[, date])</p></td>
+<td><p>The log file and the full content it should hold after appending <em>text</em>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.decisions.log_entry" title="opsward.decisions.log_entry"><code class="xref py py-obj docutils literal notranslate"><span class="pre">log_entry</span></code></a>(text, *[, date])</p></td>
+<td><p>One Y-statement line for <code class="docutils literal notranslate"><span class="pre">decisions/log.md</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#opsward.decisions.new_adr" title="opsward.decisions.new_adr"><code class="xref py py-obj docutils literal notranslate"><span class="pre">new_adr</span></code></a>(decisions_dir, title, *[, status, ...])</p></td>
+<td><p>The next numbered ADR for <em>title</em>, rendered from the <code class="docutils literal notranslate"><span class="pre">adr.md</span></code> template.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.decisions.next_number" title="opsward.decisions.next_number"><code class="xref py py-obj docutils literal notranslate"><span class="pre">next_number</span></code></a>(decisions_dir)</p></td>
+<td><p>One more than the highest numbered ADR, so numbers never collide (1 for an empty dir).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#opsward.decisions.slugify" title="opsward.decisions.slugify"><code class="xref py py-obj docutils literal notranslate"><span class="pre">slugify</span></code></a>(title)</p></td>
+<td><p>A file-name slug: lowercase, hyphens, nothing else, at most 60 characters.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.decisions.status_of" title="opsward.decisions.status_of"><code class="xref py py-obj docutils literal notranslate"><span class="pre">status_of</span></code></a>(content)</p></td>
+<td><p>The ADR's status text, from a <code class="docutils literal notranslate"><span class="pre">##</span> <span class="pre">Status</span></code> heading, a <code class="docutils literal notranslate"><span class="pre">**Status:**</span></code> line or MADR front matter; <code class="docutils literal notranslate"><span class="pre">None</span></code> when there is none.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py function">
+<dt class="sig sig-object py" id="opsward.decisions.adr_files">
+<span class="sig-prename descclassname"><span class="pre">opsward.decisions.</span></span><span class="sig-name descname"><span class="pre">adr_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">decisions_dir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/decisions.html#adr_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.decisions.adr_files" title="Link to this definition">#</a></dt>
+<dd><p>The numbered ADR files in <em>decisions_dir</em>, in number order (the template is not one).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterator" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Iterator</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="opsward.decisions.check_decisions">
+<span class="sig-prename descclassname"><span class="pre">opsward.decisions.</span></span><span class="sig-name descname"><span class="pre">check_decisions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/decisions.html#check_decisions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.decisions.check_decisions" title="Link to this definition">#</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">maintain</span></code> check: ADRs citing paths that no longer exist, or carrying no status.</p>
+<p>Rot in a decision record is a path that moved: the rationale still reads well and
+points at nothing. Superseded, deprecated and rejected ADRs are history and are not
+checked for paths: the superseding record is where the current paths live. This
+reports; it never rewrites an accepted ADR (ADR 0010).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code></a>[<a class="reference internal" href="opsward.base.html#opsward.base.MaintenanceSuggestion" title="opsward.base.MaintenanceSuggestion"><code class="xref py py-class docutils literal notranslate"><span class="pre">MaintenanceSuggestion</span></code></a>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="opsward.decisions.cited_paths">
+<span class="sig-prename descclassname"><span class="pre">opsward.decisions.</span></span><span class="sig-name descname"><span class="pre">cited_paths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">content</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/decisions.html#cited_paths"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.decisions.cited_paths" title="Link to this definition">#</a></dt>
+<dd><p>Paths an ADR cites as current, outside fenced code: bare path tokens and Markdown
+link targets (relative ones only; URLs and host names are not paths).</p>
+<p>A path the record cites as history is not checked: wrap it in <code class="docutils literal notranslate"><span class="pre">~~strikethrough~~</span></code>,
+or say so on the line (<code class="docutils literal notranslate"><span class="pre">formerly</span></code>, <code class="docutils literal notranslate"><span class="pre">previously</span></code>, <code class="docutils literal notranslate"><span class="pre">moved</span></code>, <code class="docutils literal notranslate"><span class="pre">migrated</span></code>,
+<code class="docutils literal notranslate"><span class="pre">renamed</span></code>, <code class="docutils literal notranslate"><span class="pre">replaced</span></code>, <code class="docutils literal notranslate"><span class="pre">removed</span></code>, <code class="docutils literal notranslate"><span class="pre">retired</span></code>, <code class="docutils literal notranslate"><span class="pre">deleted</span></code>), as in “we moved <code class="code docutils literal notranslate"><span class="pre">pkg/old.py</span></code> to <code class="code docutils literal notranslate"><span class="pre">pkg/new.py</span></code>” — there
+only <code class="code docutils literal notranslate"><span class="pre">pkg/new.py</span></code> must exist.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="gp">&gt;&gt;&gt; </span><span class="n">cited_paths</span><span class="p">(</span><span class="s2">"See `pkg/a.py`, [0002](0002-x.md), [doc](../research/r.md), https://x.io/a/b.py, docs.github.com/en/x.md</span><span class="se">\n</span><span class="s2">```</span><span class="se">\n</span><span class="s2">src/in/fence.py</span><span class="se">\n</span><span class="s2">```"</span><span class="p">)</span>
+</span><span data-line="2"><span class="go">['../research/r.md', '0002-x.md', 'pkg/a.py']</span>
+</span><span data-line="3"><span class="gp">&gt;&gt;&gt; </span><span class="n">cited_paths</span><span class="p">(</span><span class="s2">"We moved `pkg/old.py` to `pkg/new.py`; ~~`pkg/gone.py`~~ is history."</span><span class="p">)</span>
+</span><span data-line="4"><span class="go">['pkg/new.py']</span>
+</span><span data-line="5"><span class="gp">&gt;&gt;&gt; </span><span class="n">cited_paths</span><span class="p">(</span><span class="s2">"It was read from `pkg/live.py`.</span><span class="se">\n</span><span class="s2">Renamed [old](../old.md) to [new](../new.md)."</span><span class="p">)</span>
+</span><span data-line="6"><span class="go">['../new.md', 'pkg/live.py']</span>
+</span></pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="opsward.decisions.clean_title">
+<span class="sig-prename descclassname"><span class="pre">opsward.decisions.</span></span><span class="sig-name descname"><span class="pre">clean_title</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">title</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/decisions.html#clean_title"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.decisions.clean_title" title="Link to this definition">#</a></dt>
+<dd><p>One line, single-spaced; empty is an error the CLI reports.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="gp">&gt;&gt;&gt; </span><span class="n">clean_title</span><span class="p">(</span><span class="s2">"  two</span><span class="se">\n</span><span class="s2"> lines "</span><span class="p">)</span>
+</span><span data-line="2"><span class="go">'two lines'</span>
+</span></pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="opsward.decisions.decision_docs">
+<span class="sig-prename descclassname"><span class="pre">opsward.decisions.</span></span><span class="sig-name descname"><span class="pre">decision_docs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/decisions.html#decision_docs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.decisions.decision_docs" title="Link to this definition">#</a></dt>
+<dd><p>The ADRs a scan found (<code class="docutils literal notranslate"><span class="pre">ScanResult.decisions</span></code>), numbered files only.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference internal" href="opsward.base.html#opsward.base.DocSpec" title="opsward.base.DocSpec"><code class="xref py py-class docutils literal notranslate"><span class="pre">DocSpec</span></code></a>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="opsward.decisions.log_append">
+<span class="sig-prename descclassname"><span class="pre">opsward.decisions.</span></span><span class="sig-name descname"><span class="pre">log_append</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">decisions_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/decisions.html#log_append"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.decisions.log_append" title="Link to this definition">#</a></dt>
+<dd><p>The log file and the full content it should hold after appending <em>text</em>.</p>
+<p>A missing log starts from the <code class="docutils literal notranslate"><span class="pre">log.md</span></code> template. The existing log is read
+strictly: an unreadable or non-UTF-8 log raises (<code class="docutils literal notranslate"><span class="pre">OSError</span></code> /
+<code class="docutils literal notranslate"><span class="pre">UnicodeDecodeError</span></code>) rather than being replaced by the new line alone. The
+caller writes; this does not.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="opsward.decisions.log_entry">
+<span class="sig-prename descclassname"><span class="pre">opsward.decisions.</span></span><span class="sig-name descname"><span class="pre">log_entry</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">text</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/decisions.html#log_entry"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.decisions.log_entry" title="Link to this definition">#</a></dt>
+<dd><p>One Y-statement line for <code class="docutils literal notranslate"><span class="pre">decisions/log.md</span></code>.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="gp">&gt;&gt;&gt; </span><span class="n">log_entry</span><span class="p">(</span><span class="s2">"In the context of goldens, facing drift, we decided for pinning."</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">_dt</span><span class="o">.</span><span class="n">date</span><span class="p">(</span><span class="mi">2026</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">19</span><span class="p">))</span>
+</span><span data-line="2"><span class="go">'- 2026-10-19 — In the context of goldens, facing drift, we decided for pinning.'</span>
+</span></pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="opsward.decisions.new_adr">
+<span class="sig-prename descclassname"><span class="pre">opsward.decisions.</span></span><span class="sig-name descname"><span class="pre">new_adr</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">decisions_dir</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">title</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">status</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'Proposed'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">date</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evidence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/decisions.html#new_adr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.decisions.new_adr" title="Link to this definition">#</a></dt>
+<dd><p>The next numbered ADR for <em>title</em>, rendered from the <code class="docutils literal notranslate"><span class="pre">adr.md</span></code> template.</p>
+<p><em>evidence</em> is the issue, discussion or PR the decision rests on (a URL or <code class="docutils literal notranslate"><span class="pre">#N</span></code>);
+it lands in the Evidence section so the three surfaces stay linked.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+</span><span data-line="2"><span class="gp">&gt;&gt;&gt; </span><span class="n">gf</span> <span class="o">=</span> <span class="n">new_adr</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">()),</span> <span class="s2">"Pin the CLI surface"</span><span class="p">,</span> <span class="n">date</span><span class="o">=</span><span class="n">_dt</span><span class="o">.</span><span class="n">date</span><span class="p">(</span><span class="mi">2026</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">19</span><span class="p">),</span> <span class="n">evidence</span><span class="o">=</span><span class="s2">"#8"</span><span class="p">)</span>
+</span><span data-line="3"><span class="gp">&gt;&gt;&gt; </span><span class="n">gf</span><span class="o">.</span><span class="n">target_path</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">gf</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+</span><span data-line="4"><span class="go">('0001-pin-the-cli-surface.md', '# 0001 — Pin the CLI surface')</span>
+</span></pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="opsward.base.html#opsward.base.GeneratedFile" title="opsward.base.GeneratedFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">GeneratedFile</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="opsward.decisions.next_number">
+<span class="sig-prename descclassname"><span class="pre">opsward.decisions.</span></span><span class="sig-name descname"><span class="pre">next_number</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">decisions_dir</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/decisions.html#next_number"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.decisions.next_number" title="Link to this definition">#</a></dt>
+<dd><p>One more than the highest numbered ADR, so numbers never collide (1 for an empty dir).</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+</span><span data-line="2"><span class="gp">&gt;&gt;&gt; </span><span class="n">next_number</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">()))</span>
+</span><span data-line="3"><span class="go">1</span>
+</span></pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="opsward.decisions.slugify">
+<span class="sig-prename descclassname"><span class="pre">opsward.decisions.</span></span><span class="sig-name descname"><span class="pre">slugify</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">title</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/decisions.html#slugify"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.decisions.slugify" title="Link to this definition">#</a></dt>
+<dd><p>A file-name slug: lowercase, hyphens, nothing else, at most 60 characters.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="gp">&gt;&gt;&gt; </span><span class="n">slugify</span><span class="p">(</span><span class="s2">"Pin the CLI surface by goldens!"</span><span class="p">)</span>
+</span><span data-line="2"><span class="go">'pin-the-cli-surface-by-goldens'</span>
+</span></pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="opsward.decisions.status_of">
+<span class="sig-prename descclassname"><span class="pre">opsward.decisions.</span></span><span class="sig-name descname"><span class="pre">status_of</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">content</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/decisions.html#status_of"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.decisions.status_of" title="Link to this definition">#</a></dt>
+<dd><p>The ADR’s status text, from a <code class="docutils literal notranslate"><span class="pre">##</span> <span class="pre">Status</span></code> heading, a <code class="docutils literal notranslate"><span class="pre">**Status:**</span></code> line or
+MADR front matter; <code class="docutils literal notranslate"><span class="pre">None</span></code> when there is none.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="gp">&gt;&gt;&gt; </span><span class="n">status_of</span><span class="p">(</span><span class="s2">"# x</span><span class="se">\n\n</span><span class="s2">## Status</span><span class="se">\n\n</span><span class="s2">Accepted (2026-01-01)</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+</span><span data-line="2"><span class="go">'Accepted (2026-01-01)'</span>
+</span><span data-line="3"><span class="gp">&gt;&gt;&gt; </span><span class="n">status_of</span><span class="p">(</span><span class="s2">"---</span><span class="se">\n</span><span class="s2">status: accepted</span><span class="se">\n</span><span class="s2">---</span><span class="se">\n</span><span class="s2"># x</span><span class="se">\n</span><span class="s2">"</span><span class="p">),</span> <span class="n">status_of</span><span class="p">(</span><span class="s2">"**Status:** Superseded by 0003"</span><span class="p">),</span> <span class="n">status_of</span><span class="p">(</span><span class="s2">"# x</span><span class="se">\n</span><span class="s2">no status"</span><span class="p">)</span>
+</span><span data-line="4"><span class="go">('accepted', 'Superseded by 0003', None)</span>
+</span></pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Optional" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Optional</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"><div class="navigation-prev">
+    <a href="opsward.data.templates.html">
+      <i class="i-lucide chevron-left"></i>
+      <div class="page-info">
+        <span>Previous</span><div class="title">opsward.data.templates</div></div>
+    </a>
+  </div><div class="navigation-next">
+    <a href="opsward.discover.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title">opsward.discover</div>
+      </div>
+      <i class="i-lucide chevron-right"></i>
+    </a>
+  </div></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright">
+  <p>
+    Made with
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials">
+  <a href="https://github.com/thorwhalen/opsward" aria-label="GitHub">
+    <iconify-icon icon="simple-icons:github"></iconify-icon>
+  </a></div>
+    </div>
+  </div>
+</footer>
+      <script src="../_static/documentation_options.js?v=a11416ff"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=fd10adb8"></script>
+      <script src="../_static/shibuya.js?v=50760d75"></script></body>
+</html>

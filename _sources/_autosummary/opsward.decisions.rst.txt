@@ -1,0 +1,22 @@
+opsward.decisions
+=================
+
+.. automodule:: opsward.decisions
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      adr_files
+      check_decisions
+      cited_paths
+      clean_title
+      decision_docs
+      log_append
+      log_entry
+      new_adr
+      next_number
+      slugify
+      status_of
+   
