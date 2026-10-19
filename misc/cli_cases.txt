@@ -19,6 +19,9 @@ maintain --help
 recommend --help
 install-skills --help
 find --help
+decision --help
+decision new --help
+decision note --help
 
 # -- tier 1: one happy path per subcommand (all dry-run / read-only) --
 diagnose tests/fixtures/bare_project
@@ -26,6 +29,10 @@ diagnose tests/fixtures/python_project
 generate tests/fixtures/bare_project
 maintain tests/fixtures/stale_project
 recommend tests/fixtures/python_project
+# `decision` dry runs print only repo-relative paths and the text; the dated entry itself
+# is not printed, so the note case stays portable across days and machines.
+decision new "Pin the thing" --project-root tests/fixtures/python_project
+decision note "In the context of goldens, facing drift, we pinned the config dir." -p tests/fixtures/python_project
 
 # -- tier 1: option grammar. argh derives a short flag per parameter and dashes the long
 #    one; both spellings, the "=" form and repeated positionals are all pinned here.
@@ -56,6 +63,8 @@ diagnose --min-score
 diagnose tests/fixtures/bare_project --min-score notanint
 generate --write --nosuchflag tests/fixtures/bare_project
 find
+decision
+decision new
 
 # -- tier 1: a runtime error path (opsward's own sys.exit(2)) --
 diagnose ./no/such/directory/opsward-characterization

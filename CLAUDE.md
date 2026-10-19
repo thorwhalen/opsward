@@ -39,6 +39,7 @@ Key docs to read before starting work:
   - `generate.py` — template rendering and file generation (never overwrites without confirmation). Also provides `generate_skills()` for targeted skill/agent installation.
   - `maintain.py` — staleness detection, update suggestions, drift analysis
   - `recommend.py` — map detected tech-stack signals (deps, frameworks) to curated ecosystem skill recommendations
+  - `decisions.py` — decision capture: the next numbered ADR from the template, the Y-statement log, and the `stale_adr` drift check (ADR 0010)
   - `subagents.py` — a skill's declared subagent twin (`metadata: subagent: true`): spec, rendered `.claude/agents/<name>.md` preloading the skill, sync states; used by generate, maintain and the diagnosis note (ADR 0009)
   - `cli.py` — CLI command functions (the `_dispatch_funcs` SSOT)
   - `util.py` — internal helpers (underscore-prefixed)
@@ -62,6 +63,8 @@ python -m opsward generate /path/to/project           # Generate missing pieces
 python -m opsward maintain /path/to/project            # Check for staleness/drift
 python -m opsward recommend /path/to/project           # Recommend ecosystem skills from tech stack
 python -m opsward install-skills --write               # Install Claude Code skills
+python -m opsward decision new "title" --write          # Allocate the next numbered ADR
+python -m opsward decision note "In the context of …" --write   # One-line decision in misc/docs/decisions/log.md
 
 # After pip install (via pyproject.toml [project.scripts]):
 opsward diagnose .
@@ -89,8 +92,12 @@ Follow the SSOT dispatch pattern: `cli.py` owns the command list, `__main__.py`
 only runs it.
 
 ```python
-# In cli.py
-_dispatch_funcs = [diagnose, generate, maintain, recommend, install_skills, find]
+# In cli.py — a name → command mapping; `decision` is the one nested group
+_dispatch_funcs = {
+    "diagnose": diagnose, "generate": generate, "maintain": maintain,
+    "recommend": recommend, "install-skills": install_skills, "find": find,
+    "decision": [new, note],
+}
 ```
 
 ```python

@@ -66,7 +66,7 @@ extend the scan first (keeping it read-only), then consume it downstream.
 | Map a dependency/framework to a recommended skill | `recommend.py` | **opsward-add-recommendation** |
 | Surface new facts about a project | `scan.py` + a field on `ScanResult` (`base.py`) | **opsward-add-scan-field** |
 | Detect a new kind of staleness/drift | `maintain.py` | **opsward-add-drift-check** |
-| Expose a new CLI command | add a function, append it to `_dispatch_funcs` (`cli.py`) | — |
+| Expose a new CLI command | add a function, add it to the `_dispatch_funcs` mapping (`cli.py`) | — |
 | Change the public API | update imports in `__init__.py` (the facade) | — |
 
 ## After any change

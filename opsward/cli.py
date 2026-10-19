@@ -358,4 +358,96 @@ def find(
             print(f"          {card.source_uri}")
 
 
-_dispatch_funcs = [diagnose, generate, maintain, recommend, install_skills, find]
+def new(
+    title: str,
+    write: bool = False,
+    project_root: str = ".",
+    status: str = "Proposed",
+    evidence: str = "",
+):
+    """Allocate the next numbered ADR for TITLE (dry run unless --write; never overwrites).
+
+    :param title: the decision's title; the file name is derived from it
+    :param write: actually write the file (default: dry run)
+    :param project_root: the project directory (default: current dir)
+    :param status: initial status — Proposed (default), or Accepted when the human has accepted it
+    :param evidence: the issue, discussion or PR this rests on (a URL or #N)
+    """
+    from opsward.decisions import clean_title, new_adr
+
+    if not clean_title(title):
+        print("Error: the title is empty", file=sys.stderr)
+        sys.exit(2)
+    if status not in _ADR_STATUSES:
+        print(f"Error: status must be one of {', '.join(_ADR_STATUSES)}", file=sys.stderr)
+        sys.exit(2)
+    root, decisions_dir = _decisions_dir(project_root)
+    gf = new_adr(decisions_dir, title, status=status, evidence=evidence)
+    rel = _relative_path(gf.target_path, root)
+    if gf.target_path.exists():
+        print(f"SKIP {rel}  (already exists)")
+        sys.exit(1)
+    if write:
+        gf.target_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(gf.target_path, "x", encoding="utf-8") as fh:  # exclusive: never over a file
+            fh.write(gf.content)
+        print(f"Created {rel}")
+    else:
+        print(f"Would create {rel}\n\nDry run — pass --write to create it.")
+
+
+def note(text: str, write: bool = False, project_root: str = "."):
+    """Append TEXT as a dated one-line decision (a Y-statement) to decisions/log.md (dry run unless --write).
+
+    :param text: the decision: "In the context of …, facing …, we decided for …, because …"
+    :param write: actually append (default: dry run); the log is created from its template when missing
+    :param project_root: the project directory (default: current dir)
+    """
+    from opsward.decisions import log_append
+
+    if not " ".join(text.split()):
+        print("Error: the text is empty", file=sys.stderr)
+        sys.exit(2)
+    root, decisions_dir = _decisions_dir(project_root)
+    try:
+        path, content = log_append(decisions_dir, text)
+    except (OSError, UnicodeDecodeError) as e:
+        print(f"Error: cannot read the existing log, nothing written: {e}", file=sys.stderr)
+        sys.exit(2)
+    rel = _relative_path(path, root)
+    if write:
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(content, encoding="utf-8")
+        print(f"Appended to {rel}")
+    else:
+        verb = "append to" if path.exists() else "create"
+        print(f"Would {verb} {rel} a dated entry: {' '.join(text.split())}\n\nDry run — pass --write to do it.")
+
+
+#: The statuses `decision new` will stamp. Accepting is the operator's act: pass
+#: `--status Accepted` only when the human has said so (ADR 0010 §2).
+_ADR_STATUSES = ("Proposed", "Accepted")
+
+
+def _decisions_dir(project_root: str) -> tuple[Path, Path]:
+    """(root, root/<docs>/decisions), by the same resolver `scan` uses to find ADRs."""
+    from opsward.scan import docs_dir_for
+
+    root = Path(project_root).resolve()
+    if not root.is_dir():
+        print(f"Error: {project_root} is not a directory", file=sys.stderr)
+        sys.exit(2)
+    sr = scan(root, claude_config_dir=None)
+    return root, docs_dir_for(root, sr.project_type, sr.docs_guide_path) / "decisions"
+
+
+# The SSOT of the CLI surface: a name -> command mapping, with one nested group.
+_dispatch_funcs = {
+    "diagnose": diagnose,
+    "generate": generate,
+    "maintain": maintain,
+    "recommend": recommend,
+    "install-skills": install_skills,
+    "find": find,
+    "decision": [new, note],
+}
