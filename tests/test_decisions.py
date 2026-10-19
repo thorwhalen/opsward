@@ -122,6 +122,20 @@ def test_numbering_counts_any_numbered_file_and_log_read_is_strict():
         assert (log_dir / "log.md").read_bytes().endswith(b"latin-1 byte\n")
 
 
+def test_common_words_do_not_hide_current_paths():
+    from opsward.decisions import cited_paths
+
+    # "was" and "from" are ordinary prose; only renaming words mark history
+    assert cited_paths("The decision was to keep `pkg/kept.py`, which reads from `pkg/cfg.py`.") == ["pkg/cfg.py", "pkg/kept.py"]
+    assert cited_paths("Renamed [old](../../pkg/old.py) to [new](../../pkg/new.py).") == ["../../pkg/new.py"]
+    # opsward's own ADR 0009 cites its module on a line containing "was"; it must stay examined
+    from opsward.scan import scan as _scan
+
+    sr = _scan(Path(__file__).resolve().parent.parent, claude_config_dir=None)
+    adr9 = next(d for d in sr.decisions if d.name.startswith("0009"))
+    assert "opsward/subagents.py" in cited_paths(adr9.path.read_text(encoding="utf-8"))
+
+
 def test_decision_new_and_generate_agree_on_the_docs_folder():
     from opsward.generate import generate
 

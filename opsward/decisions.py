@@ -32,7 +32,7 @@ _FENCE_RE = re.compile(r"^(`{3,}|~{3,}).*?^\1[ \t]*$", re.M | re.S)
 _LINK_RE = re.compile(r"\]\(([^)\s#]+)(?:#[^)]*)?\)")
 _DOMAIN_RE = re.compile(r"^[\w-]+(\.[\w-]+)*\.[a-z]{2,6}$")  # a host name, not a file: no slash yet, dotted labels
 _STRIKE_RE = re.compile(r"~~.*?~~", re.S)
-_HISTORICAL_RE = re.compile(r"\b(was|were|formerly|previously|moved|migrated|renamed|replaced|removed|from)\b", re.I)
+_HISTORICAL_RE = re.compile(r"\b(formerly|previously|moved|migrated|renamed|replaced|removed|retired|deleted)\b", re.I)
 _LOG_NAME = "log.md"
 _TEMPLATE_NAME = "0000-template.md"
 _SLUG_MAX = 60
@@ -168,14 +168,16 @@ def cited_paths(content: str) -> list[str]:
     link targets (relative ones only; URLs and host names are not paths).
 
     A path the record cites as history is not checked: wrap it in ``~~strikethrough~~``,
-    or say so on the line (``was``, ``formerly``, ``moved``, ``renamed``, ``replaced``,
-    ``removed``, ``from``), as in "we moved `pkg/old.py` to `pkg/new.py`" — there
+    or say so on the line (``formerly``, ``previously``, ``moved``, ``migrated``,
+    ``renamed``, ``replaced``, ``removed``, ``retired``, ``deleted``), as in "we moved `pkg/old.py` to `pkg/new.py`" — there
     only `pkg/new.py` must exist.
 
     >>> cited_paths("See `pkg/a.py`, [0002](0002-x.md), [doc](../research/r.md), https://x.io/a/b.py, docs.github.com/en/x.md\n```\nsrc/in/fence.py\n```")
     ['../research/r.md', '0002-x.md', 'pkg/a.py']
     >>> cited_paths("We moved `pkg/old.py` to `pkg/new.py`; ~~`pkg/gone.py`~~ is history.")
     ['pkg/new.py']
+    >>> cited_paths("It was read from `pkg/live.py`, and renamed [old](../old.md) to [new](../new.md).")
+    ['../new.md', 'pkg/live.py']
     """
     from opsward.maintain import _extract_paths  # the same extractor CLAUDE.md uses
 
@@ -190,8 +192,11 @@ def cited_paths(content: str) -> list[str]:
                 continue
             found.add(p)
         for target in _LINK_RE.findall(line):
-            if "://" not in target and not target.startswith(("mailto:", "/")):
-                found.add(target)
+            if "://" in target or target.startswith(("mailto:", "/")):
+                continue
+            if historical and not _is_destination(line, target):
+                continue
+            found.add(target)
     return sorted(found)
 
 
