@@ -39,16 +39,30 @@ def iter_subdirs(directory: Path):
     )
 
 
-def iter_files(directory: Path, *, suffix: str = "", recursive: bool = False):
+def iter_files(directory: Path, *, suffix: str = "", recursive: bool = False, _seen: set | None = None):
     """Yield files in *directory*, optionally filtered by suffix.
 
-    ``recursive=True`` walks subdirectories too (hidden ones skipped), depth-first
-    in name order, which is how Claude Code scans ``.claude/agents/``.
+    ``recursive=True`` walks subdirectories too, depth-first in name order. Hidden
+    folders are skipped (opsward's choice: ``.trash`` and the like are not agents),
+    a folder already visited through a symlink is not re-entered, and a folder that
+    cannot be read is skipped rather than raised.
     """
     if not directory.is_dir():
         return
-    for p in sorted(directory.iterdir(), key=lambda p: p.name):
+    seen = _seen if _seen is not None else set()
+    try:
+        seen.add(directory.resolve())
+        entries = sorted(directory.iterdir(), key=lambda p: p.name)
+    except OSError:
+        return
+    for p in entries:
         if p.is_file() and (not suffix or p.suffix == suffix):
             yield p
         elif recursive and p.is_dir() and not p.name.startswith("."):
-            yield from iter_files(p, suffix=suffix, recursive=True)
+            try:
+                real = p.resolve()
+            except OSError:
+                continue
+            if real in seen:
+                continue
+            yield from iter_files(p, suffix=suffix, recursive=True, _seen=seen)

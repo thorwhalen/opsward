@@ -173,3 +173,31 @@ def test_agents_in_subfolders_are_found_and_named_by_frontmatter():
         assert {a.name for a in result.agents} == {"fleet-scout", "plain"}
         scout = next(a for a in result.agents if a.name == "fleet-scout")
         assert scout.path.resolve() == (sub / "scout.md").resolve() and scout.description == "Reads the fleet."
+
+
+def test_agent_scan_survives_symlink_loops_unreadable_folders_and_readmes():
+    import os
+    import tempfile
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        agents = root / ".claude" / "agents"
+        (agents / "review").mkdir(parents=True)
+        (agents / "top.md").write_text("---\nname: top\ndescription: Top.\n---\n")
+        (agents / "review" / "README.md").write_text("# About these agents\n")  # documentation, not an agent
+        (agents / "review" / "r.md").write_text("---\nname: reviewer\ndescription: Reviews.\n---\n")
+        try:
+            os.symlink(agents, agents / "loop", target_is_directory=True)
+        except (OSError, NotImplementedError):
+            pass
+        locked = agents / "locked"
+        locked.mkdir()
+        (locked / "x.md").write_text("---\nname: locked\n---\n")
+        os.chmod(locked, 0)
+        try:
+            result = scan(root, claude_config_dir=None)
+        finally:
+            os.chmod(locked, 0o755)
+        names = sorted(a.name for a in result.agents)
+        assert names in (["reviewer", "top"], ["locked", "reviewer", "top"])  # root may ignore mode 000
+        assert names.count("top") == 1  # the loop did not multiply it

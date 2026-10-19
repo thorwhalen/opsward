@@ -626,3 +626,26 @@ def test_html_link_definitions_and_tab_code_are_no_setext_titles(block):
     from opsward.score import _h2_section_sizes
 
     assert [t for t, _ in _h2_section_sizes("## Real\n" + block + "---\n")] == ["Real"]
+
+
+def test_duplicate_agent_names_count_once_and_are_reported():
+    import tempfile
+    from pathlib import Path
+
+    from opsward.scan import scan
+    from opsward.score import diagnose
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        agents = root / ".claude" / "agents"
+        (agents / "a").mkdir(parents=True)
+        (agents / "b").mkdir()
+        for d in ("a", "b"):
+            (agents / d / "x.md").write_text("---\nname: same\ndescription: One agent, two files.\n---\n")
+        report = diagnose(scan(root, claude_config_dir=None))
+        setup = next(c for c in report.scores if c.name.startswith("Setup"))
+        assert any('"same": defined 2 times' in n for n in setup.notes)
+        assert any("duplicate agent definitions" in s for s in report.suggestions)
+        (agents / "b" / "x.md").unlink()
+        single = next(c for c in diagnose(scan(root, claude_config_dir=None)).scores if c.name.startswith("Setup"))
+        assert single.score == setup.score  # the second file earned nothing

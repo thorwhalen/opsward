@@ -209,13 +209,21 @@ def _canonical_skill_location(
 
 
 def _scan_agents(agents_dir: Path):
-    """Agents under ``.claude/agents/``, subfolders included, identified by ``name:`` (opsward#39)."""
+    """Agents under ``.claude/agents/``, subfolders included, identified by ``name:`` (opsward#39).
+
+    A file in a subfolder counts only if it declares a ``name:`` (a README kept beside
+    the agents is documentation, not an agent). Two files declaring one name are both
+    returned, in scan order, so the scorer can report the collision; the host loads only
+    one of them.
+    """
     for agent_file in iter_files(agents_dir, suffix=".md", recursive=True):
         content = read_text_safe(agent_file)
         frontmatter = _parse_frontmatter(content)
-        name = str(frontmatter.get("name") or "").strip() or agent_file.stem
+        declared = str(frontmatter.get("name") or "").strip()
+        if agent_file.parent != agents_dir and not declared:
+            continue
         yield AgentInfo(
-            name=name,
+            name=declared or agent_file.stem,
             path=agent_file,
             description=_description_of(content, frontmatter),
         )

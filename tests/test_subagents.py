@@ -249,3 +249,15 @@ def test_twin_in_a_subfolder_is_matched_by_name_not_generated_twice():
         sr = scan(root)
         assert [t.state for t in twin_status(sr)] == ["in_sync"]
         assert not [f for f in generate(sr) if f.target_path.name == "fleet-sweep.md"]
+
+
+def test_unrelated_agent_in_a_subfolder_is_not_in_the_way():
+    agent = "---\nname: unrelated\ndescription: Something else.\n---\nX.\n"
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _project(Path(tmp))
+        sub = root / ".claude" / "agents" / "team"
+        sub.mkdir(parents=True)
+        (sub / "fleet-sweep.md").write_text(agent)  # same file name as the twin, in a subfolder
+        (status,) = list(twin_status(scan(root)))
+        assert status.state == "missing"
+        assert "fleet-sweep.md" in [f.target_path.name for f in generate(scan(root)) if f.target_path.parent.name == "agents"]
