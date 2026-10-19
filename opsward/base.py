@@ -30,6 +30,9 @@ class SkillInfo:
     description: str = ""
     frontmatter: dict = field(default_factory=dict)
     line_count: int = 0
+    is_link: bool = False  # the .claude/skills entry is a symlink (the canonical bridge)
+    real_path: Optional[Path] = None  # where the entry resolves to
+    canonical_path: Optional[Path] = None  # a `skills/<name>` or `<pkg>/data/skills/<name>` twin, if the entry is a real dir
 
 
 @dataclass(frozen=True)
@@ -96,6 +99,11 @@ class ScanResult:
     # Monorepo detection
     is_monorepo: bool = False
     monorepo_packages: list[str] = field(default_factory=list)
+
+    # The user's global skill scope (``$CLAUDE_CONFIG_DIR/skills`` or ``~/.claude/skills``),
+    # read so that shadowing and the listing budget can be judged; empty when disabled.
+    global_skills: list[SkillInfo] = field(default_factory=list)
+    global_skills_dir: Optional[Path] = None
 
 
 # ---------------------------------------------------------------------------

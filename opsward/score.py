@@ -638,8 +638,97 @@ def _score_skills(
                 notes.append(f'Skill "{skill.name}": {v}')
         quality += q
 
+    # Reachability findings (opsward#35): advisory, no points either way.
+    notes.extend(skill_reachability_findings(sr, suggestions=suggestions))
+
     score = round(100 * quality / len(sr.skills))
     return ComponentScore(name="Skills", score=min(score, 100), notes=notes)
+
+
+# The host's skill listing budget: 1% of the context window, observed as 30,000
+# characters on a 1M-token window (misc/docs/research/skill_tiering_and_reachability.md §3.1).
+_LISTING_BUDGET_CHARS = 30_000
+
+
+def _listing_chars(skills) -> int:
+    """Characters a set of skills costs in the host's listing (``- name: description``)."""
+    return sum(len(s.name) + 3 + len(s.description) + 1 for s in skills)
+
+
+def skill_reachability_findings(sr: ScanResult, *, suggestions: list[str]) -> list[str]:
+    """Why a project skill may never trigger, as note lines (and one suggestion each).
+
+    Three shapes from the #23 report: a project skill **shadowed** by a global one of the
+    same name (Claude Code resolves personal > project, verified in a fresh session); an
+    **unmigrated bridge** (a real directory under ``.claude/skills`` while the repo also
+    holds the skill at its canonical location); and a **listing budget** that the global
+    scope plus this project's skills cannot fit, so descriptions get dropped
+    least-invoked-first. The global scope comes from ``ScanResult.global_skills``;
+    with none (``scan(..., claude_config_dir=None)``) only the bridge check runs.
+
+    >>> from pathlib import Path
+    >>> from opsward.base import ScanResult, SkillInfo
+    >>> g = SkillInfo(name='lint', path=Path('/g/lint'), has_skill_md=True, description='Global lint.', real_path=Path('/g/lint'))
+    >>> p = SkillInfo(name='lint', path=Path('/p/.claude/skills/lint'), has_skill_md=True, description='Project lint.', real_path=Path('/p/.claude/skills/lint'))
+    >>> sr = ScanResult(project_root=Path('/p'), skills=[p], global_skills=[g])
+    >>> s = []
+    >>> skill_reachability_findings(sr, suggestions=s)[0][:46]
+    'Skill "lint": shadowed by the global skill of '
+    >>> len(s)
+    1
+    """
+    notes: list[str] = []
+    global_by_name = {g.name: g for g in sr.global_skills}
+
+    shadowed = [
+        s
+        for s in sr.skills
+        if s.name in global_by_name
+        and (s.real_path is None or s.real_path != global_by_name[s.name].real_path)
+    ]
+    for s in shadowed:
+        notes.append(
+            f'Skill "{s.name}": shadowed by the global skill of the same name '
+            "(Claude Code resolves personal > project, so this copy never loads) "
+            "→ rename it with the package prefix, or unlink the global one"
+        )
+    if shadowed:
+        suggestions.append(
+            "Rename or unlink the project skill(s) shadowed by a same-named global skill: "
+            + ", ".join(s.name for s in shadowed)
+        )
+
+    unmigrated = [s for s in sr.skills if not s.is_link and s.canonical_path is not None]
+    for s in unmigrated:
+        try:
+            canonical = s.canonical_path.relative_to(sr.project_root).as_posix()
+        except ValueError:
+            canonical = s.canonical_path.as_posix()
+        notes.append(
+            f'Skill "{s.name}": `.claude/skills/{s.name}` is a real directory while `{canonical}` '
+            "also exists → replace it with a relative symlink to the canonical copy (skill-package-setup)"
+        )
+    if unmigrated:
+        suggestions.append(
+            "Bridge the unmigrated skill(s) under .claude/skills with relative symlinks: "
+            + ", ".join(s.name for s in unmigrated)
+        )
+
+    if sr.global_skills and sr.skills:
+        g_chars, p_chars = _listing_chars(sr.global_skills), _listing_chars(sr.skills)
+        if g_chars + p_chars > _LISTING_BUDGET_CHARS:
+            notes.append(
+                f"Listing budget: ~{g_chars + p_chars:,} chars of skill entries "
+                f"(global {len(sr.global_skills)} skills ≈ {g_chars:,}, this project {len(sr.skills)} ≈ {p_chars:,}) "
+                f"against the host's ~{_LISTING_BUDGET_CHARS:,}-char listing; descriptions are dropped "
+                f"least-invoked-first, so this project's {len(sr.skills)} skill(s) are at risk of listing name-only "
+                "→ shorten descriptions, or route the skill from CLAUDE.md by name"
+            )
+            suggestions.append(
+                "The skill listing exceeds the host's budget — shorten descriptions or "
+                "route this project's skills from CLAUDE.md by name (report §5)"
+            )
+    return notes
 
 
 # ---------------------------------------------------------------------------
