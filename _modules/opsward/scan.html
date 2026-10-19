@@ -382,234 +382,238 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="249">    <span class="k">return</span> <span class="kc">None</span>
 </span><span data-line="250">
 </span><span data-line="251">
-</span><span data-line="252"><span class="k">def</span><span class="w"> </span><span class="nf">docs_dir_for</span><span class="p">(</span><span class="n">root</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">project_type</span><span class="p">:</span> <span class="n">ProjectType</span><span class="p">,</span> <span class="n">docs_guide_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
-</span><span data-line="253"><span class="w">    </span><span class="sd">"""The one docs folder every stage agrees on: the docs_guide's folder, else the</span>
-</span><span data-line="254"><span class="sd">    existing ``docs/`` or ``misc/docs/``, else the convention ``generate`` scaffolds</span>
-</span><span data-line="255"><span class="sd">    (``docs`` for JS/TS, ``misc/docs`` otherwise). Read-only; the folder may not exist.</span>
-</span><span data-line="256">
-</span><span data-line="257"><span class="sd">    &gt;&gt;&gt; import tempfile</span>
-</span><span data-line="258"><span class="sd">    &gt;&gt;&gt; root = Path(tempfile.mkdtemp())</span>
-</span><span data-line="259"><span class="sd">    &gt;&gt;&gt; docs_dir_for(root, ProjectType.python).relative_to(root).as_posix()</span>
-</span><span data-line="260"><span class="sd">    'misc/docs'</span>
-</span><span data-line="261"><span class="sd">    &gt;&gt;&gt; docs_dir_for(root, ProjectType.jsts).relative_to(root).as_posix()</span>
-</span><span data-line="262"><span class="sd">    'docs'</span>
-</span><span data-line="263"><span class="sd">    &gt;&gt;&gt; docs_dir_for(root, ProjectType.unknown).relative_to(root).as_posix()</span>
-</span><span data-line="264"><span class="sd">    'misc/docs'</span>
-</span><span data-line="265"><span class="sd">    """</span>
-</span><span data-line="266">    <span class="kn">from</span><span class="w"> </span><span class="nn">opsward.generate</span><span class="w"> </span><span class="kn">import</span> <span class="n">_docs_path</span>  <span class="c1"># the one convention `generate` scaffolds with</span>
-</span><span data-line="267">
-</span><span data-line="268">    <span class="k">if</span> <span class="n">docs_guide_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span data-line="269">        <span class="k">return</span> <span class="n">docs_guide_path</span><span class="o">.</span><span class="n">parent</span>
-</span><span data-line="270">    <span class="n">existing</span> <span class="o">=</span> <span class="n">_docs_dir</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
-</span><span data-line="271">    <span class="k">if</span> <span class="n">existing</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span data-line="272">        <span class="k">return</span> <span class="n">existing</span>
-</span><span data-line="273">    <span class="k">return</span> <span class="n">root</span> <span class="o">/</span> <span class="n">_docs_path</span><span class="p">(</span><span class="n">project_type</span><span class="p">)</span>
-</span><span data-line="274">
-</span><span data-line="275">
-</span><span data-line="276"><span class="k">def</span><span class="w"> </span><span class="nf">_scan_docs</span><span class="p">(</span><span class="n">root</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">DocSpec</span><span class="p">],</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
-</span><span data-line="277">    <span class="n">docs_dir</span> <span class="o">=</span> <span class="n">_docs_dir</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
-</span><span data-line="278">    <span class="k">if</span> <span class="n">docs_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span data-line="279">        <span class="k">return</span> <span class="p">[],</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">None</span>
-</span><span data-line="280">
-</span><span data-line="281">    <span class="n">docs</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span data-line="282">    <span class="n">docs_guide_path</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span data-line="283">    <span class="n">has_docs_guide</span> <span class="o">=</span> <span class="kc">False</span>
+</span><span data-line="252"><span class="k">def</span><span class="w"> </span><span class="nf">docs_dir_for</span><span class="p">(</span>
+</span><span data-line="253">    <span class="n">root</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">project_type</span><span class="p">:</span> <span class="n">ProjectType</span><span class="p">,</span> <span class="n">docs_guide_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span data-line="254"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+</span><span data-line="255"><span class="w">    </span><span class="sd">"""The one docs folder every stage agrees on: the docs_guide's folder, else the</span>
+</span><span data-line="256"><span class="sd">    existing ``docs/`` or ``misc/docs/``, else the convention ``generate`` scaffolds</span>
+</span><span data-line="257"><span class="sd">    (``docs`` for JS/TS, ``misc/docs`` otherwise). Read-only; the folder may not exist.</span>
+</span><span data-line="258">
+</span><span data-line="259"><span class="sd">    &gt;&gt;&gt; import tempfile</span>
+</span><span data-line="260"><span class="sd">    &gt;&gt;&gt; root = Path(tempfile.mkdtemp())</span>
+</span><span data-line="261"><span class="sd">    &gt;&gt;&gt; docs_dir_for(root, ProjectType.python).relative_to(root).as_posix()</span>
+</span><span data-line="262"><span class="sd">    'misc/docs'</span>
+</span><span data-line="263"><span class="sd">    &gt;&gt;&gt; docs_dir_for(root, ProjectType.jsts).relative_to(root).as_posix()</span>
+</span><span data-line="264"><span class="sd">    'docs'</span>
+</span><span data-line="265"><span class="sd">    &gt;&gt;&gt; docs_dir_for(root, ProjectType.unknown).relative_to(root).as_posix()</span>
+</span><span data-line="266"><span class="sd">    'misc/docs'</span>
+</span><span data-line="267"><span class="sd">    """</span>
+</span><span data-line="268">    <span class="kn">from</span><span class="w"> </span><span class="nn">opsward.generate</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+</span><span data-line="269">        <span class="n">_docs_path</span><span class="p">,</span>
+</span><span data-line="270">    <span class="p">)</span>  <span class="c1"># the one convention `generate` scaffolds with</span>
+</span><span data-line="271">
+</span><span data-line="272">    <span class="k">if</span> <span class="n">docs_guide_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="273">        <span class="k">return</span> <span class="n">docs_guide_path</span><span class="o">.</span><span class="n">parent</span>
+</span><span data-line="274">    <span class="n">existing</span> <span class="o">=</span> <span class="n">_docs_dir</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+</span><span data-line="275">    <span class="k">if</span> <span class="n">existing</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="276">        <span class="k">return</span> <span class="n">existing</span>
+</span><span data-line="277">    <span class="k">return</span> <span class="n">root</span> <span class="o">/</span> <span class="n">_docs_path</span><span class="p">(</span><span class="n">project_type</span><span class="p">)</span>
+</span><span data-line="278">
+</span><span data-line="279">
+</span><span data-line="280"><span class="k">def</span><span class="w"> </span><span class="nf">_scan_docs</span><span class="p">(</span><span class="n">root</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="n">DocSpec</span><span class="p">],</span> <span class="nb">bool</span><span class="p">,</span> <span class="n">Path</span> <span class="o">|</span> <span class="kc">None</span><span class="p">]:</span>
+</span><span data-line="281">    <span class="n">docs_dir</span> <span class="o">=</span> <span class="n">_docs_dir</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+</span><span data-line="282">    <span class="k">if</span> <span class="n">docs_dir</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="283">        <span class="k">return</span> <span class="p">[],</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">None</span>
 </span><span data-line="284">
-</span><span data-line="285">    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">iter_files</span><span class="p">(</span><span class="n">docs_dir</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">".md"</span><span class="p">):</span>
-</span><span data-line="286">        <span class="n">docs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">DocSpec</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">stem</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">size_bytes</span><span class="o">=</span><span class="n">_content_size</span><span class="p">(</span><span class="n">f</span><span class="p">)))</span>
-</span><span data-line="287">        <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">"docs_guide.md"</span><span class="p">:</span>
-</span><span data-line="288">            <span class="n">has_docs_guide</span> <span class="o">=</span> <span class="kc">True</span>
-</span><span data-line="289">            <span class="n">docs_guide_path</span> <span class="o">=</span> <span class="n">f</span>
-</span><span data-line="290">
-</span><span data-line="291">    <span class="k">return</span> <span class="n">docs</span><span class="p">,</span> <span class="n">has_docs_guide</span><span class="p">,</span> <span class="n">docs_guide_path</span>
-</span><span data-line="292">
-</span><span data-line="293">
-</span><span data-line="294"><span class="k">def</span><span class="w"> </span><span class="nf">_detect_monorepo</span><span class="p">(</span><span class="n">root</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
-</span><span data-line="295"><span class="w">    </span><span class="sd">"""Detect monorepo structures (packages/, apps/, workspaces).</span>
+</span><span data-line="285">    <span class="n">docs</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="286">    <span class="n">docs_guide_path</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span data-line="287">    <span class="n">has_docs_guide</span> <span class="o">=</span> <span class="kc">False</span>
+</span><span data-line="288">
+</span><span data-line="289">    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">iter_files</span><span class="p">(</span><span class="n">docs_dir</span><span class="p">,</span> <span class="n">suffix</span><span class="o">=</span><span class="s2">".md"</span><span class="p">):</span>
+</span><span data-line="290">        <span class="n">docs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">DocSpec</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">f</span><span class="o">.</span><span class="n">stem</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">size_bytes</span><span class="o">=</span><span class="n">_content_size</span><span class="p">(</span><span class="n">f</span><span class="p">)))</span>
+</span><span data-line="291">        <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s2">"docs_guide.md"</span><span class="p">:</span>
+</span><span data-line="292">            <span class="n">has_docs_guide</span> <span class="o">=</span> <span class="kc">True</span>
+</span><span data-line="293">            <span class="n">docs_guide_path</span> <span class="o">=</span> <span class="n">f</span>
+</span><span data-line="294">
+</span><span data-line="295">    <span class="k">return</span> <span class="n">docs</span><span class="p">,</span> <span class="n">has_docs_guide</span><span class="p">,</span> <span class="n">docs_guide_path</span>
 </span><span data-line="296">
-</span><span data-line="297"><span class="sd">    Returns (is_monorepo, list of package directory names).</span>
-</span><span data-line="298"><span class="sd">    """</span>
-</span><span data-line="299">    <span class="n">packages</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span data-line="300">    <span class="c1"># Common monorepo container directories</span>
-</span><span data-line="301">    <span class="k">for</span> <span class="n">container_name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"packages"</span><span class="p">,</span> <span class="s2">"apps"</span><span class="p">,</span> <span class="s2">"libs"</span><span class="p">,</span> <span class="s2">"modules"</span><span class="p">,</span> <span class="s2">"services"</span><span class="p">):</span>
-</span><span data-line="302">        <span class="n">container</span> <span class="o">=</span> <span class="n">root</span> <span class="o">/</span> <span class="n">container_name</span>
-</span><span data-line="303">        <span class="k">if</span> <span class="ow">not</span> <span class="n">container</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
-</span><span data-line="304">            <span class="k">continue</span>
-</span><span data-line="305">        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">container</span><span class="o">.</span><span class="n">iterdir</span><span class="p">()):</span>
-</span><span data-line="306">            <span class="k">if</span> <span class="ow">not</span> <span class="n">child</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span> <span class="ow">or</span> <span class="n">child</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"."</span><span class="p">):</span>
-</span><span data-line="307">                <span class="k">continue</span>
-</span><span data-line="308">            <span class="c1"># Check if sub-package has its own manifest</span>
-</span><span data-line="309">            <span class="k">if</span> <span class="p">(</span>
-</span><span data-line="310">                <span class="p">(</span><span class="n">child</span> <span class="o">/</span> <span class="s2">"package.json"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
-</span><span data-line="311">                <span class="ow">or</span> <span class="p">(</span><span class="n">child</span> <span class="o">/</span> <span class="s2">"pyproject.toml"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
-</span><span data-line="312">                <span class="ow">or</span> <span class="p">(</span><span class="n">child</span> <span class="o">/</span> <span class="s2">"setup.py"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
-</span><span data-line="313">            <span class="p">):</span>
-</span><span data-line="314">                <span class="n">packages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">container_name</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">child</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-</span><span data-line="315">
-</span><span data-line="316">    <span class="c1"># Also check for pnpm-workspace.yaml or lerna.json</span>
-</span><span data-line="317">    <span class="k">if</span> <span class="ow">not</span> <span class="n">packages</span><span class="p">:</span>
-</span><span data-line="318">        <span class="k">for</span> <span class="n">signal</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"pnpm-workspace.yaml"</span><span class="p">,</span> <span class="s2">"lerna.json"</span><span class="p">,</span> <span class="s2">"nx.json"</span><span class="p">,</span> <span class="s2">"turbo.json"</span><span class="p">):</span>
-</span><span data-line="319">            <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="n">signal</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-</span><span data-line="320">                <span class="c1"># It's a monorepo but we couldn't enumerate packages</span>
-</span><span data-line="321">                <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="p">[]</span>
-</span><span data-line="322">
-</span><span data-line="323">    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">packages</span><span class="p">),</span> <span class="n">packages</span>
-</span><span data-line="324">
-</span><span data-line="325">
-</span><span data-line="326"><span class="k">def</span><span class="w"> </span><span class="nf">_strip_inline_comment</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span data-line="327"><span class="w">    </span><span class="sa">r</span><span class="sd">"""Drop a trailing ``# comment`` from a YAML scalar, quoted or not.</span>
+</span><span data-line="297">
+</span><span data-line="298"><span class="k">def</span><span class="w"> </span><span class="nf">_detect_monorepo</span><span class="p">(</span><span class="n">root</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">bool</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]:</span>
+</span><span data-line="299"><span class="w">    </span><span class="sd">"""Detect monorepo structures (packages/, apps/, workspaces).</span>
+</span><span data-line="300">
+</span><span data-line="301"><span class="sd">    Returns (is_monorepo, list of package directory names).</span>
+</span><span data-line="302"><span class="sd">    """</span>
+</span><span data-line="303">    <span class="n">packages</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="304">    <span class="c1"># Common monorepo container directories</span>
+</span><span data-line="305">    <span class="k">for</span> <span class="n">container_name</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"packages"</span><span class="p">,</span> <span class="s2">"apps"</span><span class="p">,</span> <span class="s2">"libs"</span><span class="p">,</span> <span class="s2">"modules"</span><span class="p">,</span> <span class="s2">"services"</span><span class="p">):</span>
+</span><span data-line="306">        <span class="n">container</span> <span class="o">=</span> <span class="n">root</span> <span class="o">/</span> <span class="n">container_name</span>
+</span><span data-line="307">        <span class="k">if</span> <span class="ow">not</span> <span class="n">container</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+</span><span data-line="308">            <span class="k">continue</span>
+</span><span data-line="309">        <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">container</span><span class="o">.</span><span class="n">iterdir</span><span class="p">()):</span>
+</span><span data-line="310">            <span class="k">if</span> <span class="ow">not</span> <span class="n">child</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span> <span class="ow">or</span> <span class="n">child</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"."</span><span class="p">):</span>
+</span><span data-line="311">                <span class="k">continue</span>
+</span><span data-line="312">            <span class="c1"># Check if sub-package has its own manifest</span>
+</span><span data-line="313">            <span class="k">if</span> <span class="p">(</span>
+</span><span data-line="314">                <span class="p">(</span><span class="n">child</span> <span class="o">/</span> <span class="s2">"package.json"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+</span><span data-line="315">                <span class="ow">or</span> <span class="p">(</span><span class="n">child</span> <span class="o">/</span> <span class="s2">"pyproject.toml"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+</span><span data-line="316">                <span class="ow">or</span> <span class="p">(</span><span class="n">child</span> <span class="o">/</span> <span class="s2">"setup.py"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+</span><span data-line="317">            <span class="p">):</span>
+</span><span data-line="318">                <span class="n">packages</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">container_name</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">child</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span data-line="319">
+</span><span data-line="320">    <span class="c1"># Also check for pnpm-workspace.yaml or lerna.json</span>
+</span><span data-line="321">    <span class="k">if</span> <span class="ow">not</span> <span class="n">packages</span><span class="p">:</span>
+</span><span data-line="322">        <span class="k">for</span> <span class="n">signal</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"pnpm-workspace.yaml"</span><span class="p">,</span> <span class="s2">"lerna.json"</span><span class="p">,</span> <span class="s2">"nx.json"</span><span class="p">,</span> <span class="s2">"turbo.json"</span><span class="p">):</span>
+</span><span data-line="323">            <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="n">signal</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+</span><span data-line="324">                <span class="c1"># It's a monorepo but we couldn't enumerate packages</span>
+</span><span data-line="325">                <span class="k">return</span> <span class="kc">True</span><span class="p">,</span> <span class="p">[]</span>
+</span><span data-line="326">
+</span><span data-line="327">    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">packages</span><span class="p">),</span> <span class="n">packages</span>
 </span><span data-line="328">
-</span><span data-line="329"><span class="sd">    &gt;&gt;&gt; _strip_inline_comment('plain  # c'), _strip_inline_comment('"q # not" # c'), _strip_inline_comment("'a''b'  # c")</span>
-</span><span data-line="330"><span class="sd">    ('plain', '"q # not"', "'a''b'")</span>
-</span><span data-line="331"><span class="sd">    """</span>
-</span><span data-line="332">    <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-</span><span data-line="333">    <span class="k">if</span> <span class="n">value</span><span class="p">[:</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"'"</span><span class="p">,</span> <span class="s1">'"'</span><span class="p">):</span>
-</span><span data-line="334">        <span class="n">q</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-</span><span data-line="335">        <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
-</span><span data-line="336">        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
-</span><span data-line="337">            <span class="k">if</span> <span class="n">q</span> <span class="o">==</span> <span class="s2">"'"</span> <span class="ow">and</span> <span class="n">value</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"'"</span> <span class="ow">and</span> <span class="n">value</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"'"</span><span class="p">:</span>
-</span><span data-line="338">                <span class="n">i</span> <span class="o">+=</span> <span class="mi">2</span>
-</span><span data-line="339">                <span class="k">continue</span>
-</span><span data-line="340">            <span class="k">if</span> <span class="n">q</span> <span class="o">==</span> <span class="s1">'"'</span> <span class="ow">and</span> <span class="n">value</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"</span><span class="se">\\</span><span class="s2">"</span><span class="p">:</span>
-</span><span data-line="341">                <span class="n">i</span> <span class="o">+=</span> <span class="mi">2</span>
-</span><span data-line="342">                <span class="k">continue</span>
-</span><span data-line="343">            <span class="k">if</span> <span class="n">value</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">q</span><span class="p">:</span>
-</span><span data-line="344">                <span class="k">return</span> <span class="n">value</span><span class="p">[:</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
-</span><span data-line="345">            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
-</span><span data-line="346">        <span class="k">return</span> <span class="n">value</span>
-</span><span data-line="347">    <span class="n">cut</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">" #"</span><span class="p">)</span>
-</span><span data-line="348">    <span class="k">return</span> <span class="n">value</span><span class="p">[:</span><span class="n">cut</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span> <span class="k">if</span> <span class="n">cut</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">value</span>
-</span><span data-line="349">
-</span><span data-line="350">
-</span><span data-line="351"><span class="k">def</span><span class="w"> </span><span class="nf">_unquote</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span data-line="352"><span class="w">    </span><span class="sa">r</span><span class="sd">"""Strip a comment, then quotes, decoding the escapes each quoting style allows.</span>
+</span><span data-line="329">
+</span><span data-line="330"><span class="k">def</span><span class="w"> </span><span class="nf">_strip_inline_comment</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span data-line="331"><span class="w">    </span><span class="sa">r</span><span class="sd">"""Drop a trailing ``# comment`` from a YAML scalar, quoted or not.</span>
+</span><span data-line="332">
+</span><span data-line="333"><span class="sd">    &gt;&gt;&gt; _strip_inline_comment('plain  # c'), _strip_inline_comment('"q # not" # c'), _strip_inline_comment("'a''b'  # c")</span>
+</span><span data-line="334"><span class="sd">    ('plain', '"q # not"', "'a''b'")</span>
+</span><span data-line="335"><span class="sd">    """</span>
+</span><span data-line="336">    <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span><span data-line="337">    <span class="k">if</span> <span class="n">value</span><span class="p">[:</span><span class="mi">1</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"'"</span><span class="p">,</span> <span class="s1">'"'</span><span class="p">):</span>
+</span><span data-line="338">        <span class="n">q</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span data-line="339">        <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+</span><span data-line="340">        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
+</span><span data-line="341">            <span class="k">if</span> <span class="n">q</span> <span class="o">==</span> <span class="s2">"'"</span> <span class="ow">and</span> <span class="n">value</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"'"</span> <span class="ow">and</span> <span class="n">value</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">2</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"'"</span><span class="p">:</span>
+</span><span data-line="342">                <span class="n">i</span> <span class="o">+=</span> <span class="mi">2</span>
+</span><span data-line="343">                <span class="k">continue</span>
+</span><span data-line="344">            <span class="k">if</span> <span class="n">q</span> <span class="o">==</span> <span class="s1">'"'</span> <span class="ow">and</span> <span class="n">value</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"</span><span class="se">\\</span><span class="s2">"</span><span class="p">:</span>
+</span><span data-line="345">                <span class="n">i</span> <span class="o">+=</span> <span class="mi">2</span>
+</span><span data-line="346">                <span class="k">continue</span>
+</span><span data-line="347">            <span class="k">if</span> <span class="n">value</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">==</span> <span class="n">q</span><span class="p">:</span>
+</span><span data-line="348">                <span class="k">return</span> <span class="n">value</span><span class="p">[:</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+</span><span data-line="349">            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+</span><span data-line="350">        <span class="k">return</span> <span class="n">value</span>
+</span><span data-line="351">    <span class="n">cut</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">" #"</span><span class="p">)</span>
+</span><span data-line="352">    <span class="k">return</span> <span class="n">value</span><span class="p">[:</span><span class="n">cut</span><span class="p">]</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span> <span class="k">if</span> <span class="n">cut</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">value</span>
 </span><span data-line="353">
-</span><span data-line="354"><span class="sd">    &gt;&gt;&gt; _unquote('"a \\"b\\" \\u2014 c"  # x'), _unquote("'it''s'"), _unquote("bare  # x")</span>
-</span><span data-line="355"><span class="sd">    ('a "b" — c', "it's", 'bare')</span>
-</span><span data-line="356"><span class="sd">    """</span>
-</span><span data-line="357">    <span class="n">value</span> <span class="o">=</span> <span class="n">_strip_inline_comment</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-</span><span data-line="358">    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">value</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'"'</span><span class="p">:</span>
-</span><span data-line="359">        <span class="k">try</span><span class="p">:</span>
-</span><span data-line="360">            <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
-</span><span data-line="361">        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-</span><span data-line="362">            <span class="k">return</span> <span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-</span><span data-line="363">    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">value</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"'"</span><span class="p">:</span>
-</span><span data-line="364">        <span class="k">return</span> <span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"''"</span><span class="p">,</span> <span class="s2">"'"</span><span class="p">)</span>
-</span><span data-line="365">    <span class="k">return</span> <span class="n">value</span>
-</span><span data-line="366">
-</span><span data-line="367">
-</span><span data-line="368"><span class="k">def</span><span class="w"> </span><span class="nf">_parse_flow_map</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-</span><span data-line="369"><span class="w">    </span><span class="sd">"""``{a: 1, b: two}`` -&gt; ``{'a': '1', 'b': 'two'}`` (one level, no nesting)."""</span>
-</span><span data-line="370">    <span class="n">out</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span data-line="371">    <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">()[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">","</span><span class="p">):</span>
-</span><span data-line="372">        <span class="k">if</span> <span class="s2">":"</span> <span class="ow">in</span> <span class="n">part</span><span class="p">:</span>
-</span><span data-line="373">            <span class="n">k</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">":"</span><span class="p">)</span>
-</span><span data-line="374">            <span class="n">out</span><span class="p">[</span><span class="n">k</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span> <span class="o">=</span> <span class="n">_unquote</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
-</span><span data-line="375">    <span class="k">return</span> <span class="n">out</span>
-</span><span data-line="376">
-</span><span data-line="377">
-</span><span data-line="378"><span class="n">_BLOCK_SCALARS</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="s2">"&gt;"</span><span class="p">,</span> <span class="s2">"&gt;-"</span><span class="p">,</span> <span class="s2">"&gt;+"</span><span class="p">,</span> <span class="s2">"|"</span><span class="p">,</span> <span class="s2">"|-"</span><span class="p">,</span> <span class="s2">"|+"</span><span class="p">})</span>
-</span><span data-line="379">
+</span><span data-line="354">
+</span><span data-line="355"><span class="k">def</span><span class="w"> </span><span class="nf">_unquote</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span data-line="356"><span class="w">    </span><span class="sa">r</span><span class="sd">"""Strip a comment, then quotes, decoding the escapes each quoting style allows.</span>
+</span><span data-line="357">
+</span><span data-line="358"><span class="sd">    &gt;&gt;&gt; _unquote('"a \\"b\\" \\u2014 c"  # x'), _unquote("'it''s'"), _unquote("bare  # x")</span>
+</span><span data-line="359"><span class="sd">    ('a "b" — c', "it's", 'bare')</span>
+</span><span data-line="360"><span class="sd">    """</span>
+</span><span data-line="361">    <span class="n">value</span> <span class="o">=</span> <span class="n">_strip_inline_comment</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+</span><span data-line="362">    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">value</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'"'</span><span class="p">:</span>
+</span><span data-line="363">        <span class="k">try</span><span class="p">:</span>
+</span><span data-line="364">            <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
+</span><span data-line="365">        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+</span><span data-line="366">            <span class="k">return</span> <span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+</span><span data-line="367">    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">value</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">value</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"'"</span><span class="p">:</span>
+</span><span data-line="368">        <span class="k">return</span> <span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s2">"''"</span><span class="p">,</span> <span class="s2">"'"</span><span class="p">)</span>
+</span><span data-line="369">    <span class="k">return</span> <span class="n">value</span>
+</span><span data-line="370">
+</span><span data-line="371">
+</span><span data-line="372"><span class="k">def</span><span class="w"> </span><span class="nf">_parse_flow_map</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span><span data-line="373"><span class="w">    </span><span class="sd">"""``{a: 1, b: two}`` -&gt; ``{'a': '1', 'b': 'two'}`` (one level, no nesting)."""</span>
+</span><span data-line="374">    <span class="n">out</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span data-line="375">    <span class="k">for</span> <span class="n">part</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">strip</span><span class="p">()[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">","</span><span class="p">):</span>
+</span><span data-line="376">        <span class="k">if</span> <span class="s2">":"</span> <span class="ow">in</span> <span class="n">part</span><span class="p">:</span>
+</span><span data-line="377">            <span class="n">k</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">part</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">":"</span><span class="p">)</span>
+</span><span data-line="378">            <span class="n">out</span><span class="p">[</span><span class="n">k</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span> <span class="o">=</span> <span class="n">_unquote</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+</span><span data-line="379">    <span class="k">return</span> <span class="n">out</span>
 </span><span data-line="380">
-</span><span data-line="381"><span class="k">def</span><span class="w"> </span><span class="nf">_parse_frontmatter</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-</span><span data-line="382"><span class="w">    </span><span class="sa">r</span><span class="sd">"""Extract YAML frontmatter from a SKILL.md file as a simple dict.</span>
+</span><span data-line="381">
+</span><span data-line="382"><span class="n">_BLOCK_SCALARS</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="s2">"&gt;"</span><span class="p">,</span> <span class="s2">"&gt;-"</span><span class="p">,</span> <span class="s2">"&gt;+"</span><span class="p">,</span> <span class="s2">"|"</span><span class="p">,</span> <span class="s2">"|-"</span><span class="p">,</span> <span class="s2">"|+"</span><span class="p">})</span>
 </span><span data-line="383">
-</span><span data-line="384"><span class="sd">    Handles the subset of YAML used in agentskills.io spec frontmatter</span>
-</span><span data-line="385"><span class="sd">    without requiring a YAML library: scalars (with ``# comments`` stripped),</span>
-</span><span data-line="386"><span class="sd">    one level of nested keys (``metadata:``), inline flow maps</span>
-</span><span data-line="387"><span class="sd">    (``metadata: {subagent: true}``), and folded/literal block scalars</span>
-</span><span data-line="388"><span class="sd">    (``description: &gt;-`` followed by indented lines).</span>
-</span><span data-line="389">
-</span><span data-line="390"><span class="sd">    &gt;&gt;&gt; _parse_frontmatter('---\nname: x\ndescription: &gt;-\n  Line one,\n  line two: with colon.\nmetadata:\n  subagent: true  # opt in\n---\n')</span>
-</span><span data-line="391"><span class="sd">    {'name': 'x', 'description': 'Line one, line two: with colon.', 'metadata': {'subagent': 'true'}}</span>
-</span><span data-line="392"><span class="sd">    &gt;&gt;&gt; _parse_frontmatter('---\nmetadata: {subagent: "true", subagent-model: haiku}\n---\n')['metadata']</span>
-</span><span data-line="393"><span class="sd">    {'subagent': 'true', 'subagent-model': 'haiku'}</span>
-</span><span data-line="394"><span class="sd">    """</span>
-</span><span data-line="395">    <span class="n">lines</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
-</span><span data-line="396">    <span class="k">if</span> <span class="ow">not</span> <span class="n">lines</span> <span class="ow">or</span> <span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">"---"</span><span class="p">:</span>
-</span><span data-line="397">        <span class="k">return</span> <span class="p">{}</span>
-</span><span data-line="398">    <span class="n">end</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span data-line="399">    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="mi">1</span><span class="p">):</span>
-</span><span data-line="400">        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s2">"---"</span><span class="p">:</span>
-</span><span data-line="401">            <span class="n">end</span> <span class="o">=</span> <span class="n">i</span>
-</span><span data-line="402">            <span class="k">break</span>
-</span><span data-line="403">    <span class="k">if</span> <span class="n">end</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span data-line="404">        <span class="k">return</span> <span class="p">{}</span>
-</span><span data-line="405">
-</span><span data-line="406">    <span class="n">result</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span data-line="407">    <span class="n">current_key</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span data-line="408">    <span class="n">block</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># continuation lines of a block scalar</span>
-</span><span data-line="409">    <span class="n">block_style</span> <span class="o">=</span> <span class="s2">""</span>
-</span><span data-line="410">    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="n">end</span><span class="p">]:</span>
-</span><span data-line="411">        <span class="n">stripped</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-</span><span data-line="412">        <span class="n">indented</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="ow">and</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">" "</span><span class="p">,</span> <span class="s2">"</span><span class="se">\t</span><span class="s2">"</span><span class="p">)</span>
-</span><span data-line="413">        <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">indented</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">stripped</span><span class="p">):</span>
-</span><span data-line="414">            <span class="n">block</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stripped</span><span class="p">)</span>
-</span><span data-line="415">            <span class="k">continue</span>
-</span><span data-line="416">        <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span data-line="417">            <span class="n">result</span><span class="p">[</span><span class="n">current_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">_join_block</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="n">block_style</span><span class="p">)</span>
-</span><span data-line="418">            <span class="n">block</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span data-line="419">        <span class="k">if</span> <span class="ow">not</span> <span class="n">stripped</span> <span class="ow">or</span> <span class="n">stripped</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"#"</span><span class="p">):</span>
-</span><span data-line="420">            <span class="k">continue</span>
-</span><span data-line="421">        <span class="k">if</span> <span class="n">indented</span> <span class="ow">and</span> <span class="n">current_key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span data-line="422">            <span class="c1"># Indented line = continuation of previous key (nested YAML)</span>
-</span><span data-line="423">            <span class="n">current</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">current_key</span><span class="p">)</span>
-</span><span data-line="424">            <span class="k">if</span> <span class="s2">":"</span> <span class="ow">in</span> <span class="n">stripped</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">current</span><span class="p">):</span>
-</span><span data-line="425">                <span class="n">k</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">stripped</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">":"</span><span class="p">)</span>
-</span><span data-line="426">                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
-</span><span data-line="427">                    <span class="n">result</span><span class="p">[</span><span class="n">current_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span data-line="428">                <span class="n">result</span><span class="p">[</span><span class="n">current_key</span><span class="p">][</span><span class="n">k</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span> <span class="o">=</span> <span class="n">_unquote</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
-</span><span data-line="429">            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-</span><span data-line="430">                <span class="c1"># plain multi-line scalar</span>
-</span><span data-line="431">                <span class="n">result</span><span class="p">[</span><span class="n">current_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
-</span><span data-line="432">                    <span class="n">result</span><span class="p">[</span><span class="n">current_key</span><span class="p">]</span> <span class="o">+</span> <span class="s2">" "</span> <span class="o">+</span> <span class="n">_unquote</span><span class="p">(</span><span class="n">stripped</span><span class="p">)</span>
-</span><span data-line="433">                <span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-</span><span data-line="434">            <span class="k">continue</span>
-</span><span data-line="435">        <span class="k">if</span> <span class="s2">":"</span> <span class="ow">in</span> <span class="n">stripped</span><span class="p">:</span>
-</span><span data-line="436">            <span class="n">k</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">stripped</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">":"</span><span class="p">)</span>
-</span><span data-line="437">            <span class="n">k</span> <span class="o">=</span> <span class="n">k</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-</span><span data-line="438">            <span class="n">v</span> <span class="o">=</span> <span class="n">_strip_inline_comment</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
-</span><span data-line="439">            <span class="n">current_key</span> <span class="o">=</span> <span class="n">k</span>
-</span><span data-line="440">            <span class="k">if</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">_BLOCK_SCALARS</span><span class="p">:</span>
-</span><span data-line="441">                <span class="n">block</span><span class="p">,</span> <span class="n">block_style</span> <span class="o">=</span> <span class="p">[],</span> <span class="n">v</span>
-</span><span data-line="442">                <span class="n">result</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="s2">""</span>
-</span><span data-line="443">            <span class="k">elif</span> <span class="n">v</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"{"</span><span class="p">)</span> <span class="ow">and</span> <span class="n">v</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">"}"</span><span class="p">):</span>
-</span><span data-line="444">                <span class="n">result</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">_parse_flow_map</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
-</span><span data-line="445">            <span class="k">else</span><span class="p">:</span>
-</span><span data-line="446">                <span class="n">result</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">_unquote</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
-</span><span data-line="447">    <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">current_key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span data-line="448">        <span class="n">result</span><span class="p">[</span><span class="n">current_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">_join_block</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="n">block_style</span><span class="p">)</span>
-</span><span data-line="449">    <span class="k">return</span> <span class="n">result</span>
-</span><span data-line="450">
-</span><span data-line="451">
-</span><span data-line="452"><span class="k">def</span><span class="w"> </span><span class="nf">_join_block</span><span class="p">(</span><span class="n">lines</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">style</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span data-line="453"><span class="w">    </span><span class="sd">"""Join a block scalar's lines: folded (``&gt;``) with spaces, literal (``|``) with newlines."""</span>
-</span><span data-line="454">    <span class="k">while</span> <span class="n">lines</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">lines</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
-</span><span data-line="455">        <span class="n">lines</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
-</span><span data-line="456">    <span class="n">sep</span> <span class="o">=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span> <span class="k">if</span> <span class="n">style</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"|"</span><span class="p">)</span> <span class="k">else</span> <span class="s2">" "</span>
-</span><span data-line="457">    <span class="k">return</span> <span class="n">sep</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-</span><span data-line="458">
-</span><span data-line="459">
-</span><span data-line="460"><span class="k">def</span><span class="w"> </span><span class="nf">_description_of</span><span class="p">(</span><span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">frontmatter</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span data-line="461"><span class="w">    </span><span class="sd">"""The frontmatter ``description`` if it is a usable string, else the body's first line."""</span>
-</span><span data-line="462">    <span class="n">desc</span> <span class="o">=</span> <span class="n">frontmatter</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"description"</span><span class="p">)</span>
-</span><span data-line="463">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">desc</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">desc</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
-</span><span data-line="464">        <span class="k">return</span> <span class="s2">" "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">desc</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
-</span><span data-line="465">    <span class="n">body</span> <span class="o">=</span> <span class="n">content</span>
-</span><span data-line="466">    <span class="k">if</span> <span class="n">content</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"---"</span><span class="p">):</span>
-</span><span data-line="467">        <span class="n">fence</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">---"</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
-</span><span data-line="468">        <span class="k">if</span> <span class="n">fence</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
-</span><span data-line="469">            <span class="n">body</span> <span class="o">=</span> <span class="n">content</span><span class="p">[</span><span class="n">fence</span> <span class="o">+</span> <span class="mi">4</span> <span class="p">:]</span>
-</span><span data-line="470">    <span class="k">return</span> <span class="n">_first_line</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
-</span><span data-line="471">
-</span><span data-line="472">
-</span><span data-line="473"><span class="k">def</span><span class="w"> </span><span class="nf">_first_line</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span data-line="474"><span class="w">    </span><span class="sd">"""Return the first non-empty, non-heading line of *text*."""</span>
-</span><span data-line="475">    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">text</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
-</span><span data-line="476">        <span class="n">stripped</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-</span><span data-line="477">        <span class="k">if</span> <span class="n">stripped</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">stripped</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"#"</span><span class="p">):</span>
-</span><span data-line="478">            <span class="k">return</span> <span class="n">stripped</span>
-</span><span data-line="479">    <span class="k">return</span> <span class="s2">""</span>
+</span><span data-line="384">
+</span><span data-line="385"><span class="k">def</span><span class="w"> </span><span class="nf">_parse_frontmatter</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span><span data-line="386"><span class="w">    </span><span class="sa">r</span><span class="sd">"""Extract YAML frontmatter from a SKILL.md file as a simple dict.</span>
+</span><span data-line="387">
+</span><span data-line="388"><span class="sd">    Handles the subset of YAML used in agentskills.io spec frontmatter</span>
+</span><span data-line="389"><span class="sd">    without requiring a YAML library: scalars (with ``# comments`` stripped),</span>
+</span><span data-line="390"><span class="sd">    one level of nested keys (``metadata:``), inline flow maps</span>
+</span><span data-line="391"><span class="sd">    (``metadata: {subagent: true}``), and folded/literal block scalars</span>
+</span><span data-line="392"><span class="sd">    (``description: &gt;-`` followed by indented lines).</span>
+</span><span data-line="393">
+</span><span data-line="394"><span class="sd">    &gt;&gt;&gt; _parse_frontmatter('---\nname: x\ndescription: &gt;-\n  Line one,\n  line two: with colon.\nmetadata:\n  subagent: true  # opt in\n---\n')</span>
+</span><span data-line="395"><span class="sd">    {'name': 'x', 'description': 'Line one, line two: with colon.', 'metadata': {'subagent': 'true'}}</span>
+</span><span data-line="396"><span class="sd">    &gt;&gt;&gt; _parse_frontmatter('---\nmetadata: {subagent: "true", subagent-model: haiku}\n---\n')['metadata']</span>
+</span><span data-line="397"><span class="sd">    {'subagent': 'true', 'subagent-model': 'haiku'}</span>
+</span><span data-line="398"><span class="sd">    """</span>
+</span><span data-line="399">    <span class="n">lines</span> <span class="o">=</span> <span class="n">text</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+</span><span data-line="400">    <span class="k">if</span> <span class="ow">not</span> <span class="n">lines</span> <span class="ow">or</span> <span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">!=</span> <span class="s2">"---"</span><span class="p">:</span>
+</span><span data-line="401">        <span class="k">return</span> <span class="p">{}</span>
+</span><span data-line="402">    <span class="n">end</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span data-line="403">    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="mi">1</span><span class="p">:],</span> <span class="mi">1</span><span class="p">):</span>
+</span><span data-line="404">        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="o">==</span> <span class="s2">"---"</span><span class="p">:</span>
+</span><span data-line="405">            <span class="n">end</span> <span class="o">=</span> <span class="n">i</span>
+</span><span data-line="406">            <span class="k">break</span>
+</span><span data-line="407">    <span class="k">if</span> <span class="n">end</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="408">        <span class="k">return</span> <span class="p">{}</span>
+</span><span data-line="409">
+</span><span data-line="410">    <span class="n">result</span><span class="p">:</span> <span class="nb">dict</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span data-line="411">    <span class="n">current_key</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span data-line="412">    <span class="n">block</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># continuation lines of a block scalar</span>
+</span><span data-line="413">    <span class="n">block_style</span> <span class="o">=</span> <span class="s2">""</span>
+</span><span data-line="414">    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="n">end</span><span class="p">]:</span>
+</span><span data-line="415">        <span class="n">stripped</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span><span data-line="416">        <span class="n">indented</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="ow">and</span> <span class="n">line</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">" "</span><span class="p">,</span> <span class="s2">"</span><span class="se">\t</span><span class="s2">"</span><span class="p">)</span>
+</span><span data-line="417">        <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="p">(</span><span class="n">indented</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">stripped</span><span class="p">):</span>
+</span><span data-line="418">            <span class="n">block</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">stripped</span><span class="p">)</span>
+</span><span data-line="419">            <span class="k">continue</span>
+</span><span data-line="420">        <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="421">            <span class="n">result</span><span class="p">[</span><span class="n">current_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">_join_block</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="n">block_style</span><span class="p">)</span>
+</span><span data-line="422">            <span class="n">block</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span data-line="423">        <span class="k">if</span> <span class="ow">not</span> <span class="n">stripped</span> <span class="ow">or</span> <span class="n">stripped</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"#"</span><span class="p">):</span>
+</span><span data-line="424">            <span class="k">continue</span>
+</span><span data-line="425">        <span class="k">if</span> <span class="n">indented</span> <span class="ow">and</span> <span class="n">current_key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="426">            <span class="c1"># Indented line = continuation of previous key (nested YAML)</span>
+</span><span data-line="427">            <span class="n">current</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">current_key</span><span class="p">)</span>
+</span><span data-line="428">            <span class="k">if</span> <span class="s2">":"</span> <span class="ow">in</span> <span class="n">stripped</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">current</span><span class="p">):</span>
+</span><span data-line="429">                <span class="n">k</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">stripped</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">":"</span><span class="p">)</span>
+</span><span data-line="430">                <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+</span><span data-line="431">                    <span class="n">result</span><span class="p">[</span><span class="n">current_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span data-line="432">                <span class="n">result</span><span class="p">[</span><span class="n">current_key</span><span class="p">][</span><span class="n">k</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span> <span class="o">=</span> <span class="n">_unquote</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+</span><span data-line="433">            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+</span><span data-line="434">                <span class="c1"># plain multi-line scalar</span>
+</span><span data-line="435">                <span class="n">result</span><span class="p">[</span><span class="n">current_key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+</span><span data-line="436">                    <span class="n">result</span><span class="p">[</span><span class="n">current_key</span><span class="p">]</span> <span class="o">+</span> <span class="s2">" "</span> <span class="o">+</span> <span class="n">_unquote</span><span class="p">(</span><span class="n">stripped</span><span class="p">)</span>
+</span><span data-line="437">                <span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span><span data-line="438">            <span class="k">continue</span>
+</span><span data-line="439">        <span class="k">if</span> <span class="s2">":"</span> <span class="ow">in</span> <span class="n">stripped</span><span class="p">:</span>
+</span><span data-line="440">            <span class="n">k</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">stripped</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s2">":"</span><span class="p">)</span>
+</span><span data-line="441">            <span class="n">k</span> <span class="o">=</span> <span class="n">k</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span><span data-line="442">            <span class="n">v</span> <span class="o">=</span> <span class="n">_strip_inline_comment</span><span class="p">(</span><span class="n">v</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+</span><span data-line="443">            <span class="n">current_key</span> <span class="o">=</span> <span class="n">k</span>
+</span><span data-line="444">            <span class="k">if</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">_BLOCK_SCALARS</span><span class="p">:</span>
+</span><span data-line="445">                <span class="n">block</span><span class="p">,</span> <span class="n">block_style</span> <span class="o">=</span> <span class="p">[],</span> <span class="n">v</span>
+</span><span data-line="446">                <span class="n">result</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="s2">""</span>
+</span><span data-line="447">            <span class="k">elif</span> <span class="n">v</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"{"</span><span class="p">)</span> <span class="ow">and</span> <span class="n">v</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">"}"</span><span class="p">):</span>
+</span><span data-line="448">                <span class="n">result</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">_parse_flow_map</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+</span><span data-line="449">            <span class="k">else</span><span class="p">:</span>
+</span><span data-line="450">                <span class="n">result</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">=</span> <span class="n">_unquote</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+</span><span data-line="451">    <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">current_key</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="452">        <span class="n">result</span><span class="p">[</span><span class="n">current_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">_join_block</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="n">block_style</span><span class="p">)</span>
+</span><span data-line="453">    <span class="k">return</span> <span class="n">result</span>
+</span><span data-line="454">
+</span><span data-line="455">
+</span><span data-line="456"><span class="k">def</span><span class="w"> </span><span class="nf">_join_block</span><span class="p">(</span><span class="n">lines</span><span class="p">:</span> <span class="nb">list</span><span class="p">,</span> <span class="n">style</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span data-line="457"><span class="w">    </span><span class="sd">"""Join a block scalar's lines: folded (``&gt;``) with spaces, literal (``|``) with newlines."""</span>
+</span><span data-line="458">    <span class="k">while</span> <span class="n">lines</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">lines</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
+</span><span data-line="459">        <span class="n">lines</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+</span><span data-line="460">    <span class="n">sep</span> <span class="o">=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span> <span class="k">if</span> <span class="n">style</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"|"</span><span class="p">)</span> <span class="k">else</span> <span class="s2">" "</span>
+</span><span data-line="461">    <span class="k">return</span> <span class="n">sep</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span><span data-line="462">
+</span><span data-line="463">
+</span><span data-line="464"><span class="k">def</span><span class="w"> </span><span class="nf">_description_of</span><span class="p">(</span><span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">frontmatter</span><span class="p">:</span> <span class="nb">dict</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span data-line="465"><span class="w">    </span><span class="sd">"""The frontmatter ``description`` if it is a usable string, else the body's first line."""</span>
+</span><span data-line="466">    <span class="n">desc</span> <span class="o">=</span> <span class="n">frontmatter</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"description"</span><span class="p">)</span>
+</span><span data-line="467">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">desc</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">desc</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+</span><span data-line="468">        <span class="k">return</span> <span class="s2">" "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">desc</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+</span><span data-line="469">    <span class="n">body</span> <span class="o">=</span> <span class="n">content</span>
+</span><span data-line="470">    <span class="k">if</span> <span class="n">content</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"---"</span><span class="p">):</span>
+</span><span data-line="471">        <span class="n">fence</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">---"</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+</span><span data-line="472">        <span class="k">if</span> <span class="n">fence</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+</span><span data-line="473">            <span class="n">body</span> <span class="o">=</span> <span class="n">content</span><span class="p">[</span><span class="n">fence</span> <span class="o">+</span> <span class="mi">4</span> <span class="p">:]</span>
+</span><span data-line="474">    <span class="k">return</span> <span class="n">_first_line</span><span class="p">(</span><span class="n">body</span><span class="p">)</span>
+</span><span data-line="475">
+</span><span data-line="476">
+</span><span data-line="477"><span class="k">def</span><span class="w"> </span><span class="nf">_first_line</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span data-line="478"><span class="w">    </span><span class="sd">"""Return the first non-empty, non-heading line of *text*."""</span>
+</span><span data-line="479">    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">text</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
+</span><span data-line="480">        <span class="n">stripped</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span><span data-line="481">        <span class="k">if</span> <span class="n">stripped</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">stripped</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"#"</span><span class="p">):</span>
+</span><span data-line="482">            <span class="k">return</span> <span class="n">stripped</span>
+</span><span data-line="483">    <span class="k">return</span> <span class="s2">""</span>
 </span></pre></div>
         </article><button class="back-to-top" type="button">
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -637,7 +641,7 @@ data-aria-dark="Switch to auto color mode">
     </div>
   </div>
 </footer>
-      <script src="../../_static/documentation_options.js?v=a11416ff"></script>
+      <script src="../../_static/documentation_options.js?v=96ec9c95"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
