@@ -156,3 +156,20 @@ def test_bare_project_defaults(bare_project):
     assert result.agents == []
     assert result.rules == []
     assert result.docs == []
+
+
+def test_agents_in_subfolders_are_found_and_named_by_frontmatter():
+    import tempfile
+
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        sub = root / ".claude" / "agents" / "team"
+        sub.mkdir(parents=True)
+        (sub / "scout.md").write_text("---\nname: fleet-scout\ndescription: Reads the fleet.\n---\nBody.\n")
+        (root / ".claude" / "agents" / "plain.md").write_text("# Plain\n\nTop-level agent.\n")
+        (root / ".claude" / "agents" / ".hidden").mkdir()
+        (root / ".claude" / "agents" / ".hidden" / "x.md").write_text("---\nname: hidden\n---\n")
+        result = scan(root, claude_config_dir=None)
+        assert {a.name for a in result.agents} == {"fleet-scout", "plain"}
+        scout = next(a for a in result.agents if a.name == "fleet-scout")
+        assert scout.path.resolve() == (sub / "scout.md").resolve() and scout.description == "Reads the fleet."

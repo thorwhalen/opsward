@@ -39,10 +39,16 @@ def iter_subdirs(directory: Path):
     )
 
 
-def iter_files(directory: Path, *, suffix: str = ""):
-    """Yield files in *directory* (non-recursive), optionally filtered by suffix."""
+def iter_files(directory: Path, *, suffix: str = "", recursive: bool = False):
+    """Yield files in *directory*, optionally filtered by suffix.
+
+    ``recursive=True`` walks subdirectories too (hidden ones skipped), depth-first
+    in name order, which is how Claude Code scans ``.claude/agents/``.
+    """
     if not directory.is_dir():
         return
     for p in sorted(directory.iterdir(), key=lambda p: p.name):
         if p.is_file() and (not suffix or p.suffix == suffix):
             yield p
+        elif recursive and p.is_dir() and not p.name.startswith("."):
+            yield from iter_files(p, suffix=suffix, recursive=True)

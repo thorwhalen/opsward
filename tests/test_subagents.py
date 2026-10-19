@@ -237,3 +237,15 @@ def test_diagnose_notes_twins_without_moving_the_score():
         assert twin_summary(scan(root)) == {"in_sync": 1}
         # the generated twin is a described agent, so Setup credits it like any agent
         assert setup_after.score >= setup_before.score
+
+
+def test_twin_in_a_subfolder_is_matched_by_name_not_generated_twice():
+    with tempfile.TemporaryDirectory() as tmp:
+        root = _project(Path(tmp))
+        sub = root / ".claude" / "agents" / "team"
+        sub.mkdir(parents=True)
+        (gf,) = list(subagent_files(scan(root)))
+        (sub / "anything.md").write_text(gf.content)  # the twin lives in a subfolder under another file name
+        sr = scan(root)
+        assert [t.state for t in twin_status(sr)] == ["in_sync"]
+        assert not [f for f in generate(sr) if f.target_path.name == "fleet-sweep.md"]

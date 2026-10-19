@@ -209,7 +209,8 @@ def _canonical_skill_location(
 
 
 def _scan_agents(agents_dir: Path):
-    for agent_file in iter_files(agents_dir, suffix=".md"):
+    """Agents under ``.claude/agents/``, subfolders included, identified by ``name:`` (opsward#39)."""
+    for agent_file in iter_files(agents_dir, suffix=".md", recursive=True):
         content = read_text_safe(agent_file)
         frontmatter = _parse_frontmatter(content)
         name = str(frontmatter.get("name") or "").strip() or agent_file.stem

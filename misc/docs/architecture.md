@@ -21,7 +21,7 @@ Target Project ──► scan.py ──► ScanResult ──► score.py ──�
 1. `scan.py` walks the target project, collecting:
    - Project type (Python / JS/TS / mixed)
    - CLAUDE.md content and location
-   - `.claude/skills/`, `.claude/agents/`, `.claude/rules/` inventories (each skill entry also records whether it is a symlink bridge and whether a canonical `skills/<name>` or `<pkg>/data/skills/<name>` twin exists)
+   - `.claude/skills/`, `.claude/agents/` (subfolders included, agents identified by their `name:`), `.claude/rules/` inventories (each skill entry also records whether it is a symlink bridge and whether a canonical `skills/<name>` or `<pkg>/data/skills/<name>` twin exists)
    - The user's global skill scope (`$CLAUDE_CONFIG_DIR/skills`, default `~/.claude/skills`), through the `claude_config_dir` keyword seam; `None` reads nothing outside the target
    - Hooks configuration (`.claude/hooks.json` or `settings.local.json`)
    - Docs directory contents and `docs_guide.md` if present
