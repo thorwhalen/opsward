@@ -176,7 +176,7 @@ def cited_paths(content: str) -> list[str]:
     ['../research/r.md', '0002-x.md', 'pkg/a.py']
     >>> cited_paths("We moved `pkg/old.py` to `pkg/new.py`; ~~`pkg/gone.py`~~ is history.")
     ['pkg/new.py']
-    >>> cited_paths("It was read from `pkg/live.py`, and renamed [old](../old.md) to [new](../new.md).")
+    >>> cited_paths("It was read from `pkg/live.py`.\nRenamed [old](../old.md) to [new](../new.md).")
     ['../new.md', 'pkg/live.py']
     """
     from opsward.maintain import _extract_paths  # the same extractor CLAUDE.md uses
@@ -204,7 +204,8 @@ def _is_destination(line: str, path: str) -> bool:
     """On a historical line, the path after "to"/"into"/"now" is the current one."""
     at = line.find(path)
     before = line[:at].lower()
-    return bool(re.search(r"\b(to|into|now|now at|lives in|is now)\s*[`\[]?$", before.rstrip()))
+    # the path may be a code span (`x`) or a link target ([label](x)) right after the word
+    return bool(re.search(r"\b(to|into|now|now at|lives in|is now)\s*(\[[^\]]*\]\(|[`\[])?$", before.rstrip()))
 
 
 def check_decisions(sr: ScanResult) -> Iterable[MaintenanceSuggestion]:
