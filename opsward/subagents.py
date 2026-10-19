@@ -257,7 +257,9 @@ def twin_status(sr: ScanResult) -> Iterator[TwinStatus]:
     """
     agents = {a.name: a for a in sr.agents}
     agents_dir = sr.project_root / ".claude" / "agents"
-    by_stem = {a.path.stem: a for a in sr.agents if a.path.parent == agents_dir}  # only a top-level file is "in the way"
+    by_stem = {
+        a.path.stem: a for a in sr.agents if a.path.parent == agents_dir
+    }  # only a top-level file is "in the way"
     rel = lambda a: _source_rel(a.path, sr.project_root)  # noqa: E731
     taken: dict[str, str] = {}
     declared_skills: set[str] = set()

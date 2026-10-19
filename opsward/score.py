@@ -993,15 +993,23 @@ def _score_setup(sr: ScanResult, *, suggestions: list[str]) -> ComponentScore:
         by_name: dict[str, list] = {}
         for a in sr.agents:
             by_name.setdefault(a.name, []).append(a)
-        described = [n for n, group in by_name.items() if any(a.description.strip() for a in group)]
+        described = [
+            n
+            for n, group in by_name.items()
+            if any(a.description.strip() for a in group)
+        ]
         total += min(_SETUP_AGENTS_MAX, _SETUP_PER_ARTIFACT * len(described))
         for n, group in by_name.items():
             if not any(a.description.strip() for a in group):
                 notes.append(f'Agent "{n}": no description')
             if len(group) > 1:
                 files = ", ".join(_rel_to(a.path, sr.project_root) for a in group)
-                notes.append(f'Agent "{n}": defined {len(group)} times ({files}) — Claude Code loads only one of them')
-                suggestions.append(f'Rename or remove the duplicate agent definitions of "{n}" — only one is loaded')
+                notes.append(
+                    f'Agent "{n}": defined {len(group)} times ({files}) — Claude Code loads only one of them'
+                )
+                suggestions.append(
+                    f'Rename or remove the duplicate agent definitions of "{n}" — only one is loaded'
+                )
     else:
         notes.append("No agents defined")
 

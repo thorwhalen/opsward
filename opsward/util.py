@@ -39,7 +39,13 @@ def iter_subdirs(directory: Path):
     )
 
 
-def iter_files(directory: Path, *, suffix: str = "", recursive: bool = False, _seen: set | None = None):
+def iter_files(
+    directory: Path,
+    *,
+    suffix: str = "",
+    recursive: bool = False,
+    _seen: set | None = None,
+):
     """Yield files in *directory*, optionally filtered by suffix.
 
     ``recursive=True`` walks subdirectories too, depth-first in name order. Hidden
