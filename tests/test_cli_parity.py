@@ -81,6 +81,10 @@ def test_cli_surface_is_unchanged():
         _golden_for_this_python(),
         prog=[_console_script()],
         cwd=str(REPO_ROOT),
+        # `diagnose` reads the user's global skill scope ($CLAUDE_CONFIG_DIR/skills) for
+        # shadowing and listing-budget findings (opsward#35). Point it at nothing so the
+        # recording and every replay see the same, empty, scope. Record with the same pin.
+        env={"CLAUDE_CONFIG_DIR": str(REPO_ROOT / "tests" / "fixtures" / "no-such-config-dir")},
         strict_help=True,
         expect_diff=WINDOWS_CONTENT_DIFFS if sys.platform == "win32" else (),
     )

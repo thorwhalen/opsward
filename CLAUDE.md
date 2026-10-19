@@ -34,8 +34,8 @@ Key docs to read before starting work:
 - `opsward/` — the main package
   - `__init__.py` — public interface (the facade). Exports `diagnose`, `generate`, `generate_skills`, `maintain`, `recommend_skills`, `validate_skill_spec`, `SkillRecommendation`, key types
   - `base.py` — core data structures: `ProjectType`, `ScanResult`, `DiagnosisReport`, `ComponentScore`, `DocSpec`, `SkillInfo`, `AgentInfo`, `RuleInfo`, `GeneratedFile`, `MaintenanceSuggestion`
-  - `scan.py` — read-only filesystem scanning: detect project type, find CLAUDE.md, skills, agents, rules, hooks, docs
-  - `score.py` — quality scoring: CLAUDE.md rubric, skill validation, doc freshness, cross-reference checks. Rubric weights/dimensions are hardcoded module constants (no external rubric files)
+  - `scan.py` — read-only filesystem scanning: detect project type, find CLAUDE.md, skills, agents, rules, hooks, docs; also the user's global skill scope (`scan(root, claude_config_dir=...)`, `None` disables)
+  - `score.py` — quality scoring: CLAUDE.md rubric, skill validation, skill reachability findings (shadowed by a global skill, unmigrated bridge, listing budget), doc freshness, cross-reference checks. Rubric weights/dimensions are hardcoded module constants (no external rubric files)
   - `generate.py` — template rendering and file generation (never overwrites without confirmation). Also provides `generate_skills()` for targeted skill/agent installation.
   - `maintain.py` — staleness detection, update suggestions, drift analysis
   - `recommend.py` — map detected tech-stack signals (deps, frameworks) to curated ecosystem skill recommendations
@@ -113,9 +113,15 @@ CPython. Adding a command or a flag will fail that test. Re-record **every** gol
 each on its own interpreter:
 
 ```bash
+CLAUDE_CONFIG_DIR=$PWD/tests/fixtures/no-such-config-dir \
 python3.12 -m cw.testing characterize opsward --cases misc/cli_cases.txt \
     -o misc/cli_golden_py312.json
 ```
+
+The `CLAUDE_CONFIG_DIR` pin matters: `diagnose` reads the user's global skill scope
+(`$CLAUDE_CONFIG_DIR/skills`, default `~/.claude/skills`) for shadowing and
+listing-budget findings, and `tests/test_cli_parity.py` replays with the same pin so
+the recording and every replay see an empty scope.
 
 and put the resulting diff in the PR. Never re-record to make a red test green without
 first reading what changed.

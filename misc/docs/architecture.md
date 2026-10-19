@@ -21,7 +21,8 @@ Target Project ──► scan.py ──► ScanResult ──► score.py ──�
 1. `scan.py` walks the target project, collecting:
    - Project type (Python / JS/TS / mixed)
    - CLAUDE.md content and location
-   - `.claude/skills/`, `.claude/agents/`, `.claude/rules/` inventories
+   - `.claude/skills/`, `.claude/agents/`, `.claude/rules/` inventories (each skill entry also records whether it is a symlink bridge and whether a canonical `skills/<name>` or `<pkg>/data/skills/<name>` twin exists)
+   - The user's global skill scope (`$CLAUDE_CONFIG_DIR/skills`, default `~/.claude/skills`), through the `claude_config_dir` keyword seam; `None` reads nothing outside the target
    - Hooks configuration (`.claude/hooks.json` or `settings.local.json`)
    - Docs directory contents and `docs_guide.md` if present
 2. `score.py` evaluates the scan results against rubrics:
@@ -65,7 +66,7 @@ Generated artifacts include CLAUDE.md, docs, skills, agents, and rules, plus opt
 
 | Module | Responsibility | I/O |
 |--------|---------------|-----|
-| `scan.py` | Read-only filesystem inspection | `Path → ScanResult` |
+| `scan.py` | Read-only filesystem inspection (the target, plus the user's global skill scope through the `claude_config_dir` seam) | `Path → ScanResult` |
 | `score.py` | Pure scoring logic | `ScanResult → DiagnosisReport` |
 | `subagents.py` | Skill-declared subagent twins: spec, render, sync state | `SkillInfo → SubagentSpec`, `ScanResult → GeneratedFile / MaintenanceSuggestion` |
 | `generate.py` | Template loading + rendering | `ScanResult → list[GeneratedFile]` |

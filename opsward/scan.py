@@ -4,7 +4,9 @@ This module NEVER writes to the target project.
 """
 
 import json
+import os
 from pathlib import Path
+from typing import Optional
 
 from opsward.base import (
     AgentInfo,
@@ -17,13 +19,26 @@ from opsward.base import (
 from opsward.util import iter_files, iter_subdirs, read_json_safe, read_text_safe
 
 
-def scan(project_root: Path) -> ScanResult:
+_USER_CONFIG = object()  # sentinel: "the user's Claude config dir", resolved at call time
+
+
+def default_claude_config_dir() -> Path:
+    """``$CLAUDE_CONFIG_DIR`` if set, else ``~/.claude`` (what Claude Code itself uses)."""
+    return Path(os.environ.get("CLAUDE_CONFIG_DIR") or Path.home() / ".claude")
+
+
+def scan(project_root: Path, *, claude_config_dir: object = _USER_CONFIG) -> ScanResult:
     """Scan *project_root* and return a ScanResult.
 
+    ``claude_config_dir`` is the user's Claude Code config dir, whose ``skills/`` is
+    the global scope a project skill competes with (shadowing, listing budget). It
+    defaults to :func:`default_claude_config_dir`; pass ``None`` to read nothing
+    outside the project (tests, portable goldens). Reading it is still read-only.
+
     >>> import tempfile, pathlib
-    >>> r = scan(pathlib.Path(tempfile.mkdtemp()))
-    >>> r.project_type
-    <ProjectType.unknown: 'unknown'>
+    >>> r = scan(pathlib.Path(tempfile.mkdtemp()), claude_config_dir=None)
+    >>> r.project_type, r.global_skills
+    (<ProjectType.unknown: 'unknown'>, [])
     """
     project_root = Path(project_root).resolve()
     result = ScanResult(project_root=project_root)
@@ -35,7 +50,13 @@ def scan(project_root: Path) -> ScanResult:
 
     # .claude/ sub-directories
     claude_dir = project_root / ".claude"
-    result.skills = list(_scan_skills(claude_dir / "skills"))
+    result.skills = list(_scan_skills(claude_dir / "skills", project_root=project_root))
+
+    # The user's global skill scope
+    cfg = default_claude_config_dir() if claude_config_dir is _USER_CONFIG else claude_config_dir
+    if cfg is not None and (Path(cfg) / "skills").is_dir():
+        result.global_skills_dir = Path(cfg) / "skills"
+        result.global_skills = list(_scan_skills(result.global_skills_dir))
     result.agents = list(_scan_agents(claude_dir / "agents"))
     result.rules = list(_scan_rules(claude_dir / "rules"))
 
@@ -105,7 +126,8 @@ def _find_claude_md(root: Path) -> tuple[Path | None, str]:
     return None, ""
 
 
-def _scan_skills(skills_dir: Path):
+def _scan_skills(skills_dir: Path, *, project_root: Optional[Path] = None):
+    """Skills under *skills_dir*; with *project_root*, also where each entry's canonical twin would be."""
     for skill_path in iter_subdirs(skills_dir):
         skill_md = skill_path / "SKILL.md"
         has_skill_md = skill_md.is_file()
@@ -117,6 +139,14 @@ def _scan_skills(skills_dir: Path):
             line_count = len(content.splitlines())
             frontmatter = _parse_frontmatter(content)
             description = _description_of(content, frontmatter)
+        is_link = skill_path.is_symlink()
+        try:
+            real_path = skill_path.resolve()
+        except OSError:
+            real_path = None
+        canonical = None
+        if project_root is not None and not is_link:
+            canonical = _canonical_skill_location(project_root, skill_path.name, skill_path)
         yield SkillInfo(
             name=skill_path.name,
             path=skill_path,
@@ -124,7 +154,36 @@ def _scan_skills(skills_dir: Path):
             description=description,
             frontmatter=frontmatter,
             line_count=line_count,
+            is_link=is_link,
+            real_path=real_path,
+            canonical_path=canonical,
         )
+
+
+def _canonical_skill_location(project_root: Path, name: str, exclude: Path) -> Optional[Path]:
+    """``skills/<name>`` or ``<pkg>/data/skills/<name>`` holding a SKILL.md, other than *exclude*.
+
+    These are the two real locations skill-package-setup allows; a real directory
+    under ``.claude/skills`` next to one of them is the unmigrated state. ``<pkg>`` is a
+    Python package (a directory with ``__init__.py``) at the root or under ``src/``, so
+    fixtures under ``tests/data/skills`` are not mistaken for a canonical copy.
+    """
+    candidates = [project_root / "skills" / name]
+    for parent in (project_root, project_root / "src"):
+        try:
+            children = list(parent.iterdir()) if parent.is_dir() else []
+        except OSError:
+            continue
+        for child in children:
+            if child.is_dir() and not child.name.startswith(".") and (child / "__init__.py").is_file():
+                candidates.append(child / "data" / "skills" / name)
+    for cand in candidates:
+        try:
+            if (cand / "SKILL.md").is_file() and cand.resolve() != exclude.resolve():
+                return cand
+        except OSError:
+            continue
+    return None
 
 
 def _scan_agents(agents_dir: Path):
