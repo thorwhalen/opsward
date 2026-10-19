@@ -94,8 +94,12 @@ only runs it.
 ```python
 # In cli.py — a name → command mapping; `decision` is the one nested group
 _dispatch_funcs = {
-    "diagnose": diagnose, "generate": generate, "maintain": maintain,
-    "recommend": recommend, "install-skills": install_skills, "find": find,
+    "diagnose": diagnose,
+    "generate": generate,
+    "maintain": maintain,
+    "recommend": recommend,
+    "install-skills": install_skills,
+    "find": find,
     "decision": [new, note],
 }
 ```

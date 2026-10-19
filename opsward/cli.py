@@ -379,7 +379,9 @@ def new(
         print("Error: the title is empty", file=sys.stderr)
         sys.exit(2)
     if status not in _ADR_STATUSES:
-        print(f"Error: status must be one of {', '.join(_ADR_STATUSES)}", file=sys.stderr)
+        print(
+            f"Error: status must be one of {', '.join(_ADR_STATUSES)}", file=sys.stderr
+        )
         sys.exit(2)
     root, decisions_dir = _decisions_dir(project_root)
     gf = new_adr(decisions_dir, title, status=status, evidence=evidence)
@@ -389,7 +391,9 @@ def new(
         sys.exit(1)
     if write:
         gf.target_path.parent.mkdir(parents=True, exist_ok=True)
-        with open(gf.target_path, "x", encoding="utf-8") as fh:  # exclusive: never over a file
+        with open(
+            gf.target_path, "x", encoding="utf-8"
+        ) as fh:  # exclusive: never over a file
             fh.write(gf.content)
         print(f"Created {rel}")
     else:
@@ -412,7 +416,10 @@ def note(text: str, write: bool = False, project_root: str = "."):
     try:
         path, content = log_append(decisions_dir, text)
     except (OSError, UnicodeDecodeError) as e:
-        print(f"Error: cannot read the existing log, nothing written: {e}", file=sys.stderr)
+        print(
+            f"Error: cannot read the existing log, nothing written: {e}",
+            file=sys.stderr,
+        )
         sys.exit(2)
     rel = _relative_path(path, root)
     if write:
@@ -421,7 +428,9 @@ def note(text: str, write: bool = False, project_root: str = "."):
         print(f"Appended to {rel}")
     else:
         verb = "append to" if path.exists() else "create"
-        print(f"Would {verb} {rel} a dated entry: {' '.join(text.split())}\n\nDry run — pass --write to do it.")
+        print(
+            f"Would {verb} {rel} a dated entry: {' '.join(text.split())}\n\nDry run — pass --write to do it."
+        )
 
 
 #: The statuses `decision new` will stamp. Accepting is the operator's act: pass

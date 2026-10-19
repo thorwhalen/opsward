@@ -23,16 +23,27 @@ from typing import Iterable, Iterator, Optional
 from opsward.base import DocSpec, GeneratedFile, MaintenanceSuggestion, ScanResult
 from opsward.util import read_text_safe
 
-_ADR_FILE_RE = re.compile(r"^(?P<number>\d{4})[-_](?P<slug>[^/]*)\.md$")  # any numbered .md counts for numbering
+_ADR_FILE_RE = re.compile(
+    r"^(?P<number>\d{4})[-_](?P<slug>[^/]*)\.md$"
+)  # any numbered .md counts for numbering
 _STATUS_HEADING_RE = re.compile(r"^#{2,3}\s+Status\s*$\n+(?P<text>[^\n]*)", re.M)
-_STATUS_LINE_RE = re.compile(r"^\**Status\**\s*:\**\s*(?P<text>[^\n]+)$", re.M | re.I)  # the colon is required
-_FRONTMATTER_STATUS_RE = re.compile(r"\A---\n(?:.*\n)*?status:\s*(?P<text>[^\n]+)\n(?:.*\n)*?---", re.M)
+_STATUS_LINE_RE = re.compile(
+    r"^\**Status\**\s*:\**\s*(?P<text>[^\n]+)$", re.M | re.I
+)  # the colon is required
+_FRONTMATTER_STATUS_RE = re.compile(
+    r"\A---\n(?:.*\n)*?status:\s*(?P<text>[^\n]+)\n(?:.*\n)*?---", re.M
+)
 _CLOSED_STATUSES = ("superseded", "deprecated", "rejected")
 _FENCE_RE = re.compile(r"^(`{3,}|~{3,}).*?^\1[ \t]*$", re.M | re.S)
 _LINK_RE = re.compile(r"\]\(([^)\s#]+)(?:#[^)]*)?\)")
-_DOMAIN_RE = re.compile(r"^[\w-]+(\.[\w-]+)*\.[a-z]{2,6}$")  # a host name, not a file: no slash yet, dotted labels
+_DOMAIN_RE = re.compile(
+    r"^[\w-]+(\.[\w-]+)*\.[a-z]{2,6}$"
+)  # a host name, not a file: no slash yet, dotted labels
 _STRIKE_RE = re.compile(r"~~.*?~~", re.S)
-_HISTORICAL_RE = re.compile(r"\b(formerly|previously|moved|migrated|renamed|replaced|removed|retired|deleted)\b", re.I)
+_HISTORICAL_RE = re.compile(
+    r"\b(formerly|previously|moved|migrated|renamed|replaced|removed|retired|deleted)\b",
+    re.I,
+)
 _LOG_NAME = "log.md"
 _TEMPLATE_NAME = "0000-template.md"
 _SLUG_MAX = 60
@@ -77,13 +88,18 @@ def next_number(decisions_dir: Path) -> int:
     >>> next_number(Path(tempfile.mkdtemp()))
     1
     """
-    numbers = [int(_ADR_FILE_RE.match(p.name).group("number")) for p in adr_files(decisions_dir)]
+    numbers = [
+        int(_ADR_FILE_RE.match(p.name).group("number"))
+        for p in adr_files(decisions_dir)
+    ]
     return (max(numbers) + 1) if numbers else 1
 
 
 def _template(name: str) -> str:
-    return importlib.resources.files("opsward.data").joinpath(f"templates/shared/decisions/{name}").read_text(
-        encoding="utf-8"
+    return (
+        importlib.resources.files("opsward.data")
+        .joinpath(f"templates/shared/decisions/{name}")
+        .read_text(encoding="utf-8")
     )
 
 
@@ -112,9 +128,12 @@ def new_adr(
         title=clean_title(title),
         status=status,
         date=date.isoformat(),
-        evidence=evidence.strip() or "<!-- the issue, discussion or PR this rests on -->",
+        evidence=evidence.strip()
+        or "<!-- the issue, discussion or PR this rests on -->",
     )
-    return GeneratedFile(target_path=decisions_dir / f"{number:04d}-{slugify(title)}.md", content=content)
+    return GeneratedFile(
+        target_path=decisions_dir / f"{number:04d}-{slugify(title)}.md", content=content
+    )
 
 
 def log_entry(text: str, *, date: Optional[_dt.date] = None) -> str:
@@ -127,7 +146,9 @@ def log_entry(text: str, *, date: Optional[_dt.date] = None) -> str:
     return f"- {date.isoformat()} — {' '.join(text.split())}"
 
 
-def log_append(decisions_dir: Path, text: str, *, date: Optional[_dt.date] = None) -> tuple[Path, str]:
+def log_append(
+    decisions_dir: Path, text: str, *, date: Optional[_dt.date] = None
+) -> tuple[Path, str]:
     """The log file and the full content it should hold after appending *text*.
 
     A missing log starts from the ``log.md`` template. The existing log is read
@@ -136,7 +157,9 @@ def log_append(decisions_dir: Path, text: str, *, date: Optional[_dt.date] = Non
     caller writes; this does not.
     """
     path = decisions_dir / _LOG_NAME
-    existing = path.read_text(encoding="utf-8") if path.exists() else _template(_LOG_NAME)
+    existing = (
+        path.read_text(encoding="utf-8") if path.exists() else _template(_LOG_NAME)
+    )
     if existing and not existing.endswith("\n"):
         existing += "\n"
     return path, existing + log_entry(text, date=date) + "\n"
@@ -144,7 +167,11 @@ def log_append(decisions_dir: Path, text: str, *, date: Optional[_dt.date] = Non
 
 def decision_docs(sr: ScanResult) -> list[DocSpec]:
     """The ADRs a scan found (``ScanResult.decisions``), numbered files only."""
-    return [d for d in sr.decisions if _ADR_FILE_RE.match(d.path.name) and int(d.path.name[:4]) > 0]
+    return [
+        d
+        for d in sr.decisions
+        if _ADR_FILE_RE.match(d.path.name) and int(d.path.name[:4]) > 0
+    ]
 
 
 def status_of(content: str) -> Optional[str]:
@@ -205,7 +232,12 @@ def _is_destination(line: str, path: str) -> bool:
     at = line.find(path)
     before = line[:at].lower()
     # the path may be a code span (`x`) or a link target ([label](x)) right after the word
-    return bool(re.search(r"\b(to|into|now|now at|lives in|is now)\s*(\[[^\]]*\]\(|[`\[])?$", before.rstrip()))
+    return bool(
+        re.search(
+            r"\b(to|into|now|now at|lives in|is now)\s*(\[[^\]]*\]\(|[`\[])?$",
+            before.rstrip(),
+        )
+    )
 
 
 def check_decisions(sr: ScanResult) -> Iterable[MaintenanceSuggestion]:
@@ -231,14 +263,16 @@ def check_decisions(sr: ScanResult) -> Iterable[MaintenanceSuggestion]:
         # a cited path may be repo-relative, relative to the ADR's folder (a sibling or a
         # `../` link), or relative to the docs folder above it
         bases = (sr.project_root, doc.path.parent, doc.path.parent.parent)
-        missing = [p for p in cited_paths(content) if not any((b / p).exists() for b in bases)]
+        missing = [
+            p for p in cited_paths(content) if not any((b / p).exists() for b in bases)
+        ]
         if missing:
             yield MaintenanceSuggestion(
                 category="stale_adr",
                 description=(
                     f"`{rel}` cites path(s) that no longer exist: {', '.join(f'`{p}`' for p in missing[:5])}"
                     f"{' …' if len(missing) > 5 else ''} — write a superseding ADR (or a log entry) that says where it went "
-                    "(\"moved from `old` to `new`\", or ~~old~~, keeps the old path out of this check); "
+                    '("moved from `old` to `new`", or ~~old~~, keeps the old path out of this check); '
                     "the accepted one is only edited to point at its successor"
                 ),
             )
