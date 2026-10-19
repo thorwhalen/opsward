@@ -896,6 +896,13 @@ _KNOWN_HOOK_EVENTS = frozenset(
 )
 
 
+def _rel_to(path: Path, root: Path) -> str:
+    try:
+        return path.relative_to(root).as_posix()
+    except ValueError:
+        return path.as_posix()
+
+
 def validate_hooks_config(cfg: object) -> list[str]:
     """Validate a hooks config against Claude Code's expected shape.
 
@@ -981,13 +988,20 @@ def _score_setup(sr: ScanResult, *, suggestions: list[str]) -> ComponentScore:
     else:
         notes.append("No rules defined")
 
-    # Agents (up to 35) — credit agents that at least carry a description.
+    # Agents (up to 35) — credit each *name* once, when it carries a description.
     if sr.agents:
-        described = [a for a in sr.agents if a.description.strip()]
-        total += min(_SETUP_AGENTS_MAX, _SETUP_PER_ARTIFACT * len(described))
+        by_name: dict[str, list] = {}
         for a in sr.agents:
-            if not a.description.strip():
-                notes.append(f'Agent "{a.name}": no description')
+            by_name.setdefault(a.name, []).append(a)
+        described = [n for n, group in by_name.items() if any(a.description.strip() for a in group)]
+        total += min(_SETUP_AGENTS_MAX, _SETUP_PER_ARTIFACT * len(described))
+        for n, group in by_name.items():
+            if not any(a.description.strip() for a in group):
+                notes.append(f'Agent "{n}": no description')
+            if len(group) > 1:
+                files = ", ".join(_rel_to(a.path, sr.project_root) for a in group)
+                notes.append(f'Agent "{n}": defined {len(group)} times ({files}) — Claude Code loads only one of them')
+                suggestions.append(f'Rename or remove the duplicate agent definitions of "{n}" — only one is loaded')
     else:
         notes.append("No agents defined")
 
