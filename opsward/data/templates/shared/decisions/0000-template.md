@@ -3,7 +3,8 @@
 <!-- Two tiers: a small or medium decision is one Y-statement line in `log.md`
      (`opsward decision note "…" --write`); a load-bearing, expensive-to-reverse
      one is this file, allocated with `opsward decision new "title" --write`.
-     Accepted ADRs are never edited: write a new one that supersedes the old. -->
+     Accepted ADRs are not edited, except to point their Status at the ADR that
+     supersedes them: write a new one that supersedes the old. -->
 
 ## Status
 

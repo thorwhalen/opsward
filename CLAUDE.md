@@ -64,7 +64,7 @@ python -m opsward maintain /path/to/project            # Check for staleness/dri
 python -m opsward recommend /path/to/project           # Recommend ecosystem skills from tech stack
 python -m opsward install-skills --write               # Install Claude Code skills
 python -m opsward decision new "title" --write          # Allocate the next numbered ADR
-python -m opsward decision note "In the context of …" --write   # One-line decision in decisions/log.md
+python -m opsward decision note "In the context of …" --write   # One-line decision in misc/docs/decisions/log.md
 
 # After pip install (via pyproject.toml [project.scripts]):
 opsward diagnose .

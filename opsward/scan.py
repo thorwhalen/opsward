@@ -69,8 +69,8 @@ def scan(project_root: Path, *, claude_config_dir: object = _USER_CONFIG) -> Sca
     )
 
     # Decision records live next to the docs
-    docs_dir = result.docs_guide_path.parent if result.docs_guide_path else _docs_dir(project_root)
-    if docs_dir is not None and (docs_dir / "decisions").is_dir():
+    docs_dir = docs_dir_for(project_root, result.project_type, result.docs_guide_path)
+    if (docs_dir / "decisions").is_dir():
         result.decisions = [
             DocSpec(name=f.stem, path=f, size_bytes=_content_size(f))
             for f in iter_files(docs_dir / "decisions", suffix=".md")
@@ -233,6 +233,26 @@ def _docs_dir(root: Path) -> Optional[Path]:
         if cand.is_dir():
             return cand
     return None
+
+
+def docs_dir_for(root: Path, project_type: ProjectType, docs_guide_path: Optional[Path] = None) -> Path:
+    """The one docs folder every stage agrees on: the docs_guide's folder, else the
+    existing ``docs/`` or ``misc/docs/``, else the convention for the project type
+    (``misc/docs`` for Python, ``docs`` otherwise). Read-only; the folder may not exist.
+
+    >>> import tempfile
+    >>> root = Path(tempfile.mkdtemp())
+    >>> docs_dir_for(root, ProjectType.python).relative_to(root).as_posix()
+    'misc/docs'
+    >>> docs_dir_for(root, ProjectType.jsts).relative_to(root).as_posix()
+    'docs'
+    """
+    if docs_guide_path is not None:
+        return docs_guide_path.parent
+    existing = _docs_dir(root)
+    if existing is not None:
+        return existing
+    return root / ("misc/docs" if project_type == ProjectType.python else "docs")
 
 
 def _scan_docs(root: Path) -> tuple[list[DocSpec], bool, Path | None]:

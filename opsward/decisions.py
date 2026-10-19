@@ -23,8 +23,14 @@ from typing import Iterable, Iterator, Optional
 from opsward.base import DocSpec, GeneratedFile, MaintenanceSuggestion, ScanResult
 from opsward.util import read_text_safe
 
-_ADR_FILE_RE = re.compile(r"^(?P<number>\d{4})-(?P<slug>[a-z0-9][a-z0-9-]*)\.md$")
-_STATUS_RE = re.compile(r"^##\s+Status\s*$", re.M)
+_ADR_FILE_RE = re.compile(r"^(?P<number>\d{4})[-_](?P<slug>[^/]*)\.md$")  # any numbered .md counts for numbering
+_STATUS_HEADING_RE = re.compile(r"^#{2,3}\s+Status\s*$\n+(?P<text>[^\n]*)", re.M)
+_STATUS_LINE_RE = re.compile(r"^\**Status:?\**\s*:?\s*(?P<text>[^\n]+)$", re.M | re.I)
+_FRONTMATTER_STATUS_RE = re.compile(r"\A---\n(?:.*\n)*?status:\s*(?P<text>[^\n]+)\n(?:.*\n)*?---", re.M)
+_CLOSED_STATUSES = ("superseded", "deprecated", "rejected")
+_FENCE_RE = re.compile(r"^(`{3,}|~{3,}).*?^\1[ \t]*$", re.M | re.S)
+_LINK_RE = re.compile(r"\]\(([^)\s#]+)(?:#[^)]*)?\)")
+_DOMAIN_RE = re.compile(r"^[\w-]+\.(com|org|net|io|dev|ai|co|md)$")
 _LOG_NAME = "log.md"
 _TEMPLATE_NAME = "0000-template.md"
 _SLUG_MAX = 60
@@ -38,6 +44,15 @@ def slugify(title: str) -> str:
     """
     slug = re.sub(r"[^a-z0-9]+", "-", title.lower()).strip("-")
     return slug[:_SLUG_MAX].rstrip("-") or "decision"
+
+
+def clean_title(title: str) -> str:
+    r"""One line, single-spaced; empty is an error the CLI reports.
+
+    >>> clean_title("  two\n lines ")
+    'two lines'
+    """
+    return " ".join(title.split())
 
 
 def adr_files(decisions_dir: Path) -> Iterator[Path]:
@@ -92,7 +107,7 @@ def new_adr(
     date = date or _dt.date.today()
     content = Template(_template("adr.md")).substitute(
         number=f"{number:04d}",
-        title=title.strip(),
+        title=clean_title(title),
         status=status,
         date=date.isoformat(),
         evidence=evidence.strip() or "<!-- the issue, discussion or PR this rests on -->",
@@ -113,10 +128,13 @@ def log_entry(text: str, *, date: Optional[_dt.date] = None) -> str:
 def log_append(decisions_dir: Path, text: str, *, date: Optional[_dt.date] = None) -> tuple[Path, str]:
     """The log file and the full content it should hold after appending *text*.
 
-    A missing log starts from the ``log.md`` template. The caller writes; this does not.
+    A missing log starts from the ``log.md`` template. The existing log is read
+    strictly: an unreadable or non-UTF-8 log raises (``OSError`` /
+    ``UnicodeDecodeError``) rather than being replaced by the new line alone. The
+    caller writes; this does not.
     """
     path = decisions_dir / _LOG_NAME
-    existing = read_text_safe(path) if path.is_file() else _template(_LOG_NAME)
+    existing = path.read_text(encoding="utf-8") if path.exists() else _template(_LOG_NAME)
     if existing and not existing.endswith("\n"):
         existing += "\n"
     return path, existing + log_entry(text, date=date) + "\n"
@@ -127,32 +145,73 @@ def decision_docs(sr: ScanResult) -> list[DocSpec]:
     return [d for d in sr.decisions if _ADR_FILE_RE.match(d.path.name) and int(d.path.name[:4]) > 0]
 
 
-def check_decisions(sr: ScanResult) -> Iterable[MaintenanceSuggestion]:
-    """``maintain`` check: ADRs citing paths that no longer exist, or carrying no Status.
+def status_of(content: str) -> Optional[str]:
+    r"""The ADR's status text, from a ``## Status`` heading, a ``**Status:**`` line or
+    MADR front matter; ``None`` when there is none.
 
-    Rot in a decision record is a path that moved: the rationale still reads well and
-    points at nothing. This reports; it never rewrites an accepted ADR (ADR 0010).
+    >>> status_of("# x\n\n## Status\n\nAccepted (2026-01-01)\n")
+    'Accepted (2026-01-01)'
+    >>> status_of("---\nstatus: accepted\n---\n# x\n"), status_of("**Status:** Superseded by 0003"), status_of("# x\nno status")
+    ('accepted', 'Superseded by 0003', None)
+    """
+    for rx in (_STATUS_HEADING_RE, _FRONTMATTER_STATUS_RE, _STATUS_LINE_RE):
+        m = rx.search(content)
+        if m:
+            return m.group("text").strip() or ""
+    return None
+
+
+def cited_paths(content: str) -> list[str]:
+    r"""Paths an ADR cites, outside fenced code: bare path tokens and Markdown link targets
+    (relative ones only; URLs and bare domains are not paths).
+
+    >>> cited_paths("See `pkg/a.py`, [0002](0002-x.md), [doc](../research/r.md), https://x.io/a/b.py, github.com/o/r/f.py\n```\nsrc/in/fence.py\n```")
+    ['../research/r.md', '0002-x.md', 'pkg/a.py']
     """
     from opsward.maintain import _extract_paths  # the same extractor CLAUDE.md uses
 
+    prose = _FENCE_RE.sub("", content)
+    found = set()
+    for p in _extract_paths(prose):
+        if not _DOMAIN_RE.match(p.split("/", 1)[0]):
+            found.add(p)
+    for target in _LINK_RE.findall(prose):
+        if "://" not in target and not target.startswith(("mailto:", "/")):
+            found.add(target)
+    return sorted(found)
+
+
+def check_decisions(sr: ScanResult) -> Iterable[MaintenanceSuggestion]:
+    """``maintain`` check: ADRs citing paths that no longer exist, or carrying no status.
+
+    Rot in a decision record is a path that moved: the rationale still reads well and
+    points at nothing. Superseded, deprecated and rejected ADRs are history and are not
+    checked for paths: the superseding record is where the current paths live. This
+    reports; it never rewrites an accepted ADR (ADR 0010).
+    """
     for doc in decision_docs(sr):
         content = read_text_safe(doc.path)
         rel = _rel(doc.path, sr.project_root)
-        if not _STATUS_RE.search(content):
+        status = status_of(content)
+        if status is None:
             yield MaintenanceSuggestion(
                 category="stale_adr",
-                description=f"`{rel}` has no `## Status` section — an ADR without a status cannot be superseded",
+                description=f"`{rel}` has no status (a `## Status` section, `**Status:**` line or front matter) — an ADR without one cannot be superseded",
             )
-        # a cited path may be repo-relative, relative to the ADR's folder (a sibling), or
-        # relative to the docs folder above it (`decisions/README.md` from `misc/docs`)
+            continue
+        if any(word in status.lower() for word in _CLOSED_STATUSES):
+            continue
+        # a cited path may be repo-relative, relative to the ADR's folder (a sibling or a
+        # `../` link), or relative to the docs folder above it
         bases = (sr.project_root, doc.path.parent, doc.path.parent.parent)
-        missing = sorted({p for p in _extract_paths(content) if not any((b / p).exists() for b in bases)})
+        missing = [p for p in cited_paths(content) if not any((b / p).exists() for b in bases)]
         if missing:
             yield MaintenanceSuggestion(
                 category="stale_adr",
                 description=(
                     f"`{rel}` cites path(s) that no longer exist: {', '.join(f'`{p}`' for p in missing[:5])}"
-                    f"{' …' if len(missing) > 5 else ''} — write a superseding ADR (or a log entry) that says where it went; do not edit the accepted one"
+                    f"{' …' if len(missing) > 5 else ''} — write a superseding ADR (or a log entry) that says where it went; "
+                    "the accepted one is only edited to point at its successor"
                 ),
             )
 

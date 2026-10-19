@@ -21,4 +21,4 @@ ${additional_docs_table}
 
 - **Starting a new task?** Check `architecture.md` for context, then `conventions.md` for rules.
 - **Hit a bug?** Check `known_issues.md` first — it may already be documented.
-- **Making a design decision?** Small: one Y-statement line in `decisions/log.md` (`opsward decision note "…" --write`). Load-bearing or expensive to reverse: a numbered ADR (`opsward decision new "title" --write`). Never edit an accepted one; supersede it.
+- **Making a design decision?** Small: one Y-statement line in `decisions/log.md` (`opsward decision note "…" --write`). Load-bearing or expensive to reverse: a numbered ADR (`opsward decision new "title" --write`). Never edit an accepted one (except to point its Status at its successor); supersede it.

@@ -370,11 +370,17 @@ def new(
     :param title: the decision's title; the file name is derived from it
     :param write: actually write the file (default: dry run)
     :param project_root: the project directory (default: current dir)
-    :param status: initial status — Proposed (default) or Accepted
+    :param status: initial status — Proposed (default), or Accepted when the human has accepted it
     :param evidence: the issue, discussion or PR this rests on (a URL or #N)
     """
-    from opsward.decisions import new_adr
+    from opsward.decisions import clean_title, new_adr
 
+    if not clean_title(title):
+        print("Error: the title is empty", file=sys.stderr)
+        sys.exit(2)
+    if status not in _ADR_STATUSES:
+        print(f"Error: status must be one of {', '.join(_ADR_STATUSES)}", file=sys.stderr)
+        sys.exit(2)
     root, decisions_dir = _decisions_dir(project_root)
     gf = new_adr(decisions_dir, title, status=status, evidence=evidence)
     rel = _relative_path(gf.target_path, root)
@@ -383,7 +389,8 @@ def new(
         sys.exit(1)
     if write:
         gf.target_path.parent.mkdir(parents=True, exist_ok=True)
-        gf.target_path.write_text(gf.content, encoding="utf-8")
+        with open(gf.target_path, "x", encoding="utf-8") as fh:  # exclusive: never over a file
+            fh.write(gf.content)
         print(f"Created {rel}")
     else:
         print(f"Would create {rel}\n\nDry run — pass --write to create it.")
@@ -398,8 +405,15 @@ def note(text: str, write: bool = False, project_root: str = "."):
     """
     from opsward.decisions import log_append
 
+    if not " ".join(text.split()):
+        print("Error: the text is empty", file=sys.stderr)
+        sys.exit(2)
     root, decisions_dir = _decisions_dir(project_root)
-    path, content = log_append(decisions_dir, text)
+    try:
+        path, content = log_append(decisions_dir, text)
+    except (OSError, UnicodeDecodeError) as e:
+        print(f"Error: cannot read the existing log, nothing written: {e}", file=sys.stderr)
+        sys.exit(2)
     rel = _relative_path(path, root)
     if write:
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -410,17 +424,21 @@ def note(text: str, write: bool = False, project_root: str = "."):
         print(f"Would {verb} {rel} a dated entry: {' '.join(text.split())}\n\nDry run — pass --write to do it.")
 
 
+#: The statuses `decision new` will stamp. Accepting is the operator's act: pass
+#: `--status Accepted` only when the human has said so (ADR 0010 §2).
+_ADR_STATUSES = ("Proposed", "Accepted")
+
+
 def _decisions_dir(project_root: str) -> tuple[Path, Path]:
-    """(root, root/<docs>/decisions) for the project's docs convention."""
-    from opsward.generate import _docs_path
+    """(root, root/<docs>/decisions), by the same resolver `scan` uses to find ADRs."""
+    from opsward.scan import docs_dir_for
 
     root = Path(project_root).resolve()
     if not root.is_dir():
         print(f"Error: {project_root} is not a directory", file=sys.stderr)
         sys.exit(2)
     sr = scan(root, claude_config_dir=None)
-    docs_dir = sr.docs_guide_path.parent if sr.docs_guide_path else root / _docs_path(sr.project_type)
-    return root, docs_dir / "decisions"
+    return root, docs_dir_for(root, sr.project_type, sr.docs_guide_path) / "decisions"
 
 
 # The SSOT of the CLI surface: a name -> command mapping, with one nested group.

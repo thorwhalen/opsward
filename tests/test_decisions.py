@@ -78,9 +78,57 @@ def test_maintain_reports_stale_paths_and_missing_status_in_adrs():
         findings = list(check_decisions(sr))
         assert [f.category for f in findings] == ["stale_adr", "stale_adr"]
         assert any("0002-rotten.md" in f.description and "`pkg/gone.py`" in f.description for f in findings)
-        assert any("0003-nostatus.md" in f.description and "no `## Status`" in f.description for f in findings)
+        assert any("0003-nostatus.md" in f.description and "has no status" in f.description for f in findings)
         assert not any("0000-template" in f.description for f in findings)
         assert [s.category for s in maintain(sr) if s.category == "stale_adr"] == ["stale_adr", "stale_adr"]
+
+
+def test_closed_adrs_skip_the_path_check_and_status_formats_are_recognised():
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        d = root / "docs" / "decisions"
+        d.mkdir(parents=True)
+        (root / "package.json").write_text("{}")
+        (d / "0001-old.md").write_text("# 0001 — Old\n\n## Status\n\nSuperseded by [0002](0002-new.md)\n\nUsed `pkg/gone.py`.\n")
+        (d / "0002-new.md").write_text("---\nstatus: accepted\n---\n# 0002 — New\n\nMoved `pkg/gone.py` to `pkg/here.py`.\n")
+        (d / "0003-line.md").write_text("# 0003 — Line\n\n**Status:** Accepted\n\nSee [0002](0002-new.md) and [research](../research/gone.md).\n")
+        (root / "pkg").mkdir()
+        (root / "pkg" / "here.py").write_text("")
+        findings = list(check_decisions(scan(root, claude_config_dir=None)))
+        by = {f.description.split("`")[1]: f.description for f in findings}
+        assert "docs/decisions/0001-old.md" not in by  # superseded: history, not checked
+        assert "`pkg/gone.py`" in by["docs/decisions/0002-new.md"]  # the live record still cites a gone path
+        assert "`../research/gone.md`" in by["docs/decisions/0003-line.md"] and "0002-new.md" not in by["docs/decisions/0003-line.md"]
+
+
+def test_numbering_counts_any_numbered_file_and_log_read_is_strict():
+    with tempfile.TemporaryDirectory() as tmp:
+        d = Path(tmp)
+        (d / "0006_Hand_Made.md").write_text("x")
+        (d / "0007-Über-Grosse.md").write_text("x")
+        assert next_number(d) == 8
+        root = Path(tmp) / "proj"
+        log_dir = root / "docs" / "decisions"
+        log_dir.mkdir(parents=True)
+        (root / "package.json").write_text("{}")
+        (log_dir / "log.md").write_bytes(b"# Decision log\n\n- 2026-01-01 \xe9 latin-1 byte\n")
+        import pytest
+
+        with pytest.raises(UnicodeDecodeError):
+            log_append(log_dir, "new entry")
+        rc, _, err = _run(["decision", "note", "new entry", "-p", str(root), "--write"])
+        assert rc == 2 and "nothing written" in err
+        assert (log_dir / "log.md").read_bytes().endswith(b"latin-1 byte\n")
+
+
+def test_decision_new_rejects_empty_title_and_unknown_status():
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        (root / "package.json").write_text("{}")
+        rc, _, err = _run(["decision", "new", "   ", "-p", str(root)])
+        assert rc == 2 and "title is empty" in err
+        rc, _, err = _run(["decision", "new", "Fine", "-p", str(root), "--status", "lol whatever"])
+        assert rc == 2 and "status must be one of" in err
 
 
 def test_decision_commands_dry_run_then_write():
