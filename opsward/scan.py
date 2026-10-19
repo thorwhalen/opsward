@@ -164,15 +164,19 @@ def _canonical_skill_location(project_root: Path, name: str, exclude: Path) -> O
     """``skills/<name>`` or ``<pkg>/data/skills/<name>`` holding a SKILL.md, other than *exclude*.
 
     These are the two real locations skill-package-setup allows; a real directory
-    under ``.claude/skills`` next to one of them is the unmigrated state.
+    under ``.claude/skills`` next to one of them is the unmigrated state. ``<pkg>`` is a
+    Python package (a directory with ``__init__.py``) at the root or under ``src/``, so
+    fixtures under ``tests/data/skills`` are not mistaken for a canonical copy.
     """
     candidates = [project_root / "skills" / name]
-    try:
-        for child in project_root.iterdir():
-            if child.is_dir() and not child.name.startswith(".") and child.name not in ("node_modules", "skills"):
+    for parent in (project_root, project_root / "src"):
+        try:
+            children = list(parent.iterdir()) if parent.is_dir() else []
+        except OSError:
+            continue
+        for child in children:
+            if child.is_dir() and not child.name.startswith(".") and (child / "__init__.py").is_file():
                 candidates.append(child / "data" / "skills" / name)
-    except OSError:
-        return None
     for cand in candidates:
         try:
             if (cand / "SKILL.md").is_file() and cand.resolve() != exclude.resolve():

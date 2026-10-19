@@ -79,11 +79,14 @@ def test_unmigrated_bridge_is_reported_and_a_symlink_bridge_is_not():
         assert not s.is_link and s.canonical_path.resolve() == (proj / "skills" / "lint").resolve()
         notes = skill_reachability_findings(sr, suggestions=[])
         assert any("is a real directory while `skills/lint` also exists" in n for n in notes)
-        # pip-shipped layout: <pkg>/data/skills/<name>
+        # pip-shipped layout: <pkg>/data/skills/<name>, where <pkg> is a package; tests/data is not one
         _skill(proj, "mypkg/data/skills", "fmt")
+        (proj / "mypkg" / "__init__.py").write_text("")
         _skill(proj, ".claude/skills", "fmt")
+        _skill(proj, "tests/data/skills", "fixture-only")
+        _skill(proj, ".claude/skills", "fixture-only")
         sr = scan(proj, claude_config_dir=None)
-        assert {s.name: bool(s.canonical_path) for s in sr.skills} == {"lint": True, "fmt": True}
+        assert {s.name: bool(s.canonical_path) for s in sr.skills} == {"lint": True, "fmt": True, "fixture-only": False}
         # replace one real dir by the canonical bridge
         import shutil
 
@@ -93,6 +96,27 @@ def test_unmigrated_bridge_is_reported_and_a_symlink_bridge_is_not():
         sr = scan(proj, claude_config_dir=None)
         lint = next(s for s in sr.skills if s.name == "lint")
         assert lint.is_link and lint.canonical_path is None
+
+
+def test_global_dir_without_skill_md_does_not_shadow():
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp = Path(tmp)
+        proj, cfg = tmp / "proj", tmp / "cfg"
+        _skill(proj, ".claude/skills", "lint")
+        (cfg / "skills" / "lint").mkdir(parents=True)  # a bare directory: the host loads nothing from it
+        assert skill_reachability_findings(scan(proj, claude_config_dir=cfg), suggestions=[]) == []
+
+
+def test_listing_chars_follow_the_host_rules():
+    from opsward.base import SkillInfo
+    from opsward.score import _LISTING_ENTRY_DESC_CAP, _listing_chars
+
+    long = "x" * 1000
+    capped = SkillInfo(name="a", path=Path("/a"), has_skill_md=True, description=long, frontmatter={"when_to_use": long})
+    hidden = SkillInfo(name="b", path=Path("/b"), has_skill_md=True, description=long, frontmatter={"disable-model-invocation": "true"})
+    no_md = SkillInfo(name="c", path=Path("/c"), has_skill_md=False, description=long)
+    assert _listing_chars([capped]) == len("a") + 3 + _LISTING_ENTRY_DESC_CAP + 1
+    assert _listing_chars([hidden, no_md]) == 0
 
 
 def test_listing_budget_note_only_when_global_plus_project_exceeds_it():
@@ -109,7 +133,9 @@ def test_listing_budget_note_only_when_global_plus_project_exceeds_it():
         sr = scan(proj, claude_config_dir=cfg)
         suggestions: list[str] = []
         (note,) = [n for n in skill_reachability_findings(sr, suggestions=suggestions) if n.startswith("Listing budget")]
-        assert "this project's 1 skill(s) are at risk" in note and suggestions
+        assert "this project's 1 skill(s) are at risk" in note and "1M-token window" in note and suggestions
+        # the budget is a seam
+        assert not skill_reachability_findings(sr, suggestions=[], listing_budget_chars=10**9)
 
 
 def test_findings_are_notes_not_points():
