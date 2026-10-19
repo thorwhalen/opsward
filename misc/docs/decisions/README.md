@@ -14,6 +14,7 @@ Architectural decision records (MADR-style) for opsward: the load-bearing, expen
 | [0008](0008-cli-surface-pinned-by-goldens.md) | The CLI surface is pinned by per-CPython golden recordings replayed in the test suite | PR #25 |
 | [0009](0009-skills-declare-their-subagent-twin.md) | A skill opts into a subagent twin with `metadata: subagent: true`; `generate` renders `.claude/agents/<name>.md` preloading it, `maintain` checks the sync; `context: fork` is the alternative for delegate-only skills | issue #26 |
 | [0010](0010-two-tier-decision-capture.md) | Two-tier decision capture: a Y-statement line in `log.md` or a numbered ADR, chosen by reversal cost; immutable and superseding; Evidence links the issue, discussion and PR; `opsward decision new|note` writes, `maintain` reports rot under `stale_adr` | issue #16 |
+| [0011](0011-cheap-first-dispatch-no-router-agent.md) | No router agent: dispatch is route → listing → confident lexical retrieval → LLM adjudication over top-k; the router must see the user's words; abstention floor and gap defined but uncalibrated until the skills corpus is de-duplicated | issue #14 |
 
 PR and issue numbers refer to [thorwhalen/opsward](https://github.com/thorwhalen/opsward); each ADR links them in full.
 
