@@ -88,7 +88,8 @@ def test_unmigrated_bridge_is_reported_and_a_symlink_bridge_is_not():
         import shutil
 
         shutil.rmtree(proj / ".claude" / "skills" / "lint")
-        _symlink("../../skills/lint", proj / ".claude" / "skills" / "lint")
+        # an absolute target: a relative one with "/" separators is not followed on Windows
+        _symlink(proj / "skills" / "lint", proj / ".claude" / "skills" / "lint")
         sr = scan(proj, claude_config_dir=None)
         lint = next(s for s in sr.skills if s.name == "lint")
         assert lint.is_link and lint.canonical_path is None
