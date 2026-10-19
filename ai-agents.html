@@ -78,6 +78,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/opsward.recommend.html">opsward.recommend</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/opsward.scan.html">opsward.scan</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/opsward.score.html">opsward.score</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/opsward.subagents.html">opsward.subagents</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/opsward.util.html">opsward.util</a></li>
 </ul>
 </li>
@@ -107,9 +108,11 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#opsward-diagnose"><code class="docutils literal notranslate"><span class="pre">opsward-diagnose</span></code></a></li>
 <li><a class="reference internal" href="#opsward-generate"><code class="docutils literal notranslate"><span class="pre">opsward-generate</span></code></a></li>
 <li><a class="reference internal" href="#opsward-maintain"><code class="docutils literal notranslate"><span class="pre">opsward-maintain</span></code></a></li>
+<li><a class="reference internal" href="#opsward-subagents"><code class="docutils literal notranslate"><span class="pre">opsward-subagents</span></code></a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#subagents">Subagents</a><ul>
+<li><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">opsward-subagents</span></code></a></li>
 <li><a class="reference internal" href="#setup-auditor"><code class="docutils literal notranslate"><span class="pre">setup-auditor</span></code></a></li>
 </ul>
 </li>
@@ -204,10 +207,20 @@ machine-readable copies of this documentation.</p>
 <p>Check documentation and AI setup for staleness, drift, or inconsistency. Use when the user asks to maintain, refresh, or update project docs and AI configuration.</p>
 <p>Source: <a class="reference external" href="https://github.com/thorwhalen/opsward/tree/HEAD/.claude/skills/opsward-maintain"><code class="docutils literal notranslate"><span class="pre">.claude/skills/opsward-maintain</span></code></a>.</p>
 </section>
+<section id="opsward-subagents">
+<h3><code class="docutils literal notranslate"><span class="pre">opsward-subagents</span></code><a class="headerlink" href="#opsward-subagents" title="Link to this heading">#</a></h3>
+<p>Decide which of a repo’s skills should also run as subagents (in their own context), declare it in each skill’s frontmatter, and generate or refresh the twin agent files with opsward. Use when a skill does bulky or read-heavy work whose output should stay out of the main context, when a skill needs a tool restriction or a cheaper model, when a hand-written agent duplicates a skill, when <code class="docutils literal notranslate"><span class="pre">opsward</span> <span class="pre">maintain</span></code> reports a <code class="docutils literal notranslate"><span class="pre">subagent_twin</span></code> finding, or when asked “should this skill be a subagent”, “make this skill usable as a subagent”, “generate agents from skills”, or to sweep a repo for skill/agent pairs. Also usable as a subagent itself.</p>
+<p>Source: <a class="reference external" href="https://github.com/thorwhalen/opsward/tree/HEAD/.claude/skills/opsward-subagents"><code class="docutils literal notranslate"><span class="pre">.claude/skills/opsward-subagents</span></code></a>.</p>
+</section>
 </section>
 <section id="subagents">
 <h2>Subagents<a class="headerlink" href="#subagents" title="Link to this heading">#</a></h2>
 <p>Subagents are Markdown files with a frontmatter (<code class="docutils literal notranslate"><span class="pre">name</span></code>, <code class="docutils literal notranslate"><span class="pre">description</span></code>, <code class="docutils literal notranslate"><span class="pre">tools</span></code>) and a system prompt as the body. Copy one into your project’s <code class="docutils literal notranslate"><span class="pre">.claude/agents/</span></code> (or your agent host’s equivalent) to delegate the task it describes.</p>
+<section id="id1">
+<h3><code class="docutils literal notranslate"><span class="pre">opsward-subagents</span></code><a class="headerlink" href="#id1" title="Link to this heading">#</a></h3>
+<p>Decide which of a repo’s skills should also run as subagents (in their own context), declare it in each skill’s frontmatter, and generate or refresh the twin agent files with opsward. Use when a skill does bulky or read-heavy work whose output should stay out of the main context, when a skill needs a tool restriction or a cheaper model, when a hand-written agent duplicates a skill, when <code class="docutils literal notranslate"><span class="pre">opsward</span> <span class="pre">maintain</span></code> reports a <code class="docutils literal notranslate"><span class="pre">subagent_twin</span></code> finding, or when asked “should this skill be a subagent”, “make this skill usable as a subagent”, “generate agents from skills”, or to sweep a repo for skill/agent pairs. Also usable as a subagent itself.</p>
+<p>Source: <a class="reference external" href="https://github.com/thorwhalen/opsward/tree/HEAD/.claude/agents/opsward-subagents.md"><code class="docutils literal notranslate"><span class="pre">.claude/agents/opsward-subagents.md</span></code></a>; tools: <code class="docutils literal notranslate"><span class="pre">Bash,</span> <span class="pre">Read,</span> <span class="pre">Grep,</span> <span class="pre">Glob,</span> <span class="pre">Edit,</span> <span class="pre">Write</span></code>.</p>
+</section>
 <section id="setup-auditor">
 <h3><code class="docutils literal notranslate"><span class="pre">setup-auditor</span></code><a class="headerlink" href="#setup-auditor" title="Link to this heading">#</a></h3>
 <p>Read-only diagnostic agent that audits the project’s AI setup (CLAUDE.md, skills, docs, rules). Use when you want to check the health of the project’s agent configuration without making changes.</p>
@@ -266,7 +279,7 @@ machine-readable copies of this documentation.</p>
     </div>
   </div>
 </footer>
-      <script src="_static/documentation_options.js?v=8bafd125"></script>
+      <script src="_static/documentation_options.js?v=2fd7553c"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="_static/clipboard.min.js?v=a7894cd8"></script>

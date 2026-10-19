@@ -71,10 +71,22 @@ Check documentation and AI setup for staleness, drift, or inconsistency. Use whe
 
 Source: [`.claude/skills/opsward-maintain`](https://github.com/thorwhalen/opsward/tree/HEAD/.claude/skills/opsward-maintain).
 
+### `opsward-subagents`
+
+Decide which of a repo's skills should also run as subagents (in their own context), declare it in each skill's frontmatter, and generate or refresh the twin agent files with opsward. Use when a skill does bulky or read-heavy work whose output should stay out of the main context, when a skill needs a tool restriction or a cheaper model, when a hand-written agent duplicates a skill, when `opsward maintain` reports a `subagent_twin` finding, or when asked "should this skill be a subagent", "make this skill usable as a subagent", "generate agents from skills", or to sweep a repo for skill/agent pairs. Also usable as a subagent itself.
+
+Source: [`.claude/skills/opsward-subagents`](https://github.com/thorwhalen/opsward/tree/HEAD/.claude/skills/opsward-subagents).
+
 
 ## Subagents
 
 Subagents are Markdown files with a frontmatter (`name`, `description`, `tools`) and a system prompt as the body. Copy one into your project's `.claude/agents/` (or your agent host's equivalent) to delegate the task it describes.
+
+### `opsward-subagents`
+
+Decide which of a repo's skills should also run as subagents (in their own context), declare it in each skill's frontmatter, and generate or refresh the twin agent files with opsward. Use when a skill does bulky or read-heavy work whose output should stay out of the main context, when a skill needs a tool restriction or a cheaper model, when a hand-written agent duplicates a skill, when `opsward maintain` reports a `subagent_twin` finding, or when asked "should this skill be a subagent", "make this skill usable as a subagent", "generate agents from skills", or to sweep a repo for skill/agent pairs. Also usable as a subagent itself.
+
+Source: [`.claude/agents/opsward-subagents.md`](https://github.com/thorwhalen/opsward/tree/HEAD/.claude/agents/opsward-subagents.md); tools: `Bash, Read, Grep, Glob, Edit, Write`.
 
 ### `setup-auditor`
 

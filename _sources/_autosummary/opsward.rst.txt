@@ -19,4 +19,5 @@
    recommend
    scan
    score
+   subagents
    util

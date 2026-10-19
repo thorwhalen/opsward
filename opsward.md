@@ -1,4 +1,4 @@
-> built 2026-10-19 11:01 UTC from 4f0194b (main) · opsward 0.0.18. Details: build_info.json
+> built 2026-10-19 11:40 UTC from fab2255 (main) · opsward 0.0.19. Details: build_info.json
 
 # index.html.md
 
@@ -508,6 +508,7 @@ Diagnose, generate, and maintain the AI agent setup of your projects.
 | [`recommend`](_autosummary/opsward.recommend.html.md#module-opsward.recommend)                                 | Recommend skills from the ecosystem based on project tech stack.                                 |
 | [`scan`](_autosummary/opsward.scan.html.md#opsward.scan)(project_root)                                    | Scan *project_root* and return a ScanResult.                                                     |
 | [`score`](_autosummary/opsward.score.html.md#module-opsward.score)                                         | Pure scoring functions.                                                                          |
+| [`subagents`](_autosummary/opsward.subagents.html.md#module-opsward.subagents)                                 | Reuse a skill as a subagent: declare it in the skill, generate the twin, check the sync.         |
 | [`util`](_autosummary/opsward.util.html.md#module-opsward.util)                                           | Shared helpers for opsward.                                                                      |
 
 
@@ -711,6 +712,192 @@ Returns a list of human-readable violation strings (empty = compliant).
   [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
 
 
+# _autosummary/opsward.subagents.html.md
+
+# opsward.subagents
+
+Reuse a skill as a subagent: declare it in the skill, generate the twin, check the sync.
+
+A Claude Code subagent is a Markdown file under `.claude/agents/` whose frontmatter
+can *preload* a skill (`skills: [name]` injects the full `SKILL.md` body). So a skill
+that is also useful in its own context needs nothing but a thin twin that preloads it,
+restricts tools, picks a model and states the reply contract. The single source of
+truth stays in the skill: it opts in with spec-legal `metadata` keys (the Agent Skills
+spec allows string pairs there, and other hosts ignore them). Quote the values so a
+strict validator sees strings:
+
+```default
+---
+name: fleet-sweep
+description: ...
+metadata:
+  subagent: "true"
+  subagent-tools: "Bash, Read, Grep"
+  subagent-model: "sonnet"
+  subagent-reply-lines: "5"
+  subagent-name: "fleet-sweeper"
+---
+```
+
+Only `subagent` is required; the defaults are `Read, Grep, Glob, Bash`, no model
+(the host picks), 5 lines, and the skill’s own name. Three pure functions do the
+work, so `generate` and `maintain` share one source: [`subagent_spec()`](_autosummary/opsward.subagents.html.md#opsward.subagents.subagent_spec) reads
+the declaration, [`render_subagent()`](_autosummary/opsward.subagents.html.md#opsward.subagents.render_subagent) renders the twin (with a marker line
+carrying a hash of what it was rendered from), and [`twin_status()`](_autosummary/opsward.subagents.html.md#opsward.subagents.twin_status) classifies
+every skill/agent pair in a scan. Decision record:
+`misc/docs/decisions/0009-skills-declare-their-subagent-twin.md`.
+
+### Functions
+
+| [`check_subagent_twins`](_autosummary/opsward.subagents.html.md#opsward.subagents.check_subagent_twins)(sr)                    | `maintain` check: every twin that is not generated and current.                       |
+|----------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------|
+| [`render_subagent`](_autosummary/opsward.subagents.html.md#opsward.subagents.render_subagent)(spec, \*, source)           | Render the twin agent file for *spec*; *source* is the skill's repo-relative path.    |
+| [`subagent_files`](_autosummary/opsward.subagents.html.md#opsward.subagents.subagent_files)(sr)                          | Yield the twin agent file for every validly declared skill (missing or not).          |
+| [`subagent_spec`](_autosummary/opsward.subagents.html.md#opsward.subagents.subagent_spec)(skill)                        | Return the twin a skill declares under `metadata`, or `None`.                         |
+| [`twin_for_rendered_skill`](_autosummary/opsward.subagents.html.md#opsward.subagents.twin_for_rendered_skill)(skill_md_text, ...) | The twin of a skill that is about to be written (so one `generate` run creates both). |
+| [`twin_status`](_autosummary/opsward.subagents.html.md#opsward.subagents.twin_status)(sr)                             | Classify every declared twin and every hand-written agent that preloads a skill.      |
+| [`twin_summary`](_autosummary/opsward.subagents.html.md#opsward.subagents.twin_summary)(sr)                            | Counts by state, for the diagnosis note.                                              |
+
+### Classes
+
+| [`SubagentSpec`](_autosummary/opsward.subagents.html.md#opsward.subagents.SubagentSpec)(skill_name, name, description, ...)   | What a skill declared about its subagent twin, with defaults applied.                           |
+|-----------------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------------------|
+| [`TwinStatus`](_autosummary/opsward.subagents.html.md#opsward.subagents.TwinStatus)(skill, agent, state[, declared, ...])   | One skill/agent pair as [`twin_status()`](_autosummary/opsward.subagents.html.md#opsward.subagents.twin_status) sees it. |
+
+### *class* opsward.subagents.SubagentSpec(skill_name, name, description, tools, model, reply_lines)
+
+Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
+
+What a skill declared about its subagent twin, with defaults applied.
+
+#### problems()
+
+Why this declaration cannot be rendered (empty = fine).
+
+```pycon
+>>> SubagentSpec('s', '../x', '', 'Bash: all', None, 0).problems()
+['no frontmatter description (the twin reuses it as its trigger)', 'subagent-name `../x` is not a valid agent name', 'subagent-reply-lines must be at least 1', 'subagent-tools must not contain `: `']
+```
+
+* **Return type:**
+  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
+
+#### source_hash()
+
+Hash of everything the rendered twin depends on, so drift is detectable.
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
+
+### *class* opsward.subagents.TwinStatus(skill, agent, state, declared=False, content='', detail='', path='')
+
+Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
+
+One skill/agent pair as [`twin_status()`](_autosummary/opsward.subagents.html.md#opsward.subagents.twin_status) sees it.
+
+### opsward.subagents.check_subagent_twins(sr)
+
+`maintain` check: every twin that is not generated and current.
+
+* **Return type:**
+  [`Iterable`](https://docs.python.org/3/library/typing.html#typing.Iterable)[[`MaintenanceSuggestion`](_autosummary/opsward.base.html.md#opsward.base.MaintenanceSuggestion)]
+
+### opsward.subagents.render_subagent(spec, , source)
+
+Render the twin agent file for *spec*; *source* is the skill’s repo-relative path.
+
+The body is deliberately short: the skill’s full content is preloaded by the host
+through the `skills` field, so the twin only adds the context contract.
+
+```pycon
+>>> spec = SubagentSpec('sweep', 'sweep', 'Sweep and report.', 'Bash', 'haiku', 3)
+>>> text = render_subagent(spec, source='.claude/skills/sweep/SKILL.md')
+>>> text.splitlines()[1:4]
+['name: sweep', 'description: Sweep and report.', 'tools: Bash']
+>>> 'skills: [sweep]' in text and 'at most 3 lines' in text
+True
+```
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
+
+### opsward.subagents.subagent_files(sr)
+
+Yield the twin agent file for every validly declared skill (missing or not).
+
+Callers that must not overwrite (the CLI) skip existing targets; the marker in a
+generated file is what [`twin_status()`](_autosummary/opsward.subagents.html.md#opsward.subagents.twin_status) uses to tell a stale twin from a
+hand-written one. Invalid and duplicate declarations yield nothing; `maintain`
+reports them.
+
+* **Return type:**
+  [`Iterator`](https://docs.python.org/3/library/typing.html#typing.Iterator)[[`GeneratedFile`](_autosummary/opsward.base.html.md#opsward.base.GeneratedFile)]
+
+### opsward.subagents.subagent_spec(skill)
+
+Return the twin a skill declares under `metadata`, or `None`.
+
+```pycon
+>>> from pathlib import Path
+>>> from opsward.base import SkillInfo
+>>> s = SkillInfo(name='sweep', path=Path('/x/sweep'), has_skill_md=True,
+...     description='Sweep the fleet and report.',
+...     frontmatter={'name': 'sweep', 'metadata': {'subagent': 'true', 'subagent-model': 'haiku'}})
+>>> spec = subagent_spec(s)
+>>> (spec.name, spec.tools, spec.model, spec.reply_lines)
+('sweep', 'Read, Grep, Glob, Bash', 'haiku', 5)
+>>> subagent_spec(SkillInfo(name='plain', path=Path('/x/plain'))) is None
+True
+```
+
+* **Return type:**
+  [`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`SubagentSpec`](_autosummary/opsward.subagents.html.md#opsward.subagents.SubagentSpec)]
+
+### opsward.subagents.twin_for_rendered_skill(skill_md_text, skill_md_path, root)
+
+The twin of a skill that is about to be written (so one `generate` run creates both).
+
+```pycon
+>>> from pathlib import Path
+>>> text = '---\nname: s\ndescription: Do the thing.\nmetadata:\n  subagent: "true"\n---\nbody\n'
+>>> gf = twin_for_rendered_skill(text, Path('/p/.claude/skills/s/SKILL.md'), Path('/p'))
+>>> gf.target_path.as_posix(), 'skills: [s]' in gf.content
+('/p/.claude/agents/s.md', True)
+```
+
+* **Return type:**
+  [`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`GeneratedFile`](_autosummary/opsward.base.html.md#opsward.base.GeneratedFile)]
+
+### opsward.subagents.twin_status(sr)
+
+Classify every declared twin and every hand-written agent that preloads a skill.
+
+- `invalid`: the declaration cannot be rendered (see `SubagentSpec.problems`).
+- `duplicate`: two skills declare the same twin name; the first wins, the rest are reported.
+- `missing`: the skill declares a twin and no agent file exists.
+- `stale`: the agent file was generated from a declaration that has since changed.
+- `in_sync`: generated and current.
+- `handwritten`: an agent opsward did not generate, either carrying the name a skill
+  declares for its twin (`declared=True`), or sharing a non-declaring skill’s name or
+  preloading it via `skills:` (`declared=False`).
+
+* **Return type:**
+  [`Iterator`](https://docs.python.org/3/library/typing.html#typing.Iterator)[[`TwinStatus`](_autosummary/opsward.subagents.html.md#opsward.subagents.TwinStatus)]
+
+### opsward.subagents.twin_summary(sr)
+
+Counts by state, for the diagnosis note.
+
+```pycon
+>>> from pathlib import Path
+>>> twin_summary(ScanResult(project_root=Path('/tmp/empty')))
+{}
+```
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str), [`int`](https://docs.python.org/3/builtins/functions.html#int)]
+
+
 # _autosummary/opsward.util.html.md
 
 # opsward.util
@@ -760,18 +947,16 @@ Read a text file, returning ‘’ if it doesn’t exist or can’t be decoded.
 
 # About this build
 
-This documentation was built on **2026-10-19 11:01 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/4f0194bdee159ee3d81e33e721e60da51478b188"><code>4f0194b</code></a> on branch <code>main</code>, for **opsward 0.0.18** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-10-19 11:40 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/fab22551289b6e6ad5dc971ffc62dd8ba4d9c16e"><code>fab2255</code></a> on branch <code>main</code>, for **opsward 0.0.19** (from <code>pyproject.toml</code>).
 
-#### WARNING
-The documentation and the package may be misaligned:
-
-- The documented version (0.0.18) is behind the latest release on PyPI (0.0.19): `pip install opsward` gives newer code than these docs describe.
+#### NOTE
+Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
 
 ## Source
 
 |                     |                                                                                                                                                           |
 |---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/opsward/commit/4f0194bdee159ee3d81e33e721e60da51478b188"><code>4f0194bdee159ee3d81e33e721e60da51478b188</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/opsward/commit/fab22551289b6e6ad5dc971ffc62dd8ba4d9c16e"><code>fab22551289b6e6ad5dc971ffc62dd8ba4d9c16e</code></a> |
 | Branch              | <code>main</code>                                                                                                                                         |
 | Tags at this commit | none                                                                                                                                                      |
 | Working tree        | clean                                                                                                                                                     |
@@ -782,15 +967,15 @@ The documentation and the package may be misaligned:
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/opsward</code>                                                            |
-| Run          | <a href="https://github.com/thorwhalen/opsward/actions/runs/39241385053">39241385053</a>   |
+| Run          | <a href="https://github.com/thorwhalen/opsward/actions/runs/39246128477">39246128477</a>   |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>4f0194bdee159ee3d81e33e721e60da51478b188</code> (in the history of the built commit) |
+| Event commit | <code>fab22551289b6e6ad5dc971ffc62dd8ba4d9c16e</code> (in the history of the built commit) |
 
 ## Tools
 
 |          |         |
 |----------|---------|
-| epythet  | 0.2.17  |
+| epythet  | 0.2.18  |
 | Sphinx   | 9.1.0   |
 | docutils | 0.22.4  |
 | Python   | 3.12.15 |
@@ -809,14 +994,14 @@ The documentation and the package may be misaligned:
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/opsward/0.0.19/">0.0.19</a>, newer than the documented version (0.0.18).
+Latest release: <a href="https://pypi.org/project/opsward/0.0.19/">0.0.19</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/opsward && cd opsward
-git checkout 4f0194bdee159ee3d81e33e721e60da51478b188
-pip install "epythet==0.2.17"
+git checkout fab22551289b6e6ad5dc971ffc62dd8ba4d9c16e
+pip install "epythet==0.2.18"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
 
@@ -897,9 +1082,21 @@ Check documentation and AI setup for staleness, drift, or inconsistency. Use whe
 
 Source: [`.claude/skills/opsward-maintain`](https://github.com/thorwhalen/opsward/tree/HEAD/.claude/skills/opsward-maintain).
 
+### `opsward-subagents`
+
+Decide which of a repo’s skills should also run as subagents (in their own context), declare it in each skill’s frontmatter, and generate or refresh the twin agent files with opsward. Use when a skill does bulky or read-heavy work whose output should stay out of the main context, when a skill needs a tool restriction or a cheaper model, when a hand-written agent duplicates a skill, when `opsward maintain` reports a `subagent_twin` finding, or when asked “should this skill be a subagent”, “make this skill usable as a subagent”, “generate agents from skills”, or to sweep a repo for skill/agent pairs. Also usable as a subagent itself.
+
+Source: [`.claude/skills/opsward-subagents`](https://github.com/thorwhalen/opsward/tree/HEAD/.claude/skills/opsward-subagents).
+
 ## Subagents
 
 Subagents are Markdown files with a frontmatter (`name`, `description`, `tools`) and a system prompt as the body. Copy one into your project’s `.claude/agents/` (or your agent host’s equivalent) to delegate the task it describes.
+
+### `opsward-subagents`
+
+Decide which of a repo’s skills should also run as subagents (in their own context), declare it in each skill’s frontmatter, and generate or refresh the twin agent files with opsward. Use when a skill does bulky or read-heavy work whose output should stay out of the main context, when a skill needs a tool restriction or a cheaper model, when a hand-written agent duplicates a skill, when `opsward maintain` reports a `subagent_twin` finding, or when asked “should this skill be a subagent”, “make this skill usable as a subagent”, “generate agents from skills”, or to sweep a repo for skill/agent pairs. Also usable as a subagent itself.
+
+Source: [`.claude/agents/opsward-subagents.md`](https://github.com/thorwhalen/opsward/tree/HEAD/.claude/agents/opsward-subagents.md); tools: `Bash, Read, Grep, Glob, Edit, Write`.
 
 ### `setup-auditor`
 

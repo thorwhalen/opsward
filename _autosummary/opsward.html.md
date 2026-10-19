@@ -14,4 +14,5 @@ Diagnose, generate, and maintain the AI agent setup of your projects.
 | [`recommend`](opsward.recommend.html.md#module-opsward.recommend)                                 | Recommend skills from the ecosystem based on project tech stack.                                 |
 | [`scan`](opsward.scan.html.md#opsward.scan)(project_root)                                    | Scan *project_root* and return a ScanResult.                                                     |
 | [`score`](opsward.score.html.md#module-opsward.score)                                         | Pure scoring functions.                                                                          |
+| [`subagents`](opsward.subagents.html.md#module-opsward.subagents)                                 | Reuse a skill as a subagent: declare it in the skill, generate the twin, check the sync.         |
 | [`util`](opsward.util.html.md#module-opsward.util)                                           | Shared helpers for opsward.                                                                      |

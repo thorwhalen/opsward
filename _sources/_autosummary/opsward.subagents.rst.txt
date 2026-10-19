@@ -1,0 +1,25 @@
+opsward.subagents
+=================
+
+.. automodule:: opsward.subagents
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      check_subagent_twins
+      render_subagent
+      subagent_files
+      subagent_spec
+      twin_for_rendered_skill
+      twin_status
+      twin_summary
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      SubagentSpec
+      TwinStatus
+   

@@ -18,9 +18,10 @@
 - [opsward.recommend](_autosummary/opsward.recommend.html.md): Recommend skills from the ecosystem based on project tech stack.
 - [opsward.scan](_autosummary/opsward.scan.html.md): Scan &#42;project_root&#42; and return a ScanResult.
 - [opsward.score](_autosummary/opsward.score.html.md): Pure scoring functions. ScanResult -&gt; DiagnosisReport.
+- [opsward.subagents](_autosummary/opsward.subagents.html.md): Reuse a skill as a subagent: declare it in the skill, generate the twin, check the sync.
 - [opsward.util](_autosummary/opsward.util.html.md): Shared helpers for opsward.
 - [For AI agents](ai-agents.html.md): &#96;opsward&#96; ships artifacts for coding agents alongside its code. This page lists
-- [About this build](about-this-build.html.md): This documentation was built on &#42;&#42;2026-10-19 11:01 UTC&#42;&#42; from commit &lt;a href="https://github.com/tho...
+- [About this build](about-this-build.html.md): This documentation was built on &#42;&#42;2026-10-19 11:40 UTC&#42;&#42; from commit &lt;a href="https://github.com/tho...
 
 ## Optional
 

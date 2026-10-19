@@ -2,18 +2,16 @@
 
 # About this build
 
-This documentation was built on **2026-10-19 11:01 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/4f0194bdee159ee3d81e33e721e60da51478b188"><code>4f0194b</code></a> on branch <code>main</code>, for **opsward 0.0.18** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-10-19 11:40 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/fab22551289b6e6ad5dc971ffc62dd8ba4d9c16e"><code>fab2255</code></a> on branch <code>main</code>, for **opsward 0.0.19** (from <code>pyproject.toml</code>).
 
-#### WARNING
-The documentation and the package may be misaligned:
-
-- The documented version (0.0.18) is behind the latest release on PyPI (0.0.19): `pip install opsward` gives newer code than these docs describe.
+#### NOTE
+Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
 
 ## Source
 
 |                     |                                                                                                                                                           |
 |---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/opsward/commit/4f0194bdee159ee3d81e33e721e60da51478b188"><code>4f0194bdee159ee3d81e33e721e60da51478b188</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/opsward/commit/fab22551289b6e6ad5dc971ffc62dd8ba4d9c16e"><code>fab22551289b6e6ad5dc971ffc62dd8ba4d9c16e</code></a> |
 | Branch              | <code>main</code>                                                                                                                                         |
 | Tags at this commit | none                                                                                                                                                      |
 | Working tree        | clean                                                                                                                                                     |
@@ -24,15 +22,15 @@ The documentation and the package may be misaligned:
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/opsward</code>                                                            |
-| Run          | <a href="https://github.com/thorwhalen/opsward/actions/runs/39241385053">39241385053</a>   |
+| Run          | <a href="https://github.com/thorwhalen/opsward/actions/runs/39246128477">39246128477</a>   |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>4f0194bdee159ee3d81e33e721e60da51478b188</code> (in the history of the built commit) |
+| Event commit | <code>fab22551289b6e6ad5dc971ffc62dd8ba4d9c16e</code> (in the history of the built commit) |
 
 ## Tools
 
 |          |         |
 |----------|---------|
-| epythet  | 0.2.17  |
+| epythet  | 0.2.18  |
 | Sphinx   | 9.1.0   |
 | docutils | 0.22.4  |
 | Python   | 3.12.15 |
@@ -51,14 +49,14 @@ The documentation and the package may be misaligned:
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/opsward/0.0.19/">0.0.19</a>, newer than the documented version (0.0.18).
+Latest release: <a href="https://pypi.org/project/opsward/0.0.19/">0.0.19</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/opsward && cd opsward
-git checkout 4f0194bdee159ee3d81e33e721e60da51478b188
-pip install "epythet==0.2.17"
+git checkout fab22551289b6e6ad5dc971ffc62dd8ba4d9c16e
+pip install "epythet==0.2.18"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
 
