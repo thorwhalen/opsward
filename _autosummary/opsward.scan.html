@@ -140,12 +140,16 @@ data-aria-dark="Switch to auto color mode">
 <h1>opsward.scan<a class="headerlink" href="#opsward-scan" title="Link to this heading">#</a></h1>
 <dl class="py function">
 <dt class="sig sig-object py" id="opsward.scan">
-<span class="sig-prename descclassname"><span class="pre">opsward.</span></span><span class="sig-name descname"><span class="pre">scan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project_root</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/scan.html#scan"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.scan" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">opsward.</span></span><span class="sig-name descname"><span class="pre">scan</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project_root</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">claude_config_dir</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;object</span> <span class="pre">object&gt;</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/scan.html#scan"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.scan" title="Link to this definition">#</a></dt>
 <dd><p>Scan <em>project_root</em> and return a ScanResult.</p>
+<p><code class="docutils literal notranslate"><span class="pre">claude_config_dir</span></code> is the user’s Claude Code config dir, whose <code class="docutils literal notranslate"><span class="pre">skills/</span></code> is
+the global scope a project skill competes with (shadowing, listing budget). It
+defaults to <code class="xref py py-func docutils literal notranslate"><span class="pre">default_claude_config_dir()</span></code>; pass <code class="docutils literal notranslate"><span class="pre">None</span></code> to read nothing
+outside the project (tests, portable goldens). Reading it is still read-only.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span><span class="o">,</span><span class="w"> </span><span class="nn">pathlib</span>
-</span><span data-line="2"><span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">scan</span><span class="p">(</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">()))</span>
-</span><span data-line="3"><span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="o">.</span><span class="n">project_type</span>
-</span><span data-line="4"><span class="go">&lt;ProjectType.unknown: 'unknown'&gt;</span>
+</span><span data-line="2"><span class="gp">&gt;&gt;&gt; </span><span class="n">r</span> <span class="o">=</span> <span class="n">scan</span><span class="p">(</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">()),</span> <span class="n">claude_config_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</span><span data-line="3"><span class="gp">&gt;&gt;&gt; </span><span class="n">r</span><span class="o">.</span><span class="n">project_type</span><span class="p">,</span> <span class="n">r</span><span class="o">.</span><span class="n">global_skills</span>
+</span><span data-line="4"><span class="go">(&lt;ProjectType.unknown: 'unknown'&gt;, [])</span>
 </span></pre></div>
 </div>
 <dl class="field-list simple">
@@ -197,7 +201,7 @@ data-aria-dark="Switch to auto color mode">
     </div>
   </div>
 </footer>
-      <script src="../_static/documentation_options.js?v=2fd7553c"></script>
+      <script src="../_static/documentation_options.js?v=056c92e6"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>

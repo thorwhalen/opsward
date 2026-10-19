@@ -8,8 +8,9 @@ All functions are pure — same input, same output.
 
 | [`claude_md_size_overrun`](#opsward.score.claude_md_size_overrun)(content, \*[, ...])       | Return a [`SizeOverrun`](#opsward.score.SizeOverrun) if *content* exceeds *max_chars*, else None.   |
 |---------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------|
-| [`diagnose`](#opsward.score.diagnose)(scan_result, \*[, claude_md_max_chars]) | Score a ScanResult and return a DiagnosisReport.                                                                     |
+| [`diagnose`](#opsward.score.diagnose)(scan_result, \*[, ...])                 | Score a ScanResult and return a DiagnosisReport.                                                                     |
 | [`docs_dir_hint`](#opsward.score.docs_dir_hint)(sr)                                | Project-relative docs dir to suggest moving sections into.                                                           |
+| [`skill_reachability_findings`](#opsward.score.skill_reachability_findings)(sr, \*, suggestions) | Why a project skill may never trigger, as note lines (and one suggestion each).                                      |
 | [`validate_hooks_config`](#opsward.score.validate_hooks_config)(cfg)                       | Validate a hooks config against Claude Code's expected shape.                                                        |
 | [`validate_skill_spec`](#opsward.score.validate_skill_spec)(skill)                       | Validate a SkillInfo against the agentskills.io specification.                                                       |
 
@@ -51,7 +52,7 @@ True
 * **Return type:**
   [`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`SizeOverrun`](#opsward.score.SizeOverrun)]
 
-### opsward.score.diagnose(scan_result, , claude_md_max_chars=10000)
+### opsward.score.diagnose(scan_result, , claude_md_max_chars=10000, listing_budget_chars=30000)
 
 Score a ScanResult and return a DiagnosisReport.
 
@@ -75,6 +76,34 @@ Project-relative docs dir to suggest moving sections into.
 
 * **Return type:**
   [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
+
+### opsward.score.skill_reachability_findings(sr, , suggestions, listing_budget_chars=30000)
+
+Why a project skill may never trigger, as note lines (and one suggestion each).
+
+Three shapes from the #23 report: a project skill **shadowed** by a global one of the
+same name (Claude Code resolves personal > project, verified in a fresh session); an
+**unmigrated bridge** (a real directory under `.claude/skills` while the repo also
+holds the skill at its canonical location); and a **listing budget** that the global
+scope plus this project’s skills cannot fit, so descriptions get dropped
+least-invoked-first. The global scope comes from `ScanResult.global_skills`;
+with none (`scan(..., claude_config_dir=None)`) only the bridge check runs.
+
+```pycon
+>>> from pathlib import Path
+>>> from opsward.base import ScanResult, SkillInfo
+>>> g = SkillInfo(name='lint', path=Path('/g/lint'), has_skill_md=True, description='Global lint.', real_path=Path('/g/lint'))
+>>> p = SkillInfo(name='lint', path=Path('/p/.claude/skills/lint'), has_skill_md=True, description='Project lint.', real_path=Path('/p/.claude/skills/lint'))
+>>> sr = ScanResult(project_root=Path('/p'), skills=[p], global_skills=[g])
+>>> s = []
+>>> skill_reachability_findings(sr, suggestions=s)[0][:46]
+'Skill "lint": shadowed by the global skill of '
+>>> len(s)
+1
+```
+
+* **Return type:**
+  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
 
 ### opsward.score.validate_hooks_config(cfg)
 

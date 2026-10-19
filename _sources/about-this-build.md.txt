@@ -5,7 +5,7 @@ orphan: true
 
 # About this build
 
-This documentation was built on **2026-10-19 11:40 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/fab22551289b6e6ad5dc971ffc62dd8ba4d9c16e"><code>fab2255</code></a> on branch <code>main</code>, for **opsward 0.0.19** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-10-19 11:56 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/54ab41736ff3baf4523314a8b792e03bf2706fda"><code>54ab417</code></a> on branch <code>main</code>, for **opsward 0.0.20** (from <code>pyproject.toml</code>).
 
 :::{note}
 Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
@@ -15,7 +15,7 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 | | |
 |---|---|
-| Commit | <a href="https://github.com/thorwhalen/opsward/commit/fab22551289b6e6ad5dc971ffc62dd8ba4d9c16e"><code>fab22551289b6e6ad5dc971ffc62dd8ba4d9c16e</code></a> |
+| Commit | <a href="https://github.com/thorwhalen/opsward/commit/54ab41736ff3baf4523314a8b792e03bf2706fda"><code>54ab41736ff3baf4523314a8b792e03bf2706fda</code></a> |
 | Branch | <code>main</code> |
 | Tags at this commit | none |
 | Working tree | clean |
@@ -26,9 +26,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 | | |
 |---|---|
 | Repository | <code>thorwhalen/opsward</code> |
-| Run | <a href="https://github.com/thorwhalen/opsward/actions/runs/39246128477">39246128477</a> |
+| Run | <a href="https://github.com/thorwhalen/opsward/actions/runs/39248114099">39248114099</a> |
 | Ref | <code>refs/heads/main</code> |
-| Event commit | <code>fab22551289b6e6ad5dc971ffc62dd8ba4d9c16e</code> (in the history of the built commit) |
+| Event commit | <code>54ab41736ff3baf4523314a8b792e03bf2706fda</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -53,13 +53,13 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/opsward/0.0.19/">0.0.19</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/opsward/0.0.20/">0.0.20</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/opsward && cd opsward
-git checkout fab22551289b6e6ad5dc971ffc62dd8ba4d9c16e
+git checkout 54ab41736ff3baf4523314a8b792e03bf2706fda
 pip install "epythet==0.2.18"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

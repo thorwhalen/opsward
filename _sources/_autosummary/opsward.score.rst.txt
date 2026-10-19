@@ -11,6 +11,7 @@ opsward.score
       claude_md_size_overrun
       diagnose
       docs_dir_hint
+      skill_reachability_findings
       validate_hooks_config
       validate_skill_spec
    

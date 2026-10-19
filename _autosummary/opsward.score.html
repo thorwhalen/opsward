@@ -104,6 +104,7 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#opsward.score.claude_md_size_overrun"><code class="docutils literal notranslate"><span class="pre">claude_md_size_overrun()</span></code></a></li>
 <li><a class="reference internal" href="#opsward.score.diagnose"><code class="docutils literal notranslate"><span class="pre">diagnose()</span></code></a></li>
 <li><a class="reference internal" href="#opsward.score.docs_dir_hint"><code class="docutils literal notranslate"><span class="pre">docs_dir_hint()</span></code></a></li>
+<li><a class="reference internal" href="#opsward.score.skill_reachability_findings"><code class="docutils literal notranslate"><span class="pre">skill_reachability_findings()</span></code></a></li>
 <li><a class="reference internal" href="#opsward.score.validate_hooks_config"><code class="docutils literal notranslate"><span class="pre">validate_hooks_config()</span></code></a></li>
 <li><a class="reference internal" href="#opsward.score.validate_skill_spec"><code class="docutils literal notranslate"><span class="pre">validate_skill_spec()</span></code></a></li>
 </ul>
@@ -155,16 +156,19 @@ data-aria-dark="Switch to auto color mode">
 <tr class="row-odd"><td><p><a class="reference internal" href="#opsward.score.claude_md_size_overrun" title="opsward.score.claude_md_size_overrun"><code class="xref py py-obj docutils literal notranslate"><span class="pre">claude_md_size_overrun</span></code></a>(content, *[, ...])</p></td>
 <td><p>Return a <a class="reference internal" href="#opsward.score.SizeOverrun" title="opsward.score.SizeOverrun"><code class="xref py py-class docutils literal notranslate"><span class="pre">SizeOverrun</span></code></a> if <em>content</em> exceeds <em>max_chars</em>, else None.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#opsward.score.diagnose" title="opsward.score.diagnose"><code class="xref py py-obj docutils literal notranslate"><span class="pre">diagnose</span></code></a>(scan_result, *[, claude_md_max_chars])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#opsward.score.diagnose" title="opsward.score.diagnose"><code class="xref py py-obj docutils literal notranslate"><span class="pre">diagnose</span></code></a>(scan_result, *[, ...])</p></td>
 <td><p>Score a ScanResult and return a DiagnosisReport.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#opsward.score.docs_dir_hint" title="opsward.score.docs_dir_hint"><code class="xref py py-obj docutils literal notranslate"><span class="pre">docs_dir_hint</span></code></a>(sr)</p></td>
 <td><p>Project-relative docs dir to suggest moving sections into.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#opsward.score.validate_hooks_config" title="opsward.score.validate_hooks_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_hooks_config</span></code></a>(cfg)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#opsward.score.skill_reachability_findings" title="opsward.score.skill_reachability_findings"><code class="xref py py-obj docutils literal notranslate"><span class="pre">skill_reachability_findings</span></code></a>(sr, *, suggestions)</p></td>
+<td><p>Why a project skill may never trigger, as note lines (and one suggestion each).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.score.validate_hooks_config" title="opsward.score.validate_hooks_config"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_hooks_config</span></code></a>(cfg)</p></td>
 <td><p>Validate a hooks config against Claude Code's expected shape.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.score.validate_skill_spec" title="opsward.score.validate_skill_spec"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_skill_spec</span></code></a>(skill)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#opsward.score.validate_skill_spec" title="opsward.score.validate_skill_spec"><code class="xref py py-obj docutils literal notranslate"><span class="pre">validate_skill_spec</span></code></a>(skill)</p></td>
 <td><p>Validate a SkillInfo against the agentskills.io specification.</p></td>
 </tr>
 </tbody>
@@ -223,7 +227,7 @@ points at twice the threshold (at least 1 once over it).</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="opsward.score.diagnose">
-<span class="sig-prename descclassname"><span class="pre">opsward.score.</span></span><span class="sig-name descname"><span class="pre">diagnose</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scan_result</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">claude_md_max_chars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/score.html#diagnose"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.score.diagnose" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">opsward.score.</span></span><span class="sig-name descname"><span class="pre">diagnose</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scan_result</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">claude_md_max_chars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">10000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">listing_budget_chars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/score.html#diagnose"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.score.diagnose" title="Link to this definition">#</a></dt>
 <dd><p>Score a ScanResult and return a DiagnosisReport.</p>
 <p><code class="docutils literal notranslate"><span class="pre">claude_md_max_chars</span></code> is the CLAUDE.md size above which Conciseness
 loses points (see <a class="reference internal" href="#opsward.score.claude_md_size_overrun" title="opsward.score.claude_md_size_overrun"><code class="xref py py-func docutils literal notranslate"><span class="pre">claude_md_size_overrun()</span></code></a>).</p>
@@ -248,6 +252,36 @@ loses points (see <a class="reference internal" href="#opsward.score.claude_md_s
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="opsward.score.skill_reachability_findings">
+<span class="sig-prename descclassname"><span class="pre">opsward.score.</span></span><span class="sig-name descname"><span class="pre">skill_reachability_findings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sr</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">suggestions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">listing_budget_chars</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">30000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/score.html#skill_reachability_findings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.score.skill_reachability_findings" title="Link to this definition">#</a></dt>
+<dd><p>Why a project skill may never trigger, as note lines (and one suggestion each).</p>
+<p>Three shapes from the #23 report: a project skill <strong>shadowed</strong> by a global one of the
+same name (Claude Code resolves personal &gt; project, verified in a fresh session); an
+<strong>unmigrated bridge</strong> (a real directory under <code class="docutils literal notranslate"><span class="pre">.claude/skills</span></code> while the repo also
+holds the skill at its canonical location); and a <strong>listing budget</strong> that the global
+scope plus this project’s skills cannot fit, so descriptions get dropped
+least-invoked-first. The global scope comes from <code class="docutils literal notranslate"><span class="pre">ScanResult.global_skills</span></code>;
+with none (<code class="docutils literal notranslate"><span class="pre">scan(...,</span> <span class="pre">claude_config_dir=None)</span></code>) only the bridge check runs.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+</span><span data-line="2"><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">opsward.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScanResult</span><span class="p">,</span> <span class="n">SkillInfo</span>
+</span><span data-line="3"><span class="gp">&gt;&gt;&gt; </span><span class="n">g</span> <span class="o">=</span> <span class="n">SkillInfo</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">'lint'</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s1">'/g/lint'</span><span class="p">),</span> <span class="n">has_skill_md</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">'Global lint.'</span><span class="p">,</span> <span class="n">real_path</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s1">'/g/lint'</span><span class="p">))</span>
+</span><span data-line="4"><span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">SkillInfo</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">'lint'</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s1">'/p/.claude/skills/lint'</span><span class="p">),</span> <span class="n">has_skill_md</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="s1">'Project lint.'</span><span class="p">,</span> <span class="n">real_path</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s1">'/p/.claude/skills/lint'</span><span class="p">))</span>
+</span><span data-line="5"><span class="gp">&gt;&gt;&gt; </span><span class="n">sr</span> <span class="o">=</span> <span class="n">ScanResult</span><span class="p">(</span><span class="n">project_root</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s1">'/p'</span><span class="p">),</span> <span class="n">skills</span><span class="o">=</span><span class="p">[</span><span class="n">p</span><span class="p">],</span> <span class="n">global_skills</span><span class="o">=</span><span class="p">[</span><span class="n">g</span><span class="p">])</span>
+</span><span data-line="6"><span class="gp">&gt;&gt;&gt; </span><span class="n">s</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="7"><span class="gp">&gt;&gt;&gt; </span><span class="n">skill_reachability_findings</span><span class="p">(</span><span class="n">sr</span><span class="p">,</span> <span class="n">suggestions</span><span class="o">=</span><span class="n">s</span><span class="p">)[</span><span class="mi">0</span><span class="p">][:</span><span class="mi">46</span><span class="p">]</span>
+</span><span data-line="8"><span class="go">'Skill "lint": shadowed by the global skill of '</span>
+</span><span data-line="9"><span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+</span><span data-line="10"><span class="go">1</span>
+</span></pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -340,7 +374,7 @@ honors, so the hook never fires even though the file “looks” configured.</p>
     </div>
   </div>
 </footer>
-      <script src="../_static/documentation_options.js?v=2fd7553c"></script>
+      <script src="../_static/documentation_options.js?v=056c92e6"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>

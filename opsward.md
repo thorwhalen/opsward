@@ -1,4 +1,4 @@
-> built 2026-10-19 11:40 UTC from fab2255 (main) · opsward 0.0.19. Details: build_info.json
+> built 2026-10-19 11:56 UTC from 54ab417 (main) · opsward 0.0.20. Details: build_info.json
 
 # index.html.md
 
@@ -316,13 +316,13 @@ Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
 A rule found in .claude/rules/.
 
-### *class* opsward.base.ScanResult(project_root, project_type=ProjectType.unknown, claude_md_path=None, claude_md_content='', skills=list(), agents=list(), rules=list(), hooks_path=None, hooks_config=None, docs=list(), has_docs_guide=False, docs_guide_path=None, agents_md_path=None, agents_md_content='', is_monorepo=False, monorepo_packages=list())
+### *class* opsward.base.ScanResult(project_root, project_type=ProjectType.unknown, claude_md_path=None, claude_md_content='', skills=list(), agents=list(), rules=list(), hooks_path=None, hooks_config=None, docs=list(), has_docs_guide=False, docs_guide_path=None, agents_md_path=None, agents_md_content='', is_monorepo=False, monorepo_packages=list(), global_skills=list(), global_skills_dir=None)
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
 Everything we learned by reading (never writing) a target project.
 
-### *class* opsward.base.SkillInfo(name, path, has_skill_md=False, description='', frontmatter=dict(), line_count=0)
+### *class* opsward.base.SkillInfo(name, path, has_skill_md=False, description='', frontmatter=dict(), line_count=0, is_link=False, real_path=None, canonical_path=None)
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
@@ -506,7 +506,7 @@ Diagnose, generate, and maintain the AI agent setup of your projects.
 | [`generate`](_autosummary/opsward.generate.html.md#opsward.generate)(scan_result, \*[, agents_md, hooks])     | Determine which artifacts are missing, render templates, return files to create.                 |
 | [`maintain`](_autosummary/opsward.maintain.html.md#opsward.maintain)(scan_result, \*[, previous_report, ...]) | Detect maintenance issues and return suggestions.                                                |
 | [`recommend`](_autosummary/opsward.recommend.html.md#module-opsward.recommend)                                 | Recommend skills from the ecosystem based on project tech stack.                                 |
-| [`scan`](_autosummary/opsward.scan.html.md#opsward.scan)(project_root)                                    | Scan *project_root* and return a ScanResult.                                                     |
+| [`scan`](_autosummary/opsward.scan.html.md#opsward.scan)(project_root, \*[, claude_config_dir])           | Scan *project_root* and return a ScanResult.                                                     |
 | [`score`](_autosummary/opsward.score.html.md#module-opsward.score)                                         | Pure scoring functions.                                                                          |
 | [`subagents`](_autosummary/opsward.subagents.html.md#module-opsward.subagents)                                 | Reuse a skill as a subagent: declare it in the skill, generate the twin, check the sync.         |
 | [`util`](_autosummary/opsward.util.html.md#module-opsward.util)                                           | Shared helpers for opsward.                                                                      |
@@ -574,15 +574,20 @@ Recommend ecosystem skills based on detected tech stack.
 
 # opsward.scan
 
-### opsward.scan(project_root)
+### opsward.scan(project_root, \*, claude_config_dir=<object object>)
 
 Scan *project_root* and return a ScanResult.
 
+`claude_config_dir` is the user’s Claude Code config dir, whose `skills/` is
+the global scope a project skill competes with (shadowing, listing budget). It
+defaults to `default_claude_config_dir()`; pass `None` to read nothing
+outside the project (tests, portable goldens). Reading it is still read-only.
+
 ```pycon
 >>> import tempfile, pathlib
->>> r = scan(pathlib.Path(tempfile.mkdtemp()))
->>> r.project_type
-<ProjectType.unknown: 'unknown'>
+>>> r = scan(pathlib.Path(tempfile.mkdtemp()), claude_config_dir=None)
+>>> r.project_type, r.global_skills
+(<ProjectType.unknown: 'unknown'>, [])
 ```
 
 * **Return type:**
@@ -601,8 +606,9 @@ All functions are pure — same input, same output.
 
 | [`claude_md_size_overrun`](_autosummary/opsward.score.html.md#opsward.score.claude_md_size_overrun)(content, \*[, ...])       | Return a [`SizeOverrun`](_autosummary/opsward.score.html.md#opsward.score.SizeOverrun) if *content* exceeds *max_chars*, else None.   |
 |---------------------------------------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------|
-| [`diagnose`](_autosummary/opsward.score.html.md#opsward.score.diagnose)(scan_result, \*[, claude_md_max_chars]) | Score a ScanResult and return a DiagnosisReport.                                                                     |
+| [`diagnose`](_autosummary/opsward.score.html.md#opsward.score.diagnose)(scan_result, \*[, ...])                 | Score a ScanResult and return a DiagnosisReport.                                                                     |
 | [`docs_dir_hint`](_autosummary/opsward.score.html.md#opsward.score.docs_dir_hint)(sr)                                | Project-relative docs dir to suggest moving sections into.                                                           |
+| [`skill_reachability_findings`](_autosummary/opsward.score.html.md#opsward.score.skill_reachability_findings)(sr, \*, suggestions) | Why a project skill may never trigger, as note lines (and one suggestion each).                                      |
 | [`validate_hooks_config`](_autosummary/opsward.score.html.md#opsward.score.validate_hooks_config)(cfg)                       | Validate a hooks config against Claude Code's expected shape.                                                        |
 | [`validate_skill_spec`](_autosummary/opsward.score.html.md#opsward.score.validate_skill_spec)(skill)                       | Validate a SkillInfo against the agentskills.io specification.                                                       |
 
@@ -644,7 +650,7 @@ True
 * **Return type:**
   [`Optional`](https://docs.python.org/3/library/typing.html#typing.Optional)[[`SizeOverrun`](_autosummary/opsward.score.html.md#opsward.score.SizeOverrun)]
 
-### opsward.score.diagnose(scan_result, , claude_md_max_chars=10000)
+### opsward.score.diagnose(scan_result, , claude_md_max_chars=10000, listing_budget_chars=30000)
 
 Score a ScanResult and return a DiagnosisReport.
 
@@ -668,6 +674,34 @@ Project-relative docs dir to suggest moving sections into.
 
 * **Return type:**
   [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
+
+### opsward.score.skill_reachability_findings(sr, , suggestions, listing_budget_chars=30000)
+
+Why a project skill may never trigger, as note lines (and one suggestion each).
+
+Three shapes from the #23 report: a project skill **shadowed** by a global one of the
+same name (Claude Code resolves personal > project, verified in a fresh session); an
+**unmigrated bridge** (a real directory under `.claude/skills` while the repo also
+holds the skill at its canonical location); and a **listing budget** that the global
+scope plus this project’s skills cannot fit, so descriptions get dropped
+least-invoked-first. The global scope comes from `ScanResult.global_skills`;
+with none (`scan(..., claude_config_dir=None)`) only the bridge check runs.
+
+```pycon
+>>> from pathlib import Path
+>>> from opsward.base import ScanResult, SkillInfo
+>>> g = SkillInfo(name='lint', path=Path('/g/lint'), has_skill_md=True, description='Global lint.', real_path=Path('/g/lint'))
+>>> p = SkillInfo(name='lint', path=Path('/p/.claude/skills/lint'), has_skill_md=True, description='Project lint.', real_path=Path('/p/.claude/skills/lint'))
+>>> sr = ScanResult(project_root=Path('/p'), skills=[p], global_skills=[g])
+>>> s = []
+>>> skill_reachability_findings(sr, suggestions=s)[0][:46]
+'Skill "lint": shadowed by the global skill of '
+>>> len(s)
+1
+```
+
+* **Return type:**
+  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
 
 ### opsward.score.validate_hooks_config(cfg)
 
@@ -947,7 +981,7 @@ Read a text file, returning ‘’ if it doesn’t exist or can’t be decoded.
 
 # About this build
 
-This documentation was built on **2026-10-19 11:40 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/fab22551289b6e6ad5dc971ffc62dd8ba4d9c16e"><code>fab2255</code></a> on branch <code>main</code>, for **opsward 0.0.19** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-10-19 11:56 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/54ab41736ff3baf4523314a8b792e03bf2706fda"><code>54ab417</code></a> on branch <code>main</code>, for **opsward 0.0.20** (from <code>pyproject.toml</code>).
 
 #### NOTE
 Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
@@ -956,7 +990,7 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 |                     |                                                                                                                                                           |
 |---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/opsward/commit/fab22551289b6e6ad5dc971ffc62dd8ba4d9c16e"><code>fab22551289b6e6ad5dc971ffc62dd8ba4d9c16e</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/opsward/commit/54ab41736ff3baf4523314a8b792e03bf2706fda"><code>54ab41736ff3baf4523314a8b792e03bf2706fda</code></a> |
 | Branch              | <code>main</code>                                                                                                                                         |
 | Tags at this commit | none                                                                                                                                                      |
 | Working tree        | clean                                                                                                                                                     |
@@ -967,9 +1001,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/opsward</code>                                                            |
-| Run          | <a href="https://github.com/thorwhalen/opsward/actions/runs/39246128477">39246128477</a>   |
+| Run          | <a href="https://github.com/thorwhalen/opsward/actions/runs/39248114099">39248114099</a>   |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>fab22551289b6e6ad5dc971ffc62dd8ba4d9c16e</code> (in the history of the built commit) |
+| Event commit | <code>54ab41736ff3baf4523314a8b792e03bf2706fda</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -994,13 +1028,13 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/opsward/0.0.19/">0.0.19</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/opsward/0.0.20/">0.0.20</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/opsward && cd opsward
-git checkout fab22551289b6e6ad5dc971ffc62dd8ba4d9c16e
+git checkout 54ab41736ff3baf4523314a8b792e03bf2706fda
 pip install "epythet==0.2.18"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
