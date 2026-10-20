@@ -21,6 +21,7 @@ install-skills --help
 find --help
 fleet --help
 lint --help
+portability --help
 eval --help
 decision --help
 decision new --help
@@ -40,6 +41,10 @@ fleet -u tests/fixtures
 # installed, which would make the recording depend on the recording machine.
 lint tests/fixtures/python_project -v opsward
 lint tests/fixtures/bare_project --validators opsward
+# `portability` names the project, never its path; json too.
+portability tests/fixtures/python_project
+portability tests/fixtures/bare_project --format json
+portability tests/fixtures/nope
 # `eval` cases pin the free `--judge rubric` (the default): `anthropic` makes paid calls.
 eval tests/fixtures/python_project
 eval tests/fixtures/bare_project --samples 2

@@ -85,6 +85,24 @@ class FleetReport:
             for name, pcts in sorted(by_name.items(), key=lambda kv: mean(kv[1]))
         }
 
+    def portability_rollup(self) -> dict:
+        """Repos each host finds instructions in, and AGENTS.md drift across the fleet.
+
+        ``covered`` follows ``AGENT_HOSTS`` order and omits hosts no repo covers;
+        ``uncovered`` counts repos no host finds anything in (opsward#15).
+        """
+        from opsward.portability import AGENT_HOSTS, DRIFT_KINDS
+
+        reports = [r.portability for r in self.reports if r.portability is not None]
+        covered = Counter(h for p in reports for h in p.covered)
+        drift = Counter(f.kind for p in reports for f in p.findings)
+        return {
+            "covered": {h: covered[h] for h in AGENT_HOSTS if covered[h]},
+            "uncovered": sum(not p.covered for p in reports),
+            "drift": {kind: drift[kind] for kind in DRIFT_KINDS},
+            "drifting_repos": sum(bool(p.findings) for p in reports),
+        }
+
     def worst(self, n: int = DFLT_WORST_SHOWN) -> list[DiagnosisReport]:
         """The ``n`` lowest-scoring repos, ties broken by name."""
         return sorted(
@@ -114,6 +132,7 @@ class FleetReport:
             "mean_score": round(self.mean_score(), 1),
             "missing_rollup": self.missing_rollup(),
             "component_rollup": self.component_rollup(),
+            "portability_rollup": self.portability_rollup(),
         }
 
     def __str__(self) -> str:
@@ -132,6 +151,7 @@ class FleetReport:
                 for name, c in components.items()
             ]
         if self.reports:
+            lines += _portability_lines(self.portability_rollup())
             lines.append("Worst repos:")
             lines += [
                 f"  {names[str(r.project_root)]}: {r.overall_score:.1f} ({r.grade})"
@@ -141,6 +161,18 @@ class FleetReport:
             lines.append("Could not diagnose:")
             lines += [f"  {names[root]}: {why}" for root, why in self.errors.items()]
         return "\n".join(lines)
+
+
+def _portability_lines(rollup: dict) -> list[str]:
+    hosts = [f"{h} {n}" for h, n in rollup["covered"].items()]
+    hosts.append(f"none {rollup['uncovered']}")
+    lines = [f"Host coverage (repos): {', '.join(hosts)}"]
+    if rollup["drifting_repos"]:
+        kinds = ", ".join(
+            f"{kind.replace('_', '-')} {n}" for kind, n in rollup["drift"].items() if n
+        )
+        lines.append(f"AGENTS.md drift: {rollup['drifting_repos']} repo(s) ({kinds})")
+    return lines
 
 
 def unique_names(paths: Iterable[str | Path]) -> dict[str, str]:
