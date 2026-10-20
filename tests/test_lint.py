@@ -90,6 +90,29 @@ def test_lint_cli_rejects_an_unknown_validator():
     assert done.returncode == 2 and "unknown validator" in done.stderr
 
 
+def test_every_hooks_file_is_linted_even_unparseable_or_shadowed(tmp_path):
+    claude = tmp_path / ".claude"
+    claude.mkdir()
+    (claude / "hooks.json").write_text("{bad")
+    (claude / "settings.json").write_text('{"hooks": {"PreToolUse": "x"}}')
+    (claude / "settings.local.json").write_text('{"model": "m"}')  # no hooks: skipped
+    found = list(lint(scan(tmp_path, claude_config_dir=None), validators="opsward"))
+    by_path = {f.path for f in found}
+    assert by_path == {".claude/hooks.json", ".claude/settings.json"}
+    assert any("not valid JSON" in f.message for f in found)
+
+
+def test_an_empty_validator_selection_is_refused():
+    for spec in (",", "", {}):
+        with pytest.raises(ValueError, match="no validators selected"):
+            resolve_validators(spec)
+
+
+def test_lint_cli_rejects_an_unknown_format():
+    done = _lint_cli("tests/fixtures/bare_project", "--format", "xml")
+    assert done.returncode == 2 and "format must be" in done.stderr
+
+
 def test_the_shipped_pre_commit_hooks_and_action_parse():
     yaml = pytest.importorskip("yaml")
     hooks = yaml.safe_load((REPO / ".pre-commit-hooks.yaml").read_text())

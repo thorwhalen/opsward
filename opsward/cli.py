@@ -450,6 +450,9 @@ def lint(
     """
     from opsward.lint import lint as _lint, resolve_validators
 
+    if format not in ("text", "json"):
+        print("Error: format must be 'text' or 'json'", file=sys.stderr)
+        sys.exit(2)
     try:
         chosen = resolve_validators(validators)
     except ValueError as e:

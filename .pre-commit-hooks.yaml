@@ -5,6 +5,7 @@
 #     rev: <a release tag>
 #     hooks:
 #       - id: opsward-lint
+#         additional_dependencies: [skill]   # optional: adds skill.validate()
 #       - id: opsward-diagnose      # optional: the scored gate
 #         args: [--min-score, "70"]
 - id: opsward-lint

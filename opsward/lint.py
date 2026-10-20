@@ -59,7 +59,13 @@ def opsward_validator(skill: SkillInfo) -> list[str]:
 
 
 def skill_package_validator(skill: SkillInfo) -> list[str]:
-    """The ``skill`` package's ``validate()`` over the skill's directory."""
+    """The ``skill`` package's ``validate()`` over the skill's directory.
+
+    A directory with no SKILL.md is left to :func:`opsward_validator` (``skill`` would
+    report it again, with an absolute path).
+    """
+    if not skill.has_skill_md:
+        return []
     import skill as skill_pkg  # optional: pip install 'opsward[lint]'
 
     return list(skill_pkg.validate(str(skill.path)))
@@ -90,6 +96,13 @@ def resolve_validators(spec: str | Mapping[str, Validator] = DFLT_VALIDATORS) ->
     ...
     ValueError: unknown validator 'nope' (known: opsward, skill)
     """
+    chosen = _resolve(spec)
+    if not chosen:  # a gate that checks nothing must not pass
+        raise ValueError(f"no validators selected (known: {', '.join(VALIDATORS)})")
+    return chosen
+
+
+def _resolve(spec) -> dict[str, Validator]:
     if isinstance(spec, Mapping):
         return dict(spec)
     if spec == "auto":
@@ -119,7 +132,11 @@ def lint(
     *,
     validators: str | Mapping[str, Validator] = DFLT_VALIDATORS,
 ) -> Iterator[LintFinding]:
-    """Every spec/config violation in the scanned project, skills first, then hooks."""
+    """Every spec/config violation in the scanned project, skills first, then hooks.
+
+    Hooks are read from every file in :data:`HOOKS_FILES` that exists, not only the one
+    ``scan`` picked, so an unparseable or shadowed hooks file is still reported.
+    """
     root = scan_result.project_root
     chosen = resolve_validators(validators)
     for skill in scan_result.skills:
@@ -131,10 +148,28 @@ def lint(
                 messages = [f"validator failed: {type(error).__name__}: {error}"]
             for message in messages:
                 yield LintFinding(where, name, str(message))
-    if scan_result.hooks_path is not None:
-        where = _rel(scan_result.hooks_path, root)
-        if scan_result.hooks_config is None:
-            yield LintFinding(where, "opsward", "hooks config is not valid JSON")
-        else:
-            for message in validate_hooks_config(scan_result.hooks_config):
-                yield LintFinding(where, "opsward", message)
+    yield from _hooks_findings(root)
+
+
+#: Where Claude Code reads hooks from; a settings file holds hooks only under ``hooks``.
+HOOKS_FILES = ("hooks.json", "settings.json", "settings.local.json")
+
+
+def _hooks_findings(root: Path) -> Iterator[LintFinding]:
+    """Every hooks-bearing file under ``.claude/``: unparseable JSON, or a malformed ``hooks``."""
+    import json
+
+    for name in HOOKS_FILES:
+        path = root / ".claude" / name
+        if not path.is_file():
+            continue
+        where = _rel(path, root)
+        try:
+            data = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, UnicodeDecodeError, ValueError) as error:
+            yield LintFinding(where, "opsward", f"not valid JSON: {error}")
+            continue
+        if name != "hooks.json" and not (isinstance(data, dict) and "hooks" in data):
+            continue  # a settings file without hooks is not a hooks config
+        for message in validate_hooks_config(data):
+            yield LintFinding(where, "opsward", message)

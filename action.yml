@@ -20,14 +20,14 @@ inputs:
     description: Minimum overall `opsward diagnose` score; empty skips the scored gate.
     default: "80"
   lint:
-    description: Run `opsward lint` ("true" or "false").
+    description: Run `opsward lint`; only "false" skips it (so a typo fails closed).
     default: "true"
   validators:
     description: Lint validators — "auto", or a comma list of opsward, skill.
     default: "auto"
   opsward-spec:
-    description: pip requirement for opsward, e.g. "opsward[lint]==0.0.30".
-    default: "opsward[lint]"
+    description: pip requirement for opsward, e.g. "opsward[lint]==0.0.30"; empty installs the action's own ref, with the lint extra.
+    default: ""
   python-version:
     description: Python used to run opsward.
     default: "3.12"
@@ -42,7 +42,9 @@ runs:
       shell: bash
       env:
         OPSWARD_SPEC: ${{ inputs.opsward-spec }}
-      run: python -m pip install --quiet "$OPSWARD_SPEC"
+      # GITHUB_ACTION_PATH is the checkout of the ref named in `uses:`, so a pinned tag
+      # runs that tag's opsward, not whatever PyPI has today.
+      run: python -m pip install --quiet "${OPSWARD_SPEC:-${GITHUB_ACTION_PATH}[lint]}"
     - name: opsward diagnose (score gate)
       if: inputs.min-score != ''
       shell: bash
@@ -51,7 +53,7 @@ runs:
         OPSWARD_MIN_SCORE: ${{ inputs.min-score }}
       run: opsward diagnose "$OPSWARD_PATH" --min-score "$OPSWARD_MIN_SCORE"
     - name: opsward lint
-      if: inputs.lint == 'true'
+      if: inputs.lint != 'false'
       shell: bash
       env:
         OPSWARD_PATH: ${{ inputs.path }}
