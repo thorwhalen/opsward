@@ -17,6 +17,7 @@ opsward.portability
       analyze
       as_read
       check_portability
+      has_canonical
       read_host_files
       summarize
    

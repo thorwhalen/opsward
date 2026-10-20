@@ -300,8 +300,8 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="142">    <span class="n">missing_items</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
 </span><span data-line="143">    <span class="n">suggestions</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
 </span><span data-line="144">
-</span><span data-line="145">    <span class="c1"># Weighted overall score (0–100), set by score.py</span>
-</span><span data-line="146">    <span class="n">weighted_score</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span>
+</span><span data-line="145">    <span class="c1"># Weighted overall score (0–100), set by score.py; None when not computed</span>
+</span><span data-line="146">    <span class="n">weighted_score</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
 </span><span data-line="147">
 </span><span data-line="148">    <span class="c1"># Security advisories (opsward.security.Advisory): reported, never scored</span>
 </span><span data-line="149">    <span class="n">advisories</span><span class="p">:</span> <span class="nb">list</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">list</span><span class="p">)</span>
@@ -312,8 +312,8 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="154">
 </span><span data-line="155">    <span class="nd">@property</span>
 </span><span data-line="156">    <span class="k">def</span><span class="w"> </span><span class="nf">overall_score</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-</span><span data-line="157"><span class="w">        </span><span class="sd">"""Weighted score if set, else simple average."""</span>
-</span><span data-line="158">        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">weighted_score</span><span class="p">:</span>
+</span><span data-line="157"><span class="w">        </span><span class="sd">"""Weighted score if set (0.0 included), else simple average."""</span>
+</span><span data-line="158">        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">weighted_score</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
 </span><span data-line="159">            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">weighted_score</span>
 </span><span data-line="160">        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">scores</span><span class="p">:</span>
 </span><span data-line="161">            <span class="k">return</span> <span class="mf">0.0</span>
@@ -436,7 +436,7 @@ data-aria-dark="Switch to auto color mode">
     </div>
   </div>
 </footer>
-      <script src="../../_static/documentation_options.js?v=0e525676"></script>
+      <script src="../../_static/documentation_options.js?v=aa2ad26f"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>

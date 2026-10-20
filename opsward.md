@@ -1,4 +1,4 @@
-> built 2026-10-20 19:13 UTC from e0a5370 (main) · opsward 0.0.36. Details: build_info.json
+> built 2026-10-20 19:22 UTC from 08b6cf9 (main) · opsward 0.0.37. Details: build_info.json
 
 # index.html.md
 
@@ -183,6 +183,8 @@ known_issues.md, and content quality.
 
 **Cross-references**: paths in CLAUDE.md validated against the filesystem.
 
+**Portability**: sections where a render (CLAUDE.md, GEMINI.md, …) drifts from AGENTS.md, 10 points each; never how many hosts a repo covers. Without an AGENTS.md it is not scored and its weight goes to CLAUDE.md quality (ADR 0012).
+
 **Overall health**: weighted score (A–F grade) combining all components.
 
 **Security advisories** (reported, never scored; modelled on the OWASP Top 10 for agentic applications): unrestricted Bash in a skill’s `allowed-tools` or in `permissions.allow`, `bypassPermissions`, a download piped into a shell, `eval` of a built string, unpinned `npx`/`uvx` packages in hooks and MCP servers, text that tries to override the agent’s other instructions, and committed credentials. They are heuristics, so they never move the grade or fail `--min-score`.
@@ -364,7 +366,7 @@ Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
 Score for a single component (0–100) with optional notes.
 
-### *class* opsward.base.DiagnosisReport(project_root, project_type, scores=list(), missing_items=list(), suggestions=list(), weighted_score=0.0, advisories=list(), portability=None)
+### *class* opsward.base.DiagnosisReport(project_root, project_type, scores=list(), missing_items=list(), suggestions=list(), weighted_score=None, advisories=list(), portability=None)
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
@@ -379,7 +381,7 @@ A (90-100), B (80-89), C (70-79), D (60-69), F (<60).
 
 #### *property* overall_score *: [float](https://docs.python.org/3/builtins/functions.html#float)*
 
-Weighted score if set, else simple average.
+Weighted score if set (0.0 included), else simple average.
 
 ### *class* opsward.base.DocSpec(name, path, size_bytes=0)
 
@@ -1367,6 +1369,7 @@ render) are compared only when they import or link the canonical.
 |------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------|
 | [`as_read`](_autosummary/opsward.portability.html.md#opsward.portability.as_read)(render, canonical)                    | *render* as its host reads it: an `@AGENTS.md` import replaced by *canonical*. |
 | [`check_portability`](_autosummary/opsward.portability.html.md#opsward.portability.check_portability)(root, \*[, hosts])          | `analyze` over what is on disk under *root*: the library entry point.          |
+| [`has_canonical`](_autosummary/opsward.portability.html.md#opsward.portability.has_canonical)(canonical)                      | Whether an `AGENTS.md` text says anything (a BOM or whitespace does not).      |
 | [`read_host_files`](_autosummary/opsward.portability.html.md#opsward.portability.read_host_files)(root, \*[, hosts])            | Every host instruction file and rule folder present under *root*.              |
 | [`summarize`](_autosummary/opsward.portability.html.md#opsward.portability.summarize)(report)                             | One diagnose suggestion per drifting render.                                   |
 
@@ -1418,6 +1421,8 @@ Hosts that find project instructions, in `AGENT_HOSTS` order.
 
 Coverage and drift of *host_files* against the *canonical* `AGENTS.md` text. Pure.
 
+A blank canonical (empty, whitespace or a BOM) counts as absent.
+
 * **Return type:**
   [`PortabilityReport`](_autosummary/opsward.portability.html.md#opsward.portability.PortabilityReport)
 
@@ -1447,6 +1452,13 @@ scoring a shim judges what the agent actually sees, not the three-line file.
 
 * **Return type:**
   [`PortabilityReport`](_autosummary/opsward.portability.html.md#opsward.portability.PortabilityReport)
+
+### opsward.portability.has_canonical(canonical)
+
+Whether an `AGENTS.md` text says anything (a BOM or whitespace does not).
+
+* **Return type:**
+  [`bool`](https://docs.python.org/3/builtins/functions.html#bool)
 
 ### opsward.portability.read_host_files(root, , hosts={'aider': HostSpec(name='aider', instruction_files=('CONVENTIONS.md',), rule_dirs=(), reads_agents_md=False, compared=False), 'claude': HostSpec(name='claude', instruction_files=('CLAUDE.md', '.claude/CLAUDE.md'), rule_dirs=('.claude/rules',), reads_agents_md=False, compared=True), 'cline': HostSpec(name='cline', instruction_files=('.clinerules',), rule_dirs=('.clinerules',), reads_agents_md=True, compared=True), 'codex': HostSpec(name='codex', instruction_files=(), rule_dirs=(), reads_agents_md=True, compared=True), 'copilot': HostSpec(name='copilot', instruction_files=('.github/copilot-instructions.md',), rule_dirs=('.github/instructions',), reads_agents_md=True, compared=True), 'cursor': HostSpec(name='cursor', instruction_files=('.cursorrules',), rule_dirs=('.cursor/rules',), reads_agents_md=True, compared=True), 'gemini': HostSpec(name='gemini', instruction_files=('GEMINI.md',), rule_dirs=(), reads_agents_md=False, compared=True), 'windsurf': HostSpec(name='windsurf', instruction_files=('.windsurfrules', '.windsurfrules.md'), rule_dirs=('.windsurf/rules',), reads_agents_md=False, compared=True), 'zed': HostSpec(name='zed', instruction_files=('.rules',), rule_dirs=(), reads_agents_md=True, compared=True)})
 
@@ -2017,16 +2029,18 @@ Read a text file, returning ‘’ if it doesn’t exist or can’t be decoded.
 
 # About this build
 
-This documentation was built on **2026-10-20 19:13 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/e0a537064bd5c7eb0d5022c9836f7322251e29ab"><code>e0a5370</code></a> on branch <code>main</code>, for **opsward 0.0.36** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-10-20 19:22 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/08b6cf9c5cf5e12a2f6c4f08d8ebfb2863c2a518"><code>08b6cf9</code></a> on branch <code>main</code>, for **opsward 0.0.37** (from <code>pyproject.toml</code>).
 
-#### NOTE
-Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
+#### WARNING
+The documentation and the package may be misaligned:
+
+- The documented version (0.0.37) is ahead of the latest release on PyPI (0.0.36): these docs describe unreleased code.
 
 ## Source
 
 |                     |                                                                                                                                                           |
 |---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/opsward/commit/e0a537064bd5c7eb0d5022c9836f7322251e29ab"><code>e0a537064bd5c7eb0d5022c9836f7322251e29ab</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/opsward/commit/08b6cf9c5cf5e12a2f6c4f08d8ebfb2863c2a518"><code>08b6cf9c5cf5e12a2f6c4f08d8ebfb2863c2a518</code></a> |
 | Branch              | <code>main</code>                                                                                                                                         |
 | Tags at this commit | none                                                                                                                                                      |
 | Working tree        | clean                                                                                                                                                     |
@@ -2037,9 +2051,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/opsward</code>                                                            |
-| Run          | <a href="https://github.com/thorwhalen/opsward/actions/runs/39481405674">39481405674</a>   |
+| Run          | <a href="https://github.com/thorwhalen/opsward/actions/runs/39482625102">39482625102</a>   |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>e0a537064bd5c7eb0d5022c9836f7322251e29ab</code> (in the history of the built commit) |
+| Event commit | <code>08b6cf9c5cf5e12a2f6c4f08d8ebfb2863c2a518</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -2064,13 +2078,13 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/opsward/0.0.36/">0.0.36</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/opsward/0.0.36/">0.0.36</a>, older than the documented version (0.0.37).
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/opsward && cd opsward
-git checkout e0a537064bd5c7eb0d5022c9836f7322251e29ab
+git checkout 08b6cf9c5cf5e12a2f6c4f08d8ebfb2863c2a518
 pip install "epythet==0.2.22"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

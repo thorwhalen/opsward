@@ -28,7 +28,7 @@ Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
 Score for a single component (0–100) with optional notes.
 
-### *class* opsward.base.DiagnosisReport(project_root, project_type, scores=list(), missing_items=list(), suggestions=list(), weighted_score=0.0, advisories=list(), portability=None)
+### *class* opsward.base.DiagnosisReport(project_root, project_type, scores=list(), missing_items=list(), suggestions=list(), weighted_score=None, advisories=list(), portability=None)
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
@@ -43,7 +43,7 @@ A (90-100), B (80-89), C (70-79), D (60-69), F (<60).
 
 #### *property* overall_score *: [float](https://docs.python.org/3/builtins/functions.html#float)*
 
-Weighted score if set, else simple average.
+Weighted score if set (0.0 included), else simple average.
 
 ### *class* opsward.base.DocSpec(name, path, size_bytes=0)
 

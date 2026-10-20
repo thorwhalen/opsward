@@ -51,6 +51,7 @@ render) are compared only when they import or link the canonical.
 |------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------|
 | [`as_read`](#opsward.portability.as_read)(render, canonical)                    | *render* as its host reads it: an `@AGENTS.md` import replaced by *canonical*. |
 | [`check_portability`](#opsward.portability.check_portability)(root, \*[, hosts])          | `analyze` over what is on disk under *root*: the library entry point.          |
+| [`has_canonical`](#opsward.portability.has_canonical)(canonical)                      | Whether an `AGENTS.md` text says anything (a BOM or whitespace does not).      |
 | [`read_host_files`](#opsward.portability.read_host_files)(root, \*[, hosts])            | Every host instruction file and rule folder present under *root*.              |
 | [`summarize`](#opsward.portability.summarize)(report)                             | One diagnose suggestion per drifting render.                                   |
 
@@ -102,6 +103,8 @@ Hosts that find project instructions, in `AGENT_HOSTS` order.
 
 Coverage and drift of *host_files* against the *canonical* `AGENTS.md` text. Pure.
 
+A blank canonical (empty, whitespace or a BOM) counts as absent.
+
 * **Return type:**
   [`PortabilityReport`](#opsward.portability.PortabilityReport)
 
@@ -131,6 +134,13 @@ scoring a shim judges what the agent actually sees, not the three-line file.
 
 * **Return type:**
   [`PortabilityReport`](#opsward.portability.PortabilityReport)
+
+### opsward.portability.has_canonical(canonical)
+
+Whether an `AGENTS.md` text says anything (a BOM or whitespace does not).
+
+* **Return type:**
+  [`bool`](https://docs.python.org/3/builtins/functions.html#bool)
 
 ### opsward.portability.read_host_files(root, , hosts={'aider': HostSpec(name='aider', instruction_files=('CONVENTIONS.md',), rule_dirs=(), reads_agents_md=False, compared=False), 'claude': HostSpec(name='claude', instruction_files=('CLAUDE.md', '.claude/CLAUDE.md'), rule_dirs=('.claude/rules',), reads_agents_md=False, compared=True), 'cline': HostSpec(name='cline', instruction_files=('.clinerules',), rule_dirs=('.clinerules',), reads_agents_md=True, compared=True), 'codex': HostSpec(name='codex', instruction_files=(), rule_dirs=(), reads_agents_md=True, compared=True), 'copilot': HostSpec(name='copilot', instruction_files=('.github/copilot-instructions.md',), rule_dirs=('.github/instructions',), reads_agents_md=True, compared=True), 'cursor': HostSpec(name='cursor', instruction_files=('.cursorrules',), rule_dirs=('.cursor/rules',), reads_agents_md=True, compared=True), 'gemini': HostSpec(name='gemini', instruction_files=('GEMINI.md',), rule_dirs=(), reads_agents_md=False, compared=True), 'windsurf': HostSpec(name='windsurf', instruction_files=('.windsurfrules', '.windsurfrules.md'), rule_dirs=('.windsurf/rules',), reads_agents_md=False, compared=True), 'zed': HostSpec(name='zed', instruction_files=('.rules',), rule_dirs=(), reads_agents_md=True, compared=True)})
 
