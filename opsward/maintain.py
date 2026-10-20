@@ -102,10 +102,10 @@ def _check_claude_md_size(
     sr: ScanResult, max_chars: int
 ) -> Iterable[MaintenanceSuggestion]:
     """Flag a CLAUDE.md over the size budget (same finding as ``diagnose``)."""
-    from opsward.portability import as_read
+    from opsward.portability import claude_md_as_read
 
     overrun = claude_md_size_overrun(
-        as_read(sr.claude_md_content, sr.agents_md_content),
+        claude_md_as_read(sr),
         max_chars=max_chars,
         docs_dir=docs_dir_hint(sr),
     )
