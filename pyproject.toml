@@ -43,6 +43,9 @@ Changelog = "https://github.com/thorwhalen/opsward/blob/main/CHANGELOG.md"
 lint = [
     "skill",
 ]
+eval = [
+    "anthropic",
+]
 dev = [
     "pytest>=7.0",
     "pytest-cov>=4.0",

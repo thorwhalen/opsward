@@ -200,6 +200,23 @@ for skill in sr.skills:
 skill_files = generate_skills(Path.home() / ".claude")
 ```
 
+### Evals (opt-in, report-only)
+
+The rubric scores form; evals ask whether a config actually helps. They make model calls, so they never gate and never run by default:
+
+```python
+from opsward.evals import judge_claude_md, anthropic_judge, run_golden_tasks, GoldenTask, anthropic_agent
+
+# LLM-as-judge for the subjective dimensions (actionability, conciseness), next to the rubric's score
+print(judge_claude_md(open("CLAUDE.md").read(), judge=anthropic_judge(), samples=3))
+
+# Golden tasks: does the agent honour a convention with the config, and not without it?
+tasks = [GoldenTask("kw-only", "Write a function f(a, b, c).", expect=[r"\*,"])]
+print(run_golden_tasks(tasks, agent=anthropic_agent(), config=open("CLAUDE.md").read(), runs=3))
+```
+
+`pip install 'opsward[eval]'` for the paid judge and agent. Without them, `judge_claude_md` defaults to `rubric_judge` (opsward's own rubric, free) and `echo_agent` exercises the golden-task harness without a model.
+
 ## CI Integration
 
 Use opsward in CI to enforce AI setup quality:
