@@ -22,6 +22,14 @@ normalised heading):
 Scoped-rule folders (``.cursor/rules/``, ``.windsurf/rules/``, ``.clinerules/``) count
 towards coverage but are not compared: they are not renders of one brief.
 
+A fourth kind, ``lossy``, is about skills rather than the brief: a project skill
+rendered for a host whose format drops some of its fields (``allowed-tools``,
+``license``, bundled resources). Where each host installs skills and what its format
+drops is the ``skill`` package's registry (``skill.install.agent_targets``,
+``skill.translate.lost_fields``); ``HostSpec.skill_target`` points into it, so the two
+registries are joined, not copied. ``check_portability`` reports it when ``skill`` is
+installed (``pip install 'opsward[lint]'``); it is never scored.
+
 Files that are only coverage signals (``CONVENTIONS.md`` is often a contributor doc, not a
 render) are compared only when they import or link the canonical.
 
@@ -48,6 +56,8 @@ from opsward.util import read_text_safe
 CANONICAL = "AGENTS.md"
 #: The drift finding kinds, in report order (see the module docstring).
 DRIFT_KINDS = ("stale", "diverged", "host_only")
+#: A skill rendered in a format that drops some of its fields (reported, not scored).
+LOSSY = "lossy"
 
 
 @dataclass(frozen=True)
@@ -60,27 +70,50 @@ class HostSpec:
     reads_agents_md: bool = False
     # False: the file name is too common to assume it renders AGENTS.md (see module doc)
     compared: bool = True
+    # This host's name in the ``skill`` package's ``agent_targets`` registry, if any
+    skill_target: Optional[str] = None
 
 
 # The SSOT of hosts. Source: misc/docs/research/multiplatform_config.md, comparison table.
 AGENT_HOSTS: Mapping[str, HostSpec] = {
     h.name: h
     for h in (
-        HostSpec("claude", ("CLAUDE.md", ".claude/CLAUDE.md"), (".claude/rules",)),
+        HostSpec(
+            "claude",
+            ("CLAUDE.md", ".claude/CLAUDE.md"),
+            (".claude/rules",),
+            skill_target="claude-code",
+        ),
         HostSpec("codex", reads_agents_md=True),
         HostSpec(
             "copilot",
             (".github/copilot-instructions.md",),
             (".github/instructions",),
             reads_agents_md=True,
+            skill_target="copilot",
         ),
-        HostSpec("cursor", (".cursorrules",), (".cursor/rules",), reads_agents_md=True),
         HostSpec(
-            "windsurf", (".windsurfrules", ".windsurfrules.md"), (".windsurf/rules",)
+            "cursor",
+            (".cursorrules",),
+            (".cursor/rules",),
+            reads_agents_md=True,
+            skill_target="cursor",
         ),
-        HostSpec("gemini", ("GEMINI.md",)),
+        HostSpec(
+            "windsurf",
+            (".windsurfrules", ".windsurfrules.md"),
+            (".windsurf/rules",),
+            skill_target="windsurf",
+        ),
+        HostSpec("gemini", ("GEMINI.md",), skill_target="gemini"),
         HostSpec("aider", ("CONVENTIONS.md",), compared=False),
-        HostSpec("cline", (".clinerules",), (".clinerules",), reads_agents_md=True),
+        HostSpec(
+            "cline",
+            (".clinerules",),
+            (".clinerules",),
+            reads_agents_md=True,
+            skill_target="cline",
+        ),
         HostSpec("zed", (".rules",), reads_agents_md=True),
     )
 }
@@ -119,11 +152,17 @@ class HostFile:
 class DriftFinding:
     """One section that differs between ``AGENTS.md`` and a render."""
 
-    kind: str  # 'stale' | 'diverged' | 'host_only'
+    kind: str  # 'stale' | 'diverged' | 'host_only' | 'lossy'
     path: str
-    section: str
+    section: str  # the section heading; for 'lossy', the skill name
+    lost: tuple[str, ...] = ()  # 'lossy' only: the fields the host's format drops
 
     def __str__(self) -> str:
+        if self.kind == LOSSY:
+            return (
+                f"{self.path}: skill '{self.section}' loses {', '.join(self.lost)} "
+                "in this host's format"
+            )
         what = {
             "stale": "missing from the render",
             "diverged": "differs from AGENTS.md",
@@ -147,7 +186,10 @@ class PortabilityReport:
     def to_dict(self) -> dict:
         return {
             "coverage": dict(self.coverage),
-            "findings": [vars(f) for f in self.findings],
+            "findings": [
+                {k: list(v) if k == "lost" else v for k, v in vars(f).items() if v}
+                for f in self.findings
+            ],
         }
 
 
@@ -218,13 +260,70 @@ def has_canonical(canonical: str) -> bool:
 def check_portability(
     root: Path, *, hosts: Mapping[str, HostSpec] = AGENT_HOSTS
 ) -> PortabilityReport:
-    """``analyze`` over what is on disk under *root*: the library entry point."""
+    """``analyze`` over what is on disk under *root*, plus ``lossy`` skill renders.
+
+    The library entry point. Read-only.
+    """
     root = Path(root)
-    return analyze(
+    report = analyze(
         read_text_safe(root / CANONICAL).lstrip("\ufeff"),
         read_host_files(root, hosts=hosts),
         hosts=hosts,
     )
+    report.findings.extend(lossy_findings(root, hosts=hosts))
+    return report
+
+
+def lossy_findings(
+    root: Path, *, hosts: Mapping[str, HostSpec] = AGENT_HOSTS
+) -> Iterator[DriftFinding]:
+    """One ``lossy`` finding per project skill rendered for a host whose format drops fields.
+
+    A skill counts as rendered for a host when its translated file exists where the
+    ``skill`` package installs it (or, for a shared file such as ``GEMINI.md``, when the
+    file holds the skill's section). Yields nothing when ``skill`` is not installed.
+    Read-only.
+    """
+    try:
+        from skill.base import Skill
+        from skill.install import agent_targets
+        from skill.translate import lost_fields
+    except ImportError:  # optional: pip install 'opsward[lint]'
+        return
+    root = Path(root)
+    skills_dir = root / ".claude" / "skills"
+    try:
+        skill_dirs = sorted(p for p in skills_dir.iterdir() if (p / "SKILL.md").is_file())
+    except OSError:
+        return
+    targets = [
+        agent_targets[spec.skill_target]
+        for spec in hosts.values()
+        if spec.skill_target in agent_targets
+        and agent_targets[spec.skill_target].needs_translation
+    ]
+    for skill_dir in skill_dirs:
+        try:
+            skill = Skill.from_path(skill_dir)
+        except Exception:  # a malformed SKILL.md is lint's business, not drift's
+            continue
+        name = skill.meta.name or skill_dir.name
+        for target in targets:
+            dest = target.format_project_path(root, name)
+            if dest is None or not _renders(dest, name, appends=target.appends):
+                continue
+            if lost := lost_fields(skill, target_format=target.format):
+                rel = dest.relative_to(root).as_posix()
+                yield DriftFinding(LOSSY, rel, name, tuple(lost))
+
+
+def _renders(dest: Path, name: str, *, appends: bool) -> bool:
+    try:
+        if not dest.is_file():
+            return False
+        return not appends or f"<!-- skill:{name} -->" in read_text_safe(dest)
+    except OSError:
+        return False
 
 
 def summarize(report: PortabilityReport) -> Iterator[str]:
