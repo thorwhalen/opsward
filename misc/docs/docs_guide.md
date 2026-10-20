@@ -9,6 +9,7 @@ for your task.
 | `ai_setup_meta_tooling.md` | Before any design work | Foundational research: what exists in the ecosystem, gap analysis, and the original design proposal |
 | `architecture.md` | Before making structural changes | System design, module responsibilities, data flow, key abstractions |
 | `conventions.md` | Before writing new code | Coding style, patterns, naming, and template authoring rules |
+| `cli_goldens.md` | Before adding or changing a CLI command or flag | How the CLI surface is pinned by per-Python goldens and how to re-record them |
 | `target_artifacts.md` | When working on the generator | Complete spec of every file opsward can generate for a target project |
 | `scoring_rubric.md` | When working on the diagnostic | Detailed scoring criteria for CLAUDE.md, skills, docs, and overall setup health |
 | `recommend_design.md` | When working on `opsward recommend` | Design of `recommend.py`: inputs/outputs, the substring-matching heuristics and their known false positives, extension points, and why it is independent of the scorer |
