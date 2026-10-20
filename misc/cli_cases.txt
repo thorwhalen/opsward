@@ -20,6 +20,7 @@ recommend --help
 install-skills --help
 find --help
 fleet --help
+lint --help
 decision --help
 decision new --help
 decision note --help
@@ -34,6 +35,10 @@ recommend tests/fixtures/python_project
 # finds no repos (exit 2). `--manifest` writes a file, so it has no case here (tests/ cover it).
 fleet tests/fixtures/bare_project tests/fixtures/python_project
 fleet -u tests/fixtures
+# `lint` cases pin `-v opsward`: `auto` also runs the optional `skill` package when it is
+# installed, which would make the recording depend on the recording machine.
+lint tests/fixtures/python_project -v opsward
+lint tests/fixtures/bare_project --validators opsward
 # `decision` dry runs print only repo-relative paths and the text; the dated entry itself
 # is not printed, so the note case stays portable across days and machines.
 decision new "Pin the thing" --project-root tests/fixtures/python_project
@@ -72,7 +77,9 @@ decision
 decision new
 fleet
 fleet --depth notanint
+lint tests/fixtures/bare_project --validators nosuchvalidator
 
 # -- tier 1: a runtime error path (opsward's own sys.exit(2)) --
 diagnose ./no/such/directory/opsward-characterization
 fleet --under ./no/such/directory/opsward-characterization
+lint ./no/such/directory/opsward-characterization -v opsward

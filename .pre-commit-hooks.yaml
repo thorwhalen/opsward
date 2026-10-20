@@ -1,0 +1,23 @@
+# pre-commit hooks for a project's AI agent setup (opsward#50).
+# In a project's .pre-commit-config.yaml:
+#
+#   - repo: https://github.com/thorwhalen/opsward
+#     rev: <a release tag>
+#     hooks:
+#       - id: opsward-lint
+#       - id: opsward-diagnose      # optional: the scored gate
+#         args: [--min-score, "70"]
+- id: opsward-lint
+  name: opsward lint (skill specs, hooks config)
+  description: Fail on agentskills.io spec violations in the project's skills and on a malformed hooks config.
+  entry: opsward lint
+  language: python
+  pass_filenames: false
+  files: ^(\.claude/|skills/|CLAUDE\.md$|AGENTS\.md$)
+- id: opsward-diagnose
+  name: opsward diagnose (score gate)
+  description: Fail when the project's AI-setup score is below --min-score (default 80).
+  entry: opsward diagnose
+  language: python
+  pass_filenames: false
+  files: ^(\.claude/|skills/|docs/|misc/docs/|CLAUDE\.md$|AGENTS\.md$)

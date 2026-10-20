@@ -433,6 +433,49 @@ def fleet(
     sys.exit(1 if report.errors else 0)
 
 
+def lint(
+    *project_roots: str,
+    validators: str = "auto",
+    format: str = "text",
+):
+    """Check skill specs and the hooks config: pass or fail, no score (exit 1 on any finding).
+
+    The strict counterpart of `diagnose --min-score`, for CI and pre-commit. Validators:
+    opsward (its own agentskills.io check, always there) and skill (the skill package's
+    validate(); pip install 'opsward[lint]'). auto runs every one that is installed.
+
+    :param project_roots: one or more project directories (default: current dir)
+    :param validators: 'auto', or a comma list of: opsward, skill
+    :param format: output format — 'text' or 'json'
+    """
+    from opsward.lint import lint as _lint, resolve_validators
+
+    try:
+        chosen = resolve_validators(validators)
+    except ValueError as e:
+        print(f"Error: {e}", file=sys.stderr)
+        sys.exit(2)
+    findings = []
+    for root_str in project_roots or (".",):
+        root = Path(root_str).resolve()
+        if not root.is_dir():
+            print(f"Error: {root_str} is not a directory", file=sys.stderr)
+            sys.exit(2)
+        found = list(_lint(scan(root, claude_config_dir=None), validators=chosen))
+        findings += [{"project": root.name, **f.to_dict()} for f in found]
+        if format == "json":
+            continue
+        if not found:
+            print(f"{root.name}: clean ({', '.join(chosen)})")
+            continue
+        print(f"{root.name}: {len(found)} finding(s) ({', '.join(chosen)})")
+        for f in found:
+            print(f"  {f}")
+    if format == "json":
+        print(json.dumps(findings, indent=2))
+    sys.exit(1 if findings else 0)
+
+
 def _not_ignored_in_a_repo(path: Path) -> bool:
     """True when ``path`` lies in a git work tree and is not ignored (no git: False)."""
     import subprocess
@@ -549,5 +592,6 @@ _dispatch_funcs = {
     "install-skills": install_skills,
     "find": find,
     "fleet": fleet,
+    "lint": lint,
     "decision": [new, note],
 }

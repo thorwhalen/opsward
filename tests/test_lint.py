@@ -1,0 +1,101 @@
+"""`opsward lint` (opsward#50): skill specs and hooks config, pass or fail."""
+
+import json
+import subprocess
+import sys
+from pathlib import Path
+
+import pytest
+
+from opsward.base import ScanResult, SkillInfo
+from opsward.lint import lint, opsward_validator, resolve_validators
+from opsward.scan import scan
+
+REPO = Path(__file__).parent.parent
+FIXTURES = Path(__file__).parent / "fixtures"
+
+
+def _lint_cli(*args):
+    return subprocess.run(
+        [sys.executable, "-m", "opsward", "lint", *args],
+        capture_output=True,
+        text=True,
+        cwd=str(REPO),
+    )
+
+
+def _findings(name, **kw):
+    return list(lint(scan(FIXTURES / name, claude_config_dir=None), **kw))
+
+
+def test_a_clean_project_has_no_findings():
+    assert _findings("bare_project") == []
+
+
+def test_spec_and_hooks_violations_are_found_with_repo_relative_paths():
+    found = _findings("python_project", validators="opsward")
+    paths = {f.path for f in found}
+    assert paths == {".claude/skills/my-skill", ".claude/hooks.json"}
+    assert all(f.source == "opsward" for f in found)
+
+
+def test_a_validator_that_raises_is_a_finding_not_a_crash():
+    def boom(skill):
+        raise RuntimeError("nope")
+
+    found = _findings("python_project", validators={"boom": boom})
+    assert any("validator failed: RuntimeError: nope" in f.message for f in found)
+
+
+def test_a_skill_dir_without_skill_md_is_a_finding():
+    sr = ScanResult(Path("r"), skills=[SkillInfo("x", Path("r/.claude/skills/x"))])
+    assert [f.message for f in lint(sr, validators="opsward")] == ["no SKILL.md"]
+    assert opsward_validator(SkillInfo("x", Path("x"))) == ["no SKILL.md"]
+
+
+def test_unknown_or_uninstalled_validators_are_refused(monkeypatch):
+    with pytest.raises(ValueError, match="unknown validator"):
+        resolve_validators("opsward,nope")
+    import opsward.lint as mod
+
+    monkeypatch.setitem(mod.VALIDATORS, "skill", (mod.skill_package_validator, lambda: False))
+    with pytest.raises(ValueError, match="not installed"):
+        resolve_validators("skill")
+    assert list(resolve_validators("auto")) == ["opsward"]
+
+
+def test_the_skill_package_validator_composes_skill_validate():
+    pytest.importorskip("skill")
+    found = _findings("python_project", validators="skill")
+    on_skills = [f for f in found if f.path.startswith(".claude/skills/")]
+    assert on_skills and all(f.source == "skill" for f in on_skills)
+
+
+def test_lint_cli_exits_1_on_findings_and_0_when_clean():
+    bad = _lint_cli("tests/fixtures/python_project", "--validators", "opsward")
+    assert bad.returncode == 1 and ".claude/skills/my-skill" in bad.stdout
+    good = _lint_cli("tests/fixtures/bare_project")
+    assert good.returncode == 0 and "clean" in good.stdout
+
+
+def test_lint_cli_json_names_projects_not_paths():
+    done = _lint_cli("tests/fixtures/python_project", "-v", "opsward", "--format", "json")
+    data = json.loads(done.stdout)
+    assert {d["project"] for d in data} == {"python_project"}
+    assert str(FIXTURES) not in done.stdout
+
+
+def test_lint_cli_rejects_an_unknown_validator():
+    done = _lint_cli("tests/fixtures/bare_project", "--validators", "nope")
+    assert done.returncode == 2 and "unknown validator" in done.stderr
+
+
+def test_the_shipped_pre_commit_hooks_and_action_parse():
+    yaml = pytest.importorskip("yaml")
+    hooks = yaml.safe_load((REPO / ".pre-commit-hooks.yaml").read_text())
+    assert {h["id"] for h in hooks} == {"opsward-lint", "opsward-diagnose"}
+    assert all(h["entry"].startswith("opsward ") for h in hooks)
+    action = yaml.safe_load((REPO / "action.yml").read_text())
+    assert action["runs"]["using"] == "composite"
+    run_lines = [s.get("run", "") for s in action["runs"]["steps"]]
+    assert not any("${{" in line for line in run_lines)  # inputs only via env

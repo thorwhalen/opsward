@@ -228,6 +228,34 @@ jobs:
       - run: opsward diagnose . --min-score 60
 ```
 
+Two gates, for two jobs: `diagnose --min-score` is the cheap scored gate, and `lint` is the strict one, pass or fail with no score. `lint` checks every project skill against the agentskills.io spec and the hooks config for shapes Claude Code silently ignores, and exits 1 on any finding:
+
+```bash
+opsward lint .                          # opsward's own spec check, plus skill.validate() when installed
+opsward lint . --validators opsward     # only opsward's check
+pip install 'opsward[lint]'             # adds the `skill` package's validate()
+```
+
+The repo ships a reusable GitHub Action and pre-commit hooks:
+
+```yaml
+# a workflow step, after actions/checkout
+- uses: thorwhalen/opsward@<a release tag>
+  with:
+    min-score: "70"   # "" skips the scored gate
+    lint: "true"
+```
+
+```yaml
+# .pre-commit-config.yaml
+- repo: https://github.com/thorwhalen/opsward
+  rev: <a release tag>
+  hooks:
+    - id: opsward-lint
+    - id: opsward-diagnose
+      args: [--min-score, "70"]
+```
+
 ## Related Work
 
 | Project | Relationship |
