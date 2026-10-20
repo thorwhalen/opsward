@@ -236,6 +236,14 @@ print(
 
 `pip install 'opsward[eval]'` for the paid judge and agent. Without them, `judge_claude_md` defaults to `rubric_judge` (opsward's own rubric, free) and `echo_agent` exercises the golden-task harness without a model.
 
+From the shell, `opsward eval` runs both and exits 0 whenever it ran (a report, never a gate; 2 on a usage error). It finds a repo's golden tasks at `<docs>/evals/golden_tasks.json` (`misc/docs/` for Python, `docs/` for JS/TS) unless `--tasks` names a file:
+
+```bash
+opsward eval .                                   # free: the rubric judge and the echo agent
+opsward eval . --judge anthropic --samples 3     # paid model calls (pip install 'opsward[eval]')
+opsward eval . --tasks evals.json --runs 5 --format json
+```
+
 ## CI Integration
 
 Use opsward in CI to enforce AI setup quality:

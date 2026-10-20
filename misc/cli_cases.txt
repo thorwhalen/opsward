@@ -21,6 +21,7 @@ install-skills --help
 find --help
 fleet --help
 lint --help
+eval --help
 decision --help
 decision new --help
 decision note --help
@@ -39,6 +40,12 @@ fleet -u tests/fixtures
 # installed, which would make the recording depend on the recording machine.
 lint tests/fixtures/python_project -v opsward
 lint tests/fixtures/bare_project --validators opsward
+# `eval` cases pin the free `--judge rubric` (the default): `anthropic` makes paid calls.
+eval tests/fixtures/python_project
+eval tests/fixtures/bare_project --samples 2
+eval tests/fixtures/python_project --tasks tests/fixtures/golden_tasks.json --runs 2
+eval tests/fixtures/python_project --tasks tests/fixtures/golden_tasks.json --format json
+eval tests/fixtures/python_project --judge nope
 # `decision` dry runs print only repo-relative paths and the text; the dated entry itself
 # is not printed, so the note case stays portable across days and machines.
 decision new "Pin the thing" --project-root tests/fixtures/python_project

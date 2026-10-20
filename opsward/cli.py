@@ -594,6 +594,98 @@ def _decisions_dir(project_root: str) -> tuple[Path, Path]:
 
 
 # The SSOT of the CLI surface: a name -> command mapping, with one nested group.
+def eval_(
+    project_root: str,
+    *,
+    judge: str = "rubric",
+    samples: int = 1,
+    tasks: str = "",
+    runs: int = 1,
+    format: str = "text",
+):
+    """Report-only evals of a project's agent setup: an LLM judge of CLAUDE.md, and golden tasks.
+
+    The judge scores CLAUDE.md's subjective dimensions next to the rubric's own score. The
+    golden tasks (a JSON list of {name, prompt, expect, forbid}, by default
+    <docs>/evals/golden_tasks.json) run with and without CLAUDE.md and report the pass-rate
+    delta. --judge rubric is free and deterministic (the rubric judge and an agent that
+    quotes the config: it checks the harness, not a model); --judge anthropic makes paid
+    calls (pip install 'opsward[eval]'). Exits 0 whenever it ran (a report, never a gate);
+    2 only on a usage error.
+
+    :param project_root: the project directory
+    :param judge: 'rubric' (free) or 'anthropic' (paid model calls)
+    :param samples: judge samples per dimension (the median is reported)
+    :param tasks: golden-tasks JSON file (default: <docs>/evals/golden_tasks.json, if present)
+    :param runs: runs per golden task and arm
+    :param format: output format — 'text' or 'json'
+    """
+    from opsward import evals
+
+    if format not in ("text", "json"):
+        print("Error: format must be 'text' or 'json'", file=sys.stderr)
+        sys.exit(2)
+    if judge not in ("rubric", "anthropic"):
+        print("Error: judge must be 'rubric' or 'anthropic'", file=sys.stderr)
+        sys.exit(2)
+    if samples < 1 or runs < 1:
+        print("Error: samples and runs must be at least 1", file=sys.stderr)
+        sys.exit(2)
+    root = Path(project_root).resolve()
+    if not root.is_dir():
+        print(f"Error: {project_root} is not a directory", file=sys.stderr)
+        sys.exit(2)
+    sr = scan(root, claude_config_dir=None)
+    tasks_path = Path(tasks) if tasks else evals.golden_tasks_path(sr)
+    if tasks and not tasks_path.is_file():
+        print(f"Error: {tasks} is not a file", file=sys.stderr)
+        sys.exit(2)
+    try:
+        golden_tasks = (
+            evals.load_golden_tasks(tasks_path) if tasks_path.is_file() else None
+        )
+    except ValueError as e:  # JSONDecodeError is a ValueError
+        print(f"Error: cannot read the golden tasks: {e}", file=sys.stderr)
+        sys.exit(2)
+    if judge == "anthropic":
+        try:
+            the_judge, agent = evals.anthropic_judge(), evals.anthropic_agent()
+        except Exception as e:  # no SDK (ImportError) or no API key (the SDK's own error)
+            print(f"Error: cannot start the paid judge: {e}", file=sys.stderr)
+            sys.exit(2)
+    else:
+        the_judge, agent = evals.rubric_judge, evals.echo_agent
+
+    config = sr.claude_md_content
+    judged = (
+        evals.judge_claude_md(config, judge=the_judge, samples=samples)
+        if sr.claude_md_path
+        else None
+    )
+    golden = (
+        evals.run_golden_tasks(golden_tasks, agent=agent, config=config, runs=runs)
+        if golden_tasks is not None
+        else None
+    )
+    if format == "json":
+        out = {
+            "project": root.name,
+            "judge": judged.to_dict() if judged else None,
+            "golden": golden.to_dict() if golden else None,
+        }
+        print(json.dumps(out, indent=2))
+        return
+    print(f"{root.name}: evals (report only)")
+    print(judged if judged else "Judge: no CLAUDE.md to judge")
+    if golden is not None:
+        print(golden)
+    else:
+        print(
+            f"Golden tasks: none (add {evals.DFLT_GOLDEN_TASKS_RELPATH} under the "
+            "docs folder, or pass --tasks)"
+        )
+
+
 _dispatch_funcs = {
     "diagnose": diagnose,
     "generate": generate,
@@ -603,5 +695,6 @@ _dispatch_funcs = {
     "find": find,
     "fleet": fleet,
     "lint": lint,
+    "eval": eval_,
     "decision": [new, note],
 }

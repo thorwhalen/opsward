@@ -374,6 +374,31 @@ def anthropic_agent(
     return agent
 
 
+#: Where a repo keeps its golden tasks, relative to its docs folder
+#: (:func:`opsward.scan.docs_dir_for`: ``misc/docs`` for Python, ``docs`` for JS/TS).
+DFLT_GOLDEN_TASKS_RELPATH = "evals/golden_tasks.json"
+
+
+def golden_tasks_path(scan_result) -> Path:
+    """The default golden-tasks file of a scanned project (it may not exist).
+
+    >>> import tempfile
+    >>> from opsward.scan import scan
+    >>> root = Path(tempfile.mkdtemp())
+    >>> _ = (root / "pyproject.toml").write_text("")
+    >>> golden_tasks_path(scan(root, claude_config_dir=None)).relative_to(root).as_posix()
+    'misc/docs/evals/golden_tasks.json'
+    """
+    from opsward.scan import docs_dir_for
+
+    docs_dir = docs_dir_for(
+        scan_result.project_root,
+        scan_result.project_type,
+        scan_result.docs_guide_path,
+    )
+    return docs_dir / DFLT_GOLDEN_TASKS_RELPATH
+
+
 def load_golden_tasks(path: str | Path) -> list[GoldenTask]:
     """Tasks from a JSON list of ``{"name", "prompt", "expect": [...], "forbid": [...]}``."""
     name = Path(path).name

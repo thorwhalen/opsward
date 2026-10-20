@@ -1,0 +1,4 @@
+[
+  {"name": "formatter", "prompt": "Format this module.", "expect": ["black"]},
+  {"name": "no-tabs", "prompt": "Indent this block.", "forbid": ["\\t"]}
+]
