@@ -158,7 +158,8 @@ Show which agent hosts find project instructions, and how renders drift from AGE
 
 One row per host (claude, codex, copilot, cursor, …) with how it is covered:
 symlink, import (an @AGENTS.md shim), native (reads AGENTS.md itself), copy, rules,
-or none. Then every section where a render differs from AGENTS.md. Report-only.
+or none. Then every section where a render differs from AGENTS.md, and (with
+opsward[lint]) every project skill whose render drops fields. Report-only.
 
 * **Parameters:**
   * **project_roots** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – one or more project directories (default: current dir)

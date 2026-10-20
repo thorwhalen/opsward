@@ -24,6 +24,14 @@ normalised heading):
 Scoped-rule folders (`.cursor/rules/`, `.windsurf/rules/`, `.clinerules/`) count
 towards coverage but are not compared: they are not renders of one brief.
 
+A fourth kind, `lossy`, is about skills rather than the brief: a project skill
+rendered for a host whose format drops some of its fields (`allowed-tools`,
+`license`, bundled resources). Where each host installs skills and what its format
+drops is the `skill` package’s registry (`skill.install.agent_targets`,
+`skill.translate.lost_fields`); `HostSpec.skill_target` points into it, so the two
+registries are joined, not copied. `check_portability` reports it when `skill` is
+installed (`pip install 'opsward[lint]'`); it is never scored.
+
 Files that are only coverage signals (`CONVENTIONS.md` is often a contributor doc, not a
 render) are compared only when they import or link the canonical.
 
@@ -42,32 +50,34 @@ render) are compared only when they import or link the canonical.
 
 ### Module Attributes
 
-| [`DRIFT_KINDS`](#opsward.portability.DRIFT_KINDS)   | The drift finding kinds, in report order (see the module docstring).   |
-|----------------------------------------------------------------|------------------------------------------------------------------------|
+| [`DRIFT_KINDS`](#opsward.portability.DRIFT_KINDS)   | The drift finding kinds, in report order (see the module docstring).               |
+|----------------------------------------------------------------|------------------------------------------------------------------------------------|
+| [`LOSSY`](#opsward.portability.LOSSY)         | A skill rendered in a format that drops some of its fields (reported, not scored). |
 
 ### Functions
 
-| [`analyze`](#opsward.portability.analyze)(canonical, host_files, \*[, hosts])   | Coverage and drift of *host_files* against the *canonical* `AGENTS.md` text.   |
-|------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------|
-| [`as_read`](#opsward.portability.as_read)(render, canonical)                    | *render* as its host reads it: an `@AGENTS.md` import replaced by *canonical*. |
-| [`check_portability`](#opsward.portability.check_portability)(root, \*[, hosts])          | `analyze` over what is on disk under *root*: the library entry point.          |
-| [`has_canonical`](#opsward.portability.has_canonical)(canonical)                      | Whether an `AGENTS.md` text says anything (a BOM or whitespace does not).      |
-| [`read_host_files`](#opsward.portability.read_host_files)(root, \*[, hosts])            | Every host instruction file and rule folder present under *root*.              |
-| [`summarize`](#opsward.portability.summarize)(report)                             | One diagnose suggestion per drifting render.                                   |
+| [`analyze`](#opsward.portability.analyze)(canonical, host_files, \*[, hosts])   | Coverage and drift of *host_files* against the *canonical* `AGENTS.md` text.         |
+|------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|
+| [`as_read`](#opsward.portability.as_read)(render, canonical)                    | *render* as its host reads it: an `@AGENTS.md` import replaced by *canonical*.       |
+| [`check_portability`](#opsward.portability.check_portability)(root, \*[, hosts])          | `analyze` over what is on disk under *root*, plus `lossy` skill renders.             |
+| [`has_canonical`](#opsward.portability.has_canonical)(canonical)                      | Whether an `AGENTS.md` text says anything (a BOM or whitespace does not).            |
+| [`lossy_findings`](#opsward.portability.lossy_findings)(root, \*[, hosts])             | One `lossy` finding per project skill rendered for a host whose format drops fields. |
+| [`read_host_files`](#opsward.portability.read_host_files)(root, \*[, hosts])            | Every host instruction file and rule folder present under *root*.                    |
+| [`summarize`](#opsward.portability.summarize)(report)                             | One diagnose suggestion per drifting render.                                         |
 
 ### Classes
 
-| [`DriftFinding`](#opsward.portability.DriftFinding)(kind, path, section)        | One section that differs between `AGENTS.md` and a render.                        |
-|-------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------|
-| [`HostFile`](#opsward.portability.HostFile)(path[, content, ...])           | One host instruction file (or rule folder) as found on disk.                      |
-| [`HostSpec`](#opsward.portability.HostSpec)(name[, instruction_files, ...]) | Where one agent host looks for project instructions (research table, opsward#15). |
-| [`PortabilityReport`](#opsward.portability.PortabilityReport)([coverage, findings])  | Host coverage (host -> relation, `native` or `none`) and drift findings.          |
+| [`DriftFinding`](#opsward.portability.DriftFinding)(kind, path, section[, lost])   | One section that differs between `AGENTS.md` and a render.                        |
+|----------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------|
+| [`HostFile`](#opsward.portability.HostFile)(path[, content, ...])              | One host instruction file (or rule folder) as found on disk.                      |
+| [`HostSpec`](#opsward.portability.HostSpec)(name[, instruction_files, ...])    | Where one agent host looks for project instructions (research table, opsward#15). |
+| [`PortabilityReport`](#opsward.portability.PortabilityReport)([coverage, findings])     | Host coverage (host -> relation, `native` or `none`) and drift findings.          |
 
 ### opsward.portability.DRIFT_KINDS *= ('stale', 'diverged', 'host_only')*
 
 The drift finding kinds, in report order (see the module docstring).
 
-### *class* opsward.portability.DriftFinding(kind, path, section)
+### *class* opsward.portability.DriftFinding(kind, path, section, lost=())
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
@@ -83,11 +93,15 @@ One host instruction file (or rule folder) as found on disk.
 
 `symlink`, `import`, `rules` or `copy` (see the module docstring).
 
-### *class* opsward.portability.HostSpec(name, instruction_files=(), rule_dirs=(), reads_agents_md=False, compared=True)
+### *class* opsward.portability.HostSpec(name, instruction_files=(), rule_dirs=(), reads_agents_md=False, compared=True, skill_target=None)
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
 Where one agent host looks for project instructions (research table, opsward#15).
+
+### opsward.portability.LOSSY *= 'lossy'*
+
+A skill rendered in a format that drops some of its fields (reported, not scored).
 
 ### *class* opsward.portability.PortabilityReport(coverage=dict(), findings=list())
 
@@ -99,7 +113,7 @@ Host coverage (host -> relation, `native` or `none`) and drift findings.
 
 Hosts that find project instructions, in `AGENT_HOSTS` order.
 
-### opsward.portability.analyze(canonical, host_files, , hosts={'aider': HostSpec(name='aider', instruction_files=('CONVENTIONS.md',), rule_dirs=(), reads_agents_md=False, compared=False), 'claude': HostSpec(name='claude', instruction_files=('CLAUDE.md', '.claude/CLAUDE.md'), rule_dirs=('.claude/rules',), reads_agents_md=False, compared=True), 'cline': HostSpec(name='cline', instruction_files=('.clinerules',), rule_dirs=('.clinerules',), reads_agents_md=True, compared=True), 'codex': HostSpec(name='codex', instruction_files=(), rule_dirs=(), reads_agents_md=True, compared=True), 'copilot': HostSpec(name='copilot', instruction_files=('.github/copilot-instructions.md',), rule_dirs=('.github/instructions',), reads_agents_md=True, compared=True), 'cursor': HostSpec(name='cursor', instruction_files=('.cursorrules',), rule_dirs=('.cursor/rules',), reads_agents_md=True, compared=True), 'gemini': HostSpec(name='gemini', instruction_files=('GEMINI.md',), rule_dirs=(), reads_agents_md=False, compared=True), 'windsurf': HostSpec(name='windsurf', instruction_files=('.windsurfrules', '.windsurfrules.md'), rule_dirs=('.windsurf/rules',), reads_agents_md=False, compared=True), 'zed': HostSpec(name='zed', instruction_files=('.rules',), rule_dirs=(), reads_agents_md=True, compared=True)})
+### opsward.portability.analyze(canonical, host_files, , hosts={'aider': HostSpec(name='aider', instruction_files=('CONVENTIONS.md',), rule_dirs=(), reads_agents_md=False, compared=False, skill_target=None), 'claude': HostSpec(name='claude', instruction_files=('CLAUDE.md', '.claude/CLAUDE.md'), rule_dirs=('.claude/rules',), reads_agents_md=False, compared=True, skill_target='claude-code'), 'cline': HostSpec(name='cline', instruction_files=('.clinerules',), rule_dirs=('.clinerules',), reads_agents_md=True, compared=True, skill_target='cline'), 'codex': HostSpec(name='codex', instruction_files=(), rule_dirs=(), reads_agents_md=True, compared=True, skill_target=None), 'copilot': HostSpec(name='copilot', instruction_files=('.github/copilot-instructions.md',), rule_dirs=('.github/instructions',), reads_agents_md=True, compared=True, skill_target='copilot'), 'cursor': HostSpec(name='cursor', instruction_files=('.cursorrules',), rule_dirs=('.cursor/rules',), reads_agents_md=True, compared=True, skill_target='cursor'), 'gemini': HostSpec(name='gemini', instruction_files=('GEMINI.md',), rule_dirs=(), reads_agents_md=False, compared=True, skill_target='gemini'), 'windsurf': HostSpec(name='windsurf', instruction_files=('.windsurfrules', '.windsurfrules.md'), rule_dirs=('.windsurf/rules',), reads_agents_md=False, compared=True, skill_target='windsurf'), 'zed': HostSpec(name='zed', instruction_files=('.rules',), rule_dirs=(), reads_agents_md=True, compared=True, skill_target=None)})
 
 Coverage and drift of *host_files* against the *canonical* `AGENTS.md` text. Pure.
 
@@ -128,9 +142,11 @@ scoring a shim judges what the agent actually sees, not the three-line file.
 * **Return type:**
   [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 
-### opsward.portability.check_portability(root, , hosts={'aider': HostSpec(name='aider', instruction_files=('CONVENTIONS.md',), rule_dirs=(), reads_agents_md=False, compared=False), 'claude': HostSpec(name='claude', instruction_files=('CLAUDE.md', '.claude/CLAUDE.md'), rule_dirs=('.claude/rules',), reads_agents_md=False, compared=True), 'cline': HostSpec(name='cline', instruction_files=('.clinerules',), rule_dirs=('.clinerules',), reads_agents_md=True, compared=True), 'codex': HostSpec(name='codex', instruction_files=(), rule_dirs=(), reads_agents_md=True, compared=True), 'copilot': HostSpec(name='copilot', instruction_files=('.github/copilot-instructions.md',), rule_dirs=('.github/instructions',), reads_agents_md=True, compared=True), 'cursor': HostSpec(name='cursor', instruction_files=('.cursorrules',), rule_dirs=('.cursor/rules',), reads_agents_md=True, compared=True), 'gemini': HostSpec(name='gemini', instruction_files=('GEMINI.md',), rule_dirs=(), reads_agents_md=False, compared=True), 'windsurf': HostSpec(name='windsurf', instruction_files=('.windsurfrules', '.windsurfrules.md'), rule_dirs=('.windsurf/rules',), reads_agents_md=False, compared=True), 'zed': HostSpec(name='zed', instruction_files=('.rules',), rule_dirs=(), reads_agents_md=True, compared=True)})
+### opsward.portability.check_portability(root, , hosts={'aider': HostSpec(name='aider', instruction_files=('CONVENTIONS.md',), rule_dirs=(), reads_agents_md=False, compared=False, skill_target=None), 'claude': HostSpec(name='claude', instruction_files=('CLAUDE.md', '.claude/CLAUDE.md'), rule_dirs=('.claude/rules',), reads_agents_md=False, compared=True, skill_target='claude-code'), 'cline': HostSpec(name='cline', instruction_files=('.clinerules',), rule_dirs=('.clinerules',), reads_agents_md=True, compared=True, skill_target='cline'), 'codex': HostSpec(name='codex', instruction_files=(), rule_dirs=(), reads_agents_md=True, compared=True, skill_target=None), 'copilot': HostSpec(name='copilot', instruction_files=('.github/copilot-instructions.md',), rule_dirs=('.github/instructions',), reads_agents_md=True, compared=True, skill_target='copilot'), 'cursor': HostSpec(name='cursor', instruction_files=('.cursorrules',), rule_dirs=('.cursor/rules',), reads_agents_md=True, compared=True, skill_target='cursor'), 'gemini': HostSpec(name='gemini', instruction_files=('GEMINI.md',), rule_dirs=(), reads_agents_md=False, compared=True, skill_target='gemini'), 'windsurf': HostSpec(name='windsurf', instruction_files=('.windsurfrules', '.windsurfrules.md'), rule_dirs=('.windsurf/rules',), reads_agents_md=False, compared=True, skill_target='windsurf'), 'zed': HostSpec(name='zed', instruction_files=('.rules',), rule_dirs=(), reads_agents_md=True, compared=True, skill_target=None)})
 
-`analyze` over what is on disk under *root*: the library entry point.
+`analyze` over what is on disk under *root*, plus `lossy` skill renders.
+
+The library entry point. Read-only.
 
 * **Return type:**
   [`PortabilityReport`](#opsward.portability.PortabilityReport)
@@ -142,7 +158,19 @@ Whether an `AGENTS.md` text says anything (a BOM or whitespace does not).
 * **Return type:**
   [`bool`](https://docs.python.org/3/builtins/functions.html#bool)
 
-### opsward.portability.read_host_files(root, , hosts={'aider': HostSpec(name='aider', instruction_files=('CONVENTIONS.md',), rule_dirs=(), reads_agents_md=False, compared=False), 'claude': HostSpec(name='claude', instruction_files=('CLAUDE.md', '.claude/CLAUDE.md'), rule_dirs=('.claude/rules',), reads_agents_md=False, compared=True), 'cline': HostSpec(name='cline', instruction_files=('.clinerules',), rule_dirs=('.clinerules',), reads_agents_md=True, compared=True), 'codex': HostSpec(name='codex', instruction_files=(), rule_dirs=(), reads_agents_md=True, compared=True), 'copilot': HostSpec(name='copilot', instruction_files=('.github/copilot-instructions.md',), rule_dirs=('.github/instructions',), reads_agents_md=True, compared=True), 'cursor': HostSpec(name='cursor', instruction_files=('.cursorrules',), rule_dirs=('.cursor/rules',), reads_agents_md=True, compared=True), 'gemini': HostSpec(name='gemini', instruction_files=('GEMINI.md',), rule_dirs=(), reads_agents_md=False, compared=True), 'windsurf': HostSpec(name='windsurf', instruction_files=('.windsurfrules', '.windsurfrules.md'), rule_dirs=('.windsurf/rules',), reads_agents_md=False, compared=True), 'zed': HostSpec(name='zed', instruction_files=('.rules',), rule_dirs=(), reads_agents_md=True, compared=True)})
+### opsward.portability.lossy_findings(root, , hosts={'aider': HostSpec(name='aider', instruction_files=('CONVENTIONS.md',), rule_dirs=(), reads_agents_md=False, compared=False, skill_target=None), 'claude': HostSpec(name='claude', instruction_files=('CLAUDE.md', '.claude/CLAUDE.md'), rule_dirs=('.claude/rules',), reads_agents_md=False, compared=True, skill_target='claude-code'), 'cline': HostSpec(name='cline', instruction_files=('.clinerules',), rule_dirs=('.clinerules',), reads_agents_md=True, compared=True, skill_target='cline'), 'codex': HostSpec(name='codex', instruction_files=(), rule_dirs=(), reads_agents_md=True, compared=True, skill_target=None), 'copilot': HostSpec(name='copilot', instruction_files=('.github/copilot-instructions.md',), rule_dirs=('.github/instructions',), reads_agents_md=True, compared=True, skill_target='copilot'), 'cursor': HostSpec(name='cursor', instruction_files=('.cursorrules',), rule_dirs=('.cursor/rules',), reads_agents_md=True, compared=True, skill_target='cursor'), 'gemini': HostSpec(name='gemini', instruction_files=('GEMINI.md',), rule_dirs=(), reads_agents_md=False, compared=True, skill_target='gemini'), 'windsurf': HostSpec(name='windsurf', instruction_files=('.windsurfrules', '.windsurfrules.md'), rule_dirs=('.windsurf/rules',), reads_agents_md=False, compared=True, skill_target='windsurf'), 'zed': HostSpec(name='zed', instruction_files=('.rules',), rule_dirs=(), reads_agents_md=True, compared=True, skill_target=None)})
+
+One `lossy` finding per project skill rendered for a host whose format drops fields.
+
+A skill counts as rendered for a host when its translated file exists where the
+`skill` package installs it (or, for a shared file such as `GEMINI.md`, when the
+file holds the skill’s section). Yields nothing when `skill` is not installed.
+Read-only.
+
+* **Return type:**
+  [`Iterator`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator)[[`DriftFinding`](#opsward.portability.DriftFinding)]
+
+### opsward.portability.read_host_files(root, , hosts={'aider': HostSpec(name='aider', instruction_files=('CONVENTIONS.md',), rule_dirs=(), reads_agents_md=False, compared=False, skill_target=None), 'claude': HostSpec(name='claude', instruction_files=('CLAUDE.md', '.claude/CLAUDE.md'), rule_dirs=('.claude/rules',), reads_agents_md=False, compared=True, skill_target='claude-code'), 'cline': HostSpec(name='cline', instruction_files=('.clinerules',), rule_dirs=('.clinerules',), reads_agents_md=True, compared=True, skill_target='cline'), 'codex': HostSpec(name='codex', instruction_files=(), rule_dirs=(), reads_agents_md=True, compared=True, skill_target=None), 'copilot': HostSpec(name='copilot', instruction_files=('.github/copilot-instructions.md',), rule_dirs=('.github/instructions',), reads_agents_md=True, compared=True, skill_target='copilot'), 'cursor': HostSpec(name='cursor', instruction_files=('.cursorrules',), rule_dirs=('.cursor/rules',), reads_agents_md=True, compared=True, skill_target='cursor'), 'gemini': HostSpec(name='gemini', instruction_files=('GEMINI.md',), rule_dirs=(), reads_agents_md=False, compared=True, skill_target='gemini'), 'windsurf': HostSpec(name='windsurf', instruction_files=('.windsurfrules', '.windsurfrules.md'), rule_dirs=('.windsurf/rules',), reads_agents_md=False, compared=True, skill_target='windsurf'), 'zed': HostSpec(name='zed', instruction_files=('.rules',), rule_dirs=(), reads_agents_md=True, compared=True, skill_target=None)})
 
 Every host instruction file and rule folder present under *root*. Read-only.
 

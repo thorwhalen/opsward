@@ -5,19 +5,17 @@ orphan: true
 
 # About this build
 
-This documentation was built on **2026-10-20 19:22 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/08b6cf9c5cf5e12a2f6c4f08d8ebfb2863c2a518"><code>08b6cf9</code></a> on branch <code>main</code>, for **opsward 0.0.37** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-10-20 19:32 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/9ef6877c9473b0770714bc0b2989fce54349c53c"><code>9ef6877</code></a> on branch <code>main</code>, for **opsward 0.0.38** (from <code>pyproject.toml</code>).
 
-:::{warning}
-The documentation and the package may be misaligned:
-
-- The documented version (0.0.37) is ahead of the latest release on PyPI (0.0.36): these docs describe unreleased code.
+:::{note}
+Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
 :::
 
 ## Source
 
 | | |
 |---|---|
-| Commit | <a href="https://github.com/thorwhalen/opsward/commit/08b6cf9c5cf5e12a2f6c4f08d8ebfb2863c2a518"><code>08b6cf9c5cf5e12a2f6c4f08d8ebfb2863c2a518</code></a> |
+| Commit | <a href="https://github.com/thorwhalen/opsward/commit/9ef6877c9473b0770714bc0b2989fce54349c53c"><code>9ef6877c9473b0770714bc0b2989fce54349c53c</code></a> |
 | Branch | <code>main</code> |
 | Tags at this commit | none |
 | Working tree | clean |
@@ -28,9 +26,9 @@ The documentation and the package may be misaligned:
 | | |
 |---|---|
 | Repository | <code>thorwhalen/opsward</code> |
-| Run | <a href="https://github.com/thorwhalen/opsward/actions/runs/39482625102">39482625102</a> |
+| Run | <a href="https://github.com/thorwhalen/opsward/actions/runs/39484103168">39484103168</a> |
 | Ref | <code>refs/heads/main</code> |
-| Event commit | <code>08b6cf9c5cf5e12a2f6c4f08d8ebfb2863c2a518</code> (in the history of the built commit) |
+| Event commit | <code>9ef6877c9473b0770714bc0b2989fce54349c53c</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -55,13 +53,13 @@ The documentation and the package may be misaligned:
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/opsward/0.0.36/">0.0.36</a>, older than the documented version (0.0.37).
+Latest release: <a href="https://pypi.org/project/opsward/0.0.38/">0.0.38</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/opsward && cd opsward
-git checkout 08b6cf9c5cf5e12a2f6c4f08d8ebfb2863c2a518
+git checkout 9ef6877c9473b0770714bc0b2989fce54349c53c
 pip install "epythet==0.2.22"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
