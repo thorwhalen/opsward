@@ -105,7 +105,9 @@ def _check_claude_md_size(
     from opsward.portability import as_read
 
     overrun = claude_md_size_overrun(
-        as_read(sr.claude_md_content, sr.agents_md_content), max_chars=max_chars, docs_dir=docs_dir_hint(sr)
+        as_read(sr.claude_md_content, sr.agents_md_content),
+        max_chars=max_chars,
+        docs_dir=docs_dir_hint(sr),
     )
     if overrun is not None:
         yield MaintenanceSuggestion(

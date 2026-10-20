@@ -515,7 +515,9 @@ def portability(
         if format == "json":
             continue
         width = max(map(len, report.coverage), default=0)
-        print(f"{root.name}: {len(report.covered)}/{len(report.coverage)} host(s) covered")
+        print(
+            f"{root.name}: {len(report.covered)}/{len(report.coverage)} host(s) covered"
+        )
         for host, relation in report.coverage.items():
             print(f"  {host:<{width}}  {relation}")
         if report.findings:

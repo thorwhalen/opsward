@@ -224,10 +224,7 @@ def summarize(report: PortabilityReport) -> Iterator[str]:
     for f in report.findings:
         by_path.setdefault(f.path, []).append(f)
     for path, findings in by_path.items():
-        counts = {
-            kind: sum(f.kind == kind for f in findings)
-            for kind in DRIFT_KINDS
-        }
+        counts = {kind: sum(f.kind == kind for f in findings) for kind in DRIFT_KINDS}
         parts = [f"{n} {kind.replace('_', '-')}" for kind, n in counts.items() if n]
         yield (
             f"{path} drifts from AGENTS.md ({', '.join(parts)} section(s)) — "
