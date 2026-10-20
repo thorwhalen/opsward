@@ -81,7 +81,7 @@ def diagnose(
     scores: list[ComponentScore] = []
     missing: list[str] = []
     suggestions: list[str] = []
-    from opsward.portability import analyze, as_read
+    from opsward.portability import analyze, as_read, has_canonical
 
     # CLAUDE.md as Claude reads it: an `@AGENTS.md` shim is judged with its import inlined
     read = replace(
@@ -125,15 +125,14 @@ def diagnose(
 
     # 6. Portability: AGENTS.md↔render drift (coverage itself is reported, not scored)
     portability = analyze(scan_result.agents_md_content, scan_result.host_files)
-    scores.append(
-        _score_portability(portability, applies=bool(scan_result.agents_md_content))
-    )
+    has_agents_md = has_canonical(scan_result.agents_md_content)
+    scores.append(_score_portability(portability, applies=has_agents_md))
     _check_agents_md(scan_result, portability, suggestions=suggestions)
 
     # Weighted overall
     score_map = {s.name: s.score for s in scores}
     weights = dict(_OVERALL_WEIGHTS)
-    if not scan_result.agents_md_content:
+    if not has_agents_md:
         weights[_PORTABILITY_FALLBACK] += weights.pop("Portability")
     weighted = sum(score_map.get(name, 0) * weight for name, weight in weights.items())
 
@@ -1171,7 +1170,9 @@ def _check_agents_md(
     sr: ScanResult, report: "PortabilityReport", *, suggestions: list[str]
 ) -> None:
     """Advisory check for AGENTS.md (cross-platform agent instructions)."""
-    if not sr.agents_md_content:
+    from opsward.portability import has_canonical
+
+    if not has_canonical(sr.agents_md_content):
         if sr.claude_md_content:
             suggestions.append(
                 "No AGENTS.md found — run `opsward generate --agents-md` to create "

@@ -257,3 +257,11 @@ def test_without_agents_md_the_overall_score_is_unchanged(tmp_path):
     assert report.weighted_score == pytest.approx(
         sum(by_name[k] * w for k, w in old.items())
     )
+
+
+def test_a_blank_agents_md_counts_as_absent(tmp_path):
+    _write(tmp_path, "AGENTS.md", "﻿   \n\n")
+    _write(tmp_path, "CLAUDE.md", "# P\n\n## Build\n\npytest\n\n## Notes\n\nx\n")
+    score, report = _portability(tmp_path)
+    assert score.score == 100 and report.portability.findings == []
+    assert report.portability.coverage["codex"] == "none"

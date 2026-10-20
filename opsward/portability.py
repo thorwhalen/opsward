@@ -190,7 +190,11 @@ def analyze(
     *,
     hosts: Mapping[str, HostSpec] = AGENT_HOSTS,
 ) -> PortabilityReport:
-    """Coverage and drift of *host_files* against the *canonical* ``AGENTS.md`` text. Pure."""
+    """Coverage and drift of *host_files* against the *canonical* ``AGENTS.md`` text. Pure.
+
+    A blank canonical (empty, whitespace or a BOM) counts as absent.
+    """
+    canonical = canonical if has_canonical(canonical) else ""
     report = PortabilityReport()
     for spec in hosts.values():
         relations = [
@@ -204,6 +208,11 @@ def analyze(
         for hf in host_files.values():
             report.findings.extend(_drift(canonical, hf))
     return report
+
+
+def has_canonical(canonical: str) -> bool:
+    """Whether an ``AGENTS.md`` text says anything (a BOM or whitespace does not)."""
+    return bool(canonical.lstrip("\ufeff").strip())
 
 
 def check_portability(
