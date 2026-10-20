@@ -187,7 +187,11 @@ class PortabilityReport:
         return {
             "coverage": dict(self.coverage),
             "findings": [
-                {k: list(v) if k == "lost" else v for k, v in vars(f).items() if v}
+                {
+                    k: list(v) if k == "lost" else v
+                    for k, v in vars(f).items()
+                    if k != "lost" or v
+                }
                 for f in self.findings
             ],
         }
@@ -307,7 +311,9 @@ def lossy_findings(
             skill = Skill.from_path(skill_dir)
         except Exception:  # a malformed SKILL.md is lint's business, not drift's
             continue
-        name = skill.meta.name or skill_dir.name
+        name = str(skill.meta.name or skill_dir.name)
+        if Path(name).name != name or name in (".", ".."):
+            continue  # a name that is not one path component would leave the repo
         for target in targets:
             dest = target.format_project_path(root, name)
             if dest is None or not _renders(dest, name, appends=target.appends):
@@ -319,7 +325,8 @@ def lossy_findings(
 
 def _renders(dest: Path, name: str, *, appends: bool) -> bool:
     try:
-        if not dest.is_file():
+        # the installer never appends through a symlink (GEMINI.md -> AGENTS.md)
+        if not dest.is_file() or (appends and dest.is_symlink()):
             return False
         return not appends or f"<!-- skill:{name} -->" in read_text_safe(dest)
     except OSError:

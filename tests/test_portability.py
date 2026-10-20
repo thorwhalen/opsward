@@ -305,3 +305,33 @@ def test_hosts_and_the_skill_registry_are_joined_not_copied():
     assert linked <= set(agent_targets), linked - set(agent_targets)
     # every host the skill package can install into is a host opsward knows
     assert set(agent_targets) <= linked, set(agent_targets) - linked
+
+
+def test_lossy_review_cases(tmp_path):
+    _needs_skill_losses()
+    import subprocess
+    import sys
+
+    skill_md = "---\nname: {}\ndescription: d\nlicense: MIT\n---\n\nHi.\n"
+    _write(tmp_path, ".claude/skills/greet/SKILL.md", skill_md.format("greet"))
+    _write(tmp_path, ".claude/skills/evil/SKILL.md", skill_md.format("../../../outside"))
+    _write(tmp_path, ".cursor/rules/greet.mdc", "x")
+    _write(tmp_path, "outside.mdc", "x")
+    _write(tmp_path, "AGENTS.md", "# A\n<!-- skill:greet -->\n")
+    (tmp_path / "GEMINI.md").symlink_to("AGENTS.md")
+    report = portability(tmp_path)
+    assert [f.path for f in report.findings if f.kind == "lossy"] == [".cursor/rules/greet.mdc"]
+    out = subprocess.run(
+        [sys.executable, "-m", "opsward", "portability", str(tmp_path)],
+        capture_output=True, text=True,
+    ).stdout
+    assert "Lossy skill renders (1):" in out and "AGENTS.md drift" not in out
+
+
+def test_to_dict_keeps_an_empty_section():
+    from opsward.portability import DriftFinding, PortabilityReport
+
+    report = PortabilityReport(findings=[DriftFinding("host_only", "CLAUDE.md", "")])
+    assert report.to_dict()["findings"] == [
+        {"kind": "host_only", "path": "CLAUDE.md", "section": ""}
+    ]
