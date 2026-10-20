@@ -112,6 +112,8 @@ def diagnose(
         score_map.get(name, 0) * weight for name, weight in _OVERALL_WEIGHTS.items()
     )
 
+    from opsward import security  # advisory dimension: reported, never weighted
+
     return DiagnosisReport(
         project_root=scan_result.project_root,
         project_type=scan_result.project_type,
@@ -119,6 +121,7 @@ def diagnose(
         missing_items=missing,
         suggestions=suggestions,
         weighted_score=weighted,
+        advisories=list(security.security_advisories(scan_result)),
     )
 
 
