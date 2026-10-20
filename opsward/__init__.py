@@ -19,3 +19,4 @@ from opsward.maintain import maintain
 from opsward.recommend import recommend_skills, SkillRecommendation
 from opsward.discover import find_assets
 from opsward.fleet import FleetReport, fleet, git_roots_under
+from opsward.portability import AGENT_HOSTS, PortabilityReport, check_portability

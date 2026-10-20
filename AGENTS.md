@@ -24,6 +24,7 @@ pytest --doctest-modules opsward/   # doctests embedded in the package
   - `score.py` — quality scoring; rubric is hardcoded constants (`_OVERALL_WEIGHTS`, `_*_MAX`)
   - `generate.py` — template rendering + file generation (never overwrites; dry-run by default)
   - `maintain.py` — staleness / drift detection
+  - `portability.py` — which hosts a repo satisfies; AGENTS.md↔render drift (linter, report-only)
   - `recommend.py` — tech-stack → curated ecosystem-skill recommendations
   - `cli.py` / `__main__.py` — `cw` dispatch (surface pinned by `tests/test_cli_parity.py`)
   - `base.py` — dataclasses (`ScanResult`, `DiagnosisReport`, `ComponentScore`, …)

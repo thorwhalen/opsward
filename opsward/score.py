@@ -1110,16 +1110,17 @@ def _check_agents_md(sr: ScanResult, *, suggestions: list[str]) -> None:
             )
         return
 
-    # If both exist, check for basic consistency
-    if sr.claude_md_content and sr.agents_md_content:
-        # Check that AGENTS.md has build/test commands if CLAUDE.md does
-        claude_lower = sr.claude_md_content.lower()
-        agents_lower = sr.agents_md_content.lower()
-        if "```" in claude_lower and "```" not in agents_lower:
-            suggestions.append(
-                "AGENTS.md has no code blocks but CLAUDE.md does — "
-                "consider syncing build/test commands"
-            )
+    # Canonical↔render drift across every host's file (opsward#15)
+    from opsward.portability import analyze, summarize
+
+    report = analyze(sr.agents_md_content, sr.host_files)
+    claude = sr.host_files.get("CLAUDE.md")
+    if claude is not None and claude.relation == "copy":
+        suggestions.append(
+            "CLAUDE.md does not import AGENTS.md — make it a thin shim "
+            "(`@AGENTS.md` plus Claude-only deltas) so the two cannot drift"
+        )
+    suggestions.extend(summarize(report))
 
 
 def _find_section(content: str, heading_keywords: Sequence[str]) -> str:
