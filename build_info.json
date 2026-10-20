@@ -1,32 +1,32 @@
 {
   "schema_version": 1,
-  "built_at": "2026-10-20T16:39:54Z",
+  "built_at": "2026-10-20T16:42:52Z",
   "package": {
     "name": "opsward",
-    "version": "0.0.30",
+    "version": "0.0.31",
     "display_name": "opsward",
     "source": "pyproject.toml"
   },
   "git": {
     "available": true,
-    "commit": "6d7e1b4dccc6b48fc67e74f0fecb8c525d3a8b75",
-    "short_commit": "6d7e1b4",
+    "commit": "18da53908c85b10119a6e5b4dc1535c55bd28ffb",
+    "short_commit": "18da539",
     "branch": "main",
     "tags": [],
     "dirty": false,
     "remote_url": "https://github.com/thorwhalen/opsward",
-    "commit_url": "https://github.com/thorwhalen/opsward/commit/6d7e1b4dccc6b48fc67e74f0fecb8c525d3a8b75",
+    "commit_url": "https://github.com/thorwhalen/opsward/commit/18da53908c85b10119a6e5b4dc1535c55bd28ffb",
     "error": null
   },
   "ci": {
     "provider": "github",
     "repository": "thorwhalen/opsward",
-    "sha": "6d7e1b4dccc6b48fc67e74f0fecb8c525d3a8b75",
+    "sha": "18da53908c85b10119a6e5b4dc1535c55bd28ffb",
     "sha_in_history": true,
     "ref": "refs/heads/main",
     "ref_name": "main",
-    "run_id": "39459176821",
-    "run_url": "https://github.com/thorwhalen/opsward/actions/runs/39459176821",
+    "run_id": "39459633460",
+    "run_url": "https://github.com/thorwhalen/opsward/actions/runs/39459633460",
     "server_url": "https://github.com"
   },
   "tools": {
@@ -60,11 +60,11 @@
   },
   "pypi": {
     "checked": true,
-    "latest": "0.0.30",
+    "latest": "0.0.31",
     "relation": "same",
     "error": null
   },
-  "reproduce": "git clone https://github.com/thorwhalen/opsward && cd opsward\ngit checkout 6d7e1b4dccc6b48fc67e74f0fecb8c525d3a8b75\npip install \"epythet==0.2.22\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
+  "reproduce": "git clone https://github.com/thorwhalen/opsward && cd opsward\ngit checkout 18da53908c85b10119a6e5b4dc1535c55bd28ffb\npip install \"epythet==0.2.22\"\nepythet quickstart . --ignore tests/ scrap/ examples/",
   "warnings": [],
   "alignment": {
     "aligned": true,

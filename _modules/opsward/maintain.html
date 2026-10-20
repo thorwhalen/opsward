@@ -176,245 +176,299 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="40">    <span class="n">suggestions</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">_check_empty_docs</span><span class="p">(</span><span class="n">scan_result</span><span class="p">))</span>
 </span><span data-line="41">    <span class="n">suggestions</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">check_subagent_twins</span><span class="p">(</span><span class="n">scan_result</span><span class="p">))</span>
 </span><span data-line="42">    <span class="n">suggestions</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">check_decisions</span><span class="p">(</span><span class="n">scan_result</span><span class="p">))</span>
-</span><span data-line="43">
-</span><span data-line="44">    <span class="k">return</span> <span class="p">[</span>
-</span><span data-line="45">        <span class="n">s</span> <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">triage</span> <span class="k">else</span> <span class="n">replace</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">triage</span><span class="o">=</span><span class="n">DFLT_TRIAGE</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">category</span><span class="p">,</span> <span class="s2">"align"</span><span class="p">))</span>
-</span><span data-line="46">        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">suggestions</span>
-</span><span data-line="47">    <span class="p">]</span></div>
+</span><span data-line="43">    <span class="n">suggestions</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">_check_config_changelog</span><span class="p">(</span><span class="n">scan_result</span><span class="p">))</span>
+</span><span data-line="44">
+</span><span data-line="45">    <span class="k">return</span> <span class="p">[</span>
+</span><span data-line="46">        <span class="n">s</span> <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">triage</span> <span class="k">else</span> <span class="n">replace</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">triage</span><span class="o">=</span><span class="n">DFLT_TRIAGE</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">category</span><span class="p">,</span> <span class="s2">"align"</span><span class="p">))</span>
+</span><span data-line="47">        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">suggestions</span>
+</span><span data-line="48">    <span class="p">]</span></div>
 
-</span><span data-line="48">
 </span><span data-line="49">
-</span><span data-line="50"><span class="c1">#: The governance vocabulary for a drift finding (opsward#17, gap 5): who is right, the</span>
-</span><span data-line="51"><span class="c1">#: config or the code? Every finding carries the recommended one; the human or agent decides.</span>
-</span><span data-line="52"><span class="n">TRIAGE_ACTIONS</span> <span class="o">=</span> <span class="p">{</span>
-</span><span data-line="53">    <span class="s2">"align"</span><span class="p">:</span> <span class="s2">"the code is right: update the config or doc to match it"</span><span class="p">,</span>
-</span><span data-line="54">    <span class="s2">"revert"</span><span class="p">:</span> <span class="s2">"the config is right: restore the code or file it describes"</span><span class="p">,</span>
-</span><span data-line="55">    <span class="s2">"ignore"</span><span class="p">:</span> <span class="s2">"the reference is legitimately volatile: mark it `opsward: ignore-path`"</span><span class="p">,</span>
-</span><span data-line="56"><span class="p">}</span>
-</span><span data-line="57">
-</span><span data-line="58"><span class="c1">#: Recommended triage per finding category. Drift is usually the config lagging the code,</span>
-</span><span data-line="59"><span class="c1">#: so ``align`` is the default; nothing is recommended as ``revert`` or ``ignore`` blindly.</span>
-</span><span data-line="60"><span class="n">DFLT_TRIAGE</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
-</span><span data-line="61">    <span class="s2">"stale_path"</span><span class="p">:</span> <span class="s2">"align"</span><span class="p">,</span>
-</span><span data-line="62">    <span class="s2">"claude_md_size"</span><span class="p">:</span> <span class="s2">"align"</span><span class="p">,</span>
-</span><span data-line="63">    <span class="s2">"sync_issue"</span><span class="p">:</span> <span class="s2">"align"</span><span class="p">,</span>
-</span><span data-line="64">    <span class="s2">"outdated_doc"</span><span class="p">:</span> <span class="s2">"align"</span><span class="p">,</span>
-</span><span data-line="65">    <span class="s2">"incomplete_skill"</span><span class="p">:</span> <span class="s2">"align"</span><span class="p">,</span>
-</span><span data-line="66">    <span class="s2">"empty_doc"</span><span class="p">:</span> <span class="s2">"align"</span><span class="p">,</span>
-</span><span data-line="67">    <span class="s2">"subagent_twin"</span><span class="p">:</span> <span class="s2">"align"</span><span class="p">,</span>
-</span><span data-line="68">    <span class="s2">"stale_adr"</span><span class="p">:</span> <span class="s2">"align"</span><span class="p">,</span>
-</span><span data-line="69"><span class="p">}</span>
-</span><span data-line="70">
-</span><span data-line="71">
-</span><span data-line="72"><span class="c1"># ---------------------------------------------------------------------------</span>
-</span><span data-line="73"><span class="c1"># Stale paths in CLAUDE.md</span>
+</span><span data-line="50">
+</span><span data-line="51"><span class="c1">#: The governance vocabulary for a drift finding (opsward#17, gap 5): who is right, the</span>
+</span><span data-line="52"><span class="c1">#: config or the code? Every finding carries the recommended one; the human or agent decides.</span>
+</span><span data-line="53"><span class="n">TRIAGE_ACTIONS</span> <span class="o">=</span> <span class="p">{</span>
+</span><span data-line="54">    <span class="s2">"align"</span><span class="p">:</span> <span class="s2">"the code is right: update the config or doc to match it"</span><span class="p">,</span>
+</span><span data-line="55">    <span class="s2">"revert"</span><span class="p">:</span> <span class="s2">"the config is right: restore the code or file it describes"</span><span class="p">,</span>
+</span><span data-line="56">    <span class="s2">"ignore"</span><span class="p">:</span> <span class="s2">"the reference is legitimately volatile: mark it `opsward: ignore-path`"</span><span class="p">,</span>
+</span><span data-line="57"><span class="p">}</span>
+</span><span data-line="58">
+</span><span data-line="59"><span class="c1">#: Recommended triage per finding category. Drift is usually the config lagging the code,</span>
+</span><span data-line="60"><span class="c1">#: so ``align`` is the default; nothing is recommended as ``revert`` or ``ignore`` blindly.</span>
+</span><span data-line="61"><span class="n">DFLT_TRIAGE</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+</span><span data-line="62">    <span class="s2">"stale_path"</span><span class="p">:</span> <span class="s2">"align"</span><span class="p">,</span>
+</span><span data-line="63">    <span class="s2">"claude_md_size"</span><span class="p">:</span> <span class="s2">"align"</span><span class="p">,</span>
+</span><span data-line="64">    <span class="s2">"sync_issue"</span><span class="p">:</span> <span class="s2">"align"</span><span class="p">,</span>
+</span><span data-line="65">    <span class="s2">"outdated_doc"</span><span class="p">:</span> <span class="s2">"align"</span><span class="p">,</span>
+</span><span data-line="66">    <span class="s2">"incomplete_skill"</span><span class="p">:</span> <span class="s2">"align"</span><span class="p">,</span>
+</span><span data-line="67">    <span class="s2">"empty_doc"</span><span class="p">:</span> <span class="s2">"align"</span><span class="p">,</span>
+</span><span data-line="68">    <span class="s2">"subagent_twin"</span><span class="p">:</span> <span class="s2">"align"</span><span class="p">,</span>
+</span><span data-line="69">    <span class="s2">"stale_adr"</span><span class="p">:</span> <span class="s2">"align"</span><span class="p">,</span>
+</span><span data-line="70">    <span class="s2">"config_changelog"</span><span class="p">:</span> <span class="s2">"align"</span><span class="p">,</span>
+</span><span data-line="71"><span class="p">}</span>
+</span><span data-line="72">
+</span><span data-line="73">
 </span><span data-line="74"><span class="c1"># ---------------------------------------------------------------------------</span>
-</span><span data-line="75">
-</span><span data-line="76">
-</span><span data-line="77"><span class="k">def</span><span class="w"> </span><span class="nf">_check_stale_paths</span><span class="p">(</span><span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">MaintenanceSuggestion</span><span class="p">]:</span>
-</span><span data-line="78"><span class="w">    </span><span class="sd">"""Find file paths referenced in CLAUDE.md that don't exist on disk."""</span>
-</span><span data-line="79">    <span class="k">if</span> <span class="ow">not</span> <span class="n">sr</span><span class="o">.</span><span class="n">claude_md_content</span><span class="p">:</span>
-</span><span data-line="80">        <span class="k">return</span>
-</span><span data-line="81">
-</span><span data-line="82">    <span class="n">paths</span> <span class="o">=</span> <span class="n">_extract_paths</span><span class="p">(</span><span class="n">sr</span><span class="o">.</span><span class="n">claude_md_content</span><span class="p">)</span>
-</span><span data-line="83">    <span class="k">for</span> <span class="n">path_str</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">:</span>
-</span><span data-line="84">        <span class="n">full</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span> <span class="o">/</span> <span class="n">path_str</span>
-</span><span data-line="85">        <span class="k">if</span> <span class="ow">not</span> <span class="n">full</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-</span><span data-line="86">            <span class="k">yield</span> <span class="n">MaintenanceSuggestion</span><span class="p">(</span>
-</span><span data-line="87">                <span class="n">category</span><span class="o">=</span><span class="s2">"stale_path"</span><span class="p">,</span>
-</span><span data-line="88">                <span class="n">description</span><span class="o">=</span><span class="p">(</span>
-</span><span data-line="89">                    <span class="sa">f</span><span class="s2">"CLAUDE.md references `</span><span class="si">{</span><span class="n">path_str</span><span class="si">}</span><span class="s2">` but it does not exist"</span>
-</span><span data-line="90">                <span class="p">),</span>
-</span><span data-line="91">            <span class="p">)</span>
-</span><span data-line="92">
-</span><span data-line="93">
-</span><span data-line="94"><span class="c1"># ---------------------------------------------------------------------------</span>
-</span><span data-line="95"><span class="c1"># CLAUDE.md size</span>
+</span><span data-line="75"><span class="c1"># Stale paths in CLAUDE.md</span>
+</span><span data-line="76"><span class="c1"># ---------------------------------------------------------------------------</span>
+</span><span data-line="77">
+</span><span data-line="78">
+</span><span data-line="79"><span class="k">def</span><span class="w"> </span><span class="nf">_check_stale_paths</span><span class="p">(</span><span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">MaintenanceSuggestion</span><span class="p">]:</span>
+</span><span data-line="80"><span class="w">    </span><span class="sd">"""Find file paths referenced in CLAUDE.md that don't exist on disk."""</span>
+</span><span data-line="81">    <span class="k">if</span> <span class="ow">not</span> <span class="n">sr</span><span class="o">.</span><span class="n">claude_md_content</span><span class="p">:</span>
+</span><span data-line="82">        <span class="k">return</span>
+</span><span data-line="83">
+</span><span data-line="84">    <span class="n">paths</span> <span class="o">=</span> <span class="n">_extract_paths</span><span class="p">(</span><span class="n">sr</span><span class="o">.</span><span class="n">claude_md_content</span><span class="p">)</span>
+</span><span data-line="85">    <span class="k">for</span> <span class="n">path_str</span> <span class="ow">in</span> <span class="n">paths</span><span class="p">:</span>
+</span><span data-line="86">        <span class="n">full</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span> <span class="o">/</span> <span class="n">path_str</span>
+</span><span data-line="87">        <span class="k">if</span> <span class="ow">not</span> <span class="n">full</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+</span><span data-line="88">            <span class="k">yield</span> <span class="n">MaintenanceSuggestion</span><span class="p">(</span>
+</span><span data-line="89">                <span class="n">category</span><span class="o">=</span><span class="s2">"stale_path"</span><span class="p">,</span>
+</span><span data-line="90">                <span class="n">description</span><span class="o">=</span><span class="p">(</span>
+</span><span data-line="91">                    <span class="sa">f</span><span class="s2">"CLAUDE.md references `</span><span class="si">{</span><span class="n">path_str</span><span class="si">}</span><span class="s2">` but it does not exist"</span>
+</span><span data-line="92">                <span class="p">),</span>
+</span><span data-line="93">            <span class="p">)</span>
+</span><span data-line="94">
+</span><span data-line="95">
 </span><span data-line="96"><span class="c1"># ---------------------------------------------------------------------------</span>
-</span><span data-line="97">
-</span><span data-line="98">
-</span><span data-line="99"><span class="k">def</span><span class="w"> </span><span class="nf">_check_claude_md_size</span><span class="p">(</span>
-</span><span data-line="100">    <span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">,</span> <span class="n">max_chars</span><span class="p">:</span> <span class="nb">int</span>
-</span><span data-line="101"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">MaintenanceSuggestion</span><span class="p">]:</span>
-</span><span data-line="102"><span class="w">    </span><span class="sd">"""Flag a CLAUDE.md over the size budget (same finding as ``diagnose``)."""</span>
-</span><span data-line="103">    <span class="n">overrun</span> <span class="o">=</span> <span class="n">claude_md_size_overrun</span><span class="p">(</span>
-</span><span data-line="104">        <span class="n">sr</span><span class="o">.</span><span class="n">claude_md_content</span><span class="p">,</span> <span class="n">max_chars</span><span class="o">=</span><span class="n">max_chars</span><span class="p">,</span> <span class="n">docs_dir</span><span class="o">=</span><span class="n">docs_dir_hint</span><span class="p">(</span><span class="n">sr</span><span class="p">)</span>
-</span><span data-line="105">    <span class="p">)</span>
-</span><span data-line="106">    <span class="k">if</span> <span class="n">overrun</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span data-line="107">        <span class="k">yield</span> <span class="n">MaintenanceSuggestion</span><span class="p">(</span>
-</span><span data-line="108">            <span class="n">category</span><span class="o">=</span><span class="s2">"claude_md_size"</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="n">overrun</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span>
-</span><span data-line="109">        <span class="p">)</span>
-</span><span data-line="110">
-</span><span data-line="111">
-</span><span data-line="112"><span class="c1"># ---------------------------------------------------------------------------</span>
-</span><span data-line="113"><span class="c1"># docs_guide.md sync</span>
+</span><span data-line="97"><span class="c1"># CLAUDE.md size</span>
+</span><span data-line="98"><span class="c1"># ---------------------------------------------------------------------------</span>
+</span><span data-line="99">
+</span><span data-line="100">
+</span><span data-line="101"><span class="k">def</span><span class="w"> </span><span class="nf">_check_claude_md_size</span><span class="p">(</span>
+</span><span data-line="102">    <span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">,</span> <span class="n">max_chars</span><span class="p">:</span> <span class="nb">int</span>
+</span><span data-line="103"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">MaintenanceSuggestion</span><span class="p">]:</span>
+</span><span data-line="104"><span class="w">    </span><span class="sd">"""Flag a CLAUDE.md over the size budget (same finding as ``diagnose``)."""</span>
+</span><span data-line="105">    <span class="n">overrun</span> <span class="o">=</span> <span class="n">claude_md_size_overrun</span><span class="p">(</span>
+</span><span data-line="106">        <span class="n">sr</span><span class="o">.</span><span class="n">claude_md_content</span><span class="p">,</span> <span class="n">max_chars</span><span class="o">=</span><span class="n">max_chars</span><span class="p">,</span> <span class="n">docs_dir</span><span class="o">=</span><span class="n">docs_dir_hint</span><span class="p">(</span><span class="n">sr</span><span class="p">)</span>
+</span><span data-line="107">    <span class="p">)</span>
+</span><span data-line="108">    <span class="k">if</span> <span class="n">overrun</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="109">        <span class="k">yield</span> <span class="n">MaintenanceSuggestion</span><span class="p">(</span>
+</span><span data-line="110">            <span class="n">category</span><span class="o">=</span><span class="s2">"claude_md_size"</span><span class="p">,</span> <span class="n">description</span><span class="o">=</span><span class="n">overrun</span><span class="o">.</span><span class="n">describe</span><span class="p">()</span>
+</span><span data-line="111">        <span class="p">)</span>
+</span><span data-line="112">
+</span><span data-line="113">
 </span><span data-line="114"><span class="c1"># ---------------------------------------------------------------------------</span>
-</span><span data-line="115">
-</span><span data-line="116">
-</span><span data-line="117"><span class="k">def</span><span class="w"> </span><span class="nf">_check_docs_guide_sync</span><span class="p">(</span><span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">MaintenanceSuggestion</span><span class="p">]:</span>
-</span><span data-line="118"><span class="w">    </span><span class="sd">"""Check that docs_guide.md accurately reflects the actual docs directory."""</span>
-</span><span data-line="119">    <span class="k">if</span> <span class="ow">not</span> <span class="n">sr</span><span class="o">.</span><span class="n">has_docs_guide</span> <span class="ow">or</span> <span class="n">sr</span><span class="o">.</span><span class="n">docs_guide_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span data-line="120">        <span class="k">return</span>
-</span><span data-line="121">
-</span><span data-line="122">    <span class="n">guide_content</span> <span class="o">=</span> <span class="n">read_text_safe</span><span class="p">(</span><span class="n">sr</span><span class="o">.</span><span class="n">docs_guide_path</span><span class="p">)</span>
-</span><span data-line="123">    <span class="k">if</span> <span class="ow">not</span> <span class="n">guide_content</span><span class="p">:</span>
-</span><span data-line="124">        <span class="k">return</span>
-</span><span data-line="125">
-</span><span data-line="126">    <span class="n">docs_dir</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">docs_guide_path</span><span class="o">.</span><span class="n">parent</span>
-</span><span data-line="127">    <span class="n">actual_docs</span> <span class="o">=</span> <span class="p">{</span>
-</span><span data-line="128">        <span class="n">d</span><span class="o">.</span><span class="n">name</span>
-</span><span data-line="129">        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">sr</span><span class="o">.</span><span class="n">docs</span>
-</span><span data-line="130">        <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="s2">"docs_guide"</span>  <span class="c1"># don't expect docs_guide to list itself</span>
-</span><span data-line="131">    <span class="p">}</span>
-</span><span data-line="132">
-</span><span data-line="133">    <span class="c1"># Extract doc names referenced in docs_guide.md (look for .md links)</span>
-</span><span data-line="134">    <span class="n">referenced</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">_extract_doc_refs</span><span class="p">(</span><span class="n">guide_content</span><span class="p">))</span>
-</span><span data-line="135">
-</span><span data-line="136">    <span class="c1"># Docs on disk but not listed in guide</span>
-</span><span data-line="137">    <span class="n">unlisted</span> <span class="o">=</span> <span class="n">actual_docs</span> <span class="o">-</span> <span class="n">referenced</span>
-</span><span data-line="138">    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">unlisted</span><span class="p">):</span>
-</span><span data-line="139">        <span class="k">yield</span> <span class="n">MaintenanceSuggestion</span><span class="p">(</span>
-</span><span data-line="140">            <span class="n">category</span><span class="o">=</span><span class="s2">"sync_issue"</span><span class="p">,</span>
-</span><span data-line="141">            <span class="n">description</span><span class="o">=</span><span class="p">(</span>
-</span><span data-line="142">                <span class="sa">f</span><span class="s2">"`</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">.md` exists in docs/ but is not listed in docs_guide.md"</span>
-</span><span data-line="143">            <span class="p">),</span>
-</span><span data-line="144">            <span class="n">diff</span><span class="o">=</span><span class="n">_suggest_guide_addition</span><span class="p">(</span><span class="n">name</span><span class="p">),</span>
-</span><span data-line="145">        <span class="p">)</span>
-</span><span data-line="146">
-</span><span data-line="147">    <span class="c1"># Docs listed in guide but not on disk</span>
-</span><span data-line="148">    <span class="n">missing</span> <span class="o">=</span> <span class="n">referenced</span> <span class="o">-</span> <span class="n">actual_docs</span>
-</span><span data-line="149">    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">missing</span><span class="p">):</span>
-</span><span data-line="150">        <span class="c1"># Check the actual file doesn't exist (the ref might use a different stem)</span>
-</span><span data-line="151">        <span class="n">candidate</span> <span class="o">=</span> <span class="n">docs_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">.md"</span>
-</span><span data-line="152">        <span class="k">if</span> <span class="ow">not</span> <span class="n">candidate</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-</span><span data-line="153">            <span class="k">yield</span> <span class="n">MaintenanceSuggestion</span><span class="p">(</span>
-</span><span data-line="154">                <span class="n">category</span><span class="o">=</span><span class="s2">"sync_issue"</span><span class="p">,</span>
-</span><span data-line="155">                <span class="n">description</span><span class="o">=</span><span class="p">(</span>
-</span><span data-line="156">                    <span class="sa">f</span><span class="s2">"docs_guide.md references `</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">.md` but the file does not exist"</span>
-</span><span data-line="157">                <span class="p">),</span>
-</span><span data-line="158">            <span class="p">)</span>
-</span><span data-line="159">
-</span><span data-line="160">
-</span><span data-line="161"><span class="c1"># ---------------------------------------------------------------------------</span>
-</span><span data-line="162"><span class="c1"># Doc freshness (via git log if available)</span>
+</span><span data-line="115"><span class="c1"># docs_guide.md sync</span>
+</span><span data-line="116"><span class="c1"># ---------------------------------------------------------------------------</span>
+</span><span data-line="117">
+</span><span data-line="118">
+</span><span data-line="119"><span class="k">def</span><span class="w"> </span><span class="nf">_check_docs_guide_sync</span><span class="p">(</span><span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">MaintenanceSuggestion</span><span class="p">]:</span>
+</span><span data-line="120"><span class="w">    </span><span class="sd">"""Check that docs_guide.md accurately reflects the actual docs directory."""</span>
+</span><span data-line="121">    <span class="k">if</span> <span class="ow">not</span> <span class="n">sr</span><span class="o">.</span><span class="n">has_docs_guide</span> <span class="ow">or</span> <span class="n">sr</span><span class="o">.</span><span class="n">docs_guide_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="122">        <span class="k">return</span>
+</span><span data-line="123">
+</span><span data-line="124">    <span class="n">guide_content</span> <span class="o">=</span> <span class="n">read_text_safe</span><span class="p">(</span><span class="n">sr</span><span class="o">.</span><span class="n">docs_guide_path</span><span class="p">)</span>
+</span><span data-line="125">    <span class="k">if</span> <span class="ow">not</span> <span class="n">guide_content</span><span class="p">:</span>
+</span><span data-line="126">        <span class="k">return</span>
+</span><span data-line="127">
+</span><span data-line="128">    <span class="n">docs_dir</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">docs_guide_path</span><span class="o">.</span><span class="n">parent</span>
+</span><span data-line="129">    <span class="n">actual_docs</span> <span class="o">=</span> <span class="p">{</span>
+</span><span data-line="130">        <span class="n">d</span><span class="o">.</span><span class="n">name</span>
+</span><span data-line="131">        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">sr</span><span class="o">.</span><span class="n">docs</span>
+</span><span data-line="132">        <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="s2">"docs_guide"</span>  <span class="c1"># don't expect docs_guide to list itself</span>
+</span><span data-line="133">    <span class="p">}</span>
+</span><span data-line="134">
+</span><span data-line="135">    <span class="c1"># Extract doc names referenced in docs_guide.md (look for .md links)</span>
+</span><span data-line="136">    <span class="n">referenced</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">_extract_doc_refs</span><span class="p">(</span><span class="n">guide_content</span><span class="p">))</span>
+</span><span data-line="137">
+</span><span data-line="138">    <span class="c1"># Docs on disk but not listed in guide</span>
+</span><span data-line="139">    <span class="n">unlisted</span> <span class="o">=</span> <span class="n">actual_docs</span> <span class="o">-</span> <span class="n">referenced</span>
+</span><span data-line="140">    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">unlisted</span><span class="p">):</span>
+</span><span data-line="141">        <span class="k">yield</span> <span class="n">MaintenanceSuggestion</span><span class="p">(</span>
+</span><span data-line="142">            <span class="n">category</span><span class="o">=</span><span class="s2">"sync_issue"</span><span class="p">,</span>
+</span><span data-line="143">            <span class="n">description</span><span class="o">=</span><span class="p">(</span>
+</span><span data-line="144">                <span class="sa">f</span><span class="s2">"`</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">.md` exists in docs/ but is not listed in docs_guide.md"</span>
+</span><span data-line="145">            <span class="p">),</span>
+</span><span data-line="146">            <span class="n">diff</span><span class="o">=</span><span class="n">_suggest_guide_addition</span><span class="p">(</span><span class="n">name</span><span class="p">),</span>
+</span><span data-line="147">        <span class="p">)</span>
+</span><span data-line="148">
+</span><span data-line="149">    <span class="c1"># Docs listed in guide but not on disk</span>
+</span><span data-line="150">    <span class="n">missing</span> <span class="o">=</span> <span class="n">referenced</span> <span class="o">-</span> <span class="n">actual_docs</span>
+</span><span data-line="151">    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">missing</span><span class="p">):</span>
+</span><span data-line="152">        <span class="c1"># Check the actual file doesn't exist (the ref might use a different stem)</span>
+</span><span data-line="153">        <span class="n">candidate</span> <span class="o">=</span> <span class="n">docs_dir</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">.md"</span>
+</span><span data-line="154">        <span class="k">if</span> <span class="ow">not</span> <span class="n">candidate</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+</span><span data-line="155">            <span class="k">yield</span> <span class="n">MaintenanceSuggestion</span><span class="p">(</span>
+</span><span data-line="156">                <span class="n">category</span><span class="o">=</span><span class="s2">"sync_issue"</span><span class="p">,</span>
+</span><span data-line="157">                <span class="n">description</span><span class="o">=</span><span class="p">(</span>
+</span><span data-line="158">                    <span class="sa">f</span><span class="s2">"docs_guide.md references `</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">.md` but the file does not exist"</span>
+</span><span data-line="159">                <span class="p">),</span>
+</span><span data-line="160">            <span class="p">)</span>
+</span><span data-line="161">
+</span><span data-line="162">
 </span><span data-line="163"><span class="c1"># ---------------------------------------------------------------------------</span>
-</span><span data-line="164">
-</span><span data-line="165"><span class="n">_STALE_DAYS</span> <span class="o">=</span> <span class="mi">90</span>
+</span><span data-line="164"><span class="c1"># Doc freshness (via git log if available)</span>
+</span><span data-line="165"><span class="c1"># ---------------------------------------------------------------------------</span>
 </span><span data-line="166">
-</span><span data-line="167">
-</span><span data-line="168"><span class="k">def</span><span class="w"> </span><span class="nf">_check_doc_freshness</span><span class="p">(</span><span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">MaintenanceSuggestion</span><span class="p">]:</span>
-</span><span data-line="169"><span class="w">    </span><span class="sd">"""Flag docs not updated in the last 90 days (if git is available)."""</span>
-</span><span data-line="170">    <span class="k">if</span> <span class="ow">not</span> <span class="n">sr</span><span class="o">.</span><span class="n">docs</span><span class="p">:</span>
-</span><span data-line="171">        <span class="k">return</span>
-</span><span data-line="172">
-</span><span data-line="173">    <span class="n">git_dir</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span> <span class="o">/</span> <span class="s2">".git"</span>
-</span><span data-line="174">    <span class="k">if</span> <span class="ow">not</span> <span class="n">git_dir</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
-</span><span data-line="175">        <span class="k">return</span>
-</span><span data-line="176">
-</span><span data-line="177">    <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">sr</span><span class="o">.</span><span class="n">docs</span><span class="p">:</span>
-</span><span data-line="178">        <span class="n">days</span> <span class="o">=</span> <span class="n">_days_since_last_commit</span><span class="p">(</span><span class="n">doc</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span><span class="p">)</span>
-</span><span data-line="179">        <span class="k">if</span> <span class="n">days</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">days</span> <span class="o">&gt;</span> <span class="n">_STALE_DAYS</span><span class="p">:</span>
-</span><span data-line="180">            <span class="k">yield</span> <span class="n">MaintenanceSuggestion</span><span class="p">(</span>
-</span><span data-line="181">                <span class="n">category</span><span class="o">=</span><span class="s2">"outdated_doc"</span><span class="p">,</span>
-</span><span data-line="182">                <span class="n">description</span><span class="o">=</span><span class="p">(</span><span class="sa">f</span><span class="s2">"`</span><span class="si">{</span><span class="n">doc</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.md` has not been updated in </span><span class="si">{</span><span class="n">days</span><span class="si">}</span><span class="s2"> days"</span><span class="p">),</span>
-</span><span data-line="183">            <span class="p">)</span>
-</span><span data-line="184">
-</span><span data-line="185">
-</span><span data-line="186"><span class="k">def</span><span class="w"> </span><span class="nf">_days_since_last_commit</span><span class="p">(</span><span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">repo_root</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
-</span><span data-line="187"><span class="w">    </span><span class="sd">"""Return days since last git commit touching *file_path*, or None."""</span>
-</span><span data-line="188">    <span class="k">try</span><span class="p">:</span>
-</span><span data-line="189">        <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
-</span><span data-line="190">            <span class="p">[</span><span class="s2">"git"</span><span class="p">,</span> <span class="s2">"log"</span><span class="p">,</span> <span class="s2">"-1"</span><span class="p">,</span> <span class="s2">"--format=</span><span class="si">%c</span><span class="s2">t"</span><span class="p">,</span> <span class="s2">"--"</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">file_path</span><span class="p">)],</span>
-</span><span data-line="191">            <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span data-line="192">            <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span data-line="193">            <span class="n">cwd</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">repo_root</span><span class="p">),</span>
-</span><span data-line="194">            <span class="n">timeout</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
-</span><span data-line="195">        <span class="p">)</span>
-</span><span data-line="196">        <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
-</span><span data-line="197">            <span class="k">return</span> <span class="kc">None</span>
-</span><span data-line="198">        <span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
-</span><span data-line="199">
-</span><span data-line="200">        <span class="n">timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
-</span><span data-line="201">        <span class="k">return</span> <span class="nb">int</span><span class="p">((</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">timestamp</span><span class="p">)</span> <span class="o">/</span> <span class="mi">86400</span><span class="p">)</span>
-</span><span data-line="202">    <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">TimeoutExpired</span><span class="p">):</span>
-</span><span data-line="203">        <span class="k">return</span> <span class="kc">None</span>
-</span><span data-line="204">
-</span><span data-line="205">
-</span><span data-line="206"><span class="c1"># ---------------------------------------------------------------------------</span>
-</span><span data-line="207"><span class="c1"># Skills without descriptions</span>
+</span><span data-line="167"><span class="n">_STALE_DAYS</span> <span class="o">=</span> <span class="mi">90</span>
+</span><span data-line="168">
+</span><span data-line="169">
+</span><span data-line="170"><span class="k">def</span><span class="w"> </span><span class="nf">_check_doc_freshness</span><span class="p">(</span><span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">MaintenanceSuggestion</span><span class="p">]:</span>
+</span><span data-line="171"><span class="w">    </span><span class="sd">"""Flag docs not updated in the last 90 days (if git is available)."""</span>
+</span><span data-line="172">    <span class="k">if</span> <span class="ow">not</span> <span class="n">sr</span><span class="o">.</span><span class="n">docs</span><span class="p">:</span>
+</span><span data-line="173">        <span class="k">return</span>
+</span><span data-line="174">
+</span><span data-line="175">    <span class="n">git_dir</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span> <span class="o">/</span> <span class="s2">".git"</span>
+</span><span data-line="176">    <span class="k">if</span> <span class="ow">not</span> <span class="n">git_dir</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+</span><span data-line="177">        <span class="k">return</span>
+</span><span data-line="178">
+</span><span data-line="179">    <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">sr</span><span class="o">.</span><span class="n">docs</span><span class="p">:</span>
+</span><span data-line="180">        <span class="n">days</span> <span class="o">=</span> <span class="n">_days_since_last_commit</span><span class="p">(</span><span class="n">doc</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span><span class="p">)</span>
+</span><span data-line="181">        <span class="k">if</span> <span class="n">days</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">days</span> <span class="o">&gt;</span> <span class="n">_STALE_DAYS</span><span class="p">:</span>
+</span><span data-line="182">            <span class="k">yield</span> <span class="n">MaintenanceSuggestion</span><span class="p">(</span>
+</span><span data-line="183">                <span class="n">category</span><span class="o">=</span><span class="s2">"outdated_doc"</span><span class="p">,</span>
+</span><span data-line="184">                <span class="n">description</span><span class="o">=</span><span class="p">(</span><span class="sa">f</span><span class="s2">"`</span><span class="si">{</span><span class="n">doc</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.md` has not been updated in </span><span class="si">{</span><span class="n">days</span><span class="si">}</span><span class="s2"> days"</span><span class="p">),</span>
+</span><span data-line="185">            <span class="p">)</span>
+</span><span data-line="186">
+</span><span data-line="187">
+</span><span data-line="188"><span class="k">def</span><span class="w"> </span><span class="nf">_days_since_last_commit</span><span class="p">(</span><span class="n">file_path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">repo_root</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+</span><span data-line="189"><span class="w">    </span><span class="sd">"""Return days since last git commit touching *file_path*, or None."""</span>
+</span><span data-line="190">    <span class="k">try</span><span class="p">:</span>
+</span><span data-line="191">        <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+</span><span data-line="192">            <span class="p">[</span><span class="s2">"git"</span><span class="p">,</span> <span class="s2">"log"</span><span class="p">,</span> <span class="s2">"-1"</span><span class="p">,</span> <span class="s2">"--format=</span><span class="si">%c</span><span class="s2">t"</span><span class="p">,</span> <span class="s2">"--"</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">file_path</span><span class="p">)],</span>
+</span><span data-line="193">            <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span data-line="194">            <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span data-line="195">            <span class="n">cwd</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">repo_root</span><span class="p">),</span>
+</span><span data-line="196">            <span class="n">timeout</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+</span><span data-line="197">        <span class="p">)</span>
+</span><span data-line="198">        <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+</span><span data-line="199">            <span class="k">return</span> <span class="kc">None</span>
+</span><span data-line="200">        <span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
+</span><span data-line="201">
+</span><span data-line="202">        <span class="n">timestamp</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+</span><span data-line="203">        <span class="k">return</span> <span class="nb">int</span><span class="p">((</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">timestamp</span><span class="p">)</span> <span class="o">/</span> <span class="mi">86400</span><span class="p">)</span>
+</span><span data-line="204">    <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">TimeoutExpired</span><span class="p">):</span>
+</span><span data-line="205">        <span class="k">return</span> <span class="kc">None</span>
+</span><span data-line="206">
+</span><span data-line="207">
 </span><span data-line="208"><span class="c1"># ---------------------------------------------------------------------------</span>
-</span><span data-line="209">
-</span><span data-line="210">
-</span><span data-line="211"><span class="k">def</span><span class="w"> </span><span class="nf">_check_skills_without_description</span><span class="p">(</span>
-</span><span data-line="212">    <span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">,</span>
-</span><span data-line="213"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">MaintenanceSuggestion</span><span class="p">]:</span>
-</span><span data-line="214">    <span class="k">for</span> <span class="n">skill</span> <span class="ow">in</span> <span class="n">sr</span><span class="o">.</span><span class="n">skills</span><span class="p">:</span>
-</span><span data-line="215">        <span class="k">if</span> <span class="ow">not</span> <span class="n">skill</span><span class="o">.</span><span class="n">has_skill_md</span><span class="p">:</span>
-</span><span data-line="216">            <span class="k">yield</span> <span class="n">MaintenanceSuggestion</span><span class="p">(</span>
-</span><span data-line="217">                <span class="n">category</span><span class="o">=</span><span class="s2">"incomplete_skill"</span><span class="p">,</span>
-</span><span data-line="218">                <span class="n">description</span><span class="o">=</span><span class="p">(</span>
-</span><span data-line="219">                    <span class="sa">f</span><span class="s2">"Skill `</span><span class="si">{</span><span class="n">skill</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">` has no SKILL.md — "</span>
-</span><span data-line="220">                    <span class="sa">f</span><span class="s2">"agents cannot discover when to use it"</span>
-</span><span data-line="221">                <span class="p">),</span>
-</span><span data-line="222">            <span class="p">)</span>
-</span><span data-line="223">        <span class="k">elif</span> <span class="ow">not</span> <span class="n">skill</span><span class="o">.</span><span class="n">description</span><span class="p">:</span>
-</span><span data-line="224">            <span class="k">yield</span> <span class="n">MaintenanceSuggestion</span><span class="p">(</span>
-</span><span data-line="225">                <span class="n">category</span><span class="o">=</span><span class="s2">"incomplete_skill"</span><span class="p">,</span>
-</span><span data-line="226">                <span class="n">description</span><span class="o">=</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Skill `</span><span class="si">{</span><span class="n">skill</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">` SKILL.md has no description line"</span><span class="p">),</span>
-</span><span data-line="227">            <span class="p">)</span>
-</span><span data-line="228">
-</span><span data-line="229">
-</span><span data-line="230"><span class="c1"># ---------------------------------------------------------------------------</span>
-</span><span data-line="231"><span class="c1"># Empty docs</span>
+</span><span data-line="209"><span class="c1"># Skills without descriptions</span>
+</span><span data-line="210"><span class="c1"># ---------------------------------------------------------------------------</span>
+</span><span data-line="211">
+</span><span data-line="212">
+</span><span data-line="213"><span class="k">def</span><span class="w"> </span><span class="nf">_check_skills_without_description</span><span class="p">(</span>
+</span><span data-line="214">    <span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">,</span>
+</span><span data-line="215"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">MaintenanceSuggestion</span><span class="p">]:</span>
+</span><span data-line="216">    <span class="k">for</span> <span class="n">skill</span> <span class="ow">in</span> <span class="n">sr</span><span class="o">.</span><span class="n">skills</span><span class="p">:</span>
+</span><span data-line="217">        <span class="k">if</span> <span class="ow">not</span> <span class="n">skill</span><span class="o">.</span><span class="n">has_skill_md</span><span class="p">:</span>
+</span><span data-line="218">            <span class="k">yield</span> <span class="n">MaintenanceSuggestion</span><span class="p">(</span>
+</span><span data-line="219">                <span class="n">category</span><span class="o">=</span><span class="s2">"incomplete_skill"</span><span class="p">,</span>
+</span><span data-line="220">                <span class="n">description</span><span class="o">=</span><span class="p">(</span>
+</span><span data-line="221">                    <span class="sa">f</span><span class="s2">"Skill `</span><span class="si">{</span><span class="n">skill</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">` has no SKILL.md — "</span>
+</span><span data-line="222">                    <span class="sa">f</span><span class="s2">"agents cannot discover when to use it"</span>
+</span><span data-line="223">                <span class="p">),</span>
+</span><span data-line="224">            <span class="p">)</span>
+</span><span data-line="225">        <span class="k">elif</span> <span class="ow">not</span> <span class="n">skill</span><span class="o">.</span><span class="n">description</span><span class="p">:</span>
+</span><span data-line="226">            <span class="k">yield</span> <span class="n">MaintenanceSuggestion</span><span class="p">(</span>
+</span><span data-line="227">                <span class="n">category</span><span class="o">=</span><span class="s2">"incomplete_skill"</span><span class="p">,</span>
+</span><span data-line="228">                <span class="n">description</span><span class="o">=</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Skill `</span><span class="si">{</span><span class="n">skill</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">` SKILL.md has no description line"</span><span class="p">),</span>
+</span><span data-line="229">            <span class="p">)</span>
+</span><span data-line="230">
+</span><span data-line="231">
 </span><span data-line="232"><span class="c1"># ---------------------------------------------------------------------------</span>
-</span><span data-line="233">
-</span><span data-line="234"><span class="n">_MIN_DOC_BYTES</span> <span class="o">=</span> <span class="mi">50</span>
+</span><span data-line="233"><span class="c1"># Empty docs</span>
+</span><span data-line="234"><span class="c1"># ---------------------------------------------------------------------------</span>
 </span><span data-line="235">
-</span><span data-line="236">
-</span><span data-line="237"><span class="k">def</span><span class="w"> </span><span class="nf">_check_empty_docs</span><span class="p">(</span><span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">MaintenanceSuggestion</span><span class="p">]:</span>
-</span><span data-line="238">    <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">sr</span><span class="o">.</span><span class="n">docs</span><span class="p">:</span>
-</span><span data-line="239">        <span class="k">if</span> <span class="n">doc</span><span class="o">.</span><span class="n">size_bytes</span> <span class="o">&lt;</span> <span class="n">_MIN_DOC_BYTES</span><span class="p">:</span>
-</span><span data-line="240">            <span class="k">yield</span> <span class="n">MaintenanceSuggestion</span><span class="p">(</span>
-</span><span data-line="241">                <span class="n">category</span><span class="o">=</span><span class="s2">"empty_doc"</span><span class="p">,</span>
-</span><span data-line="242">                <span class="n">description</span><span class="o">=</span><span class="p">(</span>
-</span><span data-line="243">                    <span class="sa">f</span><span class="s2">"`</span><span class="si">{</span><span class="n">doc</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.md` appears to be an empty stub "</span>
-</span><span data-line="244">                    <span class="sa">f</span><span class="s2">"(</span><span class="si">{</span><span class="n">doc</span><span class="o">.</span><span class="n">size_bytes</span><span class="si">}</span><span class="s2"> bytes)"</span>
-</span><span data-line="245">                <span class="p">),</span>
-</span><span data-line="246">            <span class="p">)</span>
-</span><span data-line="247">
-</span><span data-line="248">
-</span><span data-line="249"><span class="c1"># ---------------------------------------------------------------------------</span>
-</span><span data-line="250"><span class="c1"># Helpers</span>
+</span><span data-line="236"><span class="n">_MIN_DOC_BYTES</span> <span class="o">=</span> <span class="mi">50</span>
+</span><span data-line="237">
+</span><span data-line="238">
+</span><span data-line="239"><span class="k">def</span><span class="w"> </span><span class="nf">_check_empty_docs</span><span class="p">(</span><span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">MaintenanceSuggestion</span><span class="p">]:</span>
+</span><span data-line="240">    <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">sr</span><span class="o">.</span><span class="n">docs</span><span class="p">:</span>
+</span><span data-line="241">        <span class="k">if</span> <span class="n">doc</span><span class="o">.</span><span class="n">size_bytes</span> <span class="o">&lt;</span> <span class="n">_MIN_DOC_BYTES</span><span class="p">:</span>
+</span><span data-line="242">            <span class="k">yield</span> <span class="n">MaintenanceSuggestion</span><span class="p">(</span>
+</span><span data-line="243">                <span class="n">category</span><span class="o">=</span><span class="s2">"empty_doc"</span><span class="p">,</span>
+</span><span data-line="244">                <span class="n">description</span><span class="o">=</span><span class="p">(</span>
+</span><span data-line="245">                    <span class="sa">f</span><span class="s2">"`</span><span class="si">{</span><span class="n">doc</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">.md` appears to be an empty stub "</span>
+</span><span data-line="246">                    <span class="sa">f</span><span class="s2">"(</span><span class="si">{</span><span class="n">doc</span><span class="o">.</span><span class="n">size_bytes</span><span class="si">}</span><span class="s2"> bytes)"</span>
+</span><span data-line="247">                <span class="p">),</span>
+</span><span data-line="248">            <span class="p">)</span>
+</span><span data-line="249">
+</span><span data-line="250">
 </span><span data-line="251"><span class="c1"># ---------------------------------------------------------------------------</span>
-</span><span data-line="252">
-</span><span data-line="253">
-</span><span data-line="254"><span class="n">_extract_paths</span> <span class="o">=</span> <span class="n">extract_paths</span>  <span class="c1"># the shared extractor; honours `opsward: ignore-path`</span>
+</span><span data-line="252"><span class="c1"># Helpers</span>
+</span><span data-line="253"><span class="c1"># ---------------------------------------------------------------------------</span>
+</span><span data-line="254">
 </span><span data-line="255">
-</span><span data-line="256">
-</span><span data-line="257"><span class="k">def</span><span class="w"> </span><span class="nf">_extract_doc_refs</span><span class="p">(</span><span class="n">guide_content</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-</span><span data-line="258"><span class="w">    </span><span class="sd">"""Extract doc names referenced in a docs_guide.md.</span>
-</span><span data-line="259">
-</span><span data-line="260"><span class="sd">    Matches both markdown links ``[text](name.md)`` and backtick references</span>
-</span><span data-line="261"><span class="sd">    `` `name.md` ``.</span>
-</span><span data-line="262"><span class="sd">    """</span>
-</span><span data-line="263">    <span class="n">seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-</span><span data-line="264">    <span class="c1"># Markdown links: [anything](something.md)</span>
-</span><span data-line="265">    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\[.*?\]\((\w[\w\-]*)\.md[^)]*\)"</span><span class="p">,</span> <span class="n">guide_content</span><span class="p">):</span>
-</span><span data-line="266">        <span class="n">name</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-</span><span data-line="267">        <span class="k">if</span> <span class="n">name</span> <span class="o">!=</span> <span class="s2">"docs_guide"</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
-</span><span data-line="268">            <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-</span><span data-line="269">            <span class="k">yield</span> <span class="n">name</span>
-</span><span data-line="270">    <span class="c1"># Backtick references: `something.md`</span>
-</span><span data-line="271">    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="sa">r</span><span class="s2">"`(\w[\w\-]*)\.md`"</span><span class="p">,</span> <span class="n">guide_content</span><span class="p">):</span>
-</span><span data-line="272">        <span class="n">name</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-</span><span data-line="273">        <span class="k">if</span> <span class="n">name</span> <span class="o">!=</span> <span class="s2">"docs_guide"</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
-</span><span data-line="274">            <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-</span><span data-line="275">            <span class="k">yield</span> <span class="n">name</span>
-</span><span data-line="276">
-</span><span data-line="277">
-</span><span data-line="278"><span class="k">def</span><span class="w"> </span><span class="nf">_suggest_guide_addition</span><span class="p">(</span><span class="n">doc_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span data-line="279"><span class="w">    </span><span class="sd">"""Return a diff-like suggestion for adding a doc to docs_guide.md."""</span>
-</span><span data-line="280">    <span class="k">return</span> <span class="sa">f</span><span class="s2">"+ | [</span><span class="si">{</span><span class="n">doc_name</span><span class="si">}</span><span class="s2">.md](</span><span class="si">{</span><span class="n">doc_name</span><span class="si">}</span><span class="s2">.md) | &lt;!-- add description --&gt; |"</span>
+</span><span data-line="256"><span class="n">_extract_paths</span> <span class="o">=</span> <span class="n">extract_paths</span>  <span class="c1"># the shared extractor; honours `opsward: ignore-path`</span>
+</span><span data-line="257">
+</span><span data-line="258">
+</span><span data-line="259"><span class="k">def</span><span class="w"> </span><span class="nf">_extract_doc_refs</span><span class="p">(</span><span class="n">guide_content</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+</span><span data-line="260"><span class="w">    </span><span class="sd">"""Extract doc names referenced in a docs_guide.md.</span>
+</span><span data-line="261">
+</span><span data-line="262"><span class="sd">    Matches both markdown links ``[text](name.md)`` and backtick references</span>
+</span><span data-line="263"><span class="sd">    `` `name.md` ``.</span>
+</span><span data-line="264"><span class="sd">    """</span>
+</span><span data-line="265">    <span class="n">seen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+</span><span data-line="266">    <span class="c1"># Markdown links: [anything](something.md)</span>
+</span><span data-line="267">    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="sa">r</span><span class="s2">"\[.*?\]\((\w[\w\-]*)\.md[^)]*\)"</span><span class="p">,</span> <span class="n">guide_content</span><span class="p">):</span>
+</span><span data-line="268">        <span class="n">name</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span data-line="269">        <span class="k">if</span> <span class="n">name</span> <span class="o">!=</span> <span class="s2">"docs_guide"</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+</span><span data-line="270">            <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+</span><span data-line="271">            <span class="k">yield</span> <span class="n">name</span>
+</span><span data-line="272">    <span class="c1"># Backtick references: `something.md`</span>
+</span><span data-line="273">    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">re</span><span class="o">.</span><span class="n">finditer</span><span class="p">(</span><span class="sa">r</span><span class="s2">"`(\w[\w\-]*)\.md`"</span><span class="p">,</span> <span class="n">guide_content</span><span class="p">):</span>
+</span><span data-line="274">        <span class="n">name</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span data-line="275">        <span class="k">if</span> <span class="n">name</span> <span class="o">!=</span> <span class="s2">"docs_guide"</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">seen</span><span class="p">:</span>
+</span><span data-line="276">            <span class="n">seen</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+</span><span data-line="277">            <span class="k">yield</span> <span class="n">name</span>
+</span><span data-line="278">
+</span><span data-line="279">
+</span><span data-line="280"><span class="k">def</span><span class="w"> </span><span class="nf">_suggest_guide_addition</span><span class="p">(</span><span class="n">doc_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span data-line="281"><span class="w">    </span><span class="sd">"""Return a diff-like suggestion for adding a doc to docs_guide.md."""</span>
+</span><span data-line="282">    <span class="k">return</span> <span class="sa">f</span><span class="s2">"+ | [</span><span class="si">{</span><span class="n">doc_name</span><span class="si">}</span><span class="s2">.md](</span><span class="si">{</span><span class="n">doc_name</span><span class="si">}</span><span class="s2">.md) | &lt;!-- add description --&gt; |"</span>
+</span><span data-line="283">
+</span><span data-line="284">
+</span><span data-line="285"><span class="c1"># ---------------------------------------------------------------------------</span>
+</span><span data-line="286"><span class="c1"># Config changelog (opsward#53): a dated line per change to the agent config</span>
+</span><span data-line="287"><span class="c1"># ---------------------------------------------------------------------------</span>
+</span><span data-line="288">
+</span><span data-line="289"><span class="c1">#: The convention's file, in the project's docs folder. Opt-in: the check runs only</span>
+</span><span data-line="290"><span class="c1">#: when the file exists.</span>
+</span><span data-line="291"><span class="n">CONFIG_CHANGELOG</span> <span class="o">=</span> <span class="s2">"config_changelog.md"</span>
+</span><span data-line="292">
+</span><span data-line="293"><span class="c1">#: What counts as "the agent config" for the changelog check, relative to the root.</span>
+</span><span data-line="294"><span class="n">CONFIG_PATHS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"CLAUDE.md"</span><span class="p">,</span> <span class="s2">"AGENTS.md"</span><span class="p">,</span> <span class="s2">".claude"</span><span class="p">)</span>
+</span><span data-line="295">
+</span><span data-line="296">
+</span><span data-line="297"><span class="k">def</span><span class="w"> </span><span class="nf">_check_config_changelog</span><span class="p">(</span><span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">MaintenanceSuggestion</span><span class="p">]:</span>
+</span><span data-line="298"><span class="w">    </span><span class="sd">"""Flag agent-config commits newer than the last commit to ``config_changelog.md``."""</span>
+</span><span data-line="299">    <span class="kn">from</span><span class="w"> </span><span class="nn">opsward.scan</span><span class="w"> </span><span class="kn">import</span> <span class="n">docs_dir_for</span>
+</span><span data-line="300">
+</span><span data-line="301">    <span class="n">log</span> <span class="o">=</span> <span class="n">docs_dir_for</span><span class="p">(</span><span class="n">sr</span><span class="o">.</span><span class="n">project_root</span><span class="p">,</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_type</span><span class="p">,</span> <span class="n">sr</span><span class="o">.</span><span class="n">docs_guide_path</span><span class="p">)</span> <span class="o">/</span> <span class="n">CONFIG_CHANGELOG</span>
+</span><span data-line="302">    <span class="k">if</span> <span class="ow">not</span> <span class="n">log</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span> <span class="ow">or</span> <span class="ow">not</span> <span class="p">(</span><span class="n">sr</span><span class="o">.</span><span class="n">project_root</span> <span class="o">/</span> <span class="s2">".git"</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+</span><span data-line="303">        <span class="k">return</span>
+</span><span data-line="304">    <span class="n">logged</span> <span class="o">=</span> <span class="n">_last_commit_time</span><span class="p">(</span><span class="n">sr</span><span class="o">.</span><span class="n">project_root</span><span class="p">,</span> <span class="p">[</span><span class="n">log</span><span class="p">])</span>
+</span><span data-line="305">    <span class="n">changed</span> <span class="o">=</span> <span class="n">_last_commit_time</span><span class="p">(</span>
+</span><span data-line="306">        <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span><span class="p">,</span> <span class="p">[</span><span class="n">sr</span><span class="o">.</span><span class="n">project_root</span> <span class="o">/</span> <span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">CONFIG_PATHS</span> <span class="k">if</span> <span class="p">(</span><span class="n">sr</span><span class="o">.</span><span class="n">project_root</span> <span class="o">/</span> <span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()]</span>
+</span><span data-line="307">    <span class="p">)</span>
+</span><span data-line="308">    <span class="k">if</span> <span class="n">logged</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">changed</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">changed</span> <span class="o">&gt;</span> <span class="n">logged</span><span class="p">:</span>
+</span><span data-line="309">        <span class="n">rel</span> <span class="o">=</span> <span class="n">log</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">sr</span><span class="o">.</span><span class="n">project_root</span><span class="p">)</span><span class="o">.</span><span class="n">as_posix</span><span class="p">()</span>
+</span><span data-line="310">        <span class="k">yield</span> <span class="n">MaintenanceSuggestion</span><span class="p">(</span>
+</span><span data-line="311">            <span class="n">category</span><span class="o">=</span><span class="s2">"config_changelog"</span><span class="p">,</span>
+</span><span data-line="312">            <span class="n">description</span><span class="o">=</span><span class="p">(</span>
+</span><span data-line="313">                <span class="sa">f</span><span class="s2">"the agent config changed after the last `</span><span class="si">{</span><span class="n">rel</span><span class="si">}</span><span class="s2">` entry: "</span>
+</span><span data-line="314">                <span class="s2">"add a dated line saying what changed and why"</span>
+</span><span data-line="315">            <span class="p">),</span>
+</span><span data-line="316">        <span class="p">)</span>
+</span><span data-line="317">
+</span><span data-line="318">
+</span><span data-line="319"><span class="k">def</span><span class="w"> </span><span class="nf">_last_commit_time</span><span class="p">(</span><span class="n">repo_root</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">paths</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]:</span>
+</span><span data-line="320"><span class="w">    </span><span class="sd">"""Unix time of the newest commit touching any of ``paths``, or None (no git, no commit)."""</span>
+</span><span data-line="321">    <span class="k">if</span> <span class="ow">not</span> <span class="n">paths</span><span class="p">:</span>
+</span><span data-line="322">        <span class="k">return</span> <span class="kc">None</span>
+</span><span data-line="323">    <span class="k">try</span><span class="p">:</span>
+</span><span data-line="324">        <span class="n">result</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+</span><span data-line="325">            <span class="p">[</span><span class="s2">"git"</span><span class="p">,</span> <span class="s2">"log"</span><span class="p">,</span> <span class="s2">"-1"</span><span class="p">,</span> <span class="s2">"--format=</span><span class="si">%c</span><span class="s2">t"</span><span class="p">,</span> <span class="s2">"--"</span><span class="p">,</span> <span class="o">*</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">paths</span><span class="p">)],</span>
+</span><span data-line="326">            <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span data-line="327">            <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span data-line="328">            <span class="n">cwd</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">repo_root</span><span class="p">),</span>
+</span><span data-line="329">            <span class="n">timeout</span><span class="o">=</span><span class="mi">5</span><span class="p">,</span>
+</span><span data-line="330">        <span class="p">)</span>
+</span><span data-line="331">        <span class="n">out</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">stdout</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span><span data-line="332">        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">out</span><span class="p">)</span> <span class="k">if</span> <span class="n">result</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">out</span> <span class="k">else</span> <span class="kc">None</span>
+</span><span data-line="333">    <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">,</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">TimeoutExpired</span><span class="p">):</span>
+</span><span data-line="334">        <span class="k">return</span> <span class="kc">None</span>
 </span></pre></div>
         </article><button class="back-to-top" type="button">
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -442,7 +496,7 @@ data-aria-dark="Switch to auto color mode">
     </div>
   </div>
 </footer>
-      <script src="../../_static/documentation_options.js?v=61a342a2"></script>
+      <script src="../../_static/documentation_options.js?v=c5dbc6bb"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>

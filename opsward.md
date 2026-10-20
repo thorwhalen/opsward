@@ -1,4 +1,4 @@
-> built 2026-10-20 16:39 UTC from 6d7e1b4 (main) · opsward 0.0.30. Details: build_info.json
+> built 2026-10-20 16:42 UTC from 18da539 (main) · opsward 0.0.31. Details: build_info.json
 
 # index.html.md
 
@@ -87,6 +87,8 @@ myproject: 3 issue(s)
 ```
 
 Each finding carries a recommended triage: **align** (the code is right, update the config), **revert** (the config is right, restore the code) or **ignore** (the reference is legitimately volatile). To ignore one, put `<!-- opsward: ignore-path -->` at the end of its line, or alone on the line before it; every path check (stale paths, the currency score, cross-references, ADR drift) then skips it.
+
+**Config changelog** (opt-in): create `config_changelog.md` in the docs folder and give every change to the agent config (CLAUDE.md, AGENTS.md, `.claude/`) one dated line, newest first, saying what changed and why, e.g. `- 2026-10-20: moved the CLI-golden procedure out of CLAUDE.md (over budget); align`. Once the file exists, `opsward maintain` reports a `config_changelog` finding whenever a config commit is newer than the last changelog commit.
 
 ### Fleet
 
@@ -1743,7 +1745,7 @@ Read a text file, returning ‘’ if it doesn’t exist or can’t be decoded.
 
 # About this build
 
-This documentation was built on **2026-10-20 16:39 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/6d7e1b4dccc6b48fc67e74f0fecb8c525d3a8b75"><code>6d7e1b4</code></a> on branch <code>main</code>, for **opsward 0.0.30** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-10-20 16:42 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/18da53908c85b10119a6e5b4dc1535c55bd28ffb"><code>18da539</code></a> on branch <code>main</code>, for **opsward 0.0.31** (from <code>pyproject.toml</code>).
 
 #### NOTE
 Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
@@ -1752,7 +1754,7 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 |                     |                                                                                                                                                           |
 |---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/opsward/commit/6d7e1b4dccc6b48fc67e74f0fecb8c525d3a8b75"><code>6d7e1b4dccc6b48fc67e74f0fecb8c525d3a8b75</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/opsward/commit/18da53908c85b10119a6e5b4dc1535c55bd28ffb"><code>18da53908c85b10119a6e5b4dc1535c55bd28ffb</code></a> |
 | Branch              | <code>main</code>                                                                                                                                         |
 | Tags at this commit | none                                                                                                                                                      |
 | Working tree        | clean                                                                                                                                                     |
@@ -1763,9 +1765,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/opsward</code>                                                            |
-| Run          | <a href="https://github.com/thorwhalen/opsward/actions/runs/39459176821">39459176821</a>   |
+| Run          | <a href="https://github.com/thorwhalen/opsward/actions/runs/39459633460">39459633460</a>   |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>6d7e1b4dccc6b48fc67e74f0fecb8c525d3a8b75</code> (in the history of the built commit) |
+| Event commit | <code>18da53908c85b10119a6e5b4dc1535c55bd28ffb</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -1790,13 +1792,13 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/opsward/0.0.30/">0.0.30</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/opsward/0.0.31/">0.0.31</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/opsward && cd opsward
-git checkout 6d7e1b4dccc6b48fc67e74f0fecb8c525d3a8b75
+git checkout 18da53908c85b10119a6e5b4dc1535c55bd28ffb
 pip install "epythet==0.2.22"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
