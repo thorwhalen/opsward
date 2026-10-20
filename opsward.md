@@ -1,4 +1,4 @@
-> built 2026-10-20 17:34 UTC from 0edb715 (main) · opsward 0.0.34. Details: build_info.json
+> built 2026-10-20 19:00 UTC from 2877085 (main) · opsward 0.0.35. Details: build_info.json
 
 # index.html.md
 
@@ -404,7 +404,7 @@ Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
 A rule found in .claude/rules/.
 
-### *class* opsward.base.ScanResult(project_root, project_type=ProjectType.unknown, claude_md_path=None, claude_md_content='', skills=list(), agents=list(), rules=list(), hooks_path=None, hooks_config=None, docs=list(), has_docs_guide=False, docs_guide_path=None, agents_md_path=None, agents_md_content='', is_monorepo=False, monorepo_packages=list(), decisions=list(), global_skills=list(), global_skills_dir=None)
+### *class* opsward.base.ScanResult(project_root, project_type=ProjectType.unknown, claude_md_path=None, claude_md_content='', skills=list(), agents=list(), rules=list(), hooks_path=None, hooks_config=None, docs=list(), has_docs_guide=False, docs_guide_path=None, agents_md_path=None, agents_md_content='', host_files=dict(), is_monorepo=False, monorepo_packages=list(), decisions=list(), global_skills=list(), global_skills_dir=None)
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
@@ -1102,6 +1102,7 @@ Diagnose, generate, and maintain the AI agent setup of your projects.
 | [`generate`](_autosummary/opsward.generate.html.md#opsward.generate)(scan_result, \*[, agents_md, hooks])     | Determine which artifacts are missing, render templates, return files to create.                 |
 | [`lint`](_autosummary/opsward.lint.html.md#module-opsward.lint)                                           | Schema lint (opsward#17, gap 2): spec and config violations, pass or fail, no score.             |
 | [`maintain`](_autosummary/opsward.maintain.html.md#opsward.maintain)(scan_result, \*[, previous_report, ...]) | Detect maintenance issues and return suggestions.                                                |
+| [`portability`](_autosummary/opsward.portability.html.md#module-opsward.portability)                             | Multi-host portability: which agent hosts a repo satisfies, and canonical↔render drift.          |
 | [`recommend`](_autosummary/opsward.recommend.html.md#module-opsward.recommend)                                 | Recommend skills from the ecosystem based on project tech stack.                                 |
 | [`scan`](_autosummary/opsward.scan.html.md#opsward.scan)(project_root, \*[, claude_config_dir])           | Scan *project_root* and return a ScanResult.                                                     |
 | [`score`](_autosummary/opsward.score.html.md#module-opsward.score)                                         | Pure scoring functions.                                                                          |
@@ -1289,6 +1290,127 @@ Detect maintenance issues and return suggestions.
 
 * **Return type:**
   [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`MaintenanceSuggestion`](_autosummary/opsward.base.html.md#opsward.base.MaintenanceSuggestion)]
+
+
+# _autosummary/opsward.portability.html.md
+
+# opsward.portability
+
+Multi-host portability: which agent hosts a repo satisfies, and canonical↔render drift.
+
+The canonical project brief is `AGENTS.md` (opsward#15). Every other host’s instruction
+file (`CLAUDE.md`, `GEMINI.md`, `.github/copilot-instructions.md`, …) is a *render*
+of it, related to it in one of three ways:
+
+* `symlink` — the file is a symlink to `AGENTS.md`: byte-identical, cannot drift;
+* `import` — the file imports it (`@AGENTS.md`) and adds host-only deltas: the
+  recommended shape for hosts with an import syntax (Claude Code, Gemini CLI);
+* `copy` — a separate file: everything in it can drift from the canonical.
+
+The check is a *linter*: the canonical is authoritative and drift in a render is
+reported, never merged back. Three finding kinds, matched section by section (by
+normalised heading):
+
+* `stale` — a canonical section is missing from a copy;
+* `diverged` — a section is in both, with different bodies (a stale render or a hand
+  edit in the render: the files alone cannot say which);
+* `host_only` — a section only the render has: promote it to `AGENTS.md` if it is
+  portable, or keep it as a host delta (after an `@AGENTS.md` import).
+
+Scoped-rule folders (`.cursor/rules/`, `.windsurf/rules/`, `.clinerules/`) count
+towards coverage but are not compared: they are not renders of one brief.
+
+Files that are only coverage signals (`CONVENTIONS.md` is often a contributor doc, not a
+render) are compared only when they import or link the canonical.
+
+`read_host_files` is read-only (it backs `scan`); `analyze` is pure.
+
+```pycon
+>>> report = analyze(
+...     "# P\n\n## Build\n\npytest\n",
+...     {"CLAUDE.md": HostFile("CLAUDE.md", "## Build\n\npytest -x\n## Claude\n\nx\n")},
+... )
+>>> report.coverage["claude"], report.coverage["codex"]
+('copy', 'native')
+>>> sorted((f.kind, f.section) for f in report.findings)
+[('diverged', 'build'), ('host_only', 'claude')]
+```
+
+### Functions
+
+| [`analyze`](_autosummary/opsward.portability.html.md#opsward.portability.analyze)(canonical, host_files, \*[, hosts])   | Coverage and drift of *host_files* against the *canonical* `AGENTS.md` text.   |
+|------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------|
+| [`check_portability`](_autosummary/opsward.portability.html.md#opsward.portability.check_portability)(root, \*[, hosts])          | `analyze` over what is on disk under *root*: the library entry point.          |
+| [`read_host_files`](_autosummary/opsward.portability.html.md#opsward.portability.read_host_files)(root, \*[, hosts])            | Every host instruction file and rule folder present under *root*.              |
+| [`summarize`](_autosummary/opsward.portability.html.md#opsward.portability.summarize)(report)                             | One diagnose suggestion per drifting render.                                   |
+
+### Classes
+
+| [`DriftFinding`](_autosummary/opsward.portability.html.md#opsward.portability.DriftFinding)(kind, path, section)        | One section that differs between `AGENTS.md` and a render.                        |
+|-------------------------------------------------------------------------------------------|-----------------------------------------------------------------------------------|
+| [`HostFile`](_autosummary/opsward.portability.html.md#opsward.portability.HostFile)(path[, content, ...])           | One host instruction file (or rule folder) as found on disk.                      |
+| [`HostSpec`](_autosummary/opsward.portability.html.md#opsward.portability.HostSpec)(name[, instruction_files, ...]) | Where one agent host looks for project instructions (research table, opsward#15). |
+| [`PortabilityReport`](_autosummary/opsward.portability.html.md#opsward.portability.PortabilityReport)([coverage, findings])  | Host coverage (host -> relation, `native` or `none`) and drift findings.          |
+
+### *class* opsward.portability.DriftFinding(kind, path, section)
+
+Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
+
+One section that differs between `AGENTS.md` and a render.
+
+### *class* opsward.portability.HostFile(path, content='', links_to_canonical=False, is_dir=False, compared=True)
+
+Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
+
+One host instruction file (or rule folder) as found on disk.
+
+#### *property* relation *: [str](https://docs.python.org/3/builtins/stdtypes.html#str)*
+
+`symlink`, `import`, `rules` or `copy` (see the module docstring).
+
+### *class* opsward.portability.HostSpec(name, instruction_files=(), rule_dirs=(), reads_agents_md=False, compared=True)
+
+Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
+
+Where one agent host looks for project instructions (research table, opsward#15).
+
+### *class* opsward.portability.PortabilityReport(coverage=dict(), findings=list())
+
+Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
+
+Host coverage (host -> relation, `native` or `none`) and drift findings.
+
+#### *property* covered *: [list](https://docs.python.org/3/builtins/stdtypes.html#list)[[str](https://docs.python.org/3/builtins/stdtypes.html#str)]*
+
+Hosts that find project instructions, in `AGENT_HOSTS` order.
+
+### opsward.portability.analyze(canonical, host_files, , hosts={'aider': HostSpec(name='aider', instruction_files=('CONVENTIONS.md',), rule_dirs=(), reads_agents_md=False, compared=False), 'claude': HostSpec(name='claude', instruction_files=('CLAUDE.md', '.claude/CLAUDE.md'), rule_dirs=('.claude/rules',), reads_agents_md=False, compared=True), 'cline': HostSpec(name='cline', instruction_files=('.clinerules',), rule_dirs=('.clinerules',), reads_agents_md=True, compared=True), 'codex': HostSpec(name='codex', instruction_files=(), rule_dirs=(), reads_agents_md=True, compared=True), 'copilot': HostSpec(name='copilot', instruction_files=('.github/copilot-instructions.md',), rule_dirs=('.github/instructions',), reads_agents_md=True, compared=True), 'cursor': HostSpec(name='cursor', instruction_files=('.cursorrules',), rule_dirs=('.cursor/rules',), reads_agents_md=True, compared=True), 'gemini': HostSpec(name='gemini', instruction_files=('GEMINI.md',), rule_dirs=(), reads_agents_md=False, compared=True), 'windsurf': HostSpec(name='windsurf', instruction_files=('.windsurfrules', '.windsurfrules.md'), rule_dirs=('.windsurf/rules',), reads_agents_md=False, compared=True), 'zed': HostSpec(name='zed', instruction_files=('.rules',), rule_dirs=(), reads_agents_md=True, compared=True)})
+
+Coverage and drift of *host_files* against the *canonical* `AGENTS.md` text. Pure.
+
+* **Return type:**
+  [`PortabilityReport`](_autosummary/opsward.portability.html.md#opsward.portability.PortabilityReport)
+
+### opsward.portability.check_portability(root, , hosts={'aider': HostSpec(name='aider', instruction_files=('CONVENTIONS.md',), rule_dirs=(), reads_agents_md=False, compared=False), 'claude': HostSpec(name='claude', instruction_files=('CLAUDE.md', '.claude/CLAUDE.md'), rule_dirs=('.claude/rules',), reads_agents_md=False, compared=True), 'cline': HostSpec(name='cline', instruction_files=('.clinerules',), rule_dirs=('.clinerules',), reads_agents_md=True, compared=True), 'codex': HostSpec(name='codex', instruction_files=(), rule_dirs=(), reads_agents_md=True, compared=True), 'copilot': HostSpec(name='copilot', instruction_files=('.github/copilot-instructions.md',), rule_dirs=('.github/instructions',), reads_agents_md=True, compared=True), 'cursor': HostSpec(name='cursor', instruction_files=('.cursorrules',), rule_dirs=('.cursor/rules',), reads_agents_md=True, compared=True), 'gemini': HostSpec(name='gemini', instruction_files=('GEMINI.md',), rule_dirs=(), reads_agents_md=False, compared=True), 'windsurf': HostSpec(name='windsurf', instruction_files=('.windsurfrules', '.windsurfrules.md'), rule_dirs=('.windsurf/rules',), reads_agents_md=False, compared=True), 'zed': HostSpec(name='zed', instruction_files=('.rules',), rule_dirs=(), reads_agents_md=True, compared=True)})
+
+`analyze` over what is on disk under *root*: the library entry point.
+
+* **Return type:**
+  [`PortabilityReport`](_autosummary/opsward.portability.html.md#opsward.portability.PortabilityReport)
+
+### opsward.portability.read_host_files(root, , hosts={'aider': HostSpec(name='aider', instruction_files=('CONVENTIONS.md',), rule_dirs=(), reads_agents_md=False, compared=False), 'claude': HostSpec(name='claude', instruction_files=('CLAUDE.md', '.claude/CLAUDE.md'), rule_dirs=('.claude/rules',), reads_agents_md=False, compared=True), 'cline': HostSpec(name='cline', instruction_files=('.clinerules',), rule_dirs=('.clinerules',), reads_agents_md=True, compared=True), 'codex': HostSpec(name='codex', instruction_files=(), rule_dirs=(), reads_agents_md=True, compared=True), 'copilot': HostSpec(name='copilot', instruction_files=('.github/copilot-instructions.md',), rule_dirs=('.github/instructions',), reads_agents_md=True, compared=True), 'cursor': HostSpec(name='cursor', instruction_files=('.cursorrules',), rule_dirs=('.cursor/rules',), reads_agents_md=True, compared=True), 'gemini': HostSpec(name='gemini', instruction_files=('GEMINI.md',), rule_dirs=(), reads_agents_md=False, compared=True), 'windsurf': HostSpec(name='windsurf', instruction_files=('.windsurfrules', '.windsurfrules.md'), rule_dirs=('.windsurf/rules',), reads_agents_md=False, compared=True), 'zed': HostSpec(name='zed', instruction_files=('.rules',), rule_dirs=(), reads_agents_md=True, compared=True)})
+
+Every host instruction file and rule folder present under *root*. Read-only.
+
+* **Return type:**
+  [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)
+
+### opsward.portability.summarize(report)
+
+One diagnose suggestion per drifting render.
+
+* **Return type:**
+  [`Iterator`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
 
 
 # _autosummary/opsward.recommend.html.md
@@ -1845,7 +1967,7 @@ Read a text file, returning ‘’ if it doesn’t exist or can’t be decoded.
 
 # About this build
 
-This documentation was built on **2026-10-20 17:34 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/0edb715611e6345d0d4fd5df0ef8b2344447ac91"><code>0edb715</code></a> on branch <code>main</code>, for **opsward 0.0.34** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-10-20 19:00 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/2877085bbe8a40f9f48f25c328e95fb48859118c"><code>2877085</code></a> on branch <code>main</code>, for **opsward 0.0.35** (from <code>pyproject.toml</code>).
 
 #### NOTE
 Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
@@ -1854,7 +1976,7 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 |                     |                                                                                                                                                           |
 |---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/opsward/commit/0edb715611e6345d0d4fd5df0ef8b2344447ac91"><code>0edb715611e6345d0d4fd5df0ef8b2344447ac91</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/opsward/commit/2877085bbe8a40f9f48f25c328e95fb48859118c"><code>2877085bbe8a40f9f48f25c328e95fb48859118c</code></a> |
 | Branch              | <code>main</code>                                                                                                                                         |
 | Tags at this commit | none                                                                                                                                                      |
 | Working tree        | clean                                                                                                                                                     |
@@ -1865,9 +1987,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/opsward</code>                                                            |
-| Run          | <a href="https://github.com/thorwhalen/opsward/actions/runs/39466960928">39466960928</a>   |
+| Run          | <a href="https://github.com/thorwhalen/opsward/actions/runs/39479537762">39479537762</a>   |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>0edb715611e6345d0d4fd5df0ef8b2344447ac91</code> (in the history of the built commit) |
+| Event commit | <code>2877085bbe8a40f9f48f25c328e95fb48859118c</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -1892,13 +2014,13 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/opsward/0.0.34/">0.0.34</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/opsward/0.0.35/">0.0.35</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/opsward && cd opsward
-git checkout 0edb715611e6345d0d4fd5df0ef8b2344447ac91
+git checkout 2877085bbe8a40f9f48f25c328e95fb48859118c
 pip install "epythet==0.2.22"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

@@ -2,7 +2,7 @@
 
 # About this build
 
-This documentation was built on **2026-10-20 17:34 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/0edb715611e6345d0d4fd5df0ef8b2344447ac91"><code>0edb715</code></a> on branch <code>main</code>, for **opsward 0.0.34** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-10-20 19:00 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/2877085bbe8a40f9f48f25c328e95fb48859118c"><code>2877085</code></a> on branch <code>main</code>, for **opsward 0.0.35** (from <code>pyproject.toml</code>).
 
 #### NOTE
 Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
@@ -11,7 +11,7 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 |                     |                                                                                                                                                           |
 |---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/opsward/commit/0edb715611e6345d0d4fd5df0ef8b2344447ac91"><code>0edb715611e6345d0d4fd5df0ef8b2344447ac91</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/opsward/commit/2877085bbe8a40f9f48f25c328e95fb48859118c"><code>2877085bbe8a40f9f48f25c328e95fb48859118c</code></a> |
 | Branch              | <code>main</code>                                                                                                                                         |
 | Tags at this commit | none                                                                                                                                                      |
 | Working tree        | clean                                                                                                                                                     |
@@ -22,9 +22,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/opsward</code>                                                            |
-| Run          | <a href="https://github.com/thorwhalen/opsward/actions/runs/39466960928">39466960928</a>   |
+| Run          | <a href="https://github.com/thorwhalen/opsward/actions/runs/39479537762">39479537762</a>   |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>0edb715611e6345d0d4fd5df0ef8b2344447ac91</code> (in the history of the built commit) |
+| Event commit | <code>2877085bbe8a40f9f48f25c328e95fb48859118c</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -49,13 +49,13 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/opsward/0.0.34/">0.0.34</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/opsward/0.0.35/">0.0.35</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/opsward && cd opsward
-git checkout 0edb715611e6345d0d4fd5df0ef8b2344447ac91
+git checkout 2877085bbe8a40f9f48f25c328e95fb48859118c
 pip install "epythet==0.2.22"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

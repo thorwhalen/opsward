@@ -76,6 +76,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/opsward.generate.html">opsward.generate</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/opsward.lint.html">opsward.lint</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/opsward.maintain.html">opsward.maintain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../_autosummary/opsward.portability.html">opsward.portability</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/opsward.recommend.html">opsward.recommend</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/opsward.scan.html">opsward.scan</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../_autosummary/opsward.score.html">opsward.score</a></li>
@@ -1268,41 +1269,42 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="1110">            <span class="p">)</span>
 </span><span data-line="1111">        <span class="k">return</span>
 </span><span data-line="1112">
-</span><span data-line="1113">    <span class="c1"># If both exist, check for basic consistency</span>
-</span><span data-line="1114">    <span class="k">if</span> <span class="n">sr</span><span class="o">.</span><span class="n">claude_md_content</span> <span class="ow">and</span> <span class="n">sr</span><span class="o">.</span><span class="n">agents_md_content</span><span class="p">:</span>
-</span><span data-line="1115">        <span class="c1"># Check that AGENTS.md has build/test commands if CLAUDE.md does</span>
-</span><span data-line="1116">        <span class="n">claude_lower</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">claude_md_content</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-</span><span data-line="1117">        <span class="n">agents_lower</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">agents_md_content</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-</span><span data-line="1118">        <span class="k">if</span> <span class="s2">"```"</span> <span class="ow">in</span> <span class="n">claude_lower</span> <span class="ow">and</span> <span class="s2">"```"</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">agents_lower</span><span class="p">:</span>
-</span><span data-line="1119">            <span class="n">suggestions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-</span><span data-line="1120">                <span class="s2">"AGENTS.md has no code blocks but CLAUDE.md does — "</span>
-</span><span data-line="1121">                <span class="s2">"consider syncing build/test commands"</span>
-</span><span data-line="1122">            <span class="p">)</span>
-</span><span data-line="1123">
+</span><span data-line="1113">    <span class="c1"># Canonical↔render drift across every host's file (opsward#15)</span>
+</span><span data-line="1114">    <span class="kn">from</span><span class="w"> </span><span class="nn">opsward.portability</span><span class="w"> </span><span class="kn">import</span> <span class="n">analyze</span><span class="p">,</span> <span class="n">summarize</span>
+</span><span data-line="1115">
+</span><span data-line="1116">    <span class="n">report</span> <span class="o">=</span> <span class="n">analyze</span><span class="p">(</span><span class="n">sr</span><span class="o">.</span><span class="n">agents_md_content</span><span class="p">,</span> <span class="n">sr</span><span class="o">.</span><span class="n">host_files</span><span class="p">)</span>
+</span><span data-line="1117">    <span class="n">claude</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">host_files</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"CLAUDE.md"</span><span class="p">)</span>
+</span><span data-line="1118">    <span class="k">if</span> <span class="n">claude</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">claude</span><span class="o">.</span><span class="n">relation</span> <span class="o">==</span> <span class="s2">"copy"</span><span class="p">:</span>
+</span><span data-line="1119">        <span class="n">suggestions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+</span><span data-line="1120">            <span class="s2">"CLAUDE.md does not import AGENTS.md — make it a thin shim "</span>
+</span><span data-line="1121">            <span class="s2">"(`@AGENTS.md` plus Claude-only deltas) so the two cannot drift"</span>
+</span><span data-line="1122">        <span class="p">)</span>
+</span><span data-line="1123">    <span class="n">suggestions</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">summarize</span><span class="p">(</span><span class="n">report</span><span class="p">))</span>
 </span><span data-line="1124">
-</span><span data-line="1125"><span class="k">def</span><span class="w"> </span><span class="nf">_find_section</span><span class="p">(</span><span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">heading_keywords</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span data-line="1126"><span class="w">    </span><span class="sd">"""Extract the first section whose heading matches any keyword."""</span>
-</span><span data-line="1127">    <span class="n">lines</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
-</span><span data-line="1128">    <span class="n">start</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span data-line="1129">    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lines</span><span class="p">):</span>
-</span><span data-line="1130">        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"#"</span><span class="p">):</span>
-</span><span data-line="1131">            <span class="n">heading_lower</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">"#"</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-</span><span data-line="1132">            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">kw</span> <span class="ow">in</span> <span class="n">heading_lower</span> <span class="k">for</span> <span class="n">kw</span> <span class="ow">in</span> <span class="n">heading_keywords</span><span class="p">):</span>
-</span><span data-line="1133">                <span class="n">start</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
-</span><span data-line="1134">                <span class="k">continue</span>
-</span><span data-line="1135">            <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span data-line="1136">                <span class="c1"># Hit next heading — return what we collected</span>
-</span><span data-line="1137">                <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">i</span><span class="p">])</span>
-</span><span data-line="1138">    <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span data-line="1139">        <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="n">start</span><span class="p">:])</span>
-</span><span data-line="1140">    <span class="k">return</span> <span class="s2">""</span>
-</span><span data-line="1141">
+</span><span data-line="1125">
+</span><span data-line="1126"><span class="k">def</span><span class="w"> </span><span class="nf">_find_section</span><span class="p">(</span><span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">heading_keywords</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span data-line="1127"><span class="w">    </span><span class="sd">"""Extract the first section whose heading matches any keyword."""</span>
+</span><span data-line="1128">    <span class="n">lines</span> <span class="o">=</span> <span class="n">content</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+</span><span data-line="1129">    <span class="n">start</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span data-line="1130">    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lines</span><span class="p">):</span>
+</span><span data-line="1131">        <span class="k">if</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"#"</span><span class="p">):</span>
+</span><span data-line="1132">            <span class="n">heading_lower</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">"#"</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+</span><span data-line="1133">            <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">kw</span> <span class="ow">in</span> <span class="n">heading_lower</span> <span class="k">for</span> <span class="n">kw</span> <span class="ow">in</span> <span class="n">heading_keywords</span><span class="p">):</span>
+</span><span data-line="1134">                <span class="n">start</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span>
+</span><span data-line="1135">                <span class="k">continue</span>
+</span><span data-line="1136">            <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="1137">                <span class="c1"># Hit next heading — return what we collected</span>
+</span><span data-line="1138">                <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="n">start</span><span class="p">:</span><span class="n">i</span><span class="p">])</span>
+</span><span data-line="1139">    <span class="k">if</span> <span class="n">start</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="1140">        <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">[</span><span class="n">start</span><span class="p">:])</span>
+</span><span data-line="1141">    <span class="k">return</span> <span class="s2">""</span>
 </span><span data-line="1142">
-</span><span data-line="1143"><span class="k">def</span><span class="w"> </span><span class="nf">_extract_paths</span><span class="p">(</span><span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-</span><span data-line="1144"><span class="w">    </span><span class="sd">"""The shared path extractor (honours ``opsward: ignore-path``); see ``util.extract_paths``."""</span>
-</span><span data-line="1145">    <span class="kn">from</span><span class="w"> </span><span class="nn">opsward.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">extract_paths</span>
-</span><span data-line="1146">
-</span><span data-line="1147">    <span class="k">return</span> <span class="n">extract_paths</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+</span><span data-line="1143">
+</span><span data-line="1144"><span class="k">def</span><span class="w"> </span><span class="nf">_extract_paths</span><span class="p">(</span><span class="n">content</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+</span><span data-line="1145"><span class="w">    </span><span class="sd">"""The shared path extractor (honours ``opsward: ignore-path``); see ``util.extract_paths``."""</span>
+</span><span data-line="1146">    <span class="kn">from</span><span class="w"> </span><span class="nn">opsward.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">extract_paths</span>
+</span><span data-line="1147">
+</span><span data-line="1148">    <span class="k">return</span> <span class="n">extract_paths</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
 </span></pre></div>
         </article><button class="back-to-top" type="button">
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -1330,7 +1332,7 @@ data-aria-dark="Switch to auto color mode">
     </div>
   </div>
 </footer>
-      <script src="../../_static/documentation_options.js?v=9dd25805"></script>
+      <script src="../../_static/documentation_options.js?v=39aadc1c"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>

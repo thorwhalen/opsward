@@ -15,6 +15,7 @@ Diagnose, generate, and maintain the AI agent setup of your projects.
 | [`generate`](opsward.generate.html.md#opsward.generate)(scan_result, \*[, agents_md, hooks])     | Determine which artifacts are missing, render templates, return files to create.                 |
 | [`lint`](opsward.lint.html.md#module-opsward.lint)                                           | Schema lint (opsward#17, gap 2): spec and config violations, pass or fail, no score.             |
 | [`maintain`](opsward.maintain.html.md#opsward.maintain)(scan_result, \*[, previous_report, ...]) | Detect maintenance issues and return suggestions.                                                |
+| [`portability`](opsward.portability.html.md#module-opsward.portability)                             | Multi-host portability: which agent hosts a repo satisfies, and canonical↔render drift.          |
 | [`recommend`](opsward.recommend.html.md#module-opsward.recommend)                                 | Recommend skills from the ecosystem based on project tech stack.                                 |
 | [`scan`](opsward.scan.html.md#opsward.scan)(project_root, \*[, claude_config_dir])           | Scan *project_root* and return a ScanResult.                                                     |
 | [`score`](opsward.score.html.md#module-opsward.score)                                         | Pure scoring functions.                                                                          |

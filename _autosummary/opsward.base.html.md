@@ -75,7 +75,7 @@ Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
 A rule found in .claude/rules/.
 
-### *class* opsward.base.ScanResult(project_root, project_type=ProjectType.unknown, claude_md_path=None, claude_md_content='', skills=list(), agents=list(), rules=list(), hooks_path=None, hooks_config=None, docs=list(), has_docs_guide=False, docs_guide_path=None, agents_md_path=None, agents_md_content='', is_monorepo=False, monorepo_packages=list(), decisions=list(), global_skills=list(), global_skills_dir=None)
+### *class* opsward.base.ScanResult(project_root, project_type=ProjectType.unknown, claude_md_path=None, claude_md_content='', skills=list(), agents=list(), rules=list(), hooks_path=None, hooks_config=None, docs=list(), has_docs_guide=False, docs_guide_path=None, agents_md_path=None, agents_md_content='', host_files=dict(), is_monorepo=False, monorepo_packages=list(), decisions=list(), global_skills=list(), global_skills_dir=None)
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 

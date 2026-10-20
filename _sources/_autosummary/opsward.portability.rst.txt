@@ -1,0 +1,24 @@
+opsward.portability
+===================
+
+.. automodule:: opsward.portability
+
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      analyze
+      check_portability
+      read_host_files
+      summarize
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      DriftFinding
+      HostFile
+      HostSpec
+      PortabilityReport
+   

@@ -79,6 +79,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l3"><a class="reference internal" href="opsward.generate.html">opsward.generate</a></li>
 <li class="toctree-l3"><a class="reference internal" href="opsward.lint.html">opsward.lint</a></li>
 <li class="toctree-l3"><a class="reference internal" href="opsward.maintain.html">opsward.maintain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="opsward.portability.html">opsward.portability</a></li>
 <li class="toctree-l3"><a class="reference internal" href="opsward.recommend.html">opsward.recommend</a></li>
 <li class="toctree-l3"><a class="reference internal" href="opsward.scan.html">opsward.scan</a></li>
 <li class="toctree-l3"><a class="reference internal" href="opsward.score.html">opsward.score</a></li>
@@ -163,22 +164,25 @@ data-aria-dark="Switch to auto color mode">
 <tr class="row-even"><td><p><a class="reference internal" href="opsward.maintain.html#opsward.maintain" title="opsward.maintain"><code class="xref py py-obj docutils literal notranslate"><span class="pre">maintain</span></code></a>(scan_result, *[, previous_report, ...])</p></td>
 <td><p>Detect maintenance issues and return suggestions.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="opsward.recommend.html#module-opsward.recommend" title="opsward.recommend"><code class="xref py py-obj docutils literal notranslate"><span class="pre">recommend</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="opsward.portability.html#module-opsward.portability" title="opsward.portability"><code class="xref py py-obj docutils literal notranslate"><span class="pre">portability</span></code></a></p></td>
+<td><p>Multi-host portability: which agent hosts a repo satisfies, and canonical↔render drift.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="opsward.recommend.html#module-opsward.recommend" title="opsward.recommend"><code class="xref py py-obj docutils literal notranslate"><span class="pre">recommend</span></code></a></p></td>
 <td><p>Recommend skills from the ecosystem based on project tech stack.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="opsward.scan.html#opsward.scan" title="opsward.scan"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scan</span></code></a>(project_root, *[, claude_config_dir])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="opsward.scan.html#opsward.scan" title="opsward.scan"><code class="xref py py-obj docutils literal notranslate"><span class="pre">scan</span></code></a>(project_root, *[, claude_config_dir])</p></td>
 <td><p>Scan <em>project_root</em> and return a ScanResult.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="opsward.score.html#module-opsward.score" title="opsward.score"><code class="xref py py-obj docutils literal notranslate"><span class="pre">score</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="opsward.score.html#module-opsward.score" title="opsward.score"><code class="xref py py-obj docutils literal notranslate"><span class="pre">score</span></code></a></p></td>
 <td><p>Pure scoring functions.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="opsward.security.html#module-opsward.security" title="opsward.security"><code class="xref py py-obj docutils literal notranslate"><span class="pre">security</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="opsward.security.html#module-opsward.security" title="opsward.security"><code class="xref py py-obj docutils literal notranslate"><span class="pre">security</span></code></a></p></td>
 <td><p>Security advisories (opsward#17, gap 5): &quot;valid&quot; is not &quot;safe to ship&quot;.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="opsward.subagents.html#module-opsward.subagents" title="opsward.subagents"><code class="xref py py-obj docutils literal notranslate"><span class="pre">subagents</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="opsward.subagents.html#module-opsward.subagents" title="opsward.subagents"><code class="xref py py-obj docutils literal notranslate"><span class="pre">subagents</span></code></a></p></td>
 <td><p>Reuse a skill as a subagent: declare it in the skill, generate the twin, check the sync.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="opsward.util.html#module-opsward.util" title="opsward.util"><code class="xref py py-obj docutils literal notranslate"><span class="pre">util</span></code></a></p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="opsward.util.html#module-opsward.util" title="opsward.util"><code class="xref py py-obj docutils literal notranslate"><span class="pre">util</span></code></a></p></td>
 <td><p>Shared helpers for opsward.</p></td>
 </tr>
 </tbody>
@@ -226,7 +230,7 @@ data-aria-dark="Switch to auto color mode">
     </div>
   </div>
 </footer>
-      <script src="../_static/documentation_options.js?v=9dd25805"></script>
+      <script src="../_static/documentation_options.js?v=39aadc1c"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
