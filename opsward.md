@@ -1,4 +1,4 @@
-> built 2026-10-19 13:28 UTC from 9ea0403 (main) · opsward 0.0.23. Details: build_info.json
+> built 2026-10-20 07:07 UTC from ac0d00e (main) · opsward 0.0.24. Details: build_info.json
 
 # index.html.md
 
@@ -1182,7 +1182,7 @@ Read a text file, returning ‘’ if it doesn’t exist or can’t be decoded.
 
 # About this build
 
-This documentation was built on **2026-10-19 13:28 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/9ea0403de3e91eee3fb25586f625ee6f57cdf5e1"><code>9ea0403</code></a> on branch <code>main</code>, for **opsward 0.0.23** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-10-20 07:07 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/ac0d00e45bef071548b588177bd8bf37952c7858"><code>ac0d00e</code></a> on branch <code>main</code>, for **opsward 0.0.24** (from <code>pyproject.toml</code>).
 
 #### NOTE
 Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
@@ -1191,7 +1191,7 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 |                     |                                                                                                                                                           |
 |---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/opsward/commit/9ea0403de3e91eee3fb25586f625ee6f57cdf5e1"><code>9ea0403de3e91eee3fb25586f625ee6f57cdf5e1</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/opsward/commit/ac0d00e45bef071548b588177bd8bf37952c7858"><code>ac0d00e45bef071548b588177bd8bf37952c7858</code></a> |
 | Branch              | <code>main</code>                                                                                                                                         |
 | Tags at this commit | none                                                                                                                                                      |
 | Working tree        | clean                                                                                                                                                     |
@@ -1202,16 +1202,16 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/opsward</code>                                                            |
-| Run          | <a href="https://github.com/thorwhalen/opsward/actions/runs/39260265485">39260265485</a>   |
+| Run          | <a href="https://github.com/thorwhalen/opsward/actions/runs/39384315177">39384315177</a>   |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>9ea0403de3e91eee3fb25586f625ee6f57cdf5e1</code> (in the history of the built commit) |
+| Event commit | <code>ac0d00e45bef071548b588177bd8bf37952c7858</code> (in the history of the built commit) |
 
 ## Tools
 
 |          |         |
 |----------|---------|
 | epythet  | 0.2.18  |
-| Sphinx   | 9.1.0   |
+| Sphinx   | 9.1.1   |
 | docutils | 0.22.4  |
 | Python   | 3.12.15 |
 
@@ -1229,13 +1229,13 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/opsward/0.0.23/">0.0.23</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/opsward/0.0.24/">0.0.24</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/opsward && cd opsward
-git checkout 9ea0403de3e91eee3fb25586f625ee6f57cdf5e1
+git checkout ac0d00e45bef071548b588177bd8bf37952c7858
 pip install "epythet==0.2.18"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
