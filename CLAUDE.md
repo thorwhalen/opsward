@@ -41,6 +41,7 @@ Key docs to read before starting work:
   - `recommend.py` — map detected tech-stack signals (deps, frameworks) to curated ecosystem skill recommendations
   - `decisions.py` — decision capture: the next numbered ADR from the template, the Y-statement log, and the `stale_adr` drift check (ADR 0010)
   - `subagents.py` — a skill's declared subagent twin (`metadata: subagent: true`): spec, rendered `.claude/agents/<name>.md` preloading the skill, sync states; used by generate, maintain and the diagnosis note (ADR 0009)
+  - `fleet.py` — fleet mode: map `scan → diagnose` over N roots and aggregate into a `FleetReport` (opsward#17, gap 1)
   - `cli.py` — CLI command functions (the `_dispatch_funcs` SSOT)
   - `util.py` — internal helpers (underscore-prefixed)
   - `data/` — bundled package resources (accessed via `importlib.resources.files`)
@@ -212,7 +213,7 @@ See `misc/docs/target_artifacts.md` for the full spec of generated artifacts.
 - Templates are **not** Jinja2. Use `string.Template` for simplicity and zero deps. If a template needs conditionals, split it into separate template files per variant.
 - The `diagnose` function returns a `DiagnosisReport` dataclass that is both human-readable (via `__str__`) and machine-consumable (via dataclass fields). The CLI pretty-prints it; library users get structured data.
 - The `scan.py` module must be **purely read-only** — it never modifies the target project. This is a hard invariant. It uses `pathlib.Path` and `os.walk`, never writes.
-- For multi-project scanning, each project gets its own `DiagnosisReport`. The CLI's `diagnose` accepts multiple roots (`*project_roots`) and reports each independently — there is no aggregate report object.
+- For multi-project scanning, each project gets its own `DiagnosisReport`. The CLI's `diagnose` accepts multiple roots (`*project_roots`) and reports each independently. The aggregate is library-only for now: `opsward.fleet.fleet(roots)` returns a `FleetReport` (grade counts, missing-item and component rollups, worst repos, a name-keyed `to_dict()`), and `git_roots_under(parent)` lists the repos under a folder.
 - The `ow` shim package is a separate `pyproject.toml` / directory. It literally just does `from opsward import *` and declares `opsward` as a dependency.
 
 ## Git Workflow
