@@ -103,6 +103,7 @@ data-aria-dark="Switch to auto color mode">
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
 <li><a class="reference internal" href="#opsward.cli.diagnose"><code class="docutils literal notranslate"><span class="pre">diagnose()</span></code></a></li>
+<li><a class="reference internal" href="#opsward.cli.eval_"><code class="docutils literal notranslate"><span class="pre">eval_()</span></code></a></li>
 <li><a class="reference internal" href="#opsward.cli.find"><code class="docutils literal notranslate"><span class="pre">find()</span></code></a></li>
 <li><a class="reference internal" href="#opsward.cli.fleet"><code class="docutils literal notranslate"><span class="pre">fleet()</span></code></a></li>
 <li><a class="reference internal" href="#opsward.cli.generate"><code class="docutils literal notranslate"><span class="pre">generate()</span></code></a></li>
@@ -160,31 +161,34 @@ data-aria-dark="Switch to auto color mode">
 <tr class="row-odd"><td><p><a class="reference internal" href="#opsward.cli.diagnose" title="opsward.cli.diagnose"><code class="xref py py-obj docutils literal notranslate"><span class="pre">diagnose</span></code></a>(*project_roots[, format, verbose, ...])</p></td>
 <td><p>Diagnose the AI agent setup of one or more projects.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#opsward.cli.find" title="opsward.cli.find"><code class="xref py py-obj docutils literal notranslate"><span class="pre">find</span></code></a>(query, *project_roots[, kinds, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#opsward.cli.eval_" title="opsward.cli.eval_"><code class="xref py py-obj docutils literal notranslate"><span class="pre">eval_</span></code></a>(project_root, *[, judge, samples, ...])</p></td>
+<td><p>Report-only evals of a project's agent setup: an LLM judge of CLAUDE.md, and golden tasks.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.cli.find" title="opsward.cli.find"><code class="xref py py-obj docutils literal notranslate"><span class="pre">find</span></code></a>(query, *project_roots[, kinds, ...])</p></td>
 <td><p>Find assets (skills, agents, docs) across one or more projects by QUERY.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.cli.fleet" title="opsward.cli.fleet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fleet</span></code></a>(*project_roots[, under, depth, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#opsward.cli.fleet" title="opsward.cli.fleet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fleet</span></code></a>(*project_roots[, under, depth, ...])</p></td>
 <td><p>Diagnose many projects at once and roll the results up into one fleet report.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#opsward.cli.generate" title="opsward.cli.generate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate</span></code></a>(*project_roots[, write, format, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.cli.generate" title="opsward.cli.generate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate</span></code></a>(*project_roots[, write, format, ...])</p></td>
 <td><p>Generate missing AI setup artifacts for one or more projects.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.cli.install_skills" title="opsward.cli.install_skills"><code class="xref py py-obj docutils literal notranslate"><span class="pre">install_skills</span></code></a>([target, global_install, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#opsward.cli.install_skills" title="opsward.cli.install_skills"><code class="xref py py-obj docutils literal notranslate"><span class="pre">install_skills</span></code></a>([target, global_install, ...])</p></td>
 <td><p>Install opsward's Claude Code skills (and agents) into a project or globally.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#opsward.cli.lint" title="opsward.cli.lint"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lint</span></code></a>(*project_roots[, validators, format])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.cli.lint" title="opsward.cli.lint"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lint</span></code></a>(*project_roots[, validators, format])</p></td>
 <td><p>Check skill specs and the hooks config: pass or fail, no score (exit 1 on any finding).</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.cli.maintain" title="opsward.cli.maintain"><code class="xref py py-obj docutils literal notranslate"><span class="pre">maintain</span></code></a>(*project_roots[, format])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#opsward.cli.maintain" title="opsward.cli.maintain"><code class="xref py py-obj docutils literal notranslate"><span class="pre">maintain</span></code></a>(*project_roots[, format])</p></td>
 <td><p>Check for stale references, out-of-sync docs, and other drift.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#opsward.cli.new" title="opsward.cli.new"><code class="xref py py-obj docutils literal notranslate"><span class="pre">new</span></code></a>(title[, write, project_root, status, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.cli.new" title="opsward.cli.new"><code class="xref py py-obj docutils literal notranslate"><span class="pre">new</span></code></a>(title[, write, project_root, status, ...])</p></td>
 <td><p>Allocate the next numbered ADR for TITLE (dry run unless --write; never overwrites).</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.cli.note" title="opsward.cli.note"><code class="xref py py-obj docutils literal notranslate"><span class="pre">note</span></code></a>(text[, write, project_root])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#opsward.cli.note" title="opsward.cli.note"><code class="xref py py-obj docutils literal notranslate"><span class="pre">note</span></code></a>(text[, write, project_root])</p></td>
 <td><p>Append TEXT as a dated one-line decision (a Y-statement) to decisions/log.md (dry run unless --write).</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#opsward.cli.recommend" title="opsward.cli.recommend"><code class="xref py py-obj docutils literal notranslate"><span class="pre">recommend</span></code></a>(*project_roots[, format])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.cli.recommend" title="opsward.cli.recommend"><code class="xref py py-obj docutils literal notranslate"><span class="pre">recommend</span></code></a>(*project_roots[, format])</p></td>
 <td><p>Recommend ecosystem skills based on the project's tech stack.</p></td>
 </tr>
 </tbody>
@@ -201,6 +205,31 @@ data-aria-dark="Switch to auto color mode">
 <li><p><strong>format</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – output format — ‘text’ or ‘json’</p></li>
 <li><p><strong>verbose</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – show additional detail in text output</p></li>
 <li><p><strong>min_score</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – minimum overall score to pass (exit 0); below this exits 1</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="opsward.cli.eval_">
+<span class="sig-prename descclassname"><span class="pre">opsward.cli.</span></span><span class="sig-name descname"><span class="pre">eval_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">project_root</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">judge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'rubric'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tasks</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'text'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/cli.html#eval_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.cli.eval_" title="Link to this definition">#</a></dt>
+<dd><p>Report-only evals of a project’s agent setup: an LLM judge of CLAUDE.md, and golden tasks.</p>
+<p>The judge scores CLAUDE.md’s subjective dimensions next to the rubric’s own score. The
+golden tasks (a JSON list of {name, prompt, expect, forbid}, by default
+&lt;docs&gt;/evals/golden_tasks.json) run with and without CLAUDE.md and report the pass-rate
+delta. –judge rubric is free and deterministic (the rubric judge and an agent that
+quotes the config: it checks the harness, not a model); –judge anthropic makes paid
+calls (pip install ‘opsward[eval]’). Exits 0 whenever it ran (a report, never a gate);
+2 only on a usage error.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>project_root</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – the project directory</p></li>
+<li><p><strong>judge</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – ‘rubric’ (free) or ‘anthropic’ (paid model calls)</p></li>
+<li><p><strong>samples</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – judge samples per dimension (the median is reported)</p></li>
+<li><p><strong>tasks</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – golden-tasks JSON file (default: &lt;docs&gt;/evals/golden_tasks.json, if present)</p></li>
+<li><p><strong>runs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – runs per golden task and arm</p></li>
+<li><p><strong>format</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – output format — ‘text’ or ‘json’</p></li>
 </ul>
 </dd>
 </dl>
@@ -409,7 +438,7 @@ volatile reference: put <code class="code docutils literal notranslate"><span cl
     </div>
   </div>
 </footer>
-      <script src="../_static/documentation_options.js?v=565bc8c8"></script>
+      <script src="../_static/documentation_options.js?v=9dd25805"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>

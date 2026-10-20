@@ -538,133 +538,161 @@ data-aria-dark="Switch to auto color mode">
 
 </span><span data-line="375">
 </span><span data-line="376">
+</span><span data-line="377"><span class="c1">#: Where a repo keeps its golden tasks, relative to its docs folder</span>
+</span><span data-line="378"><span class="c1">#: (:func:`opsward.scan.docs_dir_for`: ``misc/docs`` for Python, ``docs`` for JS/TS).</span>
+</span><span data-line="379"><span class="n">DFLT_GOLDEN_TASKS_RELPATH</span> <span class="o">=</span> <span class="s2">"evals/golden_tasks.json"</span>
+</span><span data-line="380">
+</span><span data-line="381">
+<div class="viewcode-block" id="golden_tasks_path">
+<a class="viewcode-back" href="../../_autosummary/opsward.evals.html#opsward.evals.golden_tasks_path">[docs]</a>
+</span><span data-line="382"><span class="k">def</span><span class="w"> </span><span class="nf">golden_tasks_path</span><span class="p">(</span><span class="n">scan_result</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
+</span><span data-line="383"><span class="w">    </span><span class="sd">"""The default golden-tasks file of a scanned project (it may not exist).</span>
+</span><span data-line="384">
+</span><span data-line="385"><span class="sd">    &gt;&gt;&gt; import tempfile</span>
+</span><span data-line="386"><span class="sd">    &gt;&gt;&gt; from opsward.scan import scan</span>
+</span><span data-line="387"><span class="sd">    &gt;&gt;&gt; root = Path(tempfile.mkdtemp())</span>
+</span><span data-line="388"><span class="sd">    &gt;&gt;&gt; _ = (root / "pyproject.toml").write_text("")</span>
+</span><span data-line="389"><span class="sd">    &gt;&gt;&gt; golden_tasks_path(scan(root, claude_config_dir=None)).relative_to(root).as_posix()</span>
+</span><span data-line="390"><span class="sd">    'misc/docs/evals/golden_tasks.json'</span>
+</span><span data-line="391"><span class="sd">    """</span>
+</span><span data-line="392">    <span class="kn">from</span><span class="w"> </span><span class="nn">opsward.scan</span><span class="w"> </span><span class="kn">import</span> <span class="n">docs_dir_for</span>
+</span><span data-line="393">
+</span><span data-line="394">    <span class="n">docs_dir</span> <span class="o">=</span> <span class="n">docs_dir_for</span><span class="p">(</span>
+</span><span data-line="395">        <span class="n">scan_result</span><span class="o">.</span><span class="n">project_root</span><span class="p">,</span>
+</span><span data-line="396">        <span class="n">scan_result</span><span class="o">.</span><span class="n">project_type</span><span class="p">,</span>
+</span><span data-line="397">        <span class="n">scan_result</span><span class="o">.</span><span class="n">docs_guide_path</span><span class="p">,</span>
+</span><span data-line="398">    <span class="p">)</span>
+</span><span data-line="399">    <span class="k">return</span> <span class="n">docs_dir</span> <span class="o">/</span> <span class="n">DFLT_GOLDEN_TASKS_RELPATH</span></div>
+
+</span><span data-line="400">
+</span><span data-line="401">
 <div class="viewcode-block" id="load_golden_tasks">
 <a class="viewcode-back" href="../../_autosummary/opsward.evals.html#opsward.evals.load_golden_tasks">[docs]</a>
-</span><span data-line="377"><span class="k">def</span><span class="w"> </span><span class="nf">load_golden_tasks</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">GoldenTask</span><span class="p">]:</span>
-</span><span data-line="378"><span class="w">    </span><span class="sd">"""Tasks from a JSON list of ``{"name", "prompt", "expect": [...], "forbid": [...]}``."""</span>
-</span><span data-line="379">    <span class="n">name</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
-</span><span data-line="380">    <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">))</span>
-</span><span data-line="381">    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-</span><span data-line="382">        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: expected a JSON list of tasks"</span><span class="p">)</span>
-</span><span data-line="383">    <span class="n">tasks</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span data-line="384">    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
-</span><span data-line="385">        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span>
-</span><span data-line="386">            <span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
-</span><span data-line="387">            <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"name"</span><span class="p">),</span> <span class="nb">str</span><span class="p">)</span>
-</span><span data-line="388">            <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"prompt"</span><span class="p">),</span> <span class="nb">str</span><span class="p">)</span>
-</span><span data-line="389">        <span class="p">):</span>
-</span><span data-line="390">            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">, task </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: needs a string `name` and `prompt`"</span><span class="p">)</span>
-</span><span data-line="391">        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"expect"</span><span class="p">,</span> <span class="s2">"forbid"</span><span class="p">):</span>
-</span><span data-line="392">            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">[]),</span> <span class="nb">list</span><span class="p">):</span>
-</span><span data-line="393">                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">, task </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: `</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">` must be a list of regexes"</span><span class="p">)</span>
-</span><span data-line="394">        <span class="n">tasks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-</span><span data-line="395">            <span class="n">GoldenTask</span><span class="p">(</span>
-</span><span data-line="396">                <span class="n">d</span><span class="p">[</span><span class="s2">"name"</span><span class="p">],</span>
-</span><span data-line="397">                <span class="n">d</span><span class="p">[</span><span class="s2">"prompt"</span><span class="p">],</span>
-</span><span data-line="398">                <span class="nb">tuple</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"expect"</span><span class="p">,</span> <span class="p">())),</span>
-</span><span data-line="399">                <span class="nb">tuple</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"forbid"</span><span class="p">,</span> <span class="p">())),</span>
-</span><span data-line="400">            <span class="p">)</span>
-</span><span data-line="401">        <span class="p">)</span>
-</span><span data-line="402">    <span class="k">return</span> <span class="n">tasks</span></div>
+</span><span data-line="402"><span class="k">def</span><span class="w"> </span><span class="nf">load_golden_tasks</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">GoldenTask</span><span class="p">]:</span>
+</span><span data-line="403"><span class="w">    </span><span class="sd">"""Tasks from a JSON list of ``{"name", "prompt", "expect": [...], "forbid": [...]}``."""</span>
+</span><span data-line="404">    <span class="n">name</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
+</span><span data-line="405">    <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">))</span>
+</span><span data-line="406">    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+</span><span data-line="407">        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: expected a JSON list of tasks"</span><span class="p">)</span>
+</span><span data-line="408">    <span class="n">tasks</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="409">    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">d</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+</span><span data-line="410">        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span>
+</span><span data-line="411">            <span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span>
+</span><span data-line="412">            <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"name"</span><span class="p">),</span> <span class="nb">str</span><span class="p">)</span>
+</span><span data-line="413">            <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"prompt"</span><span class="p">),</span> <span class="nb">str</span><span class="p">)</span>
+</span><span data-line="414">        <span class="p">):</span>
+</span><span data-line="415">            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">, task </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: needs a string `name` and `prompt`"</span><span class="p">)</span>
+</span><span data-line="416">        <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"expect"</span><span class="p">,</span> <span class="s2">"forbid"</span><span class="p">):</span>
+</span><span data-line="417">            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">[]),</span> <span class="nb">list</span><span class="p">):</span>
+</span><span data-line="418">                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">, task </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: `</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s2">` must be a list of regexes"</span><span class="p">)</span>
+</span><span data-line="419">        <span class="n">tasks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+</span><span data-line="420">            <span class="n">GoldenTask</span><span class="p">(</span>
+</span><span data-line="421">                <span class="n">d</span><span class="p">[</span><span class="s2">"name"</span><span class="p">],</span>
+</span><span data-line="422">                <span class="n">d</span><span class="p">[</span><span class="s2">"prompt"</span><span class="p">],</span>
+</span><span data-line="423">                <span class="nb">tuple</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"expect"</span><span class="p">,</span> <span class="p">())),</span>
+</span><span data-line="424">                <span class="nb">tuple</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"forbid"</span><span class="p">,</span> <span class="p">())),</span>
+</span><span data-line="425">            <span class="p">)</span>
+</span><span data-line="426">        <span class="p">)</span>
+</span><span data-line="427">    <span class="k">return</span> <span class="n">tasks</span></div>
 
-</span><span data-line="403">
-</span><span data-line="404">
+</span><span data-line="428">
+</span><span data-line="429">
 <div class="viewcode-block" id="GoldenReport">
 <a class="viewcode-back" href="../../_autosummary/opsward.evals.html#opsward.evals.GoldenReport">[docs]</a>
-</span><span data-line="405"><span class="nd">@dataclass</span>
-</span><span data-line="406"><span class="k">class</span><span class="w"> </span><span class="nc">GoldenReport</span><span class="p">:</span>
-</span><span data-line="407"><span class="w">    </span><span class="sd">"""Per task and arm (``with`` / ``without`` the config): runs passed and runs that errored.</span>
-</span><span data-line="408">
-</span><span data-line="409"><span class="sd">    A run whose agent raised is left out of its arm's pass rate (it says nothing about the</span>
-</span><span data-line="410"><span class="sd">    config), so a flaky agent cannot skew :meth:`delta`; the errors are listed.</span>
-</span><span data-line="411"><span class="sd">    """</span>
-</span><span data-line="412">
-</span><span data-line="413">    <span class="n">runs</span><span class="p">:</span> <span class="nb">int</span>
-</span><span data-line="414">    <span class="n">results</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
-</span><span data-line="415">    <span class="n">errors</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
-</span><span data-line="416">
+</span><span data-line="430"><span class="nd">@dataclass</span>
+</span><span data-line="431"><span class="k">class</span><span class="w"> </span><span class="nc">GoldenReport</span><span class="p">:</span>
+</span><span data-line="432"><span class="w">    </span><span class="sd">"""Per task and arm (``with`` / ``without`` the config): runs passed and runs that errored.</span>
+</span><span data-line="433">
+</span><span data-line="434"><span class="sd">    A run whose agent raised is left out of its arm's pass rate (it says nothing about the</span>
+</span><span data-line="435"><span class="sd">    config), so a flaky agent cannot skew :meth:`delta`; the errors are listed.</span>
+</span><span data-line="436"><span class="sd">    """</span>
+</span><span data-line="437">
+</span><span data-line="438">    <span class="n">runs</span><span class="p">:</span> <span class="nb">int</span>
+</span><span data-line="439">    <span class="n">results</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+</span><span data-line="440">    <span class="n">errors</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+</span><span data-line="441">
 <div class="viewcode-block" id="GoldenReport.rate">
 <a class="viewcode-back" href="../../_autosummary/opsward.evals.html#opsward.evals.GoldenReport.rate">[docs]</a>
-</span><span data-line="417">    <span class="k">def</span><span class="w"> </span><span class="nf">rate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arm</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-</span><span data-line="418"><span class="w">        </span><span class="sd">"""Passed / completed (non-errored) runs in ``arm``; 0.0 when none completed."""</span>
-</span><span data-line="419">        <span class="n">done</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">runs</span> <span class="o">-</span> <span class="n">r</span><span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">arm</span><span class="si">}</span><span class="s2">_errors"</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
-</span><span data-line="420">        <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="n">arm</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> <span class="o">/</span> <span class="n">done</span> <span class="k">if</span> <span class="n">done</span> <span class="k">else</span> <span class="mf">0.0</span></div>
+</span><span data-line="442">    <span class="k">def</span><span class="w"> </span><span class="nf">rate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">arm</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+</span><span data-line="443"><span class="w">        </span><span class="sd">"""Passed / completed (non-errored) runs in ``arm``; 0.0 when none completed."""</span>
+</span><span data-line="444">        <span class="n">done</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">runs</span> <span class="o">-</span> <span class="n">r</span><span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">arm</span><span class="si">}</span><span class="s2">_errors"</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">values</span><span class="p">())</span>
+</span><span data-line="445">        <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="n">r</span><span class="p">[</span><span class="n">arm</span><span class="p">]</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">values</span><span class="p">())</span> <span class="o">/</span> <span class="n">done</span> <span class="k">if</span> <span class="n">done</span> <span class="k">else</span> <span class="mf">0.0</span></div>
 
-</span><span data-line="421">
+</span><span data-line="446">
 <div class="viewcode-block" id="GoldenReport.delta">
 <a class="viewcode-back" href="../../_autosummary/opsward.evals.html#opsward.evals.GoldenReport.delta">[docs]</a>
-</span><span data-line="422">    <span class="k">def</span><span class="w"> </span><span class="nf">delta</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-</span><span data-line="423"><span class="w">        </span><span class="sd">"""Pass rate with the config minus without: positive means the config helps."""</span>
-</span><span data-line="424">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rate</span><span class="p">(</span><span class="s2">"with"</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">rate</span><span class="p">(</span><span class="s2">"without"</span><span class="p">)</span></div>
+</span><span data-line="447">    <span class="k">def</span><span class="w"> </span><span class="nf">delta</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+</span><span data-line="448"><span class="w">        </span><span class="sd">"""Pass rate with the config minus without: positive means the config helps."""</span>
+</span><span data-line="449">        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">rate</span><span class="p">(</span><span class="s2">"with"</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">rate</span><span class="p">(</span><span class="s2">"without"</span><span class="p">)</span></div>
 
-</span><span data-line="425">
-</span><span data-line="426">    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-</span><span data-line="427">        <span class="k">return</span> <span class="p">{</span>
-</span><span data-line="428">            <span class="s2">"runs"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">runs</span><span class="p">,</span>
-</span><span data-line="429">            <span class="s2">"results"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">,</span>
-</span><span data-line="430">            <span class="s2">"errors"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span>
-</span><span data-line="431">            <span class="s2">"with"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">rate</span><span class="p">(</span><span class="s2">"with"</span><span class="p">),</span>
-</span><span data-line="432">            <span class="s2">"without"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">rate</span><span class="p">(</span><span class="s2">"without"</span><span class="p">),</span>
-</span><span data-line="433">            <span class="s2">"delta"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">delta</span><span class="p">(),</span>
-</span><span data-line="434">        <span class="p">}</span>
-</span><span data-line="435">
-</span><span data-line="436">    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span data-line="437">        <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span>
-</span><span data-line="438">            <span class="sa">f</span><span class="s2">"Golden tasks: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">)</span><span class="si">}</span><span class="s2"> x </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">runs</span><span class="si">}</span><span class="s2"> run(s); "</span>
-</span><span data-line="439">            <span class="sa">f</span><span class="s2">"pass rate </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">rate</span><span class="p">(</span><span class="s1">'with'</span><span class="p">)</span><span class="si">:</span><span class="s2">.0%</span><span class="si">}</span><span class="s2"> with the config, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">rate</span><span class="p">(</span><span class="s1">'without'</span><span class="p">)</span><span class="si">:</span><span class="s2">.0%</span><span class="si">}</span><span class="s2"> without "</span>
-</span><span data-line="440">            <span class="sa">f</span><span class="s2">"(delta </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">delta</span><span class="p">()</span><span class="si">:</span><span class="s2">+.0%</span><span class="si">}</span><span class="s2">)"</span>
-</span><span data-line="441">        <span class="p">]</span>
-</span><span data-line="442">        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-</span><span data-line="443">            <span class="n">arms</span> <span class="o">=</span> <span class="p">[</span>
-</span><span data-line="444">                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">r</span><span class="p">[</span><span class="n">a</span><span class="p">]</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">runs</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">r</span><span class="p">[</span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s1">'_errors'</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">a</span><span class="si">}</span><span class="s2">"</span>
-</span><span data-line="445">                <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"with"</span><span class="p">,</span> <span class="s2">"without"</span><span class="p">)</span>
-</span><span data-line="446">            <span class="p">]</span>
-</span><span data-line="447">            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">arms</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-</span><span data-line="448">        <span class="n">lines</span> <span class="o">+=</span> <span class="p">[</span>
-</span><span data-line="449">            <span class="sa">f</span><span class="s2">"  error in </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span>
-</span><span data-line="450">            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">errs</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
-</span><span data-line="451">            <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">errs</span>
-</span><span data-line="452">        <span class="p">]</span>
-</span><span data-line="453">        <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div>
+</span><span data-line="450">
+</span><span data-line="451">    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span><span data-line="452">        <span class="k">return</span> <span class="p">{</span>
+</span><span data-line="453">            <span class="s2">"runs"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">runs</span><span class="p">,</span>
+</span><span data-line="454">            <span class="s2">"results"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">,</span>
+</span><span data-line="455">            <span class="s2">"errors"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="p">,</span>
+</span><span data-line="456">            <span class="s2">"with"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">rate</span><span class="p">(</span><span class="s2">"with"</span><span class="p">),</span>
+</span><span data-line="457">            <span class="s2">"without"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">rate</span><span class="p">(</span><span class="s2">"without"</span><span class="p">),</span>
+</span><span data-line="458">            <span class="s2">"delta"</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">delta</span><span class="p">(),</span>
+</span><span data-line="459">        <span class="p">}</span>
+</span><span data-line="460">
+</span><span data-line="461">    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span data-line="462">        <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span>
+</span><span data-line="463">            <span class="sa">f</span><span class="s2">"Golden tasks: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="p">)</span><span class="si">}</span><span class="s2"> x </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">runs</span><span class="si">}</span><span class="s2"> run(s); "</span>
+</span><span data-line="464">            <span class="sa">f</span><span class="s2">"pass rate </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">rate</span><span class="p">(</span><span class="s1">'with'</span><span class="p">)</span><span class="si">:</span><span class="s2">.0%</span><span class="si">}</span><span class="s2"> with the config, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">rate</span><span class="p">(</span><span class="s1">'without'</span><span class="p">)</span><span class="si">:</span><span class="s2">.0%</span><span class="si">}</span><span class="s2"> without "</span>
+</span><span data-line="465">            <span class="sa">f</span><span class="s2">"(delta </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">delta</span><span class="p">()</span><span class="si">:</span><span class="s2">+.0%</span><span class="si">}</span><span class="s2">)"</span>
+</span><span data-line="466">        <span class="p">]</span>
+</span><span data-line="467">        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">r</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+</span><span data-line="468">            <span class="n">arms</span> <span class="o">=</span> <span class="p">[</span>
+</span><span data-line="469">                <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">r</span><span class="p">[</span><span class="n">a</span><span class="p">]</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">runs</span><span class="w"> </span><span class="o">-</span><span class="w"> </span><span class="n">r</span><span class="p">[</span><span class="n">a</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="s1">'_errors'</span><span class="p">]</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">a</span><span class="si">}</span><span class="s2">"</span>
+</span><span data-line="470">                <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"with"</span><span class="p">,</span> <span class="s2">"without"</span><span class="p">)</span>
+</span><span data-line="471">            <span class="p">]</span>
+</span><span data-line="472">            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">arms</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span data-line="473">        <span class="n">lines</span> <span class="o">+=</span> <span class="p">[</span>
+</span><span data-line="474">            <span class="sa">f</span><span class="s2">"  error in </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span>
+</span><span data-line="475">            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">errs</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+</span><span data-line="476">            <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">errs</span>
+</span><span data-line="477">        <span class="p">]</span>
+</span><span data-line="478">        <span class="k">return</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span></div>
 
-</span><span data-line="454">
-</span><span data-line="455">
+</span><span data-line="479">
+</span><span data-line="480">
 <div class="viewcode-block" id="run_golden_tasks">
 <a class="viewcode-back" href="../../_autosummary/opsward.evals.html#opsward.evals.run_golden_tasks">[docs]</a>
-</span><span data-line="456"><span class="k">def</span><span class="w"> </span><span class="nf">run_golden_tasks</span><span class="p">(</span>
-</span><span data-line="457">    <span class="n">tasks</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">GoldenTask</span><span class="p">],</span>
-</span><span data-line="458">    <span class="o">*</span><span class="p">,</span>
-</span><span data-line="459">    <span class="n">agent</span><span class="p">:</span> <span class="n">Agent</span><span class="p">,</span>
-</span><span data-line="460">    <span class="n">config</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-</span><span data-line="461">    <span class="n">baseline</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
-</span><span data-line="462">    <span class="n">runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-</span><span data-line="463"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GoldenReport</span><span class="p">:</span>
-</span><span data-line="464"><span class="w">    </span><span class="sd">"""Run every task ``runs`` times under ``config`` and under ``baseline``; count passes.</span>
-</span><span data-line="465">
-</span><span data-line="466"><span class="sd">    An agent error is recorded, never raised, and leaves that run out of the pass rate.</span>
-</span><span data-line="467">
-</span><span data-line="468"><span class="sd">    :raises ValueError: two tasks share a name, or ``runs &lt; 1``.</span>
-</span><span data-line="469"><span class="sd">    """</span>
-</span><span data-line="470">    <span class="n">tasks</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">tasks</span><span class="p">)</span>
-</span><span data-line="471">    <span class="k">if</span> <span class="n">runs</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
-</span><span data-line="472">        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"runs must be at least 1"</span><span class="p">)</span>
-</span><span data-line="473">    <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tasks</span><span class="p">]</span>
-</span><span data-line="474">    <span class="k">if</span> <span class="n">dupes</span> <span class="o">:=</span> <span class="nb">sorted</span><span class="p">({</span><span class="n">n</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">names</span> <span class="k">if</span> <span class="n">names</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">}):</span>
-</span><span data-line="475">        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"task names must be unique, repeated: </span><span class="si">{</span><span class="n">dupes</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-</span><span data-line="476">    <span class="n">report</span> <span class="o">=</span> <span class="n">GoldenReport</span><span class="p">(</span><span class="n">runs</span><span class="o">=</span><span class="n">runs</span><span class="p">)</span>
-</span><span data-line="477">    <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="n">tasks</span><span class="p">:</span>
-</span><span data-line="478">        <span class="n">counts</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"with"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">"without"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">"with_errors"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">"without_errors"</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
-</span><span data-line="479">        <span class="n">report</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">task</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">counts</span>
-</span><span data-line="480">        <span class="k">for</span> <span class="n">arm</span><span class="p">,</span> <span class="n">text</span> <span class="ow">in</span> <span class="p">((</span><span class="s2">"with"</span><span class="p">,</span> <span class="n">config</span><span class="p">),</span> <span class="p">(</span><span class="s2">"without"</span><span class="p">,</span> <span class="n">baseline</span><span class="p">)):</span>
-</span><span data-line="481">            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">runs</span><span class="p">):</span>
-</span><span data-line="482">                <span class="k">try</span><span class="p">:</span>
-</span><span data-line="483">                    <span class="n">counts</span><span class="p">[</span><span class="n">arm</span><span class="p">]</span> <span class="o">+=</span> <span class="n">task</span><span class="o">.</span><span class="n">passed</span><span class="p">(</span><span class="n">agent</span><span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="n">text</span><span class="p">))</span>
-</span><span data-line="484">                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
-</span><span data-line="485">                    <span class="n">counts</span><span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">arm</span><span class="si">}</span><span class="s2">_errors"</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
-</span><span data-line="486">                    <span class="n">report</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
-</span><span data-line="487">                        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">arm</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">error</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">error</span><span class="si">}</span><span class="s2">"</span>
-</span><span data-line="488">                    <span class="p">)</span>
-</span><span data-line="489">    <span class="k">return</span> <span class="n">report</span></div>
+</span><span data-line="481"><span class="k">def</span><span class="w"> </span><span class="nf">run_golden_tasks</span><span class="p">(</span>
+</span><span data-line="482">    <span class="n">tasks</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">GoldenTask</span><span class="p">],</span>
+</span><span data-line="483">    <span class="o">*</span><span class="p">,</span>
+</span><span data-line="484">    <span class="n">agent</span><span class="p">:</span> <span class="n">Agent</span><span class="p">,</span>
+</span><span data-line="485">    <span class="n">config</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span data-line="486">    <span class="n">baseline</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
+</span><span data-line="487">    <span class="n">runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+</span><span data-line="488"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">GoldenReport</span><span class="p">:</span>
+</span><span data-line="489"><span class="w">    </span><span class="sd">"""Run every task ``runs`` times under ``config`` and under ``baseline``; count passes.</span>
+</span><span data-line="490">
+</span><span data-line="491"><span class="sd">    An agent error is recorded, never raised, and leaves that run out of the pass rate.</span>
+</span><span data-line="492">
+</span><span data-line="493"><span class="sd">    :raises ValueError: two tasks share a name, or ``runs &lt; 1``.</span>
+</span><span data-line="494"><span class="sd">    """</span>
+</span><span data-line="495">    <span class="n">tasks</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">tasks</span><span class="p">)</span>
+</span><span data-line="496">    <span class="k">if</span> <span class="n">runs</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+</span><span data-line="497">        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">"runs must be at least 1"</span><span class="p">)</span>
+</span><span data-line="498">    <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">t</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">tasks</span><span class="p">]</span>
+</span><span data-line="499">    <span class="k">if</span> <span class="n">dupes</span> <span class="o">:=</span> <span class="nb">sorted</span><span class="p">({</span><span class="n">n</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">names</span> <span class="k">if</span> <span class="n">names</span><span class="o">.</span><span class="n">count</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">}):</span>
+</span><span data-line="500">        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"task names must be unique, repeated: </span><span class="si">{</span><span class="n">dupes</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span data-line="501">    <span class="n">report</span> <span class="o">=</span> <span class="n">GoldenReport</span><span class="p">(</span><span class="n">runs</span><span class="o">=</span><span class="n">runs</span><span class="p">)</span>
+</span><span data-line="502">    <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="n">tasks</span><span class="p">:</span>
+</span><span data-line="503">        <span class="n">counts</span> <span class="o">=</span> <span class="p">{</span><span class="s2">"with"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">"without"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">"with_errors"</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s2">"without_errors"</span><span class="p">:</span> <span class="mi">0</span><span class="p">}</span>
+</span><span data-line="504">        <span class="n">report</span><span class="o">.</span><span class="n">results</span><span class="p">[</span><span class="n">task</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">counts</span>
+</span><span data-line="505">        <span class="k">for</span> <span class="n">arm</span><span class="p">,</span> <span class="n">text</span> <span class="ow">in</span> <span class="p">((</span><span class="s2">"with"</span><span class="p">,</span> <span class="n">config</span><span class="p">),</span> <span class="p">(</span><span class="s2">"without"</span><span class="p">,</span> <span class="n">baseline</span><span class="p">)):</span>
+</span><span data-line="506">            <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">runs</span><span class="p">):</span>
+</span><span data-line="507">                <span class="k">try</span><span class="p">:</span>
+</span><span data-line="508">                    <span class="n">counts</span><span class="p">[</span><span class="n">arm</span><span class="p">]</span> <span class="o">+=</span> <span class="n">task</span><span class="o">.</span><span class="n">passed</span><span class="p">(</span><span class="n">agent</span><span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="n">text</span><span class="p">))</span>
+</span><span data-line="509">                <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+</span><span data-line="510">                    <span class="n">counts</span><span class="p">[</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">arm</span><span class="si">}</span><span class="s2">_errors"</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+</span><span data-line="511">                    <span class="n">report</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="p">[])</span><span class="o">.</span><span class="n">append</span><span class="p">(</span>
+</span><span data-line="512">                        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">arm</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">error</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">error</span><span class="si">}</span><span class="s2">"</span>
+</span><span data-line="513">                    <span class="p">)</span>
+</span><span data-line="514">    <span class="k">return</span> <span class="n">report</span></div>
 
 </span></pre></div>
         </article><button class="back-to-top" type="button">
@@ -693,7 +721,7 @@ data-aria-dark="Switch to auto color mode">
     </div>
   </div>
 </footer>
-      <script src="../../_static/documentation_options.js?v=565bc8c8"></script>
+      <script src="../../_static/documentation_options.js?v=9dd25805"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>

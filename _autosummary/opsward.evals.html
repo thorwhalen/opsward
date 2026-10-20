@@ -103,6 +103,7 @@ data-aria-dark="Switch to auto color mode">
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
 <li><a class="reference internal" href="#opsward.evals.Agent"><code class="docutils literal notranslate"><span class="pre">Agent</span></code></a></li>
+<li><a class="reference internal" href="#opsward.evals.DFLT_GOLDEN_TASKS_RELPATH"><code class="docutils literal notranslate"><span class="pre">DFLT_GOLDEN_TASKS_RELPATH</span></code></a></li>
 <li><a class="reference internal" href="#opsward.evals.DFLT_JUDGE_MODEL"><code class="docutils literal notranslate"><span class="pre">DFLT_JUDGE_MODEL</span></code></a></li>
 <li><a class="reference internal" href="#opsward.evals.DimensionVerdict"><code class="docutils literal notranslate"><span class="pre">DimensionVerdict</span></code></a></li>
 <li><a class="reference internal" href="#opsward.evals.GoldenReport"><code class="docutils literal notranslate"><span class="pre">GoldenReport</span></code></a><ul>
@@ -118,6 +119,7 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#opsward.evals.anthropic_agent"><code class="docutils literal notranslate"><span class="pre">anthropic_agent()</span></code></a></li>
 <li><a class="reference internal" href="#opsward.evals.anthropic_judge"><code class="docutils literal notranslate"><span class="pre">anthropic_judge()</span></code></a></li>
 <li><a class="reference internal" href="#opsward.evals.echo_agent"><code class="docutils literal notranslate"><span class="pre">echo_agent()</span></code></a></li>
+<li><a class="reference internal" href="#opsward.evals.golden_tasks_path"><code class="docutils literal notranslate"><span class="pre">golden_tasks_path()</span></code></a></li>
 <li><a class="reference internal" href="#opsward.evals.judge_claude_md"><code class="docutils literal notranslate"><span class="pre">judge_claude_md()</span></code></a></li>
 <li><a class="reference internal" href="#opsward.evals.load_golden_tasks"><code class="docutils literal notranslate"><span class="pre">load_golden_tasks()</span></code></a></li>
 <li><a class="reference internal" href="#opsward.evals.parse_verdict"><code class="docutils literal notranslate"><span class="pre">parse_verdict()</span></code></a></li>
@@ -206,6 +208,9 @@ the <code class="docutils literal notranslate"><span class="pre">anthropic</span
 <tr class="row-even"><td><p><a class="reference internal" href="#opsward.evals.Agent" title="opsward.evals.Agent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Agent</span></code></a></p></td>
 <td><p>An agent does a task under a config (CLAUDE.md text; <code class="docutils literal notranslate"><span class="pre">&quot;&quot;</span></code> = no config) and returns its output.</p></td>
 </tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.evals.DFLT_GOLDEN_TASKS_RELPATH" title="opsward.evals.DFLT_GOLDEN_TASKS_RELPATH"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DFLT_GOLDEN_TASKS_RELPATH</span></code></a></p></td>
+<td><p>Where a repo keeps its golden tasks, relative to its docs folder (<code class="xref py py-func docutils literal notranslate"><span class="pre">opsward.scan.docs_dir_for()</span></code>: <code class="docutils literal notranslate"><span class="pre">misc/docs</span></code> for Python, <code class="docutils literal notranslate"><span class="pre">docs</span></code> for JS/TS).</p></td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -222,19 +227,22 @@ the <code class="docutils literal notranslate"><span class="pre">anthropic</span
 <tr class="row-odd"><td><p><a class="reference internal" href="#opsward.evals.echo_agent" title="opsward.evals.echo_agent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">echo_agent</span></code></a>(task, config)</p></td>
 <td><p>The free agent: &quot;does&quot; the task by quoting its config, so a config that states the convention passes and an empty one does not.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#opsward.evals.judge_claude_md" title="opsward.evals.judge_claude_md"><code class="xref py py-obj docutils literal notranslate"><span class="pre">judge_claude_md</span></code></a>(content, *[, judge, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#opsward.evals.golden_tasks_path" title="opsward.evals.golden_tasks_path"><code class="xref py py-obj docutils literal notranslate"><span class="pre">golden_tasks_path</span></code></a>(scan_result)</p></td>
+<td><p>The default golden-tasks file of a scanned project (it may not exist).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.evals.judge_claude_md" title="opsward.evals.judge_claude_md"><code class="xref py py-obj docutils literal notranslate"><span class="pre">judge_claude_md</span></code></a>(content, *[, judge, ...])</p></td>
 <td><p>Score CLAUDE.md <code class="docutils literal notranslate"><span class="pre">content</span></code> on each subjective dimension, <code class="docutils literal notranslate"><span class="pre">samples</span></code> times each.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.evals.load_golden_tasks" title="opsward.evals.load_golden_tasks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_golden_tasks</span></code></a>(path)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#opsward.evals.load_golden_tasks" title="opsward.evals.load_golden_tasks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_golden_tasks</span></code></a>(path)</p></td>
 <td><p>Tasks from a JSON list of <code class="docutils literal notranslate"><span class="pre">{&quot;name&quot;,</span> <span class="pre">&quot;prompt&quot;,</span> <span class="pre">&quot;expect&quot;:</span> <span class="pre">[...],</span> <span class="pre">&quot;forbid&quot;:</span> <span class="pre">[...]}</span></code>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#opsward.evals.parse_verdict" title="opsward.evals.parse_verdict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_verdict</span></code></a>(reply, *, max_score)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.evals.parse_verdict" title="opsward.evals.parse_verdict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_verdict</span></code></a>(reply, *, max_score)</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">(score,</span> <span class="pre">reasoning)</span></code> from a judge reply: the <em>last</em> JSON object in it with a <code class="docutils literal notranslate"><span class="pre">score</span></code>.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.evals.rubric_judge" title="opsward.evals.rubric_judge"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rubric_judge</span></code></a>(request)</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#opsward.evals.rubric_judge" title="opsward.evals.rubric_judge"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rubric_judge</span></code></a>(request)</p></td>
 <td><p>The free, deterministic judge: answers with opsward's own rubric score.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#opsward.evals.run_golden_tasks" title="opsward.evals.run_golden_tasks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_golden_tasks</span></code></a>(tasks, *, agent, config[, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.evals.run_golden_tasks" title="opsward.evals.run_golden_tasks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_golden_tasks</span></code></a>(tasks, *, agent, config[, ...])</p></td>
 <td><p>Run every task <code class="docutils literal notranslate"><span class="pre">runs</span></code> times under <code class="docutils literal notranslate"><span class="pre">config</span></code> and under <code class="docutils literal notranslate"><span class="pre">baseline</span></code>; count passes.</p></td>
 </tr>
 </tbody>
@@ -267,6 +275,13 @@ the <code class="docutils literal notranslate"><span class="pre">anthropic</span
 <span class="sig-prename descclassname"><span class="pre">opsward.evals.</span></span><span class="sig-name descname"><span class="pre">Agent</span></span><a class="headerlink" href="#opsward.evals.Agent" title="Link to this definition">#</a></dt>
 <dd><p>An agent does a task under a config (CLAUDE.md text; <code class="docutils literal notranslate"><span class="pre">&quot;&quot;</span></code> = no config) and returns its output.</p>
 <p>alias of <a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference internal" href="#opsward.evals.GoldenTask" title="opsward.evals.GoldenTask"><code class="xref py py-class docutils literal notranslate"><span class="pre">GoldenTask</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>], <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="opsward.evals.DFLT_GOLDEN_TASKS_RELPATH">
+<span class="sig-prename descclassname"><span class="pre">opsward.evals.</span></span><span class="sig-name descname"><span class="pre">DFLT_GOLDEN_TASKS_RELPATH</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'evals/golden_tasks.json'</span></span><a class="headerlink" href="#opsward.evals.DFLT_GOLDEN_TASKS_RELPATH" title="Link to this definition">#</a></dt>
+<dd><p>Where a repo keeps its golden tasks, relative to its docs folder
+(<code class="xref py py-func docutils literal notranslate"><span class="pre">opsward.scan.docs_dir_for()</span></code>: <code class="docutils literal notranslate"><span class="pre">misc/docs</span></code> for Python, <code class="docutils literal notranslate"><span class="pre">docs</span></code> for JS/TS).</p>
 </dd></dl>
 
 <dl class="py data">
@@ -402,6 +417,25 @@ convention passes and an empty one does not. It tests the harness, not a model.<
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="opsward.evals.golden_tasks_path">
+<span class="sig-prename descclassname"><span class="pre">opsward.evals.</span></span><span class="sig-name descname"><span class="pre">golden_tasks_path</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scan_result</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/evals.html#golden_tasks_path"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.evals.golden_tasks_path" title="Link to this definition">#</a></dt>
+<dd><p>The default golden-tasks file of a scanned project (it may not exist).</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+</span><span data-line="2"><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">opsward.scan</span><span class="w"> </span><span class="kn">import</span> <span class="n">scan</span>
+</span><span data-line="3"><span class="gp">&gt;&gt;&gt; </span><span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tempfile</span><span class="o">.</span><span class="n">mkdtemp</span><span class="p">())</span>
+</span><span data-line="4"><span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="p">(</span><span class="n">root</span> <span class="o">/</span> <span class="s2">"pyproject.toml"</span><span class="p">)</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="s2">""</span><span class="p">)</span>
+</span><span data-line="5"><span class="gp">&gt;&gt;&gt; </span><span class="n">golden_tasks_path</span><span class="p">(</span><span class="n">scan</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">claude_config_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">))</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">root</span><span class="p">)</span><span class="o">.</span><span class="n">as_posix</span><span class="p">()</span>
+</span><span data-line="6"><span class="go">'misc/docs/evals/golden_tasks.json'</span>
+</span></pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Path</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="opsward.evals.judge_claude_md">
 <span class="sig-prename descclassname"><span class="pre">opsward.evals.</span></span><span class="sig-name descname"><span class="pre">judge_claude_md</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">content</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">judge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;function</span> <span class="pre">rubric_judge&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimensions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('actionability'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">'conciseness')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/evals.html#judge_claude_md"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.evals.judge_claude_md" title="Link to this definition">#</a></dt>
 <dd><p>Score CLAUDE.md <code class="docutils literal notranslate"><span class="pre">content</span></code> on each subjective dimension, <code class="docutils literal notranslate"><span class="pre">samples</span></code> times each.</p>
@@ -518,7 +552,7 @@ read next to it), but it is not an independent opinion.</p>
     </div>
   </div>
 </footer>
-      <script src="../_static/documentation_options.js?v=565bc8c8"></script>
+      <script src="../_static/documentation_options.js?v=9dd25805"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>

@@ -757,18 +757,118 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="593">    <span class="k">return</span> <span class="n">root</span><span class="p">,</span> <span class="n">docs_dir_for</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_type</span><span class="p">,</span> <span class="n">sr</span><span class="o">.</span><span class="n">docs_guide_path</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"decisions"</span>
 </span><span data-line="594">
 </span><span data-line="595">
-</span><span data-line="596"><span class="c1"># The SSOT of the CLI surface: a name -&gt; command mapping, with one nested group.</span>
-</span><span data-line="597"><span class="n">_dispatch_funcs</span> <span class="o">=</span> <span class="p">{</span>
-</span><span data-line="598">    <span class="s2">"diagnose"</span><span class="p">:</span> <span class="n">diagnose</span><span class="p">,</span>
-</span><span data-line="599">    <span class="s2">"generate"</span><span class="p">:</span> <span class="n">generate</span><span class="p">,</span>
-</span><span data-line="600">    <span class="s2">"maintain"</span><span class="p">:</span> <span class="n">maintain</span><span class="p">,</span>
-</span><span data-line="601">    <span class="s2">"recommend"</span><span class="p">:</span> <span class="n">recommend</span><span class="p">,</span>
-</span><span data-line="602">    <span class="s2">"install-skills"</span><span class="p">:</span> <span class="n">install_skills</span><span class="p">,</span>
-</span><span data-line="603">    <span class="s2">"find"</span><span class="p">:</span> <span class="n">find</span><span class="p">,</span>
-</span><span data-line="604">    <span class="s2">"fleet"</span><span class="p">:</span> <span class="n">fleet</span><span class="p">,</span>
-</span><span data-line="605">    <span class="s2">"lint"</span><span class="p">:</span> <span class="n">lint</span><span class="p">,</span>
-</span><span data-line="606">    <span class="s2">"decision"</span><span class="p">:</span> <span class="p">[</span><span class="n">new</span><span class="p">,</span> <span class="n">note</span><span class="p">],</span>
-</span><span data-line="607"><span class="p">}</span>
+<div class="viewcode-block" id="eval_">
+<a class="viewcode-back" href="../../_autosummary/opsward.cli.html#opsward.cli.eval_">[docs]</a>
+</span><span data-line="596"><span class="k">def</span><span class="w"> </span><span class="nf">eval_</span><span class="p">(</span>
+</span><span data-line="597">    <span class="n">project_root</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span data-line="598">    <span class="o">*</span><span class="p">,</span>
+</span><span data-line="599">    <span class="n">judge</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"rubric"</span><span class="p">,</span>
+</span><span data-line="600">    <span class="n">samples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+</span><span data-line="601">    <span class="n">tasks</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
+</span><span data-line="602">    <span class="n">runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+</span><span data-line="603">    <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"text"</span><span class="p">,</span>
+</span><span data-line="604"><span class="p">):</span>
+</span><span data-line="605"><span class="w">    </span><span class="sd">"""Report-only evals of a project's agent setup: an LLM judge of CLAUDE.md, and golden tasks.</span>
+</span><span data-line="606">
+</span><span data-line="607"><span class="sd">    The judge scores CLAUDE.md's subjective dimensions next to the rubric's own score. The</span>
+</span><span data-line="608"><span class="sd">    golden tasks (a JSON list of {name, prompt, expect, forbid}, by default</span>
+</span><span data-line="609"><span class="sd">    &lt;docs&gt;/evals/golden_tasks.json) run with and without CLAUDE.md and report the pass-rate</span>
+</span><span data-line="610"><span class="sd">    delta. --judge rubric is free and deterministic (the rubric judge and an agent that</span>
+</span><span data-line="611"><span class="sd">    quotes the config: it checks the harness, not a model); --judge anthropic makes paid</span>
+</span><span data-line="612"><span class="sd">    calls (pip install 'opsward[eval]'). Exits 0 whenever it ran (a report, never a gate);</span>
+</span><span data-line="613"><span class="sd">    2 only on a usage error.</span>
+</span><span data-line="614">
+</span><span data-line="615"><span class="sd">    :param project_root: the project directory</span>
+</span><span data-line="616"><span class="sd">    :param judge: 'rubric' (free) or 'anthropic' (paid model calls)</span>
+</span><span data-line="617"><span class="sd">    :param samples: judge samples per dimension (the median is reported)</span>
+</span><span data-line="618"><span class="sd">    :param tasks: golden-tasks JSON file (default: &lt;docs&gt;/evals/golden_tasks.json, if present)</span>
+</span><span data-line="619"><span class="sd">    :param runs: runs per golden task and arm</span>
+</span><span data-line="620"><span class="sd">    :param format: output format — 'text' or 'json'</span>
+</span><span data-line="621"><span class="sd">    """</span>
+</span><span data-line="622">    <span class="kn">from</span><span class="w"> </span><span class="nn">opsward</span><span class="w"> </span><span class="kn">import</span> <span class="n">evals</span>
+</span><span data-line="623">
+</span><span data-line="624">    <span class="k">if</span> <span class="nb">format</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"text"</span><span class="p">,</span> <span class="s2">"json"</span><span class="p">):</span>
+</span><span data-line="625">        <span class="nb">print</span><span class="p">(</span><span class="s2">"Error: format must be 'text' or 'json'"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="626">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span data-line="627">    <span class="k">if</span> <span class="n">judge</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"rubric"</span><span class="p">,</span> <span class="s2">"anthropic"</span><span class="p">):</span>
+</span><span data-line="628">        <span class="nb">print</span><span class="p">(</span><span class="s2">"Error: judge must be 'rubric' or 'anthropic'"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="629">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span data-line="630">    <span class="k">if</span> <span class="n">samples</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">runs</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+</span><span data-line="631">        <span class="nb">print</span><span class="p">(</span><span class="s2">"Error: samples and runs must be at least 1"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="632">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span data-line="633">    <span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">project_root</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+</span><span data-line="634">    <span class="k">if</span> <span class="ow">not</span> <span class="n">root</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+</span><span data-line="635">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error: </span><span class="si">{</span><span class="n">project_root</span><span class="si">}</span><span class="s2"> is not a directory"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="636">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span data-line="637">    <span class="n">sr</span> <span class="o">=</span> <span class="n">scan</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">claude_config_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</span><span data-line="638">    <span class="n">tasks_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tasks</span><span class="p">)</span> <span class="k">if</span> <span class="n">tasks</span> <span class="k">else</span> <span class="n">evals</span><span class="o">.</span><span class="n">golden_tasks_path</span><span class="p">(</span><span class="n">sr</span><span class="p">)</span>
+</span><span data-line="639">    <span class="k">if</span> <span class="n">tasks</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">tasks_path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+</span><span data-line="640">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error: </span><span class="si">{</span><span class="n">tasks</span><span class="si">}</span><span class="s2"> is not a file"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="641">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span data-line="642">    <span class="k">try</span><span class="p">:</span>
+</span><span data-line="643">        <span class="n">golden_tasks</span> <span class="o">=</span> <span class="p">(</span>
+</span><span data-line="644">            <span class="n">evals</span><span class="o">.</span><span class="n">load_golden_tasks</span><span class="p">(</span><span class="n">tasks_path</span><span class="p">)</span> <span class="k">if</span> <span class="n">tasks_path</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span>
+</span><span data-line="645">        <span class="p">)</span>
+</span><span data-line="646">    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># JSONDecodeError is a ValueError</span>
+</span><span data-line="647">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error: cannot read the golden tasks: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="648">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span data-line="649">    <span class="k">if</span> <span class="n">judge</span> <span class="o">==</span> <span class="s2">"anthropic"</span><span class="p">:</span>
+</span><span data-line="650">        <span class="k">try</span><span class="p">:</span>
+</span><span data-line="651">            <span class="n">the_judge</span><span class="p">,</span> <span class="n">agent</span> <span class="o">=</span> <span class="n">evals</span><span class="o">.</span><span class="n">anthropic_judge</span><span class="p">(),</span> <span class="n">evals</span><span class="o">.</span><span class="n">anthropic_agent</span><span class="p">()</span>
+</span><span data-line="652">        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># no SDK (ImportError) or no API key (the SDK's own error)</span>
+</span><span data-line="653">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error: cannot start the paid judge: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="654">            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span data-line="655">    <span class="k">else</span><span class="p">:</span>
+</span><span data-line="656">        <span class="n">the_judge</span><span class="p">,</span> <span class="n">agent</span> <span class="o">=</span> <span class="n">evals</span><span class="o">.</span><span class="n">rubric_judge</span><span class="p">,</span> <span class="n">evals</span><span class="o">.</span><span class="n">echo_agent</span>
+</span><span data-line="657">
+</span><span data-line="658">    <span class="n">config</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">claude_md_content</span>
+</span><span data-line="659">    <span class="n">judged</span> <span class="o">=</span> <span class="p">(</span>
+</span><span data-line="660">        <span class="n">evals</span><span class="o">.</span><span class="n">judge_claude_md</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">judge</span><span class="o">=</span><span class="n">the_judge</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="n">samples</span><span class="p">)</span>
+</span><span data-line="661">        <span class="k">if</span> <span class="n">sr</span><span class="o">.</span><span class="n">claude_md_path</span>
+</span><span data-line="662">        <span class="k">else</span> <span class="kc">None</span>
+</span><span data-line="663">    <span class="p">)</span>
+</span><span data-line="664">    <span class="k">try</span><span class="p">:</span>
+</span><span data-line="665">        <span class="n">golden</span> <span class="o">=</span> <span class="p">(</span>
+</span><span data-line="666">            <span class="n">evals</span><span class="o">.</span><span class="n">run_golden_tasks</span><span class="p">(</span><span class="n">golden_tasks</span><span class="p">,</span> <span class="n">agent</span><span class="o">=</span><span class="n">agent</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span> <span class="n">runs</span><span class="o">=</span><span class="n">runs</span><span class="p">)</span>
+</span><span data-line="667">            <span class="k">if</span> <span class="n">golden_tasks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+</span><span data-line="668">            <span class="k">else</span> <span class="kc">None</span>
+</span><span data-line="669">        <span class="p">)</span>
+</span><span data-line="670">    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># e.g. two tasks share a name</span>
+</span><span data-line="671">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error: bad golden tasks: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="672">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span data-line="673">    <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">"json"</span><span class="p">:</span>
+</span><span data-line="674">        <span class="n">out</span> <span class="o">=</span> <span class="p">{</span>
+</span><span data-line="675">            <span class="s2">"project"</span><span class="p">:</span> <span class="n">root</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+</span><span data-line="676">            <span class="s2">"judge"</span><span class="p">:</span> <span class="n">judged</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">judged</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="677">            <span class="s2">"golden"</span><span class="p">:</span> <span class="n">golden</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">golden</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="678">        <span class="p">}</span>
+</span><span data-line="679">        <span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+</span><span data-line="680">        <span class="k">return</span>
+</span><span data-line="681">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">root</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: evals (report only)"</span><span class="p">)</span>
+</span><span data-line="682">    <span class="nb">print</span><span class="p">(</span><span class="n">judged</span> <span class="k">if</span> <span class="n">judged</span> <span class="k">else</span> <span class="s2">"Judge: no CLAUDE.md to judge"</span><span class="p">)</span>
+</span><span data-line="683">    <span class="k">if</span> <span class="n">golden</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="684">        <span class="nb">print</span><span class="p">(</span><span class="n">golden</span><span class="p">)</span>
+</span><span data-line="685">    <span class="k">else</span><span class="p">:</span>
+</span><span data-line="686">        <span class="nb">print</span><span class="p">(</span>
+</span><span data-line="687">            <span class="sa">f</span><span class="s2">"Golden tasks: none (add </span><span class="si">{</span><span class="n">evals</span><span class="o">.</span><span class="n">DFLT_GOLDEN_TASKS_RELPATH</span><span class="si">}</span><span class="s2"> under the "</span>
+</span><span data-line="688">            <span class="s2">"docs folder, or pass --tasks)"</span>
+</span><span data-line="689">        <span class="p">)</span></div>
+
+</span><span data-line="690">
+</span><span data-line="691">
+</span><span data-line="692"><span class="c1"># The SSOT of the CLI surface: a name -&gt; command mapping, with one nested group.</span>
+</span><span data-line="693"><span class="n">_dispatch_funcs</span> <span class="o">=</span> <span class="p">{</span>
+</span><span data-line="694">    <span class="s2">"diagnose"</span><span class="p">:</span> <span class="n">diagnose</span><span class="p">,</span>
+</span><span data-line="695">    <span class="s2">"generate"</span><span class="p">:</span> <span class="n">generate</span><span class="p">,</span>
+</span><span data-line="696">    <span class="s2">"maintain"</span><span class="p">:</span> <span class="n">maintain</span><span class="p">,</span>
+</span><span data-line="697">    <span class="s2">"recommend"</span><span class="p">:</span> <span class="n">recommend</span><span class="p">,</span>
+</span><span data-line="698">    <span class="s2">"install-skills"</span><span class="p">:</span> <span class="n">install_skills</span><span class="p">,</span>
+</span><span data-line="699">    <span class="s2">"find"</span><span class="p">:</span> <span class="n">find</span><span class="p">,</span>
+</span><span data-line="700">    <span class="s2">"fleet"</span><span class="p">:</span> <span class="n">fleet</span><span class="p">,</span>
+</span><span data-line="701">    <span class="s2">"lint"</span><span class="p">:</span> <span class="n">lint</span><span class="p">,</span>
+</span><span data-line="702">    <span class="s2">"eval"</span><span class="p">:</span> <span class="n">eval_</span><span class="p">,</span>
+</span><span data-line="703">    <span class="s2">"decision"</span><span class="p">:</span> <span class="p">[</span><span class="n">new</span><span class="p">,</span> <span class="n">note</span><span class="p">],</span>
+</span><span data-line="704"><span class="p">}</span>
 </span></pre></div>
         </article><button class="back-to-top" type="button">
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -796,7 +896,7 @@ data-aria-dark="Switch to auto color mode">
     </div>
   </div>
 </footer>
-      <script src="../../_static/documentation_options.js?v=565bc8c8"></script>
+      <script src="../../_static/documentation_options.js?v=9dd25805"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>

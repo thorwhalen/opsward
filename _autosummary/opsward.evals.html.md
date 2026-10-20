@@ -29,11 +29,12 @@ the `anthropic` SDK (`pip install 'opsward[eval]'`) and are never used by defaul
 
 ### Module Attributes
 
-| [`DFLT_JUDGE_MODEL`](#opsward.evals.DFLT_JUDGE_MODEL)   | Default model for the paid judge and agent; override with `model=`.                            |
-|---------------------------------------------------------------------|------------------------------------------------------------------------------------------------|
-| [`JUDGE_RUBRICS`](#opsward.evals.JUDGE_RUBRICS)      | vague "rate the quality" prompts give noise, anchored bands do not.                            |
-| [`Judge`](#opsward.evals.Judge)              | the JSON object above).                                                                        |
-| [`Agent`](#opsward.evals.Agent)              | An agent does a task under a config (CLAUDE.md text; `""` = no config) and returns its output. |
+| [`DFLT_JUDGE_MODEL`](#opsward.evals.DFLT_JUDGE_MODEL)          | Default model for the paid judge and agent; override with `model=`.                                                                         |
+|----------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------|
+| [`JUDGE_RUBRICS`](#opsward.evals.JUDGE_RUBRICS)             | vague "rate the quality" prompts give noise, anchored bands do not.                                                                         |
+| [`Judge`](#opsward.evals.Judge)                     | the JSON object above).                                                                                                                     |
+| [`Agent`](#opsward.evals.Agent)                     | An agent does a task under a config (CLAUDE.md text; `""` = no config) and returns its output.                                              |
+| [`DFLT_GOLDEN_TASKS_RELPATH`](#opsward.evals.DFLT_GOLDEN_TASKS_RELPATH) | Where a repo keeps its golden tasks, relative to its docs folder (`opsward.scan.docs_dir_for()`: `misc/docs` for Python, `docs` for JS/TS). |
 
 ### Functions
 
@@ -41,6 +42,7 @@ the `anthropic` SDK (`pip install 'opsward[eval]'`) and are never used by defaul
 |-----------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------|
 | [`anthropic_judge`](#opsward.evals.anthropic_judge)(\*[, model, client, max_tokens])   | A paid judge over the Messages API.                                                                                             |
 | [`echo_agent`](#opsward.evals.echo_agent)(task, config)                           | The free agent: "does" the task by quoting its config, so a config that states the convention passes and an empty one does not. |
+| [`golden_tasks_path`](#opsward.evals.golden_tasks_path)(scan_result)                     | The default golden-tasks file of a scanned project (it may not exist).                                                          |
 | [`judge_claude_md`](#opsward.evals.judge_claude_md)(content, \*[, judge, ...])         | Score CLAUDE.md `content` on each subjective dimension, `samples` times each.                                                   |
 | [`load_golden_tasks`](#opsward.evals.load_golden_tasks)(path)                            | Tasks from a JSON list of `{"name", "prompt", "expect": [...], "forbid": [...]}`.                                               |
 | [`parse_verdict`](#opsward.evals.parse_verdict)(reply, \*, max_score)                | `(score, reasoning)` from a judge reply: the *last* JSON object in it with a `score`.                                           |
@@ -61,6 +63,11 @@ the `anthropic` SDK (`pip install 'opsward[eval]'`) and are never used by defaul
 An agent does a task under a config (CLAUDE.md text; `""` = no config) and returns its output.
 
 alias of [`Callable`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable)[[[`GoldenTask`](#opsward.evals.GoldenTask), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)], [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
+
+### opsward.evals.DFLT_GOLDEN_TASKS_RELPATH *= 'evals/golden_tasks.json'*
+
+Where a repo keeps its golden tasks, relative to its docs folder
+(`opsward.scan.docs_dir_for()`: `misc/docs` for Python, `docs` for JS/TS).
 
 ### opsward.evals.DFLT_JUDGE_MODEL *= 'claude-opus-5-5'*
 
@@ -150,6 +157,22 @@ convention passes and an empty one does not. It tests the harness, not a model.
 
 * **Return type:**
   [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
+
+### opsward.evals.golden_tasks_path(scan_result)
+
+The default golden-tasks file of a scanned project (it may not exist).
+
+```pycon
+>>> import tempfile
+>>> from opsward.scan import scan
+>>> root = Path(tempfile.mkdtemp())
+>>> _ = (root / "pyproject.toml").write_text("")
+>>> golden_tasks_path(scan(root, claude_config_dir=None)).relative_to(root).as_posix()
+'misc/docs/evals/golden_tasks.json'
+```
+
+* **Return type:**
+  [`Path`](https://docs.python.org/3/library/pathlib.html#pathlib.Path)
 
 ### opsward.evals.judge_claude_md(content, \*, judge=<function rubric_judge>, dimensions=('actionability', 'conciseness'), samples=1)
 

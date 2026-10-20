@@ -1,4 +1,4 @@
-> built 2026-10-20 17:09 UTC from 2e0a6bc (main) · opsward 0.0.33. Details: build_info.json
+> built 2026-10-20 17:34 UTC from 0edb715 (main) · opsward 0.0.34. Details: build_info.json
 
 # index.html.md
 
@@ -243,6 +243,14 @@ print(
 
 `pip install 'opsward[eval]'` for the paid judge and agent. Without them, `judge_claude_md` defaults to `rubric_judge` (opsward’s own rubric, free) and `echo_agent` exercises the golden-task harness without a model.
 
+From the shell, `opsward eval` runs both and exits 0 whenever it ran (a report, never a gate; 2 on a usage error). It finds a repo’s golden tasks at `<docs>/evals/golden_tasks.json` (`misc/docs/` for Python, `docs/` for JS/TS) unless `--tasks` names a file:
+
+```bash
+opsward eval .                                   # free: the rubric judge and the echo agent
+opsward eval . --judge anthropic --samples 3     # paid model calls (pip install 'opsward[eval]')
+opsward eval . --tasks evals.json --runs 5 --format json
+```
+
 ## CI Integration
 
 Use opsward in CI to enforce AI setup quality:
@@ -419,6 +427,7 @@ CLI dispatch for opsward.
 
 | [`diagnose`](_autosummary/opsward.cli.html.md#opsward.cli.diagnose)(\*project_roots[, format, verbose, ...])   | Diagnose the AI agent setup of one or more projects.                                                   |
 |------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------|
+| [`eval_`](_autosummary/opsward.cli.html.md#opsward.cli.eval_)(project_root, \*[, judge, samples, ...])      | Report-only evals of a project's agent setup: an LLM judge of CLAUDE.md, and golden tasks.             |
 | [`find`](_autosummary/opsward.cli.html.md#opsward.cli.find)(query, \*project_roots[, kinds, ...])          | Find assets (skills, agents, docs) across one or more projects by QUERY.                               |
 | [`fleet`](_autosummary/opsward.cli.html.md#opsward.cli.fleet)(\*project_roots[, under, depth, ...])         | Diagnose many projects at once and roll the results up into one fleet report.                          |
 | [`generate`](_autosummary/opsward.cli.html.md#opsward.cli.generate)(\*project_roots[, write, format, ...])     | Generate missing AI setup artifacts for one or more projects.                                          |
@@ -438,6 +447,26 @@ Diagnose the AI agent setup of one or more projects.
   * **format** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – output format — ‘text’ or ‘json’
   * **verbose** ([`bool`](https://docs.python.org/3/builtins/functions.html#bool)) – show additional detail in text output
   * **min_score** ([`int`](https://docs.python.org/3/builtins/functions.html#int)) – minimum overall score to pass (exit 0); below this exits 1
+
+### opsward.cli.eval_(project_root, , judge='rubric', samples=1, tasks='', runs=1, format='text')
+
+Report-only evals of a project’s agent setup: an LLM judge of CLAUDE.md, and golden tasks.
+
+The judge scores CLAUDE.md’s subjective dimensions next to the rubric’s own score. The
+golden tasks (a JSON list of {name, prompt, expect, forbid}, by default
+<docs>/evals/golden_tasks.json) run with and without CLAUDE.md and report the pass-rate
+delta. –judge rubric is free and deterministic (the rubric judge and an agent that
+quotes the config: it checks the harness, not a model); –judge anthropic makes paid
+calls (pip install ‘opsward[eval]’). Exits 0 whenever it ran (a report, never a gate);
+2 only on a usage error.
+
+* **Parameters:**
+  * **project_root** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – the project directory
+  * **judge** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – ‘rubric’ (free) or ‘anthropic’ (paid model calls)
+  * **samples** ([`int`](https://docs.python.org/3/builtins/functions.html#int)) – judge samples per dimension (the median is reported)
+  * **tasks** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – golden-tasks JSON file (default: <docs>/evals/golden_tasks.json, if present)
+  * **runs** ([`int`](https://docs.python.org/3/builtins/functions.html#int)) – runs per golden task and arm
+  * **format** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – output format — ‘text’ or ‘json’
 
 ### opsward.cli.find(query, \*project_roots, kinds='skill,agent', semantic=False, limit=10)
 
@@ -815,11 +844,12 @@ the `anthropic` SDK (`pip install 'opsward[eval]'`) and are never used by defaul
 
 ### Module Attributes
 
-| [`DFLT_JUDGE_MODEL`](_autosummary/opsward.evals.html.md#opsward.evals.DFLT_JUDGE_MODEL)   | Default model for the paid judge and agent; override with `model=`.                            |
-|---------------------------------------------------------------------|------------------------------------------------------------------------------------------------|
-| [`JUDGE_RUBRICS`](_autosummary/opsward.evals.html.md#opsward.evals.JUDGE_RUBRICS)      | vague "rate the quality" prompts give noise, anchored bands do not.                            |
-| [`Judge`](_autosummary/opsward.evals.html.md#opsward.evals.Judge)              | the JSON object above).                                                                        |
-| [`Agent`](_autosummary/opsward.evals.html.md#opsward.evals.Agent)              | An agent does a task under a config (CLAUDE.md text; `""` = no config) and returns its output. |
+| [`DFLT_JUDGE_MODEL`](_autosummary/opsward.evals.html.md#opsward.evals.DFLT_JUDGE_MODEL)          | Default model for the paid judge and agent; override with `model=`.                                                                         |
+|----------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------------------|
+| [`JUDGE_RUBRICS`](_autosummary/opsward.evals.html.md#opsward.evals.JUDGE_RUBRICS)             | vague "rate the quality" prompts give noise, anchored bands do not.                                                                         |
+| [`Judge`](_autosummary/opsward.evals.html.md#opsward.evals.Judge)                     | the JSON object above).                                                                                                                     |
+| [`Agent`](_autosummary/opsward.evals.html.md#opsward.evals.Agent)                     | An agent does a task under a config (CLAUDE.md text; `""` = no config) and returns its output.                                              |
+| [`DFLT_GOLDEN_TASKS_RELPATH`](_autosummary/opsward.evals.html.md#opsward.evals.DFLT_GOLDEN_TASKS_RELPATH) | Where a repo keeps its golden tasks, relative to its docs folder (`opsward.scan.docs_dir_for()`: `misc/docs` for Python, `docs` for JS/TS). |
 
 ### Functions
 
@@ -827,6 +857,7 @@ the `anthropic` SDK (`pip install 'opsward[eval]'`) and are never used by defaul
 |-----------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------|
 | [`anthropic_judge`](_autosummary/opsward.evals.html.md#opsward.evals.anthropic_judge)(\*[, model, client, max_tokens])   | A paid judge over the Messages API.                                                                                             |
 | [`echo_agent`](_autosummary/opsward.evals.html.md#opsward.evals.echo_agent)(task, config)                           | The free agent: "does" the task by quoting its config, so a config that states the convention passes and an empty one does not. |
+| [`golden_tasks_path`](_autosummary/opsward.evals.html.md#opsward.evals.golden_tasks_path)(scan_result)                     | The default golden-tasks file of a scanned project (it may not exist).                                                          |
 | [`judge_claude_md`](_autosummary/opsward.evals.html.md#opsward.evals.judge_claude_md)(content, \*[, judge, ...])         | Score CLAUDE.md `content` on each subjective dimension, `samples` times each.                                                   |
 | [`load_golden_tasks`](_autosummary/opsward.evals.html.md#opsward.evals.load_golden_tasks)(path)                            | Tasks from a JSON list of `{"name", "prompt", "expect": [...], "forbid": [...]}`.                                               |
 | [`parse_verdict`](_autosummary/opsward.evals.html.md#opsward.evals.parse_verdict)(reply, \*, max_score)                | `(score, reasoning)` from a judge reply: the *last* JSON object in it with a `score`.                                           |
@@ -847,6 +878,11 @@ the `anthropic` SDK (`pip install 'opsward[eval]'`) and are never used by defaul
 An agent does a task under a config (CLAUDE.md text; `""` = no config) and returns its output.
 
 alias of [`Callable`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable)[[[`GoldenTask`](_autosummary/opsward.evals.html.md#opsward.evals.GoldenTask), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)], [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
+
+### opsward.evals.DFLT_GOLDEN_TASKS_RELPATH *= 'evals/golden_tasks.json'*
+
+Where a repo keeps its golden tasks, relative to its docs folder
+(`opsward.scan.docs_dir_for()`: `misc/docs` for Python, `docs` for JS/TS).
 
 ### opsward.evals.DFLT_JUDGE_MODEL *= 'claude-opus-5-5'*
 
@@ -936,6 +972,22 @@ convention passes and an empty one does not. It tests the harness, not a model.
 
 * **Return type:**
   [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
+
+### opsward.evals.golden_tasks_path(scan_result)
+
+The default golden-tasks file of a scanned project (it may not exist).
+
+```pycon
+>>> import tempfile
+>>> from opsward.scan import scan
+>>> root = Path(tempfile.mkdtemp())
+>>> _ = (root / "pyproject.toml").write_text("")
+>>> golden_tasks_path(scan(root, claude_config_dir=None)).relative_to(root).as_posix()
+'misc/docs/evals/golden_tasks.json'
+```
+
+* **Return type:**
+  [`Path`](https://docs.python.org/3/library/pathlib.html#pathlib.Path)
 
 ### opsward.evals.judge_claude_md(content, \*, judge=<function rubric_judge>, dimensions=('actionability', 'conciseness'), samples=1)
 
@@ -1793,18 +1845,16 @@ Read a text file, returning ‘’ if it doesn’t exist or can’t be decoded.
 
 # About this build
 
-This documentation was built on **2026-10-20 17:09 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/2e0a6bc8dc3a5b59286ae3c7d8f7a9918eadd9a7"><code>2e0a6bc</code></a> on branch <code>main</code>, for **opsward 0.0.33** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-10-20 17:34 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/0edb715611e6345d0d4fd5df0ef8b2344447ac91"><code>0edb715</code></a> on branch <code>main</code>, for **opsward 0.0.34** (from <code>pyproject.toml</code>).
 
-#### WARNING
-The documentation and the package may be misaligned:
-
-- The documented version (0.0.33) is behind the latest release on PyPI (0.0.34): `pip install opsward` gives newer code than these docs describe.
+#### NOTE
+Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
 
 ## Source
 
 |                     |                                                                                                                                                           |
 |---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/opsward/commit/2e0a6bc8dc3a5b59286ae3c7d8f7a9918eadd9a7"><code>2e0a6bc8dc3a5b59286ae3c7d8f7a9918eadd9a7</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/opsward/commit/0edb715611e6345d0d4fd5df0ef8b2344447ac91"><code>0edb715611e6345d0d4fd5df0ef8b2344447ac91</code></a> |
 | Branch              | <code>main</code>                                                                                                                                         |
 | Tags at this commit | none                                                                                                                                                      |
 | Working tree        | clean                                                                                                                                                     |
@@ -1815,9 +1865,9 @@ The documentation and the package may be misaligned:
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/opsward</code>                                                            |
-| Run          | <a href="https://github.com/thorwhalen/opsward/actions/runs/39463292331">39463292331</a>   |
+| Run          | <a href="https://github.com/thorwhalen/opsward/actions/runs/39466960928">39466960928</a>   |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>2e0a6bc8dc3a5b59286ae3c7d8f7a9918eadd9a7</code> (in the history of the built commit) |
+| Event commit | <code>0edb715611e6345d0d4fd5df0ef8b2344447ac91</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -1842,13 +1892,13 @@ The documentation and the package may be misaligned:
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/opsward/0.0.34/">0.0.34</a>, newer than the documented version (0.0.33).
+Latest release: <a href="https://pypi.org/project/opsward/0.0.34/">0.0.34</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/opsward && cd opsward
-git checkout 2e0a6bc8dc3a5b59286ae3c7d8f7a9918eadd9a7
+git checkout 0edb715611e6345d0d4fd5df0ef8b2344447ac91
 pip install "epythet==0.2.22"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

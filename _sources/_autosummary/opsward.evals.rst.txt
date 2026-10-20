@@ -12,6 +12,7 @@ opsward.evals
       JUDGE_RUBRICS
       Judge
       Agent
+      DFLT_GOLDEN_TASKS_RELPATH
    
    .. rubric:: Functions
 
@@ -20,6 +21,7 @@ opsward.evals
       anthropic_agent
       anthropic_judge
       echo_agent
+      golden_tasks_path
       judge_claude_md
       load_golden_tasks
       parse_verdict

@@ -6,6 +6,7 @@ CLI dispatch for opsward.
 
 | [`diagnose`](#opsward.cli.diagnose)(\*project_roots[, format, verbose, ...])   | Diagnose the AI agent setup of one or more projects.                                                   |
 |------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------|
+| [`eval_`](#opsward.cli.eval_)(project_root, \*[, judge, samples, ...])      | Report-only evals of a project's agent setup: an LLM judge of CLAUDE.md, and golden tasks.             |
 | [`find`](#opsward.cli.find)(query, \*project_roots[, kinds, ...])          | Find assets (skills, agents, docs) across one or more projects by QUERY.                               |
 | [`fleet`](#opsward.cli.fleet)(\*project_roots[, under, depth, ...])         | Diagnose many projects at once and roll the results up into one fleet report.                          |
 | [`generate`](#opsward.cli.generate)(\*project_roots[, write, format, ...])     | Generate missing AI setup artifacts for one or more projects.                                          |
@@ -25,6 +26,26 @@ Diagnose the AI agent setup of one or more projects.
   * **format** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – output format — ‘text’ or ‘json’
   * **verbose** ([`bool`](https://docs.python.org/3/builtins/functions.html#bool)) – show additional detail in text output
   * **min_score** ([`int`](https://docs.python.org/3/builtins/functions.html#int)) – minimum overall score to pass (exit 0); below this exits 1
+
+### opsward.cli.eval_(project_root, , judge='rubric', samples=1, tasks='', runs=1, format='text')
+
+Report-only evals of a project’s agent setup: an LLM judge of CLAUDE.md, and golden tasks.
+
+The judge scores CLAUDE.md’s subjective dimensions next to the rubric’s own score. The
+golden tasks (a JSON list of {name, prompt, expect, forbid}, by default
+<docs>/evals/golden_tasks.json) run with and without CLAUDE.md and report the pass-rate
+delta. –judge rubric is free and deterministic (the rubric judge and an agent that
+quotes the config: it checks the harness, not a model); –judge anthropic makes paid
+calls (pip install ‘opsward[eval]’). Exits 0 whenever it ran (a report, never a gate);
+2 only on a usage error.
+
+* **Parameters:**
+  * **project_root** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – the project directory
+  * **judge** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – ‘rubric’ (free) or ‘anthropic’ (paid model calls)
+  * **samples** ([`int`](https://docs.python.org/3/builtins/functions.html#int)) – judge samples per dimension (the median is reported)
+  * **tasks** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – golden-tasks JSON file (default: <docs>/evals/golden_tasks.json, if present)
+  * **runs** ([`int`](https://docs.python.org/3/builtins/functions.html#int)) – runs per golden task and arm
+  * **format** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – output format — ‘text’ or ‘json’
 
 ### opsward.cli.find(query, \*project_roots, kinds='skill,agent', semantic=False, limit=10)
 

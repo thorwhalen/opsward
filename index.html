@@ -390,6 +390,12 @@ known_issues.md, and content quality.</p>
 </span></pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">'opsward[eval]'</span></code> for the paid judge and agent. Without them, <code class="docutils literal notranslate"><span class="pre">judge_claude_md</span></code> defaults to <code class="docutils literal notranslate"><span class="pre">rubric_judge</span></code> (opsward’s own rubric, free) and <code class="docutils literal notranslate"><span class="pre">echo_agent</span></code> exercises the golden-task harness without a model.</p>
+<p>From the shell, <code class="docutils literal notranslate"><span class="pre">opsward</span> <span class="pre">eval</span></code> runs both and exits 0 whenever it ran (a report, never a gate; 2 on a usage error). It finds a repo’s golden tasks at <code class="docutils literal notranslate"><span class="pre">&lt;docs&gt;/evals/golden_tasks.json</span></code> (<code class="docutils literal notranslate"><span class="pre">misc/docs/</span></code> for Python, <code class="docutils literal notranslate"><span class="pre">docs/</span></code> for JS/TS) unless <code class="docutils literal notranslate"><span class="pre">--tasks</span></code> names a file:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">opsward<span class="w"> </span><span class="nb">eval</span><span class="w"> </span>.<span class="w">                                   </span><span class="c1"># free: the rubric judge and the echo agent</span>
+</span><span data-line="2">opsward<span class="w"> </span><span class="nb">eval</span><span class="w"> </span>.<span class="w"> </span>--judge<span class="w"> </span>anthropic<span class="w"> </span>--samples<span class="w"> </span><span class="m">3</span><span class="w">     </span><span class="c1"># paid model calls (pip install 'opsward[eval]')</span>
+</span><span data-line="3">opsward<span class="w"> </span><span class="nb">eval</span><span class="w"> </span>.<span class="w"> </span>--tasks<span class="w"> </span>evals.json<span class="w"> </span>--runs<span class="w"> </span><span class="m">5</span><span class="w"> </span>--format<span class="w"> </span>json
+</span></pre></div>
+</div>
 </section>
 </section>
 <section id="ci-integration">
@@ -487,7 +493,7 @@ known_issues.md, and content quality.</p>
 </section>
 </section>
 
-<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-10-20 17:09 UTC from <a href="https://github.com/thorwhalen/opsward/commit/2e0a6bc8dc3a5b59286ae3c7d8f7a9918eadd9a7">2e0a6bc</a> (main) · opsward 0.0.33 · <a href="about-this-build.html">about this build</a></p>
+<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-10-20 17:34 UTC from <a href="https://github.com/thorwhalen/opsward/commit/0edb715611e6345d0d4fd5df0ef8b2344447ac91">0edb715</a> (main) · opsward 0.0.34 · <a href="about-this-build.html">about this build</a></p>
         </article><button class="back-to-top" type="button">
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
     <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
@@ -522,7 +528,7 @@ known_issues.md, and content quality.</p>
     </div>
   </div>
 </footer>
-      <script src="_static/documentation_options.js?v=565bc8c8"></script>
+      <script src="_static/documentation_options.js?v=9dd25805"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="_static/clipboard.min.js?v=a7894cd8"></script>
