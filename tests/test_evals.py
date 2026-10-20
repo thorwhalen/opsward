@@ -58,7 +58,7 @@ def test_an_unparseable_reply_is_an_error_not_a_crash():
     assert "n/a" in str(report)
 
 
-@pytest.mark.parametrize("reply", ['{"score": 16}', '{"score": "9"}', '{"score": true}', '{"score": -1}'])
+@pytest.mark.parametrize("reply", ['{"score": 16}', '{"score": 9.5}', '{"score": true}', '{"score": -1}', '{"a": 1}'])
 def test_out_of_range_or_non_integer_scores_are_rejected(reply):
     with pytest.raises(ValueError):
         parse_verdict(reply, max_score=15)
@@ -90,28 +90,59 @@ def test_golden_tasks_measure_what_the_config_changes():
         GoldenTask("no-print", "Log it.", forbid=[r"\bprint\("]),
     ]
     report = run_golden_tasks(tasks, agent=echo_agent, config="Put `*,` before the third arg.", runs=2)
-    assert report.results["keyword-only"] == {"with": 2, "without": 0}
-    assert report.results["no-print"] == {"with": 2, "without": 2}
+    assert report.results["keyword-only"] == {"with": 2, "without": 0, "with_errors": 0, "without_errors": 0}
+    assert report.results["no-print"]["with"] == report.results["no-print"]["without"] == 2
     assert report.delta() == pytest.approx(0.5)
     assert json.loads(json.dumps(report.to_dict()))["delta"] == pytest.approx(0.5)
 
 
-def test_an_agent_error_is_a_failed_run_and_is_recorded():
-    def flaky(task, config):
-        if config:
-            raise RuntimeError("boom")
-        return "ok"
+def test_an_agent_error_is_recorded_and_left_out_of_the_rate():
+    calls = iter([RuntimeError("boom"), "ok", "nope", "nope"])
 
-    report = run_golden_tasks([GoldenTask("t", "p", expect=["ok"])], agent=flaky, config="c")
-    assert report.results["t"] == {"with": 0, "without": 1}
+    def flaky(task, config):
+        out = next(calls)
+        if isinstance(out, Exception):
+            raise out
+        return out
+
+    report = run_golden_tasks([GoldenTask("t", "p", expect=["ok"])], agent=flaky, config="c", runs=2)
+    assert report.results["t"] == {"with": 1, "without": 0, "with_errors": 1, "without_errors": 0}
+    assert report.rate("with") == 1.0 and report.rate("without") == 0.0  # 1/1 completed, 0/2
     assert "with: RuntimeError: boom" in report.errors["t"][0]
+
+
+def test_duplicate_task_names_and_bad_regexes_are_refused():
+    with pytest.raises(ValueError, match="unique"):
+        run_golden_tasks([GoldenTask("a", "p"), GoldenTask("a", "q")], agent=echo_agent, config="")
+    with pytest.raises(ValueError, match="bad regex"):
+        GoldenTask("a", "p", expect=["("])
+    with pytest.raises(ValueError, match="list of regexes"):
+        GoldenTask("a", "p", expect="abc")
+
+
+@pytest.mark.parametrize("reply, score", [
+    ('{"score": 9.0}', 9),
+    ('{"score": "9"}', 9),
+    ('Quote {"a": 1}. Verdict: {"reasoning": "r {x}", "score": 7}', 7),
+    ('{"reasoning": "first", "score": 2}\n{"reasoning": "final", "score": 4}', 4),
+    ('```json\n{"reasoning": "f", "score": 3}\n```', 3),
+])
+def test_verdicts_are_read_robustly(reply, score):
+    assert parse_verdict(reply, max_score=15)[0] == score
+
+
+def test_bad_judge_calls_are_refused():
+    with pytest.raises(ValueError, match="samples"):
+        judge_claude_md(CLAUDE_MD, samples=0)
+    with pytest.raises(ValueError, match="unknown dimension"):
+        judge_claude_md(CLAUDE_MD, dimensions=["vibes"])
 
 
 def test_anthropic_agent_puts_the_config_in_the_system_prompt():
     client = FakeClient("def f(a, b, *, c): ...", "def f(a, b, c): ...")
     agent = anthropic_agent(client=client)
     report = run_golden_tasks([GoldenTask("kw", "Write f.", expect=[r"\*,"])], agent=agent, config="Use *,")
-    assert report.results["kw"] == {"with": 1, "without": 0}
+    assert (report.results["kw"]["with"], report.results["kw"]["without"]) == (1, 0)
     assert client.calls[0]["system"] == "Use *," and "system" not in client.calls[1]
 
 
@@ -121,6 +152,12 @@ def test_golden_tasks_load_from_json(tmp_path):
     assert load_golden_tasks(path) == [GoldenTask("a", "p", ("x",), ())]
     path.write_text("{}")
     with pytest.raises(ValueError, match="JSON list"):
+        load_golden_tasks(path)
+    path.write_text('[{"prompt": "p"}]')
+    with pytest.raises(ValueError, match="task 0: needs a string `name`"):
+        load_golden_tasks(path)
+    path.write_text('[{"name": "a", "prompt": "p", "expect": "abc"}]')
+    with pytest.raises(ValueError, match="must be a list"):
         load_golden_tasks(path)
 
 
