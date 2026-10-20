@@ -15,6 +15,7 @@
    data
    decisions
    discover
+   fleet
    generate
    maintain
    recommend

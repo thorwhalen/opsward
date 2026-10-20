@@ -1,4 +1,4 @@
-> built 2026-10-20 07:07 UTC from ac0d00e (main) · opsward 0.0.24. Details: build_info.json
+> built 2026-10-20 15:14 UTC from e7e67b4 (main) · opsward 0.0.25. Details: build_info.json
 
 # index.html.md
 
@@ -665,6 +665,22 @@ Harvests the requested `kinds` (comma-separated string or a sequence of
 backend (needs `toolery[ir]`). Defaults to the current directory when no roots given.
 
 
+# _autosummary/opsward.fleet.html.md
+
+# opsward.fleet
+
+### opsward.fleet(roots, \*, diagnose_root=<function \_diagnose_root>, check_dirs=True)
+
+Diagnose every root and aggregate. A root that fails is recorded, never fatal.
+
+* **Parameters:**
+  * **roots** ([`Iterable`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterable)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str) | [`Path`](https://docs.python.org/3/library/pathlib.html#pathlib.Path)]) – project directories, e.g. `git_roots_under(parent)`.
+  * **diagnose_root** ([`Callable`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable)[[[`Path`](https://docs.python.org/3/library/pathlib.html#pathlib.Path)], [`DiagnosisReport`](_autosummary/opsward.base.html.md#opsward.base.DiagnosisReport)]) – `Path -> DiagnosisReport`; defaults to `diagnose(scan(root))`.
+  * **check_dirs** ([`bool`](https://docs.python.org/3/builtins/functions.html#bool)) – record a root that is not a directory as an error.
+* **Return type:**
+  `FleetReport`
+
+
 # _autosummary/opsward.generate.html.md
 
 # opsward.generate
@@ -699,6 +715,7 @@ Diagnose, generate, and maintain the AI agent setup of your projects.
 | [`data`](_autosummary/opsward.data.html.md#module-opsward.data)                                           | Bundled package resources for opsward, accessed via `importlib.resources.files("opsward.data")`. |
 | [`decisions`](_autosummary/opsward.decisions.html.md#module-opsward.decisions)                                 | Decision capture: numbered ADRs, the one-line decision log, and their drift.                     |
 | [`discover`](_autosummary/opsward.discover.html.md#module-opsward.discover)                                   | Optional cross-repo asset discovery, delegating to the `toolery` package.                        |
+| [`fleet`](_autosummary/opsward.fleet.html.md#opsward.fleet)(roots, \*[, diagnose_root, check_dirs])        | Diagnose every root and aggregate.                                                               |
 | [`generate`](_autosummary/opsward.generate.html.md#opsward.generate)(scan_result, \*[, agents_md, hooks])     | Determine which artifacts are missing, render templates, return files to create.                 |
 | [`maintain`](_autosummary/opsward.maintain.html.md#opsward.maintain)(scan_result, \*[, previous_report, ...]) | Detect maintenance issues and return suggestions.                                                |
 | [`recommend`](_autosummary/opsward.recommend.html.md#module-opsward.recommend)                                 | Recommend skills from the ecosystem based on project tech stack.                                 |
@@ -1182,16 +1199,18 @@ Read a text file, returning ‘’ if it doesn’t exist or can’t be decoded.
 
 # About this build
 
-This documentation was built on **2026-10-20 07:07 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/ac0d00e45bef071548b588177bd8bf37952c7858"><code>ac0d00e</code></a> on branch <code>main</code>, for **opsward 0.0.24** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-10-20 15:14 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/e7e67b48a291b19be1cba596b8f520ea3805d4e2"><code>e7e67b4</code></a> on branch <code>main</code>, for **opsward 0.0.25** (from <code>pyproject.toml</code>).
 
-#### NOTE
-Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
+#### WARNING
+The documentation and the package may be misaligned:
+
+- The documented version (0.0.25) is behind the latest release on PyPI (0.0.26): `pip install opsward` gives newer code than these docs describe.
 
 ## Source
 
 |                     |                                                                                                                                                           |
 |---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/opsward/commit/ac0d00e45bef071548b588177bd8bf37952c7858"><code>ac0d00e45bef071548b588177bd8bf37952c7858</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/opsward/commit/e7e67b48a291b19be1cba596b8f520ea3805d4e2"><code>e7e67b48a291b19be1cba596b8f520ea3805d4e2</code></a> |
 | Branch              | <code>main</code>                                                                                                                                         |
 | Tags at this commit | none                                                                                                                                                      |
 | Working tree        | clean                                                                                                                                                     |
@@ -1202,15 +1221,15 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/opsward</code>                                                            |
-| Run          | <a href="https://github.com/thorwhalen/opsward/actions/runs/39384315177">39384315177</a>   |
+| Run          | <a href="https://github.com/thorwhalen/opsward/actions/runs/39446270728">39446270728</a>   |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>ac0d00e45bef071548b588177bd8bf37952c7858</code> (in the history of the built commit) |
+| Event commit | <code>e7e67b48a291b19be1cba596b8f520ea3805d4e2</code> (in the history of the built commit) |
 
 ## Tools
 
 |          |         |
 |----------|---------|
-| epythet  | 0.2.18  |
+| epythet  | 0.2.21  |
 | Sphinx   | 9.1.1   |
 | docutils | 0.22.4  |
 | Python   | 3.12.15 |
@@ -1229,14 +1248,14 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/opsward/0.0.24/">0.0.24</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/opsward/0.0.26/">0.0.26</a>, newer than the documented version (0.0.25).
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/opsward && cd opsward
-git checkout ac0d00e45bef071548b588177bd8bf37952c7858
-pip install "epythet==0.2.18"
+git checkout e7e67b48a291b19be1cba596b8f520ea3805d4e2
+pip install "epythet==0.2.21"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
 

@@ -1,0 +1,6 @@
+opsward.fleet
+=============
+
+.. currentmodule:: opsward
+
+.. autofunction:: fleet

@@ -10,6 +10,7 @@ Diagnose, generate, and maintain the AI agent setup of your projects.
 | [`data`](opsward.data.html.md#module-opsward.data)                                           | Bundled package resources for opsward, accessed via `importlib.resources.files("opsward.data")`. |
 | [`decisions`](opsward.decisions.html.md#module-opsward.decisions)                                 | Decision capture: numbered ADRs, the one-line decision log, and their drift.                     |
 | [`discover`](opsward.discover.html.md#module-opsward.discover)                                   | Optional cross-repo asset discovery, delegating to the `toolery` package.                        |
+| [`fleet`](opsward.fleet.html.md#opsward.fleet)(roots, \*[, diagnose_root, check_dirs])        | Diagnose every root and aggregate.                                                               |
 | [`generate`](opsward.generate.html.md#opsward.generate)(scan_result, \*[, agents_md, hooks])     | Determine which artifacts are missing, render templates, return files to create.                 |
 | [`maintain`](opsward.maintain.html.md#opsward.maintain)(scan_result, \*[, previous_report, ...]) | Detect maintenance issues and return suggestions.                                                |
 | [`recommend`](opsward.recommend.html.md#module-opsward.recommend)                                 | Recommend skills from the ecosystem based on project tech stack.                                 |
