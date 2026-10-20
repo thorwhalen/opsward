@@ -298,12 +298,16 @@ def _check_config_changelog(sr: ScanResult) -> Iterable[MaintenanceSuggestion]:
     """Flag agent-config commits newer than the last commit to ``config_changelog.md``."""
     from opsward.scan import docs_dir_for
 
-    log = docs_dir_for(sr.project_root, sr.project_type, sr.docs_guide_path) / CONFIG_CHANGELOG
+    log = (
+        docs_dir_for(sr.project_root, sr.project_type, sr.docs_guide_path)
+        / CONFIG_CHANGELOG
+    )
     if not log.is_file() or not (sr.project_root / ".git").exists():
         return
     logged = _last_commit_time(sr.project_root, [log])
     changed = _last_commit_time(
-        sr.project_root, [sr.project_root / p for p in CONFIG_PATHS if (sr.project_root / p).exists()]
+        sr.project_root,
+        [sr.project_root / p for p in CONFIG_PATHS if (sr.project_root / p).exists()],
     )
     if logged is not None and changed is not None and changed > logged:
         rel = log.relative_to(sr.project_root).as_posix()
