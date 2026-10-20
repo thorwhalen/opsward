@@ -44,8 +44,17 @@ class Advisory:
 #: SKILL.md, every agent definition and every hooks command.
 TEXT_RULES: dict[str, tuple[re.Pattern, str]] = {
     "remote-code": (
-        re.compile(r"\b(curl|wget)\b[^\n|]*\|\s*(sudo\s+)?(ba|z)?sh\b"),
-        "pipes a download straight into a shell; pin a checksum or vendor the script",
+        re.compile(
+            r"\b(curl|wget)\b[^\n|]*\|\s*(?:sudo\b[^|\n]*?\s|env\s+|/\S*/)?"
+            r"(?:(?:ba|z|da|k|a)?sh\b"  # `| sh`, `| sudo -E bash`
+            # an interpreter reading its *program* from the pipe (`| python3 -`), not a
+            # local script reading data from it (`| python3 -c '…json…'`)
+            r"|(?:python[\d.]*|node|perl|ruby)(?=[ \t]*(?:-[ \t]*)?(?:$|[;&|)])))"
+            r"|(?:ba|z)?sh\s+<\(\s*(curl|wget)\b"  # `bash <(curl …)`
+            r"|\b(?:ba|z)?sh\s+-c\s+[\"']?\$\(\s*(curl|wget)\b",  # `sh -c "$(curl …)"`
+            re.M,
+        ),
+        "runs a download straight from the network; pin a checksum or vendor the script",
     ),
     "dynamic-exec": (
         re.compile(r"(^|[\s;&|`(])eval\s+[\"'$`]"),
@@ -65,16 +74,52 @@ TEXT_RULES: dict[str, tuple[re.Pattern, str]] = {
     ),
 }
 
-_UNPINNED = re.compile(r"\b(npx|uvx|pipx\s+run|bunx)\s+(-y\s+|--yes\s+)?(?P<pkg>[@\w][\w@/.\-]*)")
+#: Commands that fetch and run a registry package; and their flags naming the package.
+_RUNNERS = {"npx", "uvx", "bunx", "pnpx"}
+_PACKAGE_FLAGS = {"-p", "--package", "--from", "--with"}
+_SEPARATORS = {";", "&&", "||", "|", "&"}
+
+
+def _is_pinned(spec: str) -> bool:
+    """``pkg@1.2``, ``@scope/pkg@1.2``, ``pkg==1.2`` are pinned; ``pkg``, ``pkg@latest`` are not."""
+    if re.search(r"(==|~=|===)\s*\d", spec):
+        return True
+    name, _, version = spec[1:].partition("@") if spec.startswith("@") else spec.partition("@")
+    return bool(version) and version not in ("latest", "next", "*")
 
 
 def _unpinned(command: str) -> Iterator[str]:
-    """Packages a command runs from a registry without a version pin."""
-    for m in _UNPINNED.finditer(command):
-        pkg = m.group("pkg")
-        name_part = pkg[1:] if pkg.startswith("@") else pkg
-        if "@" not in name_part and "==" not in pkg:
-            yield pkg
+    """Packages a command runs from a registry without a version pin.
+
+    >>> list(_unpinned("npx -y srv && uvx ruff==0.6 check && uvx --from black black . && npx @a/b@1.0"))
+    ['srv', 'black']
+    >>> list(_unpinned("npx pkg@latest; uvx git+https://x/y; npx github:a/b; pipx run tool"))
+    ['pkg@latest', 'tool']
+    """
+    tokens = re.findall(r"""[^\s;&|'"]+|&&|\|\||[;&|]""", command)
+    i = 0
+    while i < len(tokens):
+        token = tokens[i]
+        is_runner = token in _RUNNERS or (token == "pipx" and i + 1 < len(tokens) and tokens[i + 1] == "run")
+        i += 2 if token == "pipx" and is_runner else 1
+        if not is_runner:
+            continue
+        specs, positional = [], None
+        while i < len(tokens) and tokens[i] not in _SEPARATORS:
+            t = tokens[i]
+            if t in _PACKAGE_FLAGS and i + 1 < len(tokens):
+                specs.append(tokens[i + 1])
+                i += 2
+                continue
+            if positional is None and not t.startswith("-"):
+                positional = t
+            i += 1
+        specs = specs or ([positional] if positional else [])
+        for spec in specs:
+            if any(c in spec for c in ":+") or spec.startswith((".", "/", "~")):
+                continue  # a URL, a git or path source: not a registry name
+            if not _is_pinned(spec):
+                yield spec
 
 
 def _rel(path: Path, root: Path) -> str:
@@ -84,17 +129,39 @@ def _rel(path: Path, root: Path) -> str:
         return path.name
 
 
+def _as_list(value) -> list:
+    return value if isinstance(value, list) else []
+
+
 def _hook_commands(cfg) -> Iterator[str]:
     hooks = cfg.get("hooks") if isinstance(cfg, dict) else None
-    for entries in (hooks or {}).values() if isinstance(hooks, dict) else ():
-        for entry in entries if isinstance(entries, list) else ():
-            for hook in entry.get("hooks", []) if isinstance(entry, dict) else ():
+    for entries in hooks.values() if isinstance(hooks, dict) else ():
+        for entry in _as_list(entries):
+            for hook in _as_list(entry.get("hooks")) if isinstance(entry, dict) else ():
                 if isinstance(hook, dict) and isinstance(hook.get("command"), str):
                     yield hook["command"]
 
 
+def _json_files(root: Path, names) -> Iterator[tuple[str, object]]:
+    for name in names:
+        path = root / name
+        try:
+            yield _rel(path, root), json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+
+
+def _hook_texts(root: Path) -> Iterator[tuple[str, str]]:
+    """Every hooks-bearing file's commands, one per line (the same files ``lint`` reads)."""
+    from opsward.lint import HOOKS_FILES
+
+    for where, data in _json_files(root, [f".claude/{n}" for n in HOOKS_FILES]):
+        if commands := list(_hook_commands(data)):
+            yield where, "\n".join(commands)
+
+
 def _texts(sr: ScanResult) -> Iterator[tuple[str, str]]:
-    """``(repo-relative path, text)`` for every config text the rules read."""
+    """``(repo-relative path, text)`` for every prose config text the rules read."""
     root = sr.project_root
     if sr.claude_md_content:
         yield _rel(sr.claude_md_path or root / "CLAUDE.md", root), sr.claude_md_content
@@ -105,19 +172,12 @@ def _texts(sr: ScanResult) -> Iterator[tuple[str, str]]:
             yield _rel(skill.path / "SKILL.md", root), read_text_safe(skill.path / "SKILL.md")
     for agent in sr.agents:
         yield _rel(agent.path, root), read_text_safe(agent.path)
-    if sr.hooks_path is not None and sr.hooks_config is not None:
-        yield _rel(sr.hooks_path, root), "\n".join(_hook_commands(sr.hooks_config))
 
 
 def _settings(root: Path) -> Iterator[tuple[str, dict]]:
-    for name in ("settings.json", "settings.local.json"):
-        path = root / ".claude" / name
-        try:
-            data = json.loads(path.read_text(encoding="utf-8"))
-        except (OSError, ValueError):
-            continue
+    for where, data in _json_files(root, [".claude/settings.json", ".claude/settings.local.json"]):
         if isinstance(data, dict):
-            yield _rel(path, root), data
+            yield where, data
 
 
 def _skill_tools(sr: ScanResult) -> Iterator[Advisory]:
@@ -139,31 +199,35 @@ def _permission_advisories(root: Path) -> Iterator[Advisory]:
             yield Advisory(where, "tool-over-grant", f"`permissions.allow` grants {', '.join(broad)}; allow specific commands")
         for server, spec in (data.get("mcpServers") or {}).items() if isinstance(data.get("mcpServers"), dict) else ():
             yield from _mcp_advisories(where, server, spec)
-    mcp = root / ".mcp.json"
-    try:
-        servers = json.loads(mcp.read_text(encoding="utf-8")).get("mcpServers", {})
-    except (OSError, ValueError, AttributeError):
-        servers = {}
-    for server, spec in servers.items() if isinstance(servers, dict) else ():
-        yield from _mcp_advisories(".mcp.json", server, spec)
+    for where, data in _json_files(root, [".mcp.json"]):
+        servers = data.get("mcpServers") if isinstance(data, dict) else None
+        for server, spec in servers.items() if isinstance(servers, dict) else ():
+            yield from _mcp_advisories(where, server, spec)
 
 
 def _mcp_advisories(where: str, server: str, spec) -> Iterator[Advisory]:
     if not isinstance(spec, dict):
         return
-    command = " ".join(str(p) for p in [spec.get("command", ""), *spec.get("args", [])] if p)
-    for pkg in _unpinned(command):
+    command = spec.get("command")
+    parts = command if isinstance(command, list) else [command] if isinstance(command, str) else []
+    command_line = " ".join(str(p) for p in [*parts, *_as_list(spec.get("args"))])
+    for pkg in _unpinned(command_line):
         yield Advisory(where, "unpinned-dependency", f"MCP server `{server}` runs `{pkg}` unpinned; pin a version")
 
 
+def _text_advisories(where: str, text: str) -> Iterator[Advisory]:
+    for risk, (pattern, advice) in TEXT_RULES.items():
+        if pattern.search(text):
+            yield Advisory(where, risk, advice)
+
+
 def security_advisories(sr: ScanResult) -> Iterator[Advisory]:
-    """Every advisory for the scanned project: text rules, unpinned hook packages, tool grants."""
+    """Every advisory for the scanned project: text rules, hook commands, tool grants."""
     for where, text in _texts(sr):
-        for risk, (pattern, advice) in TEXT_RULES.items():
-            if pattern.search(text):
-                yield Advisory(where, risk, advice)
-        if where == _rel(sr.hooks_path, sr.project_root) if sr.hooks_path else False:
-            for pkg in _unpinned(text):
-                yield Advisory(where, "unpinned-dependency", f"a hook runs `{pkg}` unpinned; pin a version")
+        yield from _text_advisories(where, text)
+    for where, commands in _hook_texts(sr.project_root):
+        yield from _text_advisories(where, commands)
+        for pkg in _unpinned(commands):
+            yield Advisory(where, "unpinned-dependency", f"a hook runs `{pkg}` unpinned; pin a version")
     yield from _skill_tools(sr)
     yield from _permission_advisories(sr.project_root)

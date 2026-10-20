@@ -114,6 +114,11 @@ def diagnose(
 
     from opsward import security  # advisory dimension: reported, never weighted
 
+    try:
+        advisories = list(security.security_advisories(scan_result))
+    except Exception as error:  # a heuristic must never take the report down with it
+        advisories = [security.Advisory(".", "check-failed", f"{type(error).__name__}: {error}")]
+
     return DiagnosisReport(
         project_root=scan_result.project_root,
         project_type=scan_result.project_type,
@@ -121,7 +126,7 @@ def diagnose(
         missing_items=missing,
         suggestions=suggestions,
         weighted_score=weighted,
-        advisories=list(security.security_advisories(scan_result)),
+        advisories=advisories,
     )
 
 
