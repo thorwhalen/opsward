@@ -68,6 +68,7 @@ python -m opsward maintain /path/to/project            # Check for staleness/dri
 python -m opsward recommend /path/to/project           # Recommend ecosystem skills from tech stack
 python -m opsward fleet --under /path/to/projects      # Diagnose every repo under a folder, rolled up
 python -m opsward lint /path/to/project               # Strict spec/config lint (exit 1 on any finding)
+python -m opsward eval /path/to/project               # Report-only evals: LLM judge + golden tasks (free rubric judge by default)
 python -m opsward install-skills --write               # Install Claude Code skills
 python -m opsward decision new "title" --write          # Allocate the next numbered ADR
 python -m opsward decision note "In the context of …" --write   # One-line decision in misc/docs/decisions/log.md

@@ -6,9 +6,9 @@
       ],
       "returncode": 0,
       "stderr": "",
-      "stdout": "usage: opsward [-h]\n               {diagnose,generate,maintain,recommend,install-skills,find,fleet,lint,decision} ...\n\npositional arguments:\n  {diagnose,generate,maintain,recommend,install-skills,find,fleet,lint,decision}\n    diagnose            Diagnose the AI agent setup of one or more projects. :param project_roots:\n                        one or more paths to project directories :param format: output format —\n                        'text' or 'json' :param verbose: show additional detail in text output\n                        :param min_score: minimum overall score to pass (exit 0); below this exits\n                        1\n    generate            Generate missing AI setup artifacts for one or more projects. By default,\n                        shows what would be created (dry run). Use --write to actually write\n                        files. Existing files are never overwritten. :param project_roots: one or\n                        more paths to project directories :param write: actually write files\n                        (default: dry run) :param format: output format — 'text' or 'json' :param\n                        agents_md: also generate AGENTS.md (cross-platform agent instructions)\n                        :param hooks: also generate starter hook scripts\n    maintain            Check for stale references, out-of-sync docs, and other drift. Each\n                        finding carries a recommended triage: align (update the config to match\n                        the code), revert (restore the code the config describes) or ignore (a\n                        legitimately volatile reference: put `opsward: ignore-path` on its line).\n                        :param project_roots: one or more paths to project directories :param\n                        format: output format — 'text' or 'json'\n    recommend           Recommend ecosystem skills based on the project's tech stack. Analyzes\n                        dependencies and suggests skills from the community catalog. :param\n                        project_roots: one or more paths to project directories :param format:\n                        output format — 'text' or 'json'\n    install-skills      Install opsward's Claude Code skills (and agents) into a project or\n                        globally. By default, shows what would be created (dry run). Use --write\n                        to actually write files. Existing files are never overwritten. :param\n                        target: project directory (ignored when --global is set) :param\n                        global_install: install into ~/.claude/ instead of the project :param\n                        agents: also install agent definitions (default: True) :param write:\n                        actually write files (default: dry run)\n    find                Find assets (skills, agents, docs) across one or more projects by QUERY.\n                        Cross-repo asset discovery via the toolery package (install with: pip\n                        install 'opsward[discovery]'). :param query: search query :param\n                        project_roots: one or more project directories (default: current dir)\n                        :param kinds: comma-separated asset kinds — skill, agent, doc :param\n                        semantic: use toolery's ir semantic backend (needs toolery[ir]) :param\n                        limit: max results to show\n    fleet               Diagnose many projects at once and roll the results up into one fleet\n                        report. The fleet is the given roots, plus the git repos found under\n                        --under. With --manifest the fleet is remembered: the roots and the latest\n                        summary are written to that JSON file, and a later run with only\n                        --manifest re-diagnoses the same roots (given roots or --under replace\n                        them). The manifest holds this machine's absolute paths, so keep it out of\n                        version control. Exits 1 when any root could not be diagnosed. :param\n                        project_roots: project directories to diagnose :param under: also diagnose\n                        every git repo found under this directory :param depth: how many levels\n                        below --under to look for git repos :param format: output format — 'text'\n                        or 'json' (the name-keyed summary) :param manifest: JSON file that\n                        remembers the fleet's roots and its latest summary\n    lint                Check skill specs and the hooks config: pass or fail, no score (exit 1 on\n                        any finding). The strict counterpart of `diagnose --min-score`, for CI and\n                        pre-commit. Validators: opsward (its own agentskills.io check, always\n                        there), skill (the skill package's validate(); pip install\n                        'opsward[lint]'), and the external agnix and skillcheck linters (opt-in by\n                        name). auto runs opsward and skill, each when installed. :param\n                        project_roots: one or more project directories (default: current dir)\n                        :param validators: 'auto', or a comma list of: opsward, skill, agnix,\n                        skillcheck :param format: output format — 'text' or 'json'\n    decision\n\noptions:\n  -h, --help            show this help message and exit\n",
+      "stdout": "usage: opsward [-h]\n               {diagnose,generate,maintain,recommend,install-skills,find,fleet,lint,eval,decision}\n               ...\n\npositional arguments:\n  {diagnose,generate,maintain,recommend,install-skills,find,fleet,lint,eval,decision}\n    diagnose            Diagnose the AI agent setup of one or more projects. :param project_roots:\n                        one or more paths to project directories :param format: output format —\n                        'text' or 'json' :param verbose: show additional detail in text output\n                        :param min_score: minimum overall score to pass (exit 0); below this exits\n                        1\n    generate            Generate missing AI setup artifacts for one or more projects. By default,\n                        shows what would be created (dry run). Use --write to actually write\n                        files. Existing files are never overwritten. :param project_roots: one or\n                        more paths to project directories :param write: actually write files\n                        (default: dry run) :param format: output format — 'text' or 'json' :param\n                        agents_md: also generate AGENTS.md (cross-platform agent instructions)\n                        :param hooks: also generate starter hook scripts\n    maintain            Check for stale references, out-of-sync docs, and other drift. Each\n                        finding carries a recommended triage: align (update the config to match\n                        the code), revert (restore the code the config describes) or ignore (a\n                        legitimately volatile reference: put `opsward: ignore-path` on its line).\n                        :param project_roots: one or more paths to project directories :param\n                        format: output format — 'text' or 'json'\n    recommend           Recommend ecosystem skills based on the project's tech stack. Analyzes\n                        dependencies and suggests skills from the community catalog. :param\n                        project_roots: one or more paths to project directories :param format:\n                        output format — 'text' or 'json'\n    install-skills      Install opsward's Claude Code skills (and agents) into a project or\n                        globally. By default, shows what would be created (dry run). Use --write\n                        to actually write files. Existing files are never overwritten. :param\n                        target: project directory (ignored when --global is set) :param\n                        global_install: install into ~/.claude/ instead of the project :param\n                        agents: also install agent definitions (default: True) :param write:\n                        actually write files (default: dry run)\n    find                Find assets (skills, agents, docs) across one or more projects by QUERY.\n                        Cross-repo asset discovery via the toolery package (install with: pip\n                        install 'opsward[discovery]'). :param query: search query :param\n                        project_roots: one or more project directories (default: current dir)\n                        :param kinds: comma-separated asset kinds — skill, agent, doc :param\n                        semantic: use toolery's ir semantic backend (needs toolery[ir]) :param\n                        limit: max results to show\n    fleet               Diagnose many projects at once and roll the results up into one fleet\n                        report. The fleet is the given roots, plus the git repos found under\n                        --under. With --manifest the fleet is remembered: the roots and the latest\n                        summary are written to that JSON file, and a later run with only\n                        --manifest re-diagnoses the same roots (given roots or --under replace\n                        them). The manifest holds this machine's absolute paths, so keep it out of\n                        version control. Exits 1 when any root could not be diagnosed. :param\n                        project_roots: project directories to diagnose :param under: also diagnose\n                        every git repo found under this directory :param depth: how many levels\n                        below --under to look for git repos :param format: output format — 'text'\n                        or 'json' (the name-keyed summary) :param manifest: JSON file that\n                        remembers the fleet's roots and its latest summary\n    lint                Check skill specs and the hooks config: pass or fail, no score (exit 1 on\n                        any finding). The strict counterpart of `diagnose --min-score`, for CI and\n                        pre-commit. Validators: opsward (its own agentskills.io check, always\n                        there), skill (the skill package's validate(); pip install\n                        'opsward[lint]'), and the external agnix and skillcheck linters (opt-in by\n                        name). auto runs opsward and skill, each when installed. :param\n                        project_roots: one or more project directories (default: current dir)\n                        :param validators: 'auto', or a comma list of: opsward, skill, agnix,\n                        skillcheck :param format: output format — 'text' or 'json'\n    eval                Report-only evals of a project's agent setup: an LLM judge of CLAUDE.md,\n                        and golden tasks. The judge scores CLAUDE.md's subjective dimensions next\n                        to the rubric's own score. The golden tasks (a JSON list of {name, prompt,\n                        expect, forbid}, by default <docs>/evals/golden_tasks.json) run with and\n                        without CLAUDE.md and report the pass-rate delta. --judge rubric is free\n                        and deterministic (the rubric judge and an agent that quotes the config:\n                        it checks the harness, not a model); --judge anthropic makes paid calls\n                        (pip install 'opsward[eval]'). Exits 0 whenever it ran (a report, never a\n                        gate); 2 only on a usage error. :param project_root: the project directory\n                        :param judge: 'rubric' (free) or 'anthropic' (paid model calls) :param\n                        samples: judge samples per dimension (the median is reported) :param\n                        tasks: golden-tasks JSON file (default: <docs>/evals/golden_tasks.json, if\n                        present) :param runs: runs per golden task and arm :param format: output\n                        format — 'text' or 'json'\n    decision\n\noptions:\n  -h, --help            show this help message and exit\n",
       "tier": 3,
-      "usage": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,fleet,lint,decision} ..."
+      "usage": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,fleet,lint,eval,decision} ..."
     },
     {
       "argv": [
@@ -97,6 +97,17 @@
       "stdout": "usage: opsward lint [-h] [-v VALIDATORS] [-f FORMAT] [project-roots ...]\n\nCheck skill specs and the hooks config: pass or fail, no score (exit 1 on any finding).\n\nThe strict counterpart of `diagnose --min-score`, for CI and pre-commit. Validators:\nopsward (its own agentskills.io check, always there), skill (the skill package's\nvalidate(); pip install 'opsward[lint]'), and the external agnix and skillcheck\nlinters (opt-in by name). auto runs opsward and skill, each when installed.\n\n:param project_roots: one or more project directories (default: current dir)\n:param validators: 'auto', or a comma list of: opsward, skill, agnix, skillcheck\n:param format: output format — 'text' or 'json'\n\npositional arguments:\n  project-roots         -\n\noptions:\n  -h, --help            show this help message and exit\n  -v VALIDATORS, --validators VALIDATORS\n                        'auto'\n  -f FORMAT, --format FORMAT\n                        'text'\n",
       "tier": 3,
       "usage": "usage: opsward lint [-h] [-v VALIDATORS] [-f FORMAT] [project-roots ...]"
+    },
+    {
+      "argv": [
+        "eval",
+        "--help"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "usage: opsward eval [-h] [-j JUDGE] [-s SAMPLES] [-t TASKS] [-r RUNS] [-f FORMAT] project-root\n\nReport-only evals of a project's agent setup: an LLM judge of CLAUDE.md, and golden tasks.\n\nThe judge scores CLAUDE.md's subjective dimensions next to the rubric's own score. The\ngolden tasks (a JSON list of {name, prompt, expect, forbid}, by default\n<docs>/evals/golden_tasks.json) run with and without CLAUDE.md and report the pass-rate\ndelta. --judge rubric is free and deterministic (the rubric judge and an agent that\nquotes the config: it checks the harness, not a model); --judge anthropic makes paid\ncalls (pip install 'opsward[eval]'). Exits 0 whenever it ran (a report, never a gate);\n2 only on a usage error.\n\n:param project_root: the project directory\n:param judge: 'rubric' (free) or 'anthropic' (paid model calls)\n:param samples: judge samples per dimension (the median is reported)\n:param tasks: golden-tasks JSON file (default: <docs>/evals/golden_tasks.json, if present)\n:param runs: runs per golden task and arm\n:param format: output format — 'text' or 'json'\n\npositional arguments:\n  project-root          -\n\noptions:\n  -h, --help            show this help message and exit\n  -j JUDGE, --judge JUDGE\n                        'rubric'\n  -s SAMPLES, --samples SAMPLES\n                        1\n  -t TASKS, --tasks TASKS\n                        ''\n  -r RUNS, --runs RUNS  1\n  -f FORMAT, --format FORMAT\n                        'text'\n",
+      "tier": 3,
+      "usage": "usage: opsward eval [-h] [-j JUDGE] [-s SAMPLES] [-t TASKS] [-r RUNS] [-f FORMAT] project-root"
     },
     {
       "argv": [
@@ -235,6 +246,73 @@
       "returncode": 0,
       "stderr": "",
       "stdout": "bare_project: clean (opsward)\n",
+      "tier": 1,
+      "usage": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "tests/fixtures/python_project"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "python_project: evals (report only)\nJudge: rubric\n  actionability: 15/15 (rubric 15/15)\n  conciseness: 15/15 (rubric 15/15)\nGolden tasks: none (add evals/golden_tasks.json under the docs folder, or pass --tasks)\n",
+      "tier": 1,
+      "usage": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "tests/fixtures/bare_project",
+        "--samples",
+        "2"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "bare_project: evals (report only)\nJudge: no CLAUDE.md to judge\nGolden tasks: none (add evals/golden_tasks.json under the docs folder, or pass --tasks)\n",
+      "tier": 1,
+      "usage": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "tests/fixtures/python_project",
+        "--tasks",
+        "tests/fixtures/golden_tasks.json",
+        "--runs",
+        "2"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "python_project: evals (report only)\nJudge: rubric\n  actionability: 15/15 (rubric 15/15)\n  conciseness: 15/15 (rubric 15/15)\nGolden tasks: 2 x 2 run(s); pass rate 100% with the config, 50% without (delta +50%)\n  formatter: 2/2 with, 0/2 without\n  no-tabs: 2/2 with, 2/2 without\n",
+      "tier": 1,
+      "usage": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "tests/fixtures/python_project",
+        "--tasks",
+        "tests/fixtures/golden_tasks.json",
+        "--format",
+        "json"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "{\n  \"project\": \"python_project\",\n  \"judge\": {\n    \"judge\": \"rubric\",\n    \"scores\": {\n      \"actionability\": {\n        \"score\": 15,\n        \"max_score\": 15,\n        \"rubric_score\": 15,\n        \"samples\": [\n          15\n        ],\n        \"reasoning\": [\n          \"rubric score\"\n        ],\n        \"errors\": []\n      },\n      \"conciseness\": {\n        \"score\": 15,\n        \"max_score\": 15,\n        \"rubric_score\": 15,\n        \"samples\": [\n          15\n        ],\n        \"reasoning\": [\n          \"rubric score\"\n        ],\n        \"errors\": []\n      }\n    }\n  },\n  \"golden\": {\n    \"runs\": 1,\n    \"results\": {\n      \"formatter\": {\n        \"with\": 1,\n        \"without\": 0,\n        \"with_errors\": 0,\n        \"without_errors\": 0\n      },\n      \"no-tabs\": {\n        \"with\": 1,\n        \"without\": 1,\n        \"with_errors\": 0,\n        \"without_errors\": 0\n      }\n    },\n    \"errors\": {},\n    \"with\": 1.0,\n    \"without\": 0.5,\n    \"delta\": 0.5\n  }\n}\n",
+      "tier": 1,
+      "usage": ""
+    },
+    {
+      "argv": [
+        "eval",
+        "tests/fixtures/python_project",
+        "--judge",
+        "nope"
+      ],
+      "returncode": 2,
+      "stderr": "Error: judge must be 'rubric' or 'anthropic'\n",
+      "stdout": "",
       "tier": 1,
       "usage": ""
     },
@@ -408,19 +486,19 @@
       "argv": [],
       "returncode": 0,
       "stderr": "",
-      "stdout": "usage: opsward [-h]\n               {diagnose,generate,maintain,recommend,install-skills,find,fleet,lint,decision} ...\n",
+      "stdout": "usage: opsward [-h]\n               {diagnose,generate,maintain,recommend,install-skills,find,fleet,lint,eval,decision}\n               ...\n",
       "tier": 1,
-      "usage": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,fleet,lint,decision} ..."
+      "usage": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,fleet,lint,eval,decision} ..."
     },
     {
       "argv": [
         "nosuchcommand"
       ],
       "returncode": 2,
-      "stderr": "usage: opsward [-h]\n               {diagnose,generate,maintain,recommend,install-skills,find,fleet,lint,decision} ...\nopsward: error: argument {diagnose,generate,maintain,recommend,install-skills,find,fleet,lint,decision}: invalid choice: 'nosuchcommand' (choose from 'diagnose', 'generate', 'maintain', 'recommend', 'install-skills', 'find', 'fleet', 'lint', 'decision')\n",
+      "stderr": "usage: opsward [-h]\n               {diagnose,generate,maintain,recommend,install-skills,find,fleet,lint,eval,decision}\n               ...\nopsward: error: argument {diagnose,generate,maintain,recommend,install-skills,find,fleet,lint,eval,decision}: invalid choice: 'nosuchcommand' (choose from 'diagnose', 'generate', 'maintain', 'recommend', 'install-skills', 'find', 'fleet', 'lint', 'eval', 'decision')\n",
       "stdout": "",
       "tier": 1,
-      "usage": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,fleet,lint,decision} ... opsward: error: argument {diagnose,generate,maintain,recommend,install-skills,find,fleet,lint,decision}: invalid choice: 'nosuchcommand' (choose from 'diagnose', 'generate', 'maintain', 'recommend', 'install-skills', 'find', 'fleet', 'lint', 'decision')"
+      "usage": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,fleet,lint,eval,decision} ... opsward: error: argument {diagnose,generate,maintain,recommend,install-skills,find,fleet,lint,eval,decision}: invalid choice: 'nosuchcommand' (choose from 'diagnose', 'generate', 'maintain', 'recommend', 'install-skills', 'find', 'fleet', 'lint', 'eval', 'decision')"
     },
     {
       "argv": [
@@ -428,10 +506,10 @@
         "--nosuchflag"
       ],
       "returncode": 2,
-      "stderr": "usage: opsward [-h]\n               {diagnose,generate,maintain,recommend,install-skills,find,fleet,lint,decision} ...\nopsward: error: unrecognized arguments: --nosuchflag\n",
+      "stderr": "usage: opsward [-h]\n               {diagnose,generate,maintain,recommend,install-skills,find,fleet,lint,eval,decision}\n               ...\nopsward: error: unrecognized arguments: --nosuchflag\n",
       "stdout": "",
       "tier": 1,
-      "usage": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,fleet,lint,decision} ... opsward: error: unrecognized arguments: --nosuchflag"
+      "usage": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,fleet,lint,eval,decision} ... opsward: error: unrecognized arguments: --nosuchflag"
     },
     {
       "argv": [
@@ -465,10 +543,10 @@
         "tests/fixtures/bare_project"
       ],
       "returncode": 2,
-      "stderr": "usage: opsward [-h]\n               {diagnose,generate,maintain,recommend,install-skills,find,fleet,lint,decision} ...\nopsward: error: unrecognized arguments: --nosuchflag\n",
+      "stderr": "usage: opsward [-h]\n               {diagnose,generate,maintain,recommend,install-skills,find,fleet,lint,eval,decision}\n               ...\nopsward: error: unrecognized arguments: --nosuchflag\n",
       "stdout": "",
       "tier": 1,
-      "usage": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,fleet,lint,decision} ... opsward: error: unrecognized arguments: --nosuchflag"
+      "usage": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,fleet,lint,eval,decision} ... opsward: error: unrecognized arguments: --nosuchflag"
     },
     {
       "argv": [
@@ -486,9 +564,9 @@
       ],
       "returncode": 0,
       "stderr": "",
-      "stdout": "usage: opsward [-h]\n               {diagnose,generate,maintain,recommend,install-skills,find,fleet,lint,decision} ...\n",
+      "stdout": "usage: opsward [-h]\n               {diagnose,generate,maintain,recommend,install-skills,find,fleet,lint,eval,decision}\n               ...\n",
       "tier": 1,
-      "usage": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,fleet,lint,decision} ..."
+      "usage": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,fleet,lint,eval,decision} ..."
     },
     {
       "argv": [

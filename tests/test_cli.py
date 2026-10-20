@@ -73,3 +73,64 @@ def test_nonexistent_path():
     _, stderr, rc = _run_cli('diagnose', '/nonexistent/path/12345')
     assert rc == 2
     assert 'not a directory' in stderr.lower() or 'error' in stderr.lower()
+
+
+# -- eval (report-only; only the free rubric judge is exercised) --
+
+
+def test_eval_finds_golden_tasks_in_the_docs_folder(tmp_path):
+    (tmp_path / 'pyproject.toml').write_text('')
+    (tmp_path / 'CLAUDE.md').write_text('# P\n\nAlways run `pytest -x`.\n')
+    tasks_file = tmp_path / 'misc' / 'docs' / 'evals' / 'golden_tasks.json'
+    tasks_file.parent.mkdir(parents=True)
+    tasks_file.write_text(
+        json.dumps([{'name': 't', 'prompt': 'Test it.', 'expect': ['pytest -x']}])
+    )
+    stdout, _, _ = _run_cli('eval', str(tmp_path), '-f', 'json', expect_rc=0)
+    out = json.loads(stdout)
+    assert out['judge']['judge'] == 'rubric'
+    assert out['golden']['delta'] == 1.0
+
+
+def test_eval_without_claude_md_or_tasks_still_exits_0():
+    stdout, _, _ = _run_cli(
+        'eval', str(FIXTURES / 'bare_project'), '-f', 'json', expect_rc=0
+    )
+    assert json.loads(stdout) == {
+        'project': 'bare_project',
+        'judge': None,
+        'golden': None,
+    }
+
+
+@pytest.mark.parametrize(
+    'args, message',
+    [
+        (['--judge', 'nope'], 'judge must be'),
+        (['--samples', '0'], 'at least 1'),
+        (['--tasks', 'no/such/tasks.json'], 'is not a file'),
+    ],
+)
+def test_eval_usage_errors_exit_2(args, message):
+    _, stderr, _ = _run_cli(
+        'eval', str(FIXTURES / 'python_project'), *args, expect_rc=2
+    )
+    assert message in stderr
+
+
+def test_eval_reports_a_malformed_tasks_file(tmp_path):
+    bad = tmp_path / 'tasks.json'
+    bad.write_text('{"not": "a list"}')
+    _, stderr, _ = _run_cli(
+        'eval', str(FIXTURES / 'python_project'), '--tasks', str(bad), expect_rc=2
+    )
+    assert 'cannot read the golden tasks' in stderr
+
+
+def test_eval_reports_duplicate_task_names(tmp_path):
+    dupes = tmp_path / 'tasks.json'
+    dupes.write_text(json.dumps([{'name': 'a', 'prompt': 'x'}] * 2))
+    _, stderr, _ = _run_cli(
+        'eval', str(FIXTURES / 'python_project'), '--tasks', str(dupes), expect_rc=2
+    )
+    assert 'must be unique' in stderr
