@@ -421,6 +421,9 @@ known_issues.md, and content quality.</p>
 <div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">opsward<span class="w"> </span>lint<span class="w"> </span>.<span class="w">                          </span><span class="c1"># opsward's own spec check, plus skill.validate() when installed</span>
 </span><span data-line="2">opsward<span class="w"> </span>lint<span class="w"> </span>.<span class="w"> </span>--validators<span class="w"> </span>opsward<span class="w">     </span><span class="c1"># only opsward's check</span>
 </span><span data-line="3">pip<span class="w"> </span>install<span class="w"> </span><span class="s1">'opsward[lint]'</span><span class="w">             </span><span class="c1"># adds the `skill` package's validate()</span>
+</span><span data-line="4"><span class="c1"># external linters, opt-in by name (opsward does not install them; `auto` never runs them):</span>
+</span><span data-line="5">npm<span class="w"> </span>install<span class="w"> </span>-g<span class="w"> </span>agnix<span class="w">                    </span><span class="c1"># --validators agnix</span>
+</span><span data-line="6">pip<span class="w"> </span>install<span class="w"> </span>skillcheck<span class="w">                  </span><span class="c1"># --validators skillcheck</span>
 </span></pre></div>
 </div>
 <p>The repo ships a reusable GitHub Action and pre-commit hooks:</p>
@@ -484,7 +487,7 @@ known_issues.md, and content quality.</p>
 </section>
 </section>
 
-<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-10-20 16:54 UTC from <a href="https://github.com/thorwhalen/opsward/commit/9fc721c2d2abd9b6a2893cd458c79f49331de923">9fc721c</a> (main) · opsward 0.0.32 · <a href="about-this-build.html">about this build</a></p>
+<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-10-20 17:09 UTC from <a href="https://github.com/thorwhalen/opsward/commit/2e0a6bc8dc3a5b59286ae3c7d8f7a9918eadd9a7">2e0a6bc</a> (main) · opsward 0.0.33 · <a href="about-this-build.html">about this build</a></p>
         </article><button class="back-to-top" type="button">
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
     <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
@@ -519,7 +522,7 @@ known_issues.md, and content quality.</p>
     </div>
   </div>
 </footer>
-      <script src="_static/documentation_options.js?v=f2234cd1"></script>
+      <script src="_static/documentation_options.js?v=565bc8c8"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="_static/clipboard.min.js?v=a7894cd8"></script>

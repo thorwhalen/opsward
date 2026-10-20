@@ -102,14 +102,20 @@ data-aria-dark="Switch to auto color mode">
       <i class="i-lucide close"></i>
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#opsward.lint.AUTO_VALIDATORS"><code class="docutils literal notranslate"><span class="pre">AUTO_VALIDATORS</span></code></a></li>
+<li><a class="reference internal" href="#opsward.lint.DFLT_EXTERNAL_TIMEOUT"><code class="docutils literal notranslate"><span class="pre">DFLT_EXTERNAL_TIMEOUT</span></code></a></li>
 <li><a class="reference internal" href="#opsward.lint.DFLT_VALIDATORS"><code class="docutils literal notranslate"><span class="pre">DFLT_VALIDATORS</span></code></a></li>
+<li><a class="reference internal" href="#opsward.lint.EXTERNAL_FINDING_LEVELS"><code class="docutils literal notranslate"><span class="pre">EXTERNAL_FINDING_LEVELS</span></code></a></li>
 <li><a class="reference internal" href="#opsward.lint.HOOKS_FILES"><code class="docutils literal notranslate"><span class="pre">HOOKS_FILES</span></code></a></li>
+<li><a class="reference internal" href="#opsward.lint.INSTALL_HINTS"><code class="docutils literal notranslate"><span class="pre">INSTALL_HINTS</span></code></a></li>
 <li><a class="reference internal" href="#opsward.lint.LintFinding"><code class="docutils literal notranslate"><span class="pre">LintFinding</span></code></a></li>
 <li><a class="reference internal" href="#opsward.lint.VALIDATORS"><code class="docutils literal notranslate"><span class="pre">VALIDATORS</span></code></a></li>
+<li><a class="reference internal" href="#opsward.lint.agnix_validator"><code class="docutils literal notranslate"><span class="pre">agnix_validator()</span></code></a></li>
 <li><a class="reference internal" href="#opsward.lint.lint"><code class="docutils literal notranslate"><span class="pre">lint()</span></code></a></li>
 <li><a class="reference internal" href="#opsward.lint.opsward_validator"><code class="docutils literal notranslate"><span class="pre">opsward_validator()</span></code></a></li>
 <li><a class="reference internal" href="#opsward.lint.resolve_validators"><code class="docutils literal notranslate"><span class="pre">resolve_validators()</span></code></a></li>
 <li><a class="reference internal" href="#opsward.lint.skill_package_validator"><code class="docutils literal notranslate"><span class="pre">skill_package_validator()</span></code></a></li>
+<li><a class="reference internal" href="#opsward.lint.skillcheck_validator"><code class="docutils literal notranslate"><span class="pre">skillcheck_validator()</span></code></a></li>
 </ul>
 </div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
   </aside>
@@ -158,10 +164,15 @@ violation with a repo-relative path. A validator is <code class="docutils litera
 <li><p><code class="docutils literal notranslate"><span class="pre">opsward</span></code> – opsward’s own agentskills.io spec check (<code class="xref py py-func docutils literal notranslate"><span class="pre">validate_skill_spec()</span></code>),
 always available;</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">skill</span></code> – the <code class="docutils literal notranslate"><span class="pre">skill</span></code> package’s <code class="docutils literal notranslate"><span class="pre">skill.validate()</span></code> (<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">'opsward[lint]'</span></code>),
-which composes its own registered validators.</p></li>
+which composes its own registered validators;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">agnix</span></code> and <code class="docutils literal notranslate"><span class="pre">skillcheck</span></code> – external linters, run as subprocesses
+(<code class="docutils literal notranslate"><span class="pre">npm</span> <span class="pre">install</span> <span class="pre">-g</span> <span class="pre">agnix</span></code>, <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">skillcheck</span></code>); their JSON diagnostics of level
+<code class="docutils literal notranslate"><span class="pre">error</span></code> and <code class="docutils literal notranslate"><span class="pre">warning</span></code> become findings. opsward does not depend on either, and they
+are opt-in by name: their rule sets are wider and noisier than the spec check, so a
+gate on <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code> must not turn red because a machine happens to have one installed.</p></li>
 </ul>
-<p><code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code> (the default) is <code class="docutils literal notranslate"><span class="pre">opsward</span></code> plus <code class="docutils literal notranslate"><span class="pre">skill</span></code> when it is importable. A host can
-pass any mapping of name to validator instead, which is the seam for external linters.</p>
+<p><code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code> (the default) is <a class="reference internal" href="#opsward.lint.AUTO_VALIDATORS" title="opsward.lint.AUTO_VALIDATORS"><code class="xref py py-data docutils literal notranslate"><span class="pre">AUTO_VALIDATORS</span></code></a>, each when it is available. A host
+can pass any mapping of name to validator instead.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 </span><span data-line="2"><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">opsward.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScanResult</span><span class="p">,</span> <span class="n">SkillInfo</span>
 </span><span data-line="3"><span class="gp">&gt;&gt;&gt; </span><span class="n">sr</span> <span class="o">=</span> <span class="n">ScanResult</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s2">"repo"</span><span class="p">),</span> <span class="n">skills</span><span class="o">=</span><span class="p">[</span><span class="n">SkillInfo</span><span class="p">(</span><span class="s2">"Bad_Name"</span><span class="p">,</span> <span class="n">Path</span><span class="p">(</span><span class="s2">"repo/.claude/skills/Bad_Name"</span><span class="p">),</span>
@@ -178,8 +189,20 @@ pass any mapping of name to validator instead, which is the seam for external li
 <tr class="row-odd"><td><p><a class="reference internal" href="#opsward.lint.DFLT_VALIDATORS" title="opsward.lint.DFLT_VALIDATORS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DFLT_VALIDATORS</span></code></a></p></td>
 <td><p>these names, each when it is available.</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#opsward.lint.EXTERNAL_FINDING_LEVELS" title="opsward.lint.EXTERNAL_FINDING_LEVELS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">EXTERNAL_FINDING_LEVELS</span></code></a></p></td>
+<td><p>Diagnostic levels of an external linter that count as findings (<code class="docutils literal notranslate"><span class="pre">info</span></code> does not).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.lint.DFLT_EXTERNAL_TIMEOUT" title="opsward.lint.DFLT_EXTERNAL_TIMEOUT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DFLT_EXTERNAL_TIMEOUT</span></code></a></p></td>
+<td><p>Seconds an external linter may take on one skill.</p></td>
+</tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#opsward.lint.VALIDATORS" title="opsward.lint.VALIDATORS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VALIDATORS</span></code></a></p></td>
 <td><p>name -&gt; (validator, is-it-available).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.lint.AUTO_VALIDATORS" title="opsward.lint.AUTO_VALIDATORS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">AUTO_VALIDATORS</span></code></a></p></td>
+<td><p>the same set on every machine.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#opsward.lint.INSTALL_HINTS" title="opsward.lint.INSTALL_HINTS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">INSTALL_HINTS</span></code></a></p></td>
+<td><p>How to install each optional validator (named in the &quot;not installed&quot; error).</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#opsward.lint.HOOKS_FILES" title="opsward.lint.HOOKS_FILES"><code class="xref py py-obj docutils literal notranslate"><span class="pre">HOOKS_FILES</span></code></a></p></td>
 <td><p>Where Claude Code reads hooks from; a settings file holds hooks only under <code class="docutils literal notranslate"><span class="pre">hooks</span></code>.</p></td>
@@ -191,17 +214,23 @@ pass any mapping of name to validator instead, which is the seam for external li
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.lint.lint" title="opsward.lint.lint"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lint</span></code></a>(scan_result, *[, validators])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.lint.agnix_validator" title="opsward.lint.agnix_validator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">agnix_validator</span></code></a>(skill)</p></td>
+<td><p><a class="reference external" href="https://github.com/agent-sh/agnix">agnix</a> over the skill's directory.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#opsward.lint.lint" title="opsward.lint.lint"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lint</span></code></a>(scan_result, *[, validators])</p></td>
 <td><p>Every spec/config violation in the scanned project, skills first, then hooks.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#opsward.lint.opsward_validator" title="opsward.lint.opsward_validator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">opsward_validator</span></code></a>(skill)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.lint.opsward_validator" title="opsward.lint.opsward_validator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">opsward_validator</span></code></a>(skill)</p></td>
 <td><p>opsward's own spec check; a skill directory without a SKILL.md is one violation.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.lint.resolve_validators" title="opsward.lint.resolve_validators"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resolve_validators</span></code></a>([spec])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#opsward.lint.resolve_validators" title="opsward.lint.resolve_validators"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resolve_validators</span></code></a>([spec])</p></td>
 <td><p>Turn <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code>, <code class="docutils literal notranslate"><span class="pre">&quot;opsward,skill&quot;</span></code> or a mapping into a name -&gt; validator dict.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#opsward.lint.skill_package_validator" title="opsward.lint.skill_package_validator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">skill_package_validator</span></code></a>(skill)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.lint.skill_package_validator" title="opsward.lint.skill_package_validator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">skill_package_validator</span></code></a>(skill)</p></td>
 <td><p>The <code class="docutils literal notranslate"><span class="pre">skill</span></code> package's <code class="docutils literal notranslate"><span class="pre">validate()</span></code> over the skill's directory.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#opsward.lint.skillcheck_validator" title="opsward.lint.skillcheck_validator"><code class="xref py py-obj docutils literal notranslate"><span class="pre">skillcheck_validator</span></code></a>(skill)</p></td>
+<td><p><a class="reference external" href="https://pypi.org/project/skillcheck/">skillcheck</a> over the skill's SKILL.md.</p></td>
 </tr>
 </tbody>
 </table>
@@ -217,6 +246,23 @@ pass any mapping of name to validator instead, which is the seam for external li
 </table>
 </div>
 <dl class="py data">
+<dt class="sig sig-object py" id="opsward.lint.AUTO_VALIDATORS">
+<span class="sig-prename descclassname"><span class="pre">opsward.lint.</span></span><span class="sig-name descname"><span class="pre">AUTO_VALIDATORS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('opsward',</span> <span class="pre">'skill')</span></span><a class="headerlink" href="#opsward.lint.AUTO_VALIDATORS" title="Link to this definition">#</a></dt>
+<dd><p>the same set on every machine.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>What <code class="docutils literal notranslate"><span class="pre">&quot;auto&quot;</span></code> runs (each when available)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="opsward.lint.DFLT_EXTERNAL_TIMEOUT">
+<span class="sig-prename descclassname"><span class="pre">opsward.lint.</span></span><span class="sig-name descname"><span class="pre">DFLT_EXTERNAL_TIMEOUT</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">120</span></span><a class="headerlink" href="#opsward.lint.DFLT_EXTERNAL_TIMEOUT" title="Link to this definition">#</a></dt>
+<dd><p>Seconds an external linter may take on one skill.</p>
+</dd></dl>
+
+<dl class="py data">
 <dt class="sig sig-object py" id="opsward.lint.DFLT_VALIDATORS">
 <span class="sig-prename descclassname"><span class="pre">opsward.lint.</span></span><span class="sig-name descname"><span class="pre">DFLT_VALIDATORS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'auto'</span></span><a class="headerlink" href="#opsward.lint.DFLT_VALIDATORS" title="Link to this definition">#</a></dt>
 <dd><p>these names, each when it is available.</p>
@@ -228,9 +274,21 @@ pass any mapping of name to validator instead, which is the seam for external li
 </dd></dl>
 
 <dl class="py data">
+<dt class="sig sig-object py" id="opsward.lint.EXTERNAL_FINDING_LEVELS">
+<span class="sig-prename descclassname"><span class="pre">opsward.lint.</span></span><span class="sig-name descname"><span class="pre">EXTERNAL_FINDING_LEVELS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('error',</span> <span class="pre">'warning')</span></span><a class="headerlink" href="#opsward.lint.EXTERNAL_FINDING_LEVELS" title="Link to this definition">#</a></dt>
+<dd><p>Diagnostic levels of an external linter that count as findings (<code class="docutils literal notranslate"><span class="pre">info</span></code> does not).</p>
+</dd></dl>
+
+<dl class="py data">
 <dt class="sig sig-object py" id="opsward.lint.HOOKS_FILES">
 <span class="sig-prename descclassname"><span class="pre">opsward.lint.</span></span><span class="sig-name descname"><span class="pre">HOOKS_FILES</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('hooks.json',</span> <span class="pre">'settings.json',</span> <span class="pre">'settings.local.json')</span></span><a class="headerlink" href="#opsward.lint.HOOKS_FILES" title="Link to this definition">#</a></dt>
 <dd><p>Where Claude Code reads hooks from; a settings file holds hooks only under <code class="docutils literal notranslate"><span class="pre">hooks</span></code>.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="opsward.lint.INSTALL_HINTS">
+<span class="sig-prename descclassname"><span class="pre">opsward.lint.</span></span><span class="sig-name descname"><span class="pre">INSTALL_HINTS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'agnix':</span> <span class="pre">'npm</span> <span class="pre">install</span> <span class="pre">-g</span> <span class="pre">agnix',</span> <span class="pre">'skill':</span> <span class="pre">&quot;pip</span> <span class="pre">install</span> <span class="pre">'opsward[lint]'&quot;,</span> <span class="pre">'skillcheck':</span> <span class="pre">'pip</span> <span class="pre">install</span> <span class="pre">skillcheck'}</span></span><a class="headerlink" href="#opsward.lint.INSTALL_HINTS" title="Link to this definition">#</a></dt>
+<dd><p>How to install each optional validator (named in the “not installed” error).</p>
 </dd></dl>
 
 <dl class="py class">
@@ -244,11 +302,22 @@ pass any mapping of name to validator instead, which is the seam for external li
 
 <dl class="py data">
 <dt class="sig sig-object py" id="opsward.lint.VALIDATORS">
-<span class="sig-prename descclassname"><span class="pre">opsward.lint.</span></span><span class="sig-name descname"><span class="pre">VALIDATORS</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.15)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="opsward.base.html#opsward.base.SkillInfo" title="opsward.base.SkillInfo"><span class="pre">SkillInfo</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.15)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'opsward':</span> <span class="pre">(&lt;function</span> <span class="pre">opsward_validator&gt;,</span> <span class="pre">&lt;function</span> <span class="pre">&lt;lambda&gt;&gt;),</span> <span class="pre">'skill':</span> <span class="pre">(&lt;function</span> <span class="pre">skill_package_validator&gt;,</span> <span class="pre">&lt;function</span> <span class="pre">_skill_package_available&gt;)}</span></span><a class="headerlink" href="#opsward.lint.VALIDATORS" title="Link to this definition">#</a></dt>
+<span class="sig-prename descclassname"><span class="pre">opsward.lint.</span></span><span class="sig-name descname"><span class="pre">VALIDATORS</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><span class="pre">tuple</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.15)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="opsward.base.html#opsward.base.SkillInfo" title="opsward.base.SkillInfo"><span class="pre">SkillInfo</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.15)"><span class="pre">Callable</span></a><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'agnix':</span> <span class="pre">(&lt;function</span> <span class="pre">agnix_validator&gt;,</span> <span class="pre">&lt;function</span> <span class="pre">_on_path.&lt;locals&gt;.&lt;lambda&gt;&gt;),</span> <span class="pre">'opsward':</span> <span class="pre">(&lt;function</span> <span class="pre">opsward_validator&gt;,</span> <span class="pre">&lt;function</span> <span class="pre">&lt;lambda&gt;&gt;),</span> <span class="pre">'skill':</span> <span class="pre">(&lt;function</span> <span class="pre">skill_package_validator&gt;,</span> <span class="pre">&lt;function</span> <span class="pre">_skill_package_available&gt;),</span> <span class="pre">'skillcheck':</span> <span class="pre">(&lt;function</span> <span class="pre">skillcheck_validator&gt;,</span> <span class="pre">&lt;function</span> <span class="pre">_on_path.&lt;locals&gt;.&lt;lambda&gt;&gt;)}</span></span><a class="headerlink" href="#opsward.lint.VALIDATORS" title="Link to this definition">#</a></dt>
 <dd><p>name -&gt; (validator, is-it-available).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Every known validator</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="opsward.lint.agnix_validator">
+<span class="sig-prename descclassname"><span class="pre">opsward.lint.</span></span><span class="sig-name descname"><span class="pre">agnix_validator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skill</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/lint.html#agnix_validator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.lint.agnix_validator" title="Link to this definition">#</a></dt>
+<dd><p><a class="reference external" href="https://github.com/agent-sh/agnix">agnix</a> over the skill’s directory.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -294,7 +363,7 @@ pass any mapping of name to validator instead, which is the seam for external li
 </span><span data-line="3"><span class="gp">&gt;&gt;&gt; </span><span class="n">resolve_validators</span><span class="p">(</span><span class="s2">"nope"</span><span class="p">)</span>
 </span><span data-line="4"><span class="gt">Traceback (most recent call last):</span>
 </span><span data-line="5"><span class="c">...</span>
-</span><span data-line="6"><span class="gr">ValueError</span>: <span class="n">unknown validator 'nope' (known: opsward, skill)</span>
+</span><span data-line="6"><span class="gr">ValueError</span>: <span class="n">unknown validator 'nope' (known: opsward, skill, agnix, skillcheck)</span>
 </span></pre></div>
 </div>
 </dd></dl>
@@ -305,6 +374,17 @@ pass any mapping of name to validator instead, which is the seam for external li
 <dd><p>The <code class="docutils literal notranslate"><span class="pre">skill</span></code> package’s <code class="docutils literal notranslate"><span class="pre">validate()</span></code> over the skill’s directory.</p>
 <p>A directory with no SKILL.md is left to <a class="reference internal" href="#opsward.lint.opsward_validator" title="opsward.lint.opsward_validator"><code class="xref py py-func docutils literal notranslate"><span class="pre">opsward_validator()</span></code></a> (<code class="docutils literal notranslate"><span class="pre">skill</span></code> would
 report it again, with an absolute path).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="opsward.lint.skillcheck_validator">
+<span class="sig-prename descclassname"><span class="pre">opsward.lint.</span></span><span class="sig-name descname"><span class="pre">skillcheck_validator</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">skill</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/lint.html#skillcheck_validator"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.lint.skillcheck_validator" title="Link to this definition">#</a></dt>
+<dd><p><a class="reference external" href="https://pypi.org/project/skillcheck/">skillcheck</a> over the skill’s SKILL.md.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span></p>
@@ -354,7 +434,7 @@ report it again, with an absolute path).</p>
     </div>
   </div>
 </footer>
-      <script src="../_static/documentation_options.js?v=f2234cd1"></script>
+      <script src="../_static/documentation_options.js?v=565bc8c8"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>

@@ -1,4 +1,4 @@
-> built 2026-10-20 16:54 UTC from 9fc721c (main) · opsward 0.0.32. Details: build_info.json
+> built 2026-10-20 17:09 UTC from 2e0a6bc (main) · opsward 0.0.33. Details: build_info.json
 
 # index.html.md
 
@@ -277,6 +277,9 @@ Two gates, for two jobs: `diagnose --min-score` is the cheap scored gate, and `l
 opsward lint .                          # opsward's own spec check, plus skill.validate() when installed
 opsward lint . --validators opsward     # only opsward's check
 pip install 'opsward[lint]'             # adds the `skill` package's validate()
+# external linters, opt-in by name (opsward does not install them; `auto` never runs them):
+npm install -g agnix                    # --validators agnix
+pip install skillcheck                  # --validators skillcheck
 ```
 
 The repo ships a reusable GitHub Action and pre-commit hooks:
@@ -499,12 +502,13 @@ actually write files. Existing files are never overwritten.
 Check skill specs and the hooks config: pass or fail, no score (exit 1 on any finding).
 
 The strict counterpart of `diagnose --min-score`, for CI and pre-commit. Validators:
-opsward (its own agentskills.io check, always there) and skill (the skill package’s
-validate(); pip install ‘opsward[lint]’). auto runs every one that is installed.
+opsward (its own agentskills.io check, always there), skill (the skill package’s
+validate(); pip install ‘opsward[lint]’), and the external agnix and skillcheck
+linters (opt-in by name). auto runs opsward and skill, each when installed.
 
 * **Parameters:**
   * **project_roots** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – one or more project directories (default: current dir)
-  * **validators** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – ‘auto’, or a comma list of: opsward, skill
+  * **validators** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – ‘auto’, or a comma list of: opsward, skill, agnix, skillcheck
   * **format** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – output format — ‘text’ or ‘json’
 
 ### opsward.cli.maintain(\*project_roots, format='text')
@@ -1067,10 +1071,15 @@ violation with a repo-relative path. A validator is `SkillInfo -> list[str]`:
 * `opsward` – opsward’s own agentskills.io spec check (`validate_skill_spec()`),
   always available;
 * `skill` – the `skill` package’s `skill.validate()` (`pip install 'opsward[lint]'`),
-  which composes its own registered validators.
+  which composes its own registered validators;
+* `agnix` and `skillcheck` – external linters, run as subprocesses
+  (`npm install -g agnix`, `pip install skillcheck`); their JSON diagnostics of level
+  `error` and `warning` become findings. opsward does not depend on either, and they
+  are opt-in by name: their rule sets are wider and noisier than the spec check, so a
+  gate on `"auto"` must not turn red because a machine happens to have one installed.
 
-`"auto"` (the default) is `opsward` plus `skill` when it is importable. A host can
-pass any mapping of name to validator instead, which is the seam for external linters.
+`"auto"` (the default) is [`AUTO_VALIDATORS`](_autosummary/opsward.lint.html.md#opsward.lint.AUTO_VALIDATORS), each when it is available. A host
+can pass any mapping of name to validator instead.
 
 ```pycon
 >>> from pathlib import Path
@@ -1084,23 +1093,40 @@ pass any mapping of name to validator instead, which is the seam for external li
 
 ### Module Attributes
 
-| [`DFLT_VALIDATORS`](_autosummary/opsward.lint.html.md#opsward.lint.DFLT_VALIDATORS)   | these names, each when it is available.                                             |
-|--------------------------------------------------------------------|-------------------------------------------------------------------------------------|
-| [`VALIDATORS`](_autosummary/opsward.lint.html.md#opsward.lint.VALIDATORS)        | name -> (validator, is-it-available).                                               |
-| [`HOOKS_FILES`](_autosummary/opsward.lint.html.md#opsward.lint.HOOKS_FILES)       | Where Claude Code reads hooks from; a settings file holds hooks only under `hooks`. |
+| [`DFLT_VALIDATORS`](_autosummary/opsward.lint.html.md#opsward.lint.DFLT_VALIDATORS)         | these names, each when it is available.                                             |
+|--------------------------------------------------------------------------|-------------------------------------------------------------------------------------|
+| [`EXTERNAL_FINDING_LEVELS`](_autosummary/opsward.lint.html.md#opsward.lint.EXTERNAL_FINDING_LEVELS) | Diagnostic levels of an external linter that count as findings (`info` does not).   |
+| [`DFLT_EXTERNAL_TIMEOUT`](_autosummary/opsward.lint.html.md#opsward.lint.DFLT_EXTERNAL_TIMEOUT)   | Seconds an external linter may take on one skill.                                   |
+| [`VALIDATORS`](_autosummary/opsward.lint.html.md#opsward.lint.VALIDATORS)              | name -> (validator, is-it-available).                                               |
+| [`AUTO_VALIDATORS`](_autosummary/opsward.lint.html.md#opsward.lint.AUTO_VALIDATORS)         | the same set on every machine.                                                      |
+| [`INSTALL_HINTS`](_autosummary/opsward.lint.html.md#opsward.lint.INSTALL_HINTS)           | How to install each optional validator (named in the "not installed" error).        |
+| [`HOOKS_FILES`](_autosummary/opsward.lint.html.md#opsward.lint.HOOKS_FILES)             | Where Claude Code reads hooks from; a settings file holds hooks only under `hooks`. |
 
 ### Functions
 
-| [`lint`](_autosummary/opsward.lint.html.md#opsward.lint.lint)(scan_result, \*[, validators])   | Every spec/config violation in the scanned project, skills first, then hooks.    |
-|----------------------------------------------------------------------------------------|----------------------------------------------------------------------------------|
-| [`opsward_validator`](_autosummary/opsward.lint.html.md#opsward.lint.opsward_validator)(skill)              | opsward's own spec check; a skill directory without a SKILL.md is one violation. |
-| [`resolve_validators`](_autosummary/opsward.lint.html.md#opsward.lint.resolve_validators)([spec])            | Turn `"auto"`, `"opsward,skill"` or a mapping into a name -> validator dict.     |
-| [`skill_package_validator`](_autosummary/opsward.lint.html.md#opsward.lint.skill_package_validator)(skill)        | The `skill` package's `validate()` over the skill's directory.                   |
+| [`agnix_validator`](_autosummary/opsward.lint.html.md#opsward.lint.agnix_validator)(skill)              | [agnix](https://github.com/agent-sh/agnix) over the skill's directory.           |
+|--------------------------------------------------------------------------------------|----------------------------------------------------------------------------------|
+| [`lint`](_autosummary/opsward.lint.html.md#opsward.lint.lint)(scan_result, \*[, validators]) | Every spec/config violation in the scanned project, skills first, then hooks.    |
+| [`opsward_validator`](_autosummary/opsward.lint.html.md#opsward.lint.opsward_validator)(skill)            | opsward's own spec check; a skill directory without a SKILL.md is one violation. |
+| [`resolve_validators`](_autosummary/opsward.lint.html.md#opsward.lint.resolve_validators)([spec])          | Turn `"auto"`, `"opsward,skill"` or a mapping into a name -> validator dict.     |
+| [`skill_package_validator`](_autosummary/opsward.lint.html.md#opsward.lint.skill_package_validator)(skill)      | The `skill` package's `validate()` over the skill's directory.                   |
+| [`skillcheck_validator`](_autosummary/opsward.lint.html.md#opsward.lint.skillcheck_validator)(skill)         | [skillcheck](https://pypi.org/project/skillcheck/) over the skill's SKILL.md.    |
 
 ### Classes
 
 | [`LintFinding`](_autosummary/opsward.lint.html.md#opsward.lint.LintFinding)(path, source, message)   | One violation: where (repo-relative), which validator said so, and what.   |
 |---------------------------------------------------------------------------------------|----------------------------------------------------------------------------|
+
+### opsward.lint.AUTO_VALIDATORS *= ('opsward', 'skill')*
+
+the same set on every machine.
+
+* **Type:**
+  What `"auto"` runs (each when available)
+
+### opsward.lint.DFLT_EXTERNAL_TIMEOUT *= 120*
+
+Seconds an external linter may take on one skill.
 
 ### opsward.lint.DFLT_VALIDATORS *= 'auto'*
 
@@ -1109,9 +1135,17 @@ these names, each when it is available.
 * **Type:**
   What `validators="auto"` means
 
+### opsward.lint.EXTERNAL_FINDING_LEVELS *= ('error', 'warning')*
+
+Diagnostic levels of an external linter that count as findings (`info` does not).
+
 ### opsward.lint.HOOKS_FILES *= ('hooks.json', 'settings.json', 'settings.local.json')*
 
 Where Claude Code reads hooks from; a settings file holds hooks only under `hooks`.
+
+### opsward.lint.INSTALL_HINTS *= {'agnix': 'npm install -g agnix', 'skill': "pip install 'opsward[lint]'", 'skillcheck': 'pip install skillcheck'}*
+
+How to install each optional validator (named in the “not installed” error).
 
 ### *class* opsward.lint.LintFinding(path, source, message)
 
@@ -1119,12 +1153,19 @@ Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
 One violation: where (repo-relative), which validator said so, and what.
 
-### opsward.lint.VALIDATORS *: [dict](https://docs.python.org/3/builtins/stdtypes.html#dict)[[str](https://docs.python.org/3/builtins/stdtypes.html#str), [tuple](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[Callable](https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable)[[[SkillInfo](_autosummary/opsward.base.html.md#opsward.base.SkillInfo)], [list](https://docs.python.org/3/builtins/stdtypes.html#list)], [Callable](https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable)[[], [bool](https://docs.python.org/3/builtins/functions.html#bool)]]]* *= {'opsward': (<function opsward_validator>, <function <lambda>>), 'skill': (<function skill_package_validator>, <function \_skill_package_available>)}*
+### opsward.lint.VALIDATORS *: [dict](https://docs.python.org/3/builtins/stdtypes.html#dict)[[str](https://docs.python.org/3/builtins/stdtypes.html#str), [tuple](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[Callable](https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable)[[[SkillInfo](_autosummary/opsward.base.html.md#opsward.base.SkillInfo)], [list](https://docs.python.org/3/builtins/stdtypes.html#list)], [Callable](https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable)[[], [bool](https://docs.python.org/3/builtins/functions.html#bool)]]]* *= {'agnix': (<function agnix_validator>, <function \_on_path.<locals>.<lambda>>), 'opsward': (<function opsward_validator>, <function <lambda>>), 'skill': (<function skill_package_validator>, <function \_skill_package_available>), 'skillcheck': (<function skillcheck_validator>, <function \_on_path.<locals>.<lambda>>)}*
 
 name -> (validator, is-it-available).
 
 * **Type:**
   Every known validator
+
+### opsward.lint.agnix_validator(skill)
+
+[agnix](https://github.com/agent-sh/agnix) over the skill’s directory.
+
+* **Return type:**
+  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
 
 ### opsward.lint.lint(scan_result, , validators='auto')
 
@@ -1158,7 +1199,7 @@ Turn `"auto"`, `"opsward,skill"` or a mapping into a name -> validator dict.
 >>> resolve_validators("nope")
 Traceback (most recent call last):
 ...
-ValueError: unknown validator 'nope' (known: opsward, skill)
+ValueError: unknown validator 'nope' (known: opsward, skill, agnix, skillcheck)
 ```
 
 ### opsward.lint.skill_package_validator(skill)
@@ -1167,6 +1208,13 @@ The `skill` package’s `validate()` over the skill’s directory.
 
 A directory with no SKILL.md is left to [`opsward_validator()`](_autosummary/opsward.lint.html.md#opsward.lint.opsward_validator) (`skill` would
 report it again, with an absolute path).
+
+* **Return type:**
+  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
+
+### opsward.lint.skillcheck_validator(skill)
+
+[skillcheck](https://pypi.org/project/skillcheck/) over the skill’s SKILL.md.
 
 * **Return type:**
   [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
@@ -1745,16 +1793,18 @@ Read a text file, returning ‘’ if it doesn’t exist or can’t be decoded.
 
 # About this build
 
-This documentation was built on **2026-10-20 16:54 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/9fc721c2d2abd9b6a2893cd458c79f49331de923"><code>9fc721c</code></a> on branch <code>main</code>, for **opsward 0.0.32** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-10-20 17:09 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/2e0a6bc8dc3a5b59286ae3c7d8f7a9918eadd9a7"><code>2e0a6bc</code></a> on branch <code>main</code>, for **opsward 0.0.33** (from <code>pyproject.toml</code>).
 
-#### NOTE
-Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
+#### WARNING
+The documentation and the package may be misaligned:
+
+- The documented version (0.0.33) is behind the latest release on PyPI (0.0.34): `pip install opsward` gives newer code than these docs describe.
 
 ## Source
 
 |                     |                                                                                                                                                           |
 |---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/opsward/commit/9fc721c2d2abd9b6a2893cd458c79f49331de923"><code>9fc721c2d2abd9b6a2893cd458c79f49331de923</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/opsward/commit/2e0a6bc8dc3a5b59286ae3c7d8f7a9918eadd9a7"><code>2e0a6bc8dc3a5b59286ae3c7d8f7a9918eadd9a7</code></a> |
 | Branch              | <code>main</code>                                                                                                                                         |
 | Tags at this commit | none                                                                                                                                                      |
 | Working tree        | clean                                                                                                                                                     |
@@ -1765,9 +1815,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/opsward</code>                                                            |
-| Run          | <a href="https://github.com/thorwhalen/opsward/actions/runs/39461236432">39461236432</a>   |
+| Run          | <a href="https://github.com/thorwhalen/opsward/actions/runs/39463292331">39463292331</a>   |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>9fc721c2d2abd9b6a2893cd458c79f49331de923</code> (in the history of the built commit) |
+| Event commit | <code>2e0a6bc8dc3a5b59286ae3c7d8f7a9918eadd9a7</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -1792,13 +1842,13 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/opsward/0.0.32/">0.0.32</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/opsward/0.0.34/">0.0.34</a>, newer than the documented version (0.0.33).
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/opsward && cd opsward
-git checkout 9fc721c2d2abd9b6a2893cd458c79f49331de923
+git checkout 2e0a6bc8dc3a5b59286ae3c7d8f7a9918eadd9a7
 pip install "epythet==0.2.22"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

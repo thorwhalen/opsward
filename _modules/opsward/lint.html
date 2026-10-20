@@ -141,191 +141,285 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="7"><span class="sd">* ``opsward`` -- opsward's own agentskills.io spec check (:func:`validate_skill_spec`),</span>
 </span><span data-line="8"><span class="sd">  always available;</span>
 </span><span data-line="9"><span class="sd">* ``skill`` -- the ``skill`` package's ``skill.validate()`` (``pip install 'opsward[lint]'``),</span>
-</span><span data-line="10"><span class="sd">  which composes its own registered validators.</span>
-</span><span data-line="11">
-</span><span data-line="12"><span class="sd">``"auto"`` (the default) is ``opsward`` plus ``skill`` when it is importable. A host can</span>
-</span><span data-line="13"><span class="sd">pass any mapping of name to validator instead, which is the seam for external linters.</span>
-</span><span data-line="14">
-</span><span data-line="15"><span class="sd">&gt;&gt;&gt; from pathlib import Path</span>
-</span><span data-line="16"><span class="sd">&gt;&gt;&gt; from opsward.base import ScanResult, SkillInfo</span>
-</span><span data-line="17"><span class="sd">&gt;&gt;&gt; sr = ScanResult(Path("repo"), skills=[SkillInfo("Bad_Name", Path("repo/.claude/skills/Bad_Name"),</span>
-</span><span data-line="18"><span class="sd">...                                                 has_skill_md=True, frontmatter={"name": "Bad_Name"})])</span>
-</span><span data-line="19"><span class="sd">&gt;&gt;&gt; findings = list(lint(sr, validators={"opsward": opsward_validator}))</span>
-</span><span data-line="20"><span class="sd">&gt;&gt;&gt; findings[0].path, findings[0].source</span>
-</span><span data-line="21"><span class="sd">('.claude/skills/Bad_Name', 'opsward')</span>
-</span><span data-line="22"><span class="sd">"""</span>
-</span><span data-line="23">
-</span><span data-line="24"><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
-</span><span data-line="25">
-</span><span data-line="26"><span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Mapping</span>
-</span><span data-line="27"><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">asdict</span><span class="p">,</span> <span class="n">dataclass</span>
-</span><span data-line="28"><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-</span><span data-line="29">
-</span><span data-line="30"><span class="kn">from</span><span class="w"> </span><span class="nn">opsward.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScanResult</span><span class="p">,</span> <span class="n">SkillInfo</span>
-</span><span data-line="31"><span class="kn">from</span><span class="w"> </span><span class="nn">opsward.score</span><span class="w"> </span><span class="kn">import</span> <span class="n">validate_hooks_config</span><span class="p">,</span> <span class="n">validate_skill_spec</span>
-</span><span data-line="32">
-</span><span data-line="33"><span class="n">Validator</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">SkillInfo</span><span class="p">],</span> <span class="nb">list</span><span class="p">]</span>
-</span><span data-line="34">
-</span><span data-line="35"><span class="c1">#: What ``validators="auto"`` means: these names, each when it is available.</span>
-</span><span data-line="36"><span class="n">DFLT_VALIDATORS</span> <span class="o">=</span> <span class="s2">"auto"</span>
+</span><span data-line="10"><span class="sd">  which composes its own registered validators;</span>
+</span><span data-line="11"><span class="sd">* ``agnix`` and ``skillcheck`` -- external linters, run as subprocesses</span>
+</span><span data-line="12"><span class="sd">  (``npm install -g agnix``, ``pip install skillcheck``); their JSON diagnostics of level</span>
+</span><span data-line="13"><span class="sd">  ``error`` and ``warning`` become findings. opsward does not depend on either, and they</span>
+</span><span data-line="14"><span class="sd">  are opt-in by name: their rule sets are wider and noisier than the spec check, so a</span>
+</span><span data-line="15"><span class="sd">  gate on ``"auto"`` must not turn red because a machine happens to have one installed.</span>
+</span><span data-line="16">
+</span><span data-line="17"><span class="sd">``"auto"`` (the default) is :data:`AUTO_VALIDATORS`, each when it is available. A host</span>
+</span><span data-line="18"><span class="sd">can pass any mapping of name to validator instead.</span>
+</span><span data-line="19">
+</span><span data-line="20"><span class="sd">&gt;&gt;&gt; from pathlib import Path</span>
+</span><span data-line="21"><span class="sd">&gt;&gt;&gt; from opsward.base import ScanResult, SkillInfo</span>
+</span><span data-line="22"><span class="sd">&gt;&gt;&gt; sr = ScanResult(Path("repo"), skills=[SkillInfo("Bad_Name", Path("repo/.claude/skills/Bad_Name"),</span>
+</span><span data-line="23"><span class="sd">...                                                 has_skill_md=True, frontmatter={"name": "Bad_Name"})])</span>
+</span><span data-line="24"><span class="sd">&gt;&gt;&gt; findings = list(lint(sr, validators={"opsward": opsward_validator}))</span>
+</span><span data-line="25"><span class="sd">&gt;&gt;&gt; findings[0].path, findings[0].source</span>
+</span><span data-line="26"><span class="sd">('.claude/skills/Bad_Name', 'opsward')</span>
+</span><span data-line="27"><span class="sd">"""</span>
+</span><span data-line="28">
+</span><span data-line="29"><span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+</span><span data-line="30">
+</span><span data-line="31"><span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+</span><span data-line="32"><span class="kn">import</span><span class="w"> </span><span class="nn">shutil</span>
+</span><span data-line="33"><span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+</span><span data-line="34"><span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Mapping</span>
+</span><span data-line="35"><span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">asdict</span><span class="p">,</span> <span class="n">dataclass</span>
+</span><span data-line="36"><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 </span><span data-line="37">
-</span><span data-line="38">
+</span><span data-line="38"><span class="kn">from</span><span class="w"> </span><span class="nn">opsward.base</span><span class="w"> </span><span class="kn">import</span> <span class="n">ScanResult</span><span class="p">,</span> <span class="n">SkillInfo</span>
+</span><span data-line="39"><span class="kn">from</span><span class="w"> </span><span class="nn">opsward.score</span><span class="w"> </span><span class="kn">import</span> <span class="n">validate_hooks_config</span><span class="p">,</span> <span class="n">validate_skill_spec</span>
+</span><span data-line="40">
+</span><span data-line="41"><span class="n">Validator</span> <span class="o">=</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">SkillInfo</span><span class="p">],</span> <span class="nb">list</span><span class="p">]</span>
+</span><span data-line="42">
+</span><span data-line="43"><span class="c1">#: What ``validators="auto"`` means: these names, each when it is available.</span>
+</span><span data-line="44"><span class="n">DFLT_VALIDATORS</span> <span class="o">=</span> <span class="s2">"auto"</span>
+</span><span data-line="45">
+</span><span data-line="46">
 <div class="viewcode-block" id="LintFinding">
 <a class="viewcode-back" href="../../_autosummary/opsward.lint.html#opsward.lint.LintFinding">[docs]</a>
-</span><span data-line="39"><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span data-line="40"><span class="k">class</span><span class="w"> </span><span class="nc">LintFinding</span><span class="p">:</span>
-</span><span data-line="41"><span class="w">    </span><span class="sd">"""One violation: where (repo-relative), which validator said so, and what."""</span>
-</span><span data-line="42">
-</span><span data-line="43">    <span class="n">path</span><span class="p">:</span> <span class="nb">str</span>
-</span><span data-line="44">    <span class="n">source</span><span class="p">:</span> <span class="nb">str</span>
-</span><span data-line="45">    <span class="n">message</span><span class="p">:</span> <span class="nb">str</span>
-</span><span data-line="46">
-</span><span data-line="47">    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span data-line="48">        <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">: [</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="si">}</span><span class="s2">"</span>
-</span><span data-line="49">
-</span><span data-line="50">    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
-</span><span data-line="51">        <span class="k">return</span> <span class="n">asdict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+</span><span data-line="47"><span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span data-line="48"><span class="k">class</span><span class="w"> </span><span class="nc">LintFinding</span><span class="p">:</span>
+</span><span data-line="49"><span class="w">    </span><span class="sd">"""One violation: where (repo-relative), which validator said so, and what."""</span>
+</span><span data-line="50">
+</span><span data-line="51">    <span class="n">path</span><span class="p">:</span> <span class="nb">str</span>
+</span><span data-line="52">    <span class="n">source</span><span class="p">:</span> <span class="nb">str</span>
+</span><span data-line="53">    <span class="n">message</span><span class="p">:</span> <span class="nb">str</span>
+</span><span data-line="54">
+</span><span data-line="55">    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span data-line="56">        <span class="k">return</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">: [</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">message</span><span class="si">}</span><span class="s2">"</span>
+</span><span data-line="57">
+</span><span data-line="58">    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+</span><span data-line="59">        <span class="k">return</span> <span class="n">asdict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
 
-</span><span data-line="52">
-</span><span data-line="53">
+</span><span data-line="60">
+</span><span data-line="61">
 <div class="viewcode-block" id="opsward_validator">
 <a class="viewcode-back" href="../../_autosummary/opsward.lint.html#opsward.lint.opsward_validator">[docs]</a>
-</span><span data-line="54"><span class="k">def</span><span class="w"> </span><span class="nf">opsward_validator</span><span class="p">(</span><span class="n">skill</span><span class="p">:</span> <span class="n">SkillInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-</span><span data-line="55"><span class="w">    </span><span class="sd">"""opsward's own spec check; a skill directory without a SKILL.md is one violation."""</span>
-</span><span data-line="56">    <span class="k">if</span> <span class="ow">not</span> <span class="n">skill</span><span class="o">.</span><span class="n">has_skill_md</span><span class="p">:</span>
-</span><span data-line="57">        <span class="k">return</span> <span class="p">[</span><span class="s2">"no SKILL.md"</span><span class="p">]</span>
-</span><span data-line="58">    <span class="k">return</span> <span class="n">validate_skill_spec</span><span class="p">(</span><span class="n">skill</span><span class="p">)</span></div>
+</span><span data-line="62"><span class="k">def</span><span class="w"> </span><span class="nf">opsward_validator</span><span class="p">(</span><span class="n">skill</span><span class="p">:</span> <span class="n">SkillInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+</span><span data-line="63"><span class="w">    </span><span class="sd">"""opsward's own spec check; a skill directory without a SKILL.md is one violation."""</span>
+</span><span data-line="64">    <span class="k">if</span> <span class="ow">not</span> <span class="n">skill</span><span class="o">.</span><span class="n">has_skill_md</span><span class="p">:</span>
+</span><span data-line="65">        <span class="k">return</span> <span class="p">[</span><span class="s2">"no SKILL.md"</span><span class="p">]</span>
+</span><span data-line="66">    <span class="k">return</span> <span class="n">validate_skill_spec</span><span class="p">(</span><span class="n">skill</span><span class="p">)</span></div>
 
-</span><span data-line="59">
-</span><span data-line="60">
+</span><span data-line="67">
+</span><span data-line="68">
 <div class="viewcode-block" id="skill_package_validator">
 <a class="viewcode-back" href="../../_autosummary/opsward.lint.html#opsward.lint.skill_package_validator">[docs]</a>
-</span><span data-line="61"><span class="k">def</span><span class="w"> </span><span class="nf">skill_package_validator</span><span class="p">(</span><span class="n">skill</span><span class="p">:</span> <span class="n">SkillInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-</span><span data-line="62"><span class="w">    </span><span class="sd">"""The ``skill`` package's ``validate()`` over the skill's directory.</span>
-</span><span data-line="63">
-</span><span data-line="64"><span class="sd">    A directory with no SKILL.md is left to :func:`opsward_validator` (``skill`` would</span>
-</span><span data-line="65"><span class="sd">    report it again, with an absolute path).</span>
-</span><span data-line="66"><span class="sd">    """</span>
-</span><span data-line="67">    <span class="k">if</span> <span class="ow">not</span> <span class="n">skill</span><span class="o">.</span><span class="n">has_skill_md</span><span class="p">:</span>
-</span><span data-line="68">        <span class="k">return</span> <span class="p">[]</span>
-</span><span data-line="69">    <span class="kn">import</span><span class="w"> </span><span class="nn">skill</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">skill_pkg</span>  <span class="c1"># optional: pip install 'opsward[lint]'</span>
-</span><span data-line="70">
-</span><span data-line="71">    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">skill_pkg</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">skill</span><span class="o">.</span><span class="n">path</span><span class="p">)))</span></div>
-
-</span><span data-line="72">
-</span><span data-line="73">
-</span><span data-line="74"><span class="k">def</span><span class="w"> </span><span class="nf">_skill_package_available</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span data-line="75">    <span class="kn">from</span><span class="w"> </span><span class="nn">importlib.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_spec</span>
-</span><span data-line="76">
-</span><span data-line="77">    <span class="k">return</span> <span class="n">find_spec</span><span class="p">(</span><span class="s2">"skill"</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+</span><span data-line="69"><span class="k">def</span><span class="w"> </span><span class="nf">skill_package_validator</span><span class="p">(</span><span class="n">skill</span><span class="p">:</span> <span class="n">SkillInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+</span><span data-line="70"><span class="w">    </span><span class="sd">"""The ``skill`` package's ``validate()`` over the skill's directory.</span>
+</span><span data-line="71">
+</span><span data-line="72"><span class="sd">    A directory with no SKILL.md is left to :func:`opsward_validator` (``skill`` would</span>
+</span><span data-line="73"><span class="sd">    report it again, with an absolute path).</span>
+</span><span data-line="74"><span class="sd">    """</span>
+</span><span data-line="75">    <span class="k">if</span> <span class="ow">not</span> <span class="n">skill</span><span class="o">.</span><span class="n">has_skill_md</span><span class="p">:</span>
+</span><span data-line="76">        <span class="k">return</span> <span class="p">[]</span>
+</span><span data-line="77">    <span class="kn">import</span><span class="w"> </span><span class="nn">skill</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">skill_pkg</span>  <span class="c1"># optional: pip install 'opsward[lint]'</span>
 </span><span data-line="78">
-</span><span data-line="79">
-</span><span data-line="80"><span class="c1">#: Every known validator: name -&gt; (validator, is-it-available).</span>
-</span><span data-line="81"><span class="n">VALIDATORS</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Validator</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="nb">bool</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">{</span>
-</span><span data-line="82">    <span class="s2">"opsward"</span><span class="p">:</span> <span class="p">(</span><span class="n">opsward_validator</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="kc">True</span><span class="p">),</span>
-</span><span data-line="83">    <span class="s2">"skill"</span><span class="p">:</span> <span class="p">(</span><span class="n">skill_package_validator</span><span class="p">,</span> <span class="n">_skill_package_available</span><span class="p">),</span>
-</span><span data-line="84"><span class="p">}</span>
-</span><span data-line="85">
-</span><span data-line="86">
-<div class="viewcode-block" id="resolve_validators">
-<a class="viewcode-back" href="../../_autosummary/opsward.lint.html#opsward.lint.resolve_validators">[docs]</a>
-</span><span data-line="87"><span class="k">def</span><span class="w"> </span><span class="nf">resolve_validators</span><span class="p">(</span>
-</span><span data-line="88">    <span class="n">spec</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Validator</span><span class="p">]</span> <span class="o">=</span> <span class="n">DFLT_VALIDATORS</span><span class="p">,</span>
-</span><span data-line="89"><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Validator</span><span class="p">]:</span>
-</span><span data-line="90"><span class="w">    </span><span class="sd">"""Turn ``"auto"``, ``"opsward,skill"`` or a mapping into a name -&gt; validator dict.</span>
-</span><span data-line="91">
-</span><span data-line="92"><span class="sd">    :raises ValueError: an unknown name, or a named validator that is not installed.</span>
-</span><span data-line="93">
-</span><span data-line="94"><span class="sd">    &gt;&gt;&gt; list(resolve_validators("opsward"))</span>
-</span><span data-line="95"><span class="sd">    ['opsward']</span>
-</span><span data-line="96"><span class="sd">    &gt;&gt;&gt; resolve_validators("nope")</span>
-</span><span data-line="97"><span class="sd">    Traceback (most recent call last):</span>
-</span><span data-line="98"><span class="sd">    ...</span>
-</span><span data-line="99"><span class="sd">    ValueError: unknown validator 'nope' (known: opsward, skill)</span>
-</span><span data-line="100"><span class="sd">    """</span>
-</span><span data-line="101">    <span class="n">chosen</span> <span class="o">=</span> <span class="n">_resolve</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
-</span><span data-line="102">    <span class="k">if</span> <span class="ow">not</span> <span class="n">chosen</span><span class="p">:</span>  <span class="c1"># a gate that checks nothing must not pass</span>
-</span><span data-line="103">        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"no validators selected (known: </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">VALIDATORS</span><span class="p">)</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
-</span><span data-line="104">    <span class="k">return</span> <span class="n">chosen</span></div>
+</span><span data-line="79">    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">skill_pkg</span><span class="o">.</span><span class="n">validate</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">skill</span><span class="o">.</span><span class="n">path</span><span class="p">)))</span></div>
 
+</span><span data-line="80">
+</span><span data-line="81">
+</span><span data-line="82"><span class="k">def</span><span class="w"> </span><span class="nf">_skill_package_available</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span data-line="83">    <span class="kn">from</span><span class="w"> </span><span class="nn">importlib.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_spec</span>
+</span><span data-line="84">
+</span><span data-line="85">    <span class="k">return</span> <span class="n">find_spec</span><span class="p">(</span><span class="s2">"skill"</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+</span><span data-line="86">
+</span><span data-line="87">
+</span><span data-line="88"><span class="c1">#: Diagnostic levels of an external linter that count as findings (``info`` does not).</span>
+</span><span data-line="89"><span class="n">EXTERNAL_FINDING_LEVELS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"error"</span><span class="p">,</span> <span class="s2">"warning"</span><span class="p">)</span>
+</span><span data-line="90"><span class="c1">#: Seconds an external linter may take on one skill.</span>
+</span><span data-line="91"><span class="n">DFLT_EXTERNAL_TIMEOUT</span> <span class="o">=</span> <span class="mi">120</span>
+</span><span data-line="92">
+</span><span data-line="93">
+</span><span data-line="94"><span class="k">def</span><span class="w"> </span><span class="nf">_run_json</span><span class="p">(</span><span class="n">argv</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">timeout</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">DFLT_EXTERNAL_TIMEOUT</span><span class="p">):</span>
+</span><span data-line="95"><span class="w">    </span><span class="sd">"""Run an external linter and parse its JSON stdout (its exit code is not the verdict)."""</span>
+</span><span data-line="96">    <span class="n">done</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">argv</span><span class="p">,</span> <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">text</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="n">timeout</span><span class="p">)</span>
+</span><span data-line="97">    <span class="k">try</span><span class="p">:</span>
+</span><span data-line="98">        <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">done</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+</span><span data-line="99">    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+</span><span data-line="100">        <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="n">ln</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">ln</span> <span class="ow">in</span> <span class="p">(</span><span class="n">done</span><span class="o">.</span><span class="n">stderr</span> <span class="ow">or</span> <span class="n">done</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()]</span>
+</span><span data-line="101">        <span class="n">detail</span> <span class="o">=</span> <span class="nb">next</span><span class="p">((</span><span class="n">ln</span> <span class="k">for</span> <span class="n">ln</span> <span class="ow">in</span> <span class="n">lines</span> <span class="k">if</span> <span class="n">ln</span><span class="p">),</span> <span class="s2">"no output"</span><span class="p">)</span>
+</span><span data-line="102">        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+</span><span data-line="103">            <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">argv</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s2"> exited </span><span class="si">{</span><span class="n">done</span><span class="o">.</span><span class="n">returncode</span><span class="si">}</span><span class="s2"> without JSON: </span><span class="si">{</span><span class="n">detail</span><span class="si">}</span><span class="s2">"</span>
+</span><span data-line="104">        <span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
 </span><span data-line="105">
 </span><span data-line="106">
-</span><span data-line="107"><span class="k">def</span><span class="w"> </span><span class="nf">_resolve</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Validator</span><span class="p">]:</span>
-</span><span data-line="108">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
-</span><span data-line="109">        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
-</span><span data-line="110">    <span class="k">if</span> <span class="n">spec</span> <span class="o">==</span> <span class="s2">"auto"</span><span class="p">:</span>
-</span><span data-line="111">        <span class="k">return</span> <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">available</span><span class="p">)</span> <span class="ow">in</span> <span class="n">VALIDATORS</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">available</span><span class="p">()}</span>
-</span><span data-line="112">    <span class="n">chosen</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span data-line="113">    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">spec</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">","</span><span class="p">))):</span>
-</span><span data-line="114">        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">VALIDATORS</span><span class="p">:</span>
-</span><span data-line="115">            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-</span><span data-line="116">                <span class="sa">f</span><span class="s2">"unknown validator </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> (known: </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">VALIDATORS</span><span class="p">)</span><span class="si">}</span><span class="s2">)"</span>
-</span><span data-line="117">            <span class="p">)</span>
-</span><span data-line="118">        <span class="n">validator</span><span class="p">,</span> <span class="n">available</span> <span class="o">=</span> <span class="n">VALIDATORS</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
-</span><span data-line="119">        <span class="k">if</span> <span class="ow">not</span> <span class="n">available</span><span class="p">():</span>
-</span><span data-line="120">            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-</span><span data-line="121">                <span class="sa">f</span><span class="s2">"validator </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> is not installed: pip install 'opsward[lint]'"</span>
-</span><span data-line="122">            <span class="p">)</span>
-</span><span data-line="123">        <span class="n">chosen</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">validator</span>
-</span><span data-line="124">    <span class="k">return</span> <span class="n">chosen</span>
-</span><span data-line="125">
-</span><span data-line="126">
-</span><span data-line="127"><span class="k">def</span><span class="w"> </span><span class="nf">_rel</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">root</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span data-line="128">    <span class="k">try</span><span class="p">:</span>
-</span><span data-line="129">        <span class="k">return</span> <span class="n">path</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">root</span><span class="p">)</span><span class="o">.</span><span class="n">as_posix</span><span class="p">()</span>
-</span><span data-line="130">    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-</span><span data-line="131">        <span class="k">return</span> <span class="n">path</span><span class="o">.</span><span class="n">name</span>
-</span><span data-line="132">
-</span><span data-line="133">
+</span><span data-line="107"><span class="k">def</span><span class="w"> </span><span class="nf">_messages</span><span class="p">(</span><span class="n">diagnostics</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Mapping</span><span class="p">],</span> <span class="o">*</span><span class="p">,</span> <span class="n">level_key</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+</span><span data-line="108"><span class="w">    </span><span class="sd">"""``rule: message (line N)`` for each diagnostic at a finding level.</span>
+</span><span data-line="109">
+</span><span data-line="110"><span class="sd">    &gt;&gt;&gt; _messages([{"rule": "AS-004", "level": "error", "message": "bad name", "line": 2},</span>
+</span><span data-line="111"><span class="sd">    ...            {"rule": "VER-001", "level": "info", "message": "fyi"}], level_key="level")</span>
+</span><span data-line="112"><span class="sd">    ['AS-004: bad name (line 2)']</span>
+</span><span data-line="113"><span class="sd">    """</span>
+</span><span data-line="114">    <span class="k">return</span> <span class="p">[</span>
+</span><span data-line="115">        <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'rule'</span><span class="p">,</span><span class="w"> </span><span class="s1">'?'</span><span class="p">)</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'message'</span><span class="p">,</span><span class="w"> </span><span class="s1">''</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span>
+</span><span data-line="116">        <span class="o">+</span> <span class="p">(</span><span class="sa">f</span><span class="s2">" (line </span><span class="si">{</span><span class="n">d</span><span class="p">[</span><span class="s1">'line'</span><span class="p">]</span><span class="si">}</span><span class="s2">)"</span> <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"line"</span><span class="p">)</span> <span class="k">else</span> <span class="s2">""</span><span class="p">)</span>
+</span><span data-line="117">        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">diagnostics</span>
+</span><span data-line="118">        <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">level_key</span><span class="p">)</span> <span class="ow">in</span> <span class="n">EXTERNAL_FINDING_LEVELS</span>
+</span><span data-line="119">    <span class="p">]</span>
+</span><span data-line="120">
+</span><span data-line="121">
+<div class="viewcode-block" id="agnix_validator">
+<a class="viewcode-back" href="../../_autosummary/opsward.lint.html#opsward.lint.agnix_validator">[docs]</a>
+</span><span data-line="122"><span class="k">def</span><span class="w"> </span><span class="nf">agnix_validator</span><span class="p">(</span><span class="n">skill</span><span class="p">:</span> <span class="n">SkillInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+</span><span data-line="123"><span class="w">    </span><span class="sd">"""`agnix &lt;https://github.com/agent-sh/agnix&gt;`_ over the skill's directory."""</span>
+</span><span data-line="124">    <span class="k">if</span> <span class="ow">not</span> <span class="n">skill</span><span class="o">.</span><span class="n">has_skill_md</span><span class="p">:</span>
+</span><span data-line="125">        <span class="k">return</span> <span class="p">[]</span>
+</span><span data-line="126">    <span class="n">report</span> <span class="o">=</span> <span class="n">_run_json</span><span class="p">([</span><span class="s2">"agnix"</span><span class="p">,</span> <span class="s2">"--format"</span><span class="p">,</span> <span class="s2">"json"</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">skill</span><span class="o">.</span><span class="n">path</span><span class="p">)])</span>
+</span><span data-line="127">    <span class="k">return</span> <span class="n">_messages</span><span class="p">(</span><span class="n">report</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"diagnostics"</span><span class="p">,</span> <span class="p">()),</span> <span class="n">level_key</span><span class="o">=</span><span class="s2">"level"</span><span class="p">)</span></div>
+
+</span><span data-line="128">
+</span><span data-line="129">
+<div class="viewcode-block" id="skillcheck_validator">
+<a class="viewcode-back" href="../../_autosummary/opsward.lint.html#opsward.lint.skillcheck_validator">[docs]</a>
+</span><span data-line="130"><span class="k">def</span><span class="w"> </span><span class="nf">skillcheck_validator</span><span class="p">(</span><span class="n">skill</span><span class="p">:</span> <span class="n">SkillInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+</span><span data-line="131"><span class="w">    </span><span class="sd">"""`skillcheck &lt;https://pypi.org/project/skillcheck/&gt;`_ over the skill's SKILL.md."""</span>
+</span><span data-line="132">    <span class="k">if</span> <span class="ow">not</span> <span class="n">skill</span><span class="o">.</span><span class="n">has_skill_md</span><span class="p">:</span>
+</span><span data-line="133">        <span class="k">return</span> <span class="p">[]</span>
+</span><span data-line="134">    <span class="n">argv</span> <span class="o">=</span> <span class="p">[</span>
+</span><span data-line="135">        <span class="s2">"skillcheck"</span><span class="p">,</span>
+</span><span data-line="136">        <span class="s2">"--format"</span><span class="p">,</span>
+</span><span data-line="137">        <span class="s2">"json"</span><span class="p">,</span>
+</span><span data-line="138">        <span class="s2">"--no-color"</span><span class="p">,</span>
+</span><span data-line="139">        <span class="nb">str</span><span class="p">(</span><span class="n">skill</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="s2">"SKILL.md"</span><span class="p">),</span>
+</span><span data-line="140">    <span class="p">]</span>
+</span><span data-line="141">    <span class="n">report</span> <span class="o">=</span> <span class="n">_run_json</span><span class="p">(</span><span class="n">argv</span><span class="p">)</span>
+</span><span data-line="142">    <span class="k">return</span> <span class="p">[</span>
+</span><span data-line="143">        <span class="n">message</span>
+</span><span data-line="144">        <span class="k">for</span> <span class="n">result</span> <span class="ow">in</span> <span class="n">report</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"results"</span><span class="p">,</span> <span class="p">())</span>
+</span><span data-line="145">        <span class="k">for</span> <span class="n">message</span> <span class="ow">in</span> <span class="n">_messages</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">"diagnostics"</span><span class="p">,</span> <span class="p">()),</span> <span class="n">level_key</span><span class="o">=</span><span class="s2">"severity"</span><span class="p">)</span>
+</span><span data-line="146">    <span class="p">]</span></div>
+
+</span><span data-line="147">
+</span><span data-line="148">
+</span><span data-line="149"><span class="k">def</span><span class="w"> </span><span class="nf">_on_path</span><span class="p">(</span><span class="n">executable</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="nb">bool</span><span class="p">]:</span>
+</span><span data-line="150">    <span class="k">return</span> <span class="k">lambda</span><span class="p">:</span> <span class="n">shutil</span><span class="o">.</span><span class="n">which</span><span class="p">(</span><span class="n">executable</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+</span><span data-line="151">
+</span><span data-line="152">
+</span><span data-line="153"><span class="c1">#: Every known validator: name -&gt; (validator, is-it-available).</span>
+</span><span data-line="154"><span class="n">VALIDATORS</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Validator</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[[],</span> <span class="nb">bool</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">{</span>
+</span><span data-line="155">    <span class="s2">"opsward"</span><span class="p">:</span> <span class="p">(</span><span class="n">opsward_validator</span><span class="p">,</span> <span class="k">lambda</span><span class="p">:</span> <span class="kc">True</span><span class="p">),</span>
+</span><span data-line="156">    <span class="s2">"skill"</span><span class="p">:</span> <span class="p">(</span><span class="n">skill_package_validator</span><span class="p">,</span> <span class="n">_skill_package_available</span><span class="p">),</span>
+</span><span data-line="157">    <span class="s2">"agnix"</span><span class="p">:</span> <span class="p">(</span><span class="n">agnix_validator</span><span class="p">,</span> <span class="n">_on_path</span><span class="p">(</span><span class="s2">"agnix"</span><span class="p">)),</span>
+</span><span data-line="158">    <span class="s2">"skillcheck"</span><span class="p">:</span> <span class="p">(</span><span class="n">skillcheck_validator</span><span class="p">,</span> <span class="n">_on_path</span><span class="p">(</span><span class="s2">"skillcheck"</span><span class="p">)),</span>
+</span><span data-line="159"><span class="p">}</span>
+</span><span data-line="160">
+</span><span data-line="161"><span class="c1">#: What ``"auto"`` runs (each when available): the same set on every machine.</span>
+</span><span data-line="162"><span class="n">AUTO_VALIDATORS</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"opsward"</span><span class="p">,</span> <span class="s2">"skill"</span><span class="p">)</span>
+</span><span data-line="163">
+</span><span data-line="164"><span class="c1">#: How to install each optional validator (named in the "not installed" error).</span>
+</span><span data-line="165"><span class="n">INSTALL_HINTS</span> <span class="o">=</span> <span class="p">{</span>
+</span><span data-line="166">    <span class="s2">"skill"</span><span class="p">:</span> <span class="s2">"pip install 'opsward[lint]'"</span><span class="p">,</span>
+</span><span data-line="167">    <span class="s2">"agnix"</span><span class="p">:</span> <span class="s2">"npm install -g agnix"</span><span class="p">,</span>
+</span><span data-line="168">    <span class="s2">"skillcheck"</span><span class="p">:</span> <span class="s2">"pip install skillcheck"</span><span class="p">,</span>
+</span><span data-line="169"><span class="p">}</span>
+</span><span data-line="170">
+</span><span data-line="171">
+<div class="viewcode-block" id="resolve_validators">
+<a class="viewcode-back" href="../../_autosummary/opsward.lint.html#opsward.lint.resolve_validators">[docs]</a>
+</span><span data-line="172"><span class="k">def</span><span class="w"> </span><span class="nf">resolve_validators</span><span class="p">(</span>
+</span><span data-line="173">    <span class="n">spec</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Validator</span><span class="p">]</span> <span class="o">=</span> <span class="n">DFLT_VALIDATORS</span><span class="p">,</span>
+</span><span data-line="174"><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Validator</span><span class="p">]:</span>
+</span><span data-line="175"><span class="w">    </span><span class="sd">"""Turn ``"auto"``, ``"opsward,skill"`` or a mapping into a name -&gt; validator dict.</span>
+</span><span data-line="176">
+</span><span data-line="177"><span class="sd">    :raises ValueError: an unknown name, or a named validator that is not installed.</span>
+</span><span data-line="178">
+</span><span data-line="179"><span class="sd">    &gt;&gt;&gt; list(resolve_validators("opsward"))</span>
+</span><span data-line="180"><span class="sd">    ['opsward']</span>
+</span><span data-line="181"><span class="sd">    &gt;&gt;&gt; resolve_validators("nope")</span>
+</span><span data-line="182"><span class="sd">    Traceback (most recent call last):</span>
+</span><span data-line="183"><span class="sd">    ...</span>
+</span><span data-line="184"><span class="sd">    ValueError: unknown validator 'nope' (known: opsward, skill, agnix, skillcheck)</span>
+</span><span data-line="185"><span class="sd">    """</span>
+</span><span data-line="186">    <span class="n">chosen</span> <span class="o">=</span> <span class="n">_resolve</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+</span><span data-line="187">    <span class="k">if</span> <span class="ow">not</span> <span class="n">chosen</span><span class="p">:</span>  <span class="c1"># a gate that checks nothing must not pass</span>
+</span><span data-line="188">        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"no validators selected (known: </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">VALIDATORS</span><span class="p">)</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+</span><span data-line="189">    <span class="k">return</span> <span class="n">chosen</span></div>
+
+</span><span data-line="190">
+</span><span data-line="191">
+</span><span data-line="192"><span class="k">def</span><span class="w"> </span><span class="nf">_resolve</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Validator</span><span class="p">]:</span>
+</span><span data-line="193">    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">spec</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">):</span>
+</span><span data-line="194">        <span class="k">return</span> <span class="nb">dict</span><span class="p">(</span><span class="n">spec</span><span class="p">)</span>
+</span><span data-line="195">    <span class="k">if</span> <span class="n">spec</span> <span class="o">==</span> <span class="s2">"auto"</span><span class="p">:</span>
+</span><span data-line="196">        <span class="k">return</span> <span class="p">{</span>
+</span><span data-line="197">            <span class="n">name</span><span class="p">:</span> <span class="n">v</span>
+</span><span data-line="198">            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="p">(</span><span class="n">v</span><span class="p">,</span> <span class="n">available</span><span class="p">)</span> <span class="ow">in</span> <span class="n">VALIDATORS</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+</span><span data-line="199">            <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">AUTO_VALIDATORS</span> <span class="ow">and</span> <span class="n">available</span><span class="p">()</span>
+</span><span data-line="200">        <span class="p">}</span>
+</span><span data-line="201">    <span class="n">chosen</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span data-line="202">    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">spec</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">","</span><span class="p">))):</span>
+</span><span data-line="203">        <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">VALIDATORS</span><span class="p">:</span>
+</span><span data-line="204">            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+</span><span data-line="205">                <span class="sa">f</span><span class="s2">"unknown validator </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> (known: </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">VALIDATORS</span><span class="p">)</span><span class="si">}</span><span class="s2">)"</span>
+</span><span data-line="206">            <span class="p">)</span>
+</span><span data-line="207">        <span class="n">validator</span><span class="p">,</span> <span class="n">available</span> <span class="o">=</span> <span class="n">VALIDATORS</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
+</span><span data-line="208">        <span class="k">if</span> <span class="ow">not</span> <span class="n">available</span><span class="p">():</span>
+</span><span data-line="209">            <span class="n">hint</span> <span class="o">=</span> <span class="n">INSTALL_HINTS</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="s2">"see opsward.lint"</span><span class="p">)</span>
+</span><span data-line="210">            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"validator </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s2"> is not installed: </span><span class="si">{</span><span class="n">hint</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span data-line="211">        <span class="n">chosen</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">validator</span>
+</span><span data-line="212">    <span class="k">return</span> <span class="n">chosen</span>
+</span><span data-line="213">
+</span><span data-line="214">
+</span><span data-line="215"><span class="k">def</span><span class="w"> </span><span class="nf">_rel</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">root</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span data-line="216">    <span class="k">try</span><span class="p">:</span>
+</span><span data-line="217">        <span class="k">return</span> <span class="n">path</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">root</span><span class="p">)</span><span class="o">.</span><span class="n">as_posix</span><span class="p">()</span>
+</span><span data-line="218">    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+</span><span data-line="219">        <span class="k">return</span> <span class="n">path</span><span class="o">.</span><span class="n">name</span>
+</span><span data-line="220">
+</span><span data-line="221">
 <div class="viewcode-block" id="lint">
 <a class="viewcode-back" href="../../_autosummary/opsward.lint.html#opsward.lint.lint">[docs]</a>
-</span><span data-line="134"><span class="k">def</span><span class="w"> </span><span class="nf">lint</span><span class="p">(</span>
-</span><span data-line="135">    <span class="n">scan_result</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">,</span>
-</span><span data-line="136">    <span class="o">*</span><span class="p">,</span>
-</span><span data-line="137">    <span class="n">validators</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Validator</span><span class="p">]</span> <span class="o">=</span> <span class="n">DFLT_VALIDATORS</span><span class="p">,</span>
-</span><span data-line="138"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">LintFinding</span><span class="p">]:</span>
-</span><span data-line="139"><span class="w">    </span><span class="sd">"""Every spec/config violation in the scanned project, skills first, then hooks.</span>
-</span><span data-line="140">
-</span><span data-line="141"><span class="sd">    Hooks are read from every file in :data:`HOOKS_FILES` that exists, not only the one</span>
-</span><span data-line="142"><span class="sd">    ``scan`` picked, so an unparseable or shadowed hooks file is still reported.</span>
-</span><span data-line="143"><span class="sd">    """</span>
-</span><span data-line="144">    <span class="n">root</span> <span class="o">=</span> <span class="n">scan_result</span><span class="o">.</span><span class="n">project_root</span>
-</span><span data-line="145">    <span class="n">chosen</span> <span class="o">=</span> <span class="n">resolve_validators</span><span class="p">(</span><span class="n">validators</span><span class="p">)</span>
-</span><span data-line="146">    <span class="k">for</span> <span class="n">skill</span> <span class="ow">in</span> <span class="n">scan_result</span><span class="o">.</span><span class="n">skills</span><span class="p">:</span>
-</span><span data-line="147">        <span class="n">where</span> <span class="o">=</span> <span class="n">_rel</span><span class="p">(</span><span class="n">skill</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">root</span><span class="p">)</span>
-</span><span data-line="148">        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">validator</span> <span class="ow">in</span> <span class="n">chosen</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-</span><span data-line="149">            <span class="k">try</span><span class="p">:</span>
-</span><span data-line="150">                <span class="n">messages</span> <span class="o">=</span> <span class="n">validator</span><span class="p">(</span><span class="n">skill</span><span class="p">)</span>
-</span><span data-line="151">            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>  <span class="c1"># a broken validator is a finding, not a crash</span>
-</span><span data-line="152">                <span class="n">messages</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"validator failed: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">error</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">error</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span>
-</span><span data-line="153">            <span class="k">for</span> <span class="n">message</span> <span class="ow">in</span> <span class="n">messages</span><span class="p">:</span>
-</span><span data-line="154">                <span class="k">yield</span> <span class="n">LintFinding</span><span class="p">(</span><span class="n">where</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">message</span><span class="p">))</span>
-</span><span data-line="155">    <span class="k">yield from</span> <span class="n">_hooks_findings</span><span class="p">(</span><span class="n">root</span><span class="p">)</span></div>
+</span><span data-line="222"><span class="k">def</span><span class="w"> </span><span class="nf">lint</span><span class="p">(</span>
+</span><span data-line="223">    <span class="n">scan_result</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">,</span>
+</span><span data-line="224">    <span class="o">*</span><span class="p">,</span>
+</span><span data-line="225">    <span class="n">validators</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Validator</span><span class="p">]</span> <span class="o">=</span> <span class="n">DFLT_VALIDATORS</span><span class="p">,</span>
+</span><span data-line="226"><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">LintFinding</span><span class="p">]:</span>
+</span><span data-line="227"><span class="w">    </span><span class="sd">"""Every spec/config violation in the scanned project, skills first, then hooks.</span>
+</span><span data-line="228">
+</span><span data-line="229"><span class="sd">    Hooks are read from every file in :data:`HOOKS_FILES` that exists, not only the one</span>
+</span><span data-line="230"><span class="sd">    ``scan`` picked, so an unparseable or shadowed hooks file is still reported.</span>
+</span><span data-line="231"><span class="sd">    """</span>
+</span><span data-line="232">    <span class="n">root</span> <span class="o">=</span> <span class="n">scan_result</span><span class="o">.</span><span class="n">project_root</span>
+</span><span data-line="233">    <span class="n">chosen</span> <span class="o">=</span> <span class="n">resolve_validators</span><span class="p">(</span><span class="n">validators</span><span class="p">)</span>
+</span><span data-line="234">    <span class="k">for</span> <span class="n">skill</span> <span class="ow">in</span> <span class="n">scan_result</span><span class="o">.</span><span class="n">skills</span><span class="p">:</span>
+</span><span data-line="235">        <span class="n">where</span> <span class="o">=</span> <span class="n">_rel</span><span class="p">(</span><span class="n">skill</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">root</span><span class="p">)</span>
+</span><span data-line="236">        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">validator</span> <span class="ow">in</span> <span class="n">chosen</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+</span><span data-line="237">            <span class="k">try</span><span class="p">:</span>
+</span><span data-line="238">                <span class="n">messages</span> <span class="o">=</span> <span class="n">validator</span><span class="p">(</span><span class="n">skill</span><span class="p">)</span>
+</span><span data-line="239">            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>  <span class="c1"># a broken validator is a finding, not a crash</span>
+</span><span data-line="240">                <span class="n">messages</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s2">"validator failed: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">error</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="n">error</span><span class="si">}</span><span class="s2">"</span><span class="p">]</span>
+</span><span data-line="241">            <span class="k">for</span> <span class="n">message</span> <span class="ow">in</span> <span class="n">messages</span><span class="p">:</span>
+</span><span data-line="242">                <span class="k">yield</span> <span class="n">LintFinding</span><span class="p">(</span><span class="n">where</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">message</span><span class="p">))</span>
+</span><span data-line="243">    <span class="k">yield from</span> <span class="n">_hooks_findings</span><span class="p">(</span><span class="n">root</span><span class="p">)</span></div>
 
-</span><span data-line="156">
-</span><span data-line="157">
-</span><span data-line="158"><span class="c1">#: Where Claude Code reads hooks from; a settings file holds hooks only under ``hooks``.</span>
-</span><span data-line="159"><span class="n">HOOKS_FILES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"hooks.json"</span><span class="p">,</span> <span class="s2">"settings.json"</span><span class="p">,</span> <span class="s2">"settings.local.json"</span><span class="p">)</span>
-</span><span data-line="160">
-</span><span data-line="161">
-</span><span data-line="162"><span class="k">def</span><span class="w"> </span><span class="nf">_hooks_findings</span><span class="p">(</span><span class="n">root</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">LintFinding</span><span class="p">]:</span>
-</span><span data-line="163"><span class="w">    </span><span class="sd">"""Every hooks-bearing file under ``.claude/``: unparseable JSON, or a malformed ``hooks``."""</span>
-</span><span data-line="164">    <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
-</span><span data-line="165">
-</span><span data-line="166">    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">HOOKS_FILES</span><span class="p">:</span>
-</span><span data-line="167">        <span class="n">path</span> <span class="o">=</span> <span class="n">root</span> <span class="o">/</span> <span class="s2">".claude"</span> <span class="o">/</span> <span class="n">name</span>
-</span><span data-line="168">        <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
-</span><span data-line="169">            <span class="k">continue</span>
-</span><span data-line="170">        <span class="n">where</span> <span class="o">=</span> <span class="n">_rel</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">root</span><span class="p">)</span>
-</span><span data-line="171">        <span class="k">try</span><span class="p">:</span>
-</span><span data-line="172">            <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">))</span>
-</span><span data-line="173">        <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">UnicodeDecodeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
-</span><span data-line="174">            <span class="k">yield</span> <span class="n">LintFinding</span><span class="p">(</span><span class="n">where</span><span class="p">,</span> <span class="s2">"opsward"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"not valid JSON: </span><span class="si">{</span><span class="n">error</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-</span><span data-line="175">            <span class="k">continue</span>
-</span><span data-line="176">        <span class="k">if</span> <span class="n">name</span> <span class="o">!=</span> <span class="s2">"hooks.json"</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">"hooks"</span> <span class="ow">in</span> <span class="n">data</span><span class="p">):</span>
-</span><span data-line="177">            <span class="k">continue</span>  <span class="c1"># a settings file without hooks is not a hooks config</span>
-</span><span data-line="178">        <span class="k">for</span> <span class="n">message</span> <span class="ow">in</span> <span class="n">validate_hooks_config</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
-</span><span data-line="179">            <span class="k">yield</span> <span class="n">LintFinding</span><span class="p">(</span><span class="n">where</span><span class="p">,</span> <span class="s2">"opsward"</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
+</span><span data-line="244">
+</span><span data-line="245">
+</span><span data-line="246"><span class="c1">#: Where Claude Code reads hooks from; a settings file holds hooks only under ``hooks``.</span>
+</span><span data-line="247"><span class="n">HOOKS_FILES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"hooks.json"</span><span class="p">,</span> <span class="s2">"settings.json"</span><span class="p">,</span> <span class="s2">"settings.local.json"</span><span class="p">)</span>
+</span><span data-line="248">
+</span><span data-line="249">
+</span><span data-line="250"><span class="k">def</span><span class="w"> </span><span class="nf">_hooks_findings</span><span class="p">(</span><span class="n">root</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">LintFinding</span><span class="p">]:</span>
+</span><span data-line="251"><span class="w">    </span><span class="sd">"""Every hooks-bearing file under ``.claude/``: unparseable JSON, or a malformed ``hooks``."""</span>
+</span><span data-line="252">    <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
+</span><span data-line="253">
+</span><span data-line="254">    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">HOOKS_FILES</span><span class="p">:</span>
+</span><span data-line="255">        <span class="n">path</span> <span class="o">=</span> <span class="n">root</span> <span class="o">/</span> <span class="s2">".claude"</span> <span class="o">/</span> <span class="n">name</span>
+</span><span data-line="256">        <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+</span><span data-line="257">            <span class="k">continue</span>
+</span><span data-line="258">        <span class="n">where</span> <span class="o">=</span> <span class="n">_rel</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">root</span><span class="p">)</span>
+</span><span data-line="259">        <span class="k">try</span><span class="p">:</span>
+</span><span data-line="260">            <span class="n">data</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">(</span><span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">))</span>
+</span><span data-line="261">        <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">UnicodeDecodeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">)</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+</span><span data-line="262">            <span class="k">yield</span> <span class="n">LintFinding</span><span class="p">(</span><span class="n">where</span><span class="p">,</span> <span class="s2">"opsward"</span><span class="p">,</span> <span class="sa">f</span><span class="s2">"not valid JSON: </span><span class="si">{</span><span class="n">error</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span data-line="263">            <span class="k">continue</span>
+</span><span data-line="264">        <span class="k">if</span> <span class="n">name</span> <span class="o">!=</span> <span class="s2">"hooks.json"</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">)</span> <span class="ow">and</span> <span class="s2">"hooks"</span> <span class="ow">in</span> <span class="n">data</span><span class="p">):</span>
+</span><span data-line="265">            <span class="k">continue</span>  <span class="c1"># a settings file without hooks is not a hooks config</span>
+</span><span data-line="266">        <span class="k">for</span> <span class="n">message</span> <span class="ow">in</span> <span class="n">validate_hooks_config</span><span class="p">(</span><span class="n">data</span><span class="p">):</span>
+</span><span data-line="267">            <span class="k">yield</span> <span class="n">LintFinding</span><span class="p">(</span><span class="n">where</span><span class="p">,</span> <span class="s2">"opsward"</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
 </span></pre></div>
         </article><button class="back-to-top" type="button">
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -353,7 +447,7 @@ data-aria-dark="Switch to auto color mode">
     </div>
   </div>
 </footer>
-      <script src="../../_static/documentation_options.js?v=f2234cd1"></script>
+      <script src="../../_static/documentation_options.js?v=565bc8c8"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>

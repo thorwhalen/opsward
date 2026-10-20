@@ -289,13 +289,14 @@ actually write files. Existing files are never overwritten.</p>
 <span class="sig-prename descclassname"><span class="pre">opsward.cli.</span></span><span class="sig-name descname"><span class="pre">lint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">project_roots</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validators</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'text'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/cli.html#lint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.cli.lint" title="Link to this definition">#</a></dt>
 <dd><p>Check skill specs and the hooks config: pass or fail, no score (exit 1 on any finding).</p>
 <p>The strict counterpart of <code class="code docutils literal notranslate"><span class="pre">diagnose</span> <span class="pre">--min-score</span></code>, for CI and pre-commit. Validators:
-opsward (its own agentskills.io check, always there) and skill (the skill package’s
-validate(); pip install ‘opsward[lint]’). auto runs every one that is installed.</p>
+opsward (its own agentskills.io check, always there), skill (the skill package’s
+validate(); pip install ‘opsward[lint]’), and the external agnix and skillcheck
+linters (opt-in by name). auto runs opsward and skill, each when installed.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>project_roots</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – one or more project directories (default: current dir)</p></li>
-<li><p><strong>validators</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – ‘auto’, or a comma list of: opsward, skill</p></li>
+<li><p><strong>validators</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – ‘auto’, or a comma list of: opsward, skill, agnix, skillcheck</p></li>
 <li><p><strong>format</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – output format — ‘text’ or ‘json’</p></li>
 </ul>
 </dd>
@@ -408,7 +409,7 @@ volatile reference: put <code class="code docutils literal notranslate"><span cl
     </div>
   </div>
 </footer>
-      <script src="../_static/documentation_options.js?v=f2234cd1"></script>
+      <script src="../_static/documentation_options.js?v=565bc8c8"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>

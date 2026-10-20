@@ -89,12 +89,13 @@ actually write files. Existing files are never overwritten.
 Check skill specs and the hooks config: pass or fail, no score (exit 1 on any finding).
 
 The strict counterpart of `diagnose --min-score`, for CI and pre-commit. Validators:
-opsward (its own agentskills.io check, always there) and skill (the skill package’s
-validate(); pip install ‘opsward[lint]’). auto runs every one that is installed.
+opsward (its own agentskills.io check, always there), skill (the skill package’s
+validate(); pip install ‘opsward[lint]’), and the external agnix and skillcheck
+linters (opt-in by name). auto runs opsward and skill, each when installed.
 
 * **Parameters:**
   * **project_roots** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – one or more project directories (default: current dir)
-  * **validators** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – ‘auto’, or a comma list of: opsward, skill
+  * **validators** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – ‘auto’, or a comma list of: opsward, skill, agnix, skillcheck
   * **format** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – output format — ‘text’ or ‘json’
 
 ### opsward.cli.maintain(\*project_roots, format='text')

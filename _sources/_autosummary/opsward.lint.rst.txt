@@ -9,17 +9,23 @@ opsward.lint
    .. autosummary::
    
       DFLT_VALIDATORS
+      EXTERNAL_FINDING_LEVELS
+      DFLT_EXTERNAL_TIMEOUT
       VALIDATORS
+      AUTO_VALIDATORS
+      INSTALL_HINTS
       HOOKS_FILES
    
    .. rubric:: Functions
 
    .. autosummary::
    
+      agnix_validator
       lint
       opsward_validator
       resolve_validators
       skill_package_validator
+      skillcheck_validator
    
    .. rubric:: Classes
 
