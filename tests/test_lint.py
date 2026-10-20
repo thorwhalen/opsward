@@ -58,10 +58,76 @@ def test_unknown_or_uninstalled_validators_are_refused(monkeypatch):
         resolve_validators("opsward,nope")
     import opsward.lint as mod
 
-    monkeypatch.setitem(mod.VALIDATORS, "skill", (mod.skill_package_validator, lambda: False))
+    for name in ("skill", "agnix", "skillcheck"):
+        validator, _ = mod.VALIDATORS[name]
+        monkeypatch.setitem(mod.VALIDATORS, name, (validator, lambda: False))
     with pytest.raises(ValueError, match="not installed"):
         resolve_validators("skill")
+    with pytest.raises(ValueError, match="npm install -g agnix"):
+        resolve_validators("agnix")
     assert list(resolve_validators("auto")) == ["opsward"]
+
+
+def _fake_run(stdout, *, calls=None):
+    import subprocess
+
+    def run(argv, **kwargs):
+        if calls is not None:
+            calls.append(argv)
+        return subprocess.CompletedProcess(argv, 1, stdout=stdout, stderr="boom")
+
+    return run
+
+
+def test_agnix_and_skillcheck_json_become_findings(monkeypatch, tmp_path):
+    import json
+
+    import opsward.lint as mod
+
+    skill = SkillInfo("s", tmp_path / "s", has_skill_md=True)
+    calls = []
+    agnix_out = {
+        "diagnostics": [
+            {"level": "error", "rule": "AS-004", "message": "bad name", "line": 2},
+            {"level": "warning", "rule": "AS-010", "message": "vague"},
+            {"level": "info", "rule": "VER-001", "message": "versions"},
+        ]
+    }
+    monkeypatch.setattr(mod.subprocess, "run", _fake_run(json.dumps(agnix_out), calls=calls))
+    assert mod.agnix_validator(skill) == ["AS-004: bad name (line 2)", "AS-010: vague"]
+    assert calls[0][:3] == ["agnix", "--format", "json"]
+    check_out = {
+        "results": [
+            {"diagnostics": [{"severity": "error", "rule": "r", "message": "m", "line": None},
+                             {"severity": "info", "rule": "i", "message": "x"}]}
+        ]
+    }
+    monkeypatch.setattr(mod.subprocess, "run", _fake_run(json.dumps(check_out)))
+    assert mod.skillcheck_validator(skill) == ["r: m"]
+    assert mod.agnix_validator(SkillInfo("x", tmp_path / "x")) == []  # no SKILL.md
+
+
+def test_an_external_linter_without_json_is_a_validator_failure(monkeypatch):
+    import opsward.lint as mod
+
+    monkeypatch.setattr(mod.subprocess, "run", _fake_run("not json"))
+    sr = ScanResult(Path("r"), skills=[SkillInfo("s", Path("r/.claude/skills/s"), has_skill_md=True)])
+    [finding] = lint(sr, validators={"agnix": mod.agnix_validator})
+    assert "validator failed" in finding.message and "boom" in finding.message
+
+
+@pytest.mark.parametrize("name", ["agnix", "skillcheck"])
+def test_the_real_external_linter_flags_a_bad_skill(name, tmp_path):
+    import shutil
+
+    import opsward.lint as mod
+
+    if shutil.which(name) is None:
+        pytest.skip(f"{name} is not on PATH")
+    (tmp_path / "Bad_Skill").mkdir()
+    (tmp_path / "Bad_Skill" / "SKILL.md").write_text("---\nname: Bad_Name\n---\nbody\n")
+    validator, _ = mod.VALIDATORS[name]
+    assert validator(SkillInfo("Bad_Skill", tmp_path / "Bad_Skill", has_skill_md=True))
 
 
 def test_the_skill_package_validator_composes_skill_validate():

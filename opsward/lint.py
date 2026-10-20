@@ -7,10 +7,14 @@ violation with a repo-relative path. A validator is ``SkillInfo -> list[str]``:
 * ``opsward`` -- opsward's own agentskills.io spec check (:func:`validate_skill_spec`),
   always available;
 * ``skill`` -- the ``skill`` package's ``skill.validate()`` (``pip install 'opsward[lint]'``),
-  which composes its own registered validators.
+  which composes its own registered validators;
+* ``agnix`` and ``skillcheck`` -- external linters, run as subprocesses when their
+  executable is on ``PATH`` (``npm install -g agnix``, ``pip install skillcheck``); their
+  JSON diagnostics of level ``error`` and ``warning`` become findings. opsward does not
+  depend on either.
 
-``"auto"`` (the default) is ``opsward`` plus ``skill`` when it is importable. A host can
-pass any mapping of name to validator instead, which is the seam for external linters.
+``"auto"`` (the default) is every validator that is available. A host can pass any
+mapping of name to validator instead.
 
 >>> from pathlib import Path
 >>> from opsward.base import ScanResult, SkillInfo
@@ -23,7 +27,10 @@ pass any mapping of name to validator instead, which is the seam for external li
 
 from __future__ import annotations
 
-from collections.abc import Callable, Iterator, Mapping
+import json
+import shutil
+import subprocess
+from collections.abc import Callable, Iterable, Iterator, Mapping
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
@@ -77,10 +84,83 @@ def _skill_package_available() -> bool:
     return find_spec("skill") is not None
 
 
+#: Diagnostic levels of an external linter that count as findings (``info`` does not).
+EXTERNAL_FINDING_LEVELS = ("error", "warning")
+#: Seconds an external linter may take on one skill.
+DFLT_EXTERNAL_TIMEOUT = 120
+
+
+def _run_json(argv: list[str], *, timeout: float = DFLT_EXTERNAL_TIMEOUT):
+    """Run an external linter and parse its JSON stdout (its exit code is not the verdict)."""
+    done = subprocess.run(argv, capture_output=True, text=True, timeout=timeout)
+    try:
+        return json.loads(done.stdout)
+    except ValueError:
+        detail = (done.stderr or done.stdout).strip().splitlines()[-1:] or ["no output"]
+        raise RuntimeError(
+            f"{argv[0]} exited {done.returncode} without JSON: {detail[0]}"
+        ) from None
+
+
+def _messages(diagnostics: Iterable[Mapping], *, level_key: str) -> list[str]:
+    """``rule: message (line N)`` for each diagnostic at a finding level.
+
+    >>> _messages([{"rule": "AS-004", "level": "error", "message": "bad name", "line": 2},
+    ...            {"rule": "VER-001", "level": "info", "message": "fyi"}], level_key="level")
+    ['AS-004: bad name (line 2)']
+    """
+    return [
+        f"{d.get('rule', '?')}: {d.get('message', '')}"
+        + (f" (line {d['line']})" if d.get("line") else "")
+        for d in diagnostics
+        if d.get(level_key) in EXTERNAL_FINDING_LEVELS
+    ]
+
+
+def agnix_validator(skill: SkillInfo) -> list[str]:
+    """`agnix <https://github.com/agent-sh/agnix>`_ over the skill's directory."""
+    if not skill.has_skill_md:
+        return []
+    report = _run_json(["agnix", "--format", "json", str(skill.path)])
+    return _messages(report.get("diagnostics", ()), level_key="level")
+
+
+def skillcheck_validator(skill: SkillInfo) -> list[str]:
+    """`skillcheck <https://pypi.org/project/skillcheck/>`_ over the skill's SKILL.md."""
+    if not skill.has_skill_md:
+        return []
+    argv = [
+        "skillcheck",
+        "--format",
+        "json",
+        "--no-color",
+        str(skill.path / "SKILL.md"),
+    ]
+    report = _run_json(argv)
+    return [
+        message
+        for result in report.get("results", ())
+        for message in _messages(result.get("diagnostics", ()), level_key="severity")
+    ]
+
+
+def _on_path(executable: str) -> Callable[[], bool]:
+    return lambda: shutil.which(executable) is not None
+
+
 #: Every known validator: name -> (validator, is-it-available).
 VALIDATORS: dict[str, tuple[Validator, Callable[[], bool]]] = {
     "opsward": (opsward_validator, lambda: True),
     "skill": (skill_package_validator, _skill_package_available),
+    "agnix": (agnix_validator, _on_path("agnix")),
+    "skillcheck": (skillcheck_validator, _on_path("skillcheck")),
+}
+
+#: How to install each optional validator (named in the "not installed" error).
+INSTALL_HINTS = {
+    "skill": "pip install 'opsward[lint]'",
+    "agnix": "npm install -g agnix",
+    "skillcheck": "pip install skillcheck",
 }
 
 
@@ -96,7 +176,7 @@ def resolve_validators(
     >>> resolve_validators("nope")
     Traceback (most recent call last):
     ...
-    ValueError: unknown validator 'nope' (known: opsward, skill)
+    ValueError: unknown validator 'nope' (known: opsward, skill, agnix, skillcheck)
     """
     chosen = _resolve(spec)
     if not chosen:  # a gate that checks nothing must not pass
@@ -117,9 +197,8 @@ def _resolve(spec) -> dict[str, Validator]:
             )
         validator, available = VALIDATORS[name]
         if not available():
-            raise ValueError(
-                f"validator {name!r} is not installed: pip install 'opsward[lint]'"
-            )
+            hint = INSTALL_HINTS.get(name, "see opsward.lint")
+            raise ValueError(f"validator {name!r} is not installed: {hint}")
         chosen[name] = validator
     return chosen
 
