@@ -5,7 +5,7 @@ from pathlib import Path
 
 import pytest
 
-from opsward import diagnose, portability, scan
+from opsward import check_portability as portability, diagnose, scan
 from opsward.portability import HostFile, analyze
 
 CANONICAL = "# P\n\n## Build\n\n```bash\npytest\n# not a heading\n```\n\n## Layout\n\n- src/\n"
@@ -105,3 +105,49 @@ def test_diagnose_quiet_for_a_clean_shim(tmp_path):
     _write(tmp_path, "CLAUDE.md", "# P\n\n@AGENTS.md\n\n## Claude only\n\nhooks\n")
     suggestions = diagnose(scan(tmp_path, claude_config_dir=None)).suggestions
     assert not any("AGENTS.md" in s for s in suggestions)
+
+
+# -- review cases: false drift and missed shims --
+
+
+def test_reversed_symlink_or_hardlink_is_the_canonical(tmp_path):
+    _write(tmp_path, "CLAUDE.md", CANONICAL)
+    try:
+        os.link(tmp_path / "CLAUDE.md", tmp_path / "AGENTS.md")
+    except (OSError, NotImplementedError):
+        pytest.skip("hard links unavailable")
+    assert portability(tmp_path).coverage["claude"] == "symlink"
+
+
+def test_inline_import_counts_but_fenced_or_code_span_does_not():
+    assert HostFile("CLAUDE.md", "See @AGENTS.md for commands.").relation == "import"
+    assert HostFile("CLAUDE.md", "```\n@AGENTS.md\n```").relation == "copy"
+    assert HostFile("CLAUDE.md", "write `@AGENTS.md` to import").relation == "copy"
+
+
+def test_headings_h1_setext_bom_and_fences():
+    from opsward.portability import _sections
+
+    assert _sections("# T\n\n# One\na\n# Two\nb") == {"one": "a", "two": "b"}
+    assert _sections("﻿## A\nx".lstrip("﻿")) == {"a": "x"}
+    assert _sections("Title\n=====\nBuild\n-----\npytest") == {"build": "pytest"}
+    text = "# T\n## A\n````md\n```\n## inside\n```\n````\n## B\ny"
+    assert set(_sections(text)) == {"a", "b"}
+    assert "b" in _sections("# T\n## A\n```y``` z\n## B\ny")
+
+
+def test_empty_render_and_conventions_doc_are_not_drift(tmp_path):
+    _write(tmp_path, "AGENTS.md", CANONICAL)
+    _write(tmp_path, "GEMINI.md", "")
+    _write(tmp_path, "CONVENTIONS.md", "# Contributing\n\n## Style\n\nblack\n")
+    report = portability(tmp_path)
+    assert report.findings == []
+    assert report.coverage["aider"] == "copy"
+
+
+def test_clinerules_file_and_dot_claude_claude_md(tmp_path):
+    _write(tmp_path, ".clinerules", "rules")
+    _write(tmp_path, ".claude/CLAUDE.md", "# P\n")
+    report = portability(tmp_path)
+    assert report.coverage["cline"] == "copy"
+    assert report.coverage["claude"] == "copy"
