@@ -17,10 +17,14 @@ opsward.portability
    
       analyze
       as_read
+      canonical_import
       check_portability
+      claude_md_as_read
+      claude_md_relpath
       has_canonical
       lossy_findings
       read_host_files
+      resolves_to_canonical
       summarize
    
    .. rubric:: Classes

@@ -8,7 +8,10 @@ of it, related to it in one of three ways:
 
 * `symlink` — the file is a symlink to `AGENTS.md`: byte-identical, cannot drift;
 * `import` — the file imports it (`@AGENTS.md`) and adds host-only deltas: the
-  recommended shape for hosts with an import syntax (Claude Code, Gemini CLI);
+  recommended shape for hosts with an import syntax (Claude Code, Gemini CLI). The
+  import path resolves against the importing file’s folder, as Claude Code resolves it:
+  `.claude/CLAUDE.md` needs `@../AGENTS.md`, and an import that names some other
+  file (`@AGENTS.md` there means `.claude/AGENTS.md`) is no import of the canonical;
 * `copy` — a separate file: everything in it can drift from the canonical.
 
 The check is a *linter*: the canonical is authoritative and drift in a render is
@@ -56,14 +59,18 @@ render) are compared only when they import or link the canonical.
 
 ### Functions
 
-| [`analyze`](#opsward.portability.analyze)(canonical, host_files, \*[, hosts])   | Coverage and drift of *host_files* against the *canonical* `AGENTS.md` text.         |
-|------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|
-| [`as_read`](#opsward.portability.as_read)(render, canonical)                    | *render* as its host reads it: an `@AGENTS.md` import replaced by *canonical*.       |
-| [`check_portability`](#opsward.portability.check_portability)(root, \*[, hosts])          | `analyze` over what is on disk under *root*, plus `lossy` skill renders.             |
-| [`has_canonical`](#opsward.portability.has_canonical)(canonical)                      | Whether an `AGENTS.md` text says anything (a BOM or whitespace does not).            |
-| [`lossy_findings`](#opsward.portability.lossy_findings)(root, \*[, hosts])             | One `lossy` finding per project skill rendered for a host whose format drops fields. |
-| [`read_host_files`](#opsward.portability.read_host_files)(root, \*[, hosts])            | Every host instruction file and rule folder present under *root*.                    |
-| [`summarize`](#opsward.portability.summarize)(report)                             | One diagnose suggestion per drifting render.                                         |
+| [`analyze`](#opsward.portability.analyze)(canonical, host_files, \*[, hosts])      | Coverage and drift of *host_files* against the *canonical* `AGENTS.md` text.         |
+|---------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------|
+| [`as_read`](#opsward.portability.as_read)(render, canonical, \*[, path])           | *render* (the file at root-relative *path*) as its host reads it, import inlined.    |
+| [`canonical_import`](#opsward.portability.canonical_import)(importer)                       | The `@…` import that names `AGENTS.md` from the file *importer* (root-relative).     |
+| [`check_portability`](#opsward.portability.check_portability)(root, \*[, hosts])             | `analyze` over what is on disk under *root*, plus `lossy` skill renders.             |
+| [`claude_md_as_read`](#opsward.portability.claude_md_as_read)(scan_result)                   | The scanned CLAUDE.md as Claude Code reads it (`as_read` at its own path).           |
+| [`claude_md_relpath`](#opsward.portability.claude_md_relpath)(scan_result)                   | The scanned CLAUDE.md's path relative to the project root (`CLAUDE.md` if unknown).  |
+| [`has_canonical`](#opsward.portability.has_canonical)(canonical)                         | Whether an `AGENTS.md` text says anything (a BOM or whitespace does not).            |
+| [`lossy_findings`](#opsward.portability.lossy_findings)(root, \*[, hosts])                | One `lossy` finding per project skill rendered for a host whose format drops fields. |
+| [`read_host_files`](#opsward.portability.read_host_files)(root, \*[, hosts])               | Every host instruction file and rule folder present under *root*.                    |
+| [`resolves_to_canonical`](#opsward.portability.resolves_to_canonical)(import_path, \*, importer) | Whether `@import_path` in the file *importer* (root-relative) names `AGENTS.md`.     |
+| [`summarize`](#opsward.portability.summarize)(report)                                | One diagnose suggestion per drifting render.                                         |
 
 ### Classes
 
@@ -122,12 +129,14 @@ A blank canonical (empty, whitespace or a BOM) counts as absent.
 * **Return type:**
   [`PortabilityReport`](#opsward.portability.PortabilityReport)
 
-### opsward.portability.as_read(render, canonical)
+### opsward.portability.as_read(render, canonical, , path='CLAUDE.md')
 
-*render* as its host reads it: an `@AGENTS.md` import replaced by *canonical*.
+*render* (the file at root-relative *path*) as its host reads it, import inlined.
 
-A line that is only the import is replaced in place; an import inside a sentence
-appends the canonical at the end. A copy (no import) comes back unchanged, so
+An `@…AGENTS.md` import that resolves to the canonical from *path*’s folder is
+replaced by *canonical*: a line that is only the import is replaced in place; an
+import inside a sentence appends the canonical at the end. A copy, or an import that
+does not resolve (`@AGENTS.md` in `.claude/CLAUDE.md`), comes back unchanged, so
 scoring a shim judges what the agent actually sees, not the three-line file.
 
 ```pycon
@@ -137,6 +146,22 @@ scoring a shim judges what the agent actually sees, not the three-line file.
 'Read @AGENTS.md first.\n\n## Build'
 >>> as_read("## Build\n\npytest", "## Other")
 '## Build\n\npytest'
+>>> as_read("@AGENTS.md", "## Build", path=".claude/CLAUDE.md")
+'@AGENTS.md'
+>>> as_read("@../AGENTS.md", "## Build", path=".claude/CLAUDE.md")
+'## Build'
+```
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
+
+### opsward.portability.canonical_import(importer)
+
+The `@…` import that names `AGENTS.md` from the file *importer* (root-relative).
+
+```pycon
+>>> canonical_import("CLAUDE.md"), canonical_import(".claude/CLAUDE.md")
+('@AGENTS.md', '@../AGENTS.md')
 ```
 
 * **Return type:**
@@ -150,6 +175,20 @@ The library entry point. Read-only.
 
 * **Return type:**
   [`PortabilityReport`](#opsward.portability.PortabilityReport)
+
+### opsward.portability.claude_md_as_read(scan_result)
+
+The scanned CLAUDE.md as Claude Code reads it (`as_read` at its own path).
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
+
+### opsward.portability.claude_md_relpath(scan_result)
+
+The scanned CLAUDE.md’s path relative to the project root (`CLAUDE.md` if unknown).
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 
 ### opsward.portability.has_canonical(canonical)
 
@@ -176,6 +215,26 @@ Every host instruction file and rule folder present under *root*. Read-only.
 
 * **Return type:**
   [`dict`](https://docs.python.org/3/builtins/stdtypes.html#dict)
+
+### opsward.portability.resolves_to_canonical(import_path, , importer)
+
+Whether `@import_path` in the file *importer* (root-relative) names `AGENTS.md`.
+
+Imports resolve against the importing file’s folder (Claude Code’s rule), so the
+same `@AGENTS.md` is the canonical from the root and a missing file from
+`.claude/`.
+
+```pycon
+>>> resolves_to_canonical("AGENTS.md", importer="CLAUDE.md")
+True
+>>> resolves_to_canonical("AGENTS.md", importer=".claude/CLAUDE.md")
+False
+>>> resolves_to_canonical("../AGENTS.md", importer=".claude/CLAUDE.md")
+True
+```
+
+* **Return type:**
+  [`bool`](https://docs.python.org/3/builtins/functions.html#bool)
 
 ### opsward.portability.summarize(report)
 

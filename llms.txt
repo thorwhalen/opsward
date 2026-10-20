@@ -27,7 +27,7 @@
 - [opsward.subagents](_autosummary/opsward.subagents.html.md): Reuse a skill as a subagent: declare it in the skill, generate the twin, check the sync.
 - [opsward.util](_autosummary/opsward.util.html.md): Shared helpers for opsward.
 - [For AI agents](ai-agents.html.md): &#96;opsward&#96; ships artifacts for coding agents alongside its code. This page lists
-- [About this build](about-this-build.html.md): This documentation was built on &#42;&#42;2026-10-20 19:32 UTC&#42;&#42; from commit &lt;a href="https://github.com/tho...
+- [About this build](about-this-build.html.md): This documentation was built on &#42;&#42;2026-10-20 19:38 UTC&#42;&#42; from commit &lt;a href="https://github.com/tho...
 
 ## Optional
 

@@ -117,10 +117,14 @@ data-aria-dark="Switch to auto color mode">
 </li>
 <li><a class="reference internal" href="#opsward.portability.analyze"><code class="docutils literal notranslate"><span class="pre">analyze()</span></code></a></li>
 <li><a class="reference internal" href="#opsward.portability.as_read"><code class="docutils literal notranslate"><span class="pre">as_read()</span></code></a></li>
+<li><a class="reference internal" href="#opsward.portability.canonical_import"><code class="docutils literal notranslate"><span class="pre">canonical_import()</span></code></a></li>
 <li><a class="reference internal" href="#opsward.portability.check_portability"><code class="docutils literal notranslate"><span class="pre">check_portability()</span></code></a></li>
+<li><a class="reference internal" href="#opsward.portability.claude_md_as_read"><code class="docutils literal notranslate"><span class="pre">claude_md_as_read()</span></code></a></li>
+<li><a class="reference internal" href="#opsward.portability.claude_md_relpath"><code class="docutils literal notranslate"><span class="pre">claude_md_relpath()</span></code></a></li>
 <li><a class="reference internal" href="#opsward.portability.has_canonical"><code class="docutils literal notranslate"><span class="pre">has_canonical()</span></code></a></li>
 <li><a class="reference internal" href="#opsward.portability.lossy_findings"><code class="docutils literal notranslate"><span class="pre">lossy_findings()</span></code></a></li>
 <li><a class="reference internal" href="#opsward.portability.read_host_files"><code class="docutils literal notranslate"><span class="pre">read_host_files()</span></code></a></li>
+<li><a class="reference internal" href="#opsward.portability.resolves_to_canonical"><code class="docutils literal notranslate"><span class="pre">resolves_to_canonical()</span></code></a></li>
 <li><a class="reference internal" href="#opsward.portability.summarize"><code class="docutils literal notranslate"><span class="pre">summarize()</span></code></a></li>
 </ul>
 </div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
@@ -169,7 +173,10 @@ of it, related to it in one of three ways:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">symlink</span></code> — the file is a symlink to <code class="docutils literal notranslate"><span class="pre">AGENTS.md</span></code>: byte-identical, cannot drift;</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">import</span></code> — the file imports it (<code class="docutils literal notranslate"><span class="pre">&#64;AGENTS.md</span></code>) and adds host-only deltas: the
-recommended shape for hosts with an import syntax (Claude Code, Gemini CLI);</p></li>
+recommended shape for hosts with an import syntax (Claude Code, Gemini CLI). The
+import path resolves against the importing file’s folder, as Claude Code resolves it:
+<code class="docutils literal notranslate"><span class="pre">.claude/CLAUDE.md</span></code> needs <code class="docutils literal notranslate"><span class="pre">&#64;../AGENTS.md</span></code>, and an import that names some other
+file (<code class="docutils literal notranslate"><span class="pre">&#64;AGENTS.md</span></code> there means <code class="docutils literal notranslate"><span class="pre">.claude/AGENTS.md</span></code>) is no import of the canonical;</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">copy</span></code> — a separate file: everything in it can drift from the canonical.</p></li>
 </ul>
 <p>The check is a <em>linter</em>: the canonical is authoritative and drift in a render is
@@ -224,20 +231,32 @@ render) are compared only when they import or link the canonical.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#opsward.portability.analyze" title="opsward.portability.analyze"><code class="xref py py-obj docutils literal notranslate"><span class="pre">analyze</span></code></a>(canonical, host_files, *[, hosts])</p></td>
 <td><p>Coverage and drift of <em>host_files</em> against the <em>canonical</em> <code class="docutils literal notranslate"><span class="pre">AGENTS.md</span></code> text.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#opsward.portability.as_read" title="opsward.portability.as_read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">as_read</span></code></a>(render, canonical)</p></td>
-<td><p><em>render</em> as its host reads it: an <code class="docutils literal notranslate"><span class="pre">&#64;AGENTS.md</span></code> import replaced by <em>canonical</em>.</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#opsward.portability.as_read" title="opsward.portability.as_read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">as_read</span></code></a>(render, canonical, *[, path])</p></td>
+<td><p><em>render</em> (the file at root-relative <em>path</em>) as its host reads it, import inlined.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.portability.check_portability" title="opsward.portability.check_portability"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_portability</span></code></a>(root, *[, hosts])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.portability.canonical_import" title="opsward.portability.canonical_import"><code class="xref py py-obj docutils literal notranslate"><span class="pre">canonical_import</span></code></a>(importer)</p></td>
+<td><p>The <code class="docutils literal notranslate"><span class="pre">&#64;…</span></code> import that names <code class="docutils literal notranslate"><span class="pre">AGENTS.md</span></code> from the file <em>importer</em> (root-relative).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#opsward.portability.check_portability" title="opsward.portability.check_portability"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_portability</span></code></a>(root, *[, hosts])</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">analyze</span></code> over what is on disk under <em>root</em>, plus <code class="docutils literal notranslate"><span class="pre">lossy</span></code> skill renders.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#opsward.portability.has_canonical" title="opsward.portability.has_canonical"><code class="xref py py-obj docutils literal notranslate"><span class="pre">has_canonical</span></code></a>(canonical)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.portability.claude_md_as_read" title="opsward.portability.claude_md_as_read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">claude_md_as_read</span></code></a>(scan_result)</p></td>
+<td><p>The scanned CLAUDE.md as Claude Code reads it (<code class="docutils literal notranslate"><span class="pre">as_read</span></code> at its own path).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#opsward.portability.claude_md_relpath" title="opsward.portability.claude_md_relpath"><code class="xref py py-obj docutils literal notranslate"><span class="pre">claude_md_relpath</span></code></a>(scan_result)</p></td>
+<td><p>The scanned CLAUDE.md's path relative to the project root (<code class="docutils literal notranslate"><span class="pre">CLAUDE.md</span></code> if unknown).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.portability.has_canonical" title="opsward.portability.has_canonical"><code class="xref py py-obj docutils literal notranslate"><span class="pre">has_canonical</span></code></a>(canonical)</p></td>
 <td><p>Whether an <code class="docutils literal notranslate"><span class="pre">AGENTS.md</span></code> text says anything (a BOM or whitespace does not).</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.portability.lossy_findings" title="opsward.portability.lossy_findings"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lossy_findings</span></code></a>(root, *[, hosts])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#opsward.portability.lossy_findings" title="opsward.portability.lossy_findings"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lossy_findings</span></code></a>(root, *[, hosts])</p></td>
 <td><p>One <code class="docutils literal notranslate"><span class="pre">lossy</span></code> finding per project skill rendered for a host whose format drops fields.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#opsward.portability.read_host_files" title="opsward.portability.read_host_files"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_host_files</span></code></a>(root, *[, hosts])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.portability.read_host_files" title="opsward.portability.read_host_files"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_host_files</span></code></a>(root, *[, hosts])</p></td>
 <td><p>Every host instruction file and rule folder present under <em>root</em>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#opsward.portability.resolves_to_canonical" title="opsward.portability.resolves_to_canonical"><code class="xref py py-obj docutils literal notranslate"><span class="pre">resolves_to_canonical</span></code></a>(import_path, *, importer)</p></td>
+<td><p>Whether <code class="docutils literal notranslate"><span class="pre">&#64;import_path</span></code> in the file <em>importer</em> (root-relative) names <code class="docutils literal notranslate"><span class="pre">AGENTS.md</span></code>.</p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#opsward.portability.summarize" title="opsward.portability.summarize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">summarize</span></code></a>(report)</p></td>
 <td><p>One diagnose suggestion per drifting render.</p></td>
@@ -338,10 +357,12 @@ render) are compared only when they import or link the canonical.</p>
 
 <dl class="py function">
 <dt class="sig sig-object py" id="opsward.portability.as_read">
-<span class="sig-prename descclassname"><span class="pre">opsward.portability.</span></span><span class="sig-name descname"><span class="pre">as_read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">render</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">canonical</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/portability.html#as_read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.portability.as_read" title="Link to this definition">#</a></dt>
-<dd><p><em>render</em> as its host reads it: an <code class="docutils literal notranslate"><span class="pre">&#64;AGENTS.md</span></code> import replaced by <em>canonical</em>.</p>
-<p>A line that is only the import is replaced in place; an import inside a sentence
-appends the canonical at the end. A copy (no import) comes back unchanged, so
+<span class="sig-prename descclassname"><span class="pre">opsward.portability.</span></span><span class="sig-name descname"><span class="pre">as_read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">render</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">canonical</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'CLAUDE.md'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/portability.html#as_read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.portability.as_read" title="Link to this definition">#</a></dt>
+<dd><p><em>render</em> (the file at root-relative <em>path</em>) as its host reads it, import inlined.</p>
+<p>An <code class="docutils literal notranslate"><span class="pre">&#64;…AGENTS.md</span></code> import that resolves to the canonical from <em>path</em>’s folder is
+replaced by <em>canonical</em>: a line that is only the import is replaced in place; an
+import inside a sentence appends the canonical at the end. A copy, or an import that
+does not resolve (<code class="docutils literal notranslate"><span class="pre">&#64;AGENTS.md</span></code> in <code class="docutils literal notranslate"><span class="pre">.claude/CLAUDE.md</span></code>), comes back unchanged, so
 scoring a shim judges what the agent actually sees, not the three-line file.</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="gp">&gt;&gt;&gt; </span><span class="n">as_read</span><span class="p">(</span><span class="s2">"@AGENTS.md</span><span class="se">\n\n</span><span class="s2">## Claude</span><span class="se">\n\n</span><span class="s2">x"</span><span class="p">,</span> <span class="s2">"## Build</span><span class="se">\n\n</span><span class="s2">pytest</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
 </span><span data-line="2"><span class="go">'## Build\n\npytest\n\n## Claude\n\nx'</span>
@@ -349,6 +370,25 @@ scoring a shim judges what the agent actually sees, not the three-line file.</p>
 </span><span data-line="4"><span class="go">'Read @AGENTS.md first.\n\n## Build'</span>
 </span><span data-line="5"><span class="gp">&gt;&gt;&gt; </span><span class="n">as_read</span><span class="p">(</span><span class="s2">"## Build</span><span class="se">\n\n</span><span class="s2">pytest"</span><span class="p">,</span> <span class="s2">"## Other"</span><span class="p">)</span>
 </span><span data-line="6"><span class="go">'## Build\n\npytest'</span>
+</span><span data-line="7"><span class="gp">&gt;&gt;&gt; </span><span class="n">as_read</span><span class="p">(</span><span class="s2">"@AGENTS.md"</span><span class="p">,</span> <span class="s2">"## Build"</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s2">".claude/CLAUDE.md"</span><span class="p">)</span>
+</span><span data-line="8"><span class="go">'@AGENTS.md'</span>
+</span><span data-line="9"><span class="gp">&gt;&gt;&gt; </span><span class="n">as_read</span><span class="p">(</span><span class="s2">"@../AGENTS.md"</span><span class="p">,</span> <span class="s2">"## Build"</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s2">".claude/CLAUDE.md"</span><span class="p">)</span>
+</span><span data-line="10"><span class="go">'## Build'</span>
+</span></pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="opsward.portability.canonical_import">
+<span class="sig-prename descclassname"><span class="pre">opsward.portability.</span></span><span class="sig-name descname"><span class="pre">canonical_import</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">importer</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/portability.html#canonical_import"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.portability.canonical_import" title="Link to this definition">#</a></dt>
+<dd><p>The <code class="docutils literal notranslate"><span class="pre">&#64;…</span></code> import that names <code class="docutils literal notranslate"><span class="pre">AGENTS.md</span></code> from the file <em>importer</em> (root-relative).</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="gp">&gt;&gt;&gt; </span><span class="n">canonical_import</span><span class="p">(</span><span class="s2">"CLAUDE.md"</span><span class="p">),</span> <span class="n">canonical_import</span><span class="p">(</span><span class="s2">".claude/CLAUDE.md"</span><span class="p">)</span>
+</span><span data-line="2"><span class="go">('@AGENTS.md', '@../AGENTS.md')</span>
 </span></pre></div>
 </div>
 <dl class="field-list simple">
@@ -366,6 +406,28 @@ scoring a shim judges what the agent actually sees, not the three-line file.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#opsward.portability.PortabilityReport" title="opsward.portability.PortabilityReport"><code class="xref py py-class docutils literal notranslate"><span class="pre">PortabilityReport</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="opsward.portability.claude_md_as_read">
+<span class="sig-prename descclassname"><span class="pre">opsward.portability.</span></span><span class="sig-name descname"><span class="pre">claude_md_as_read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scan_result</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/portability.html#claude_md_as_read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.portability.claude_md_as_read" title="Link to this definition">#</a></dt>
+<dd><p>The scanned CLAUDE.md as Claude Code reads it (<code class="docutils literal notranslate"><span class="pre">as_read</span></code> at its own path).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="opsward.portability.claude_md_relpath">
+<span class="sig-prename descclassname"><span class="pre">opsward.portability.</span></span><span class="sig-name descname"><span class="pre">claude_md_relpath</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scan_result</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/portability.html#claude_md_relpath"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.portability.claude_md_relpath" title="Link to this definition">#</a></dt>
+<dd><p>The scanned CLAUDE.md’s path relative to the project root (<code class="docutils literal notranslate"><span class="pre">CLAUDE.md</span></code> if unknown).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -403,6 +465,28 @@ Read-only.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="opsward.portability.resolves_to_canonical">
+<span class="sig-prename descclassname"><span class="pre">opsward.portability.</span></span><span class="sig-name descname"><span class="pre">resolves_to_canonical</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">import_path</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">importer</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/portability.html#resolves_to_canonical"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.portability.resolves_to_canonical" title="Link to this definition">#</a></dt>
+<dd><p>Whether <code class="docutils literal notranslate"><span class="pre">&#64;import_path</span></code> in the file <em>importer</em> (root-relative) names <code class="docutils literal notranslate"><span class="pre">AGENTS.md</span></code>.</p>
+<p>Imports resolve against the importing file’s folder (Claude Code’s rule), so the
+same <code class="docutils literal notranslate"><span class="pre">&#64;AGENTS.md</span></code> is the canonical from the root and a missing file from
+<code class="docutils literal notranslate"><span class="pre">.claude/</span></code>.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="gp">&gt;&gt;&gt; </span><span class="n">resolves_to_canonical</span><span class="p">(</span><span class="s2">"AGENTS.md"</span><span class="p">,</span> <span class="n">importer</span><span class="o">=</span><span class="s2">"CLAUDE.md"</span><span class="p">)</span>
+</span><span data-line="2"><span class="go">True</span>
+</span><span data-line="3"><span class="gp">&gt;&gt;&gt; </span><span class="n">resolves_to_canonical</span><span class="p">(</span><span class="s2">"AGENTS.md"</span><span class="p">,</span> <span class="n">importer</span><span class="o">=</span><span class="s2">".claude/CLAUDE.md"</span><span class="p">)</span>
+</span><span data-line="4"><span class="go">False</span>
+</span><span data-line="5"><span class="gp">&gt;&gt;&gt; </span><span class="n">resolves_to_canonical</span><span class="p">(</span><span class="s2">"../AGENTS.md"</span><span class="p">,</span> <span class="n">importer</span><span class="o">=</span><span class="s2">".claude/CLAUDE.md"</span><span class="p">)</span>
+</span><span data-line="6"><span class="go">True</span>
+</span></pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -460,7 +544,7 @@ Read-only.</p>
     </div>
   </div>
 </footer>
-      <script src="../_static/documentation_options.js?v=423071ad"></script>
+      <script src="../_static/documentation_options.js?v=e648f5b4"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
