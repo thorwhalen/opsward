@@ -705,9 +705,9 @@ def eval_(
     else:
         the_judge, agent = evals.rubric_judge, evals.echo_agent
 
-    from opsward.portability import as_read
+    from opsward.portability import claude_md_as_read
 
-    config = as_read(sr.claude_md_content, sr.agents_md_content)
+    config = claude_md_as_read(sr)
     judged = (
         evals.judge_claude_md(config, judge=the_judge, samples=samples)
         if sr.claude_md_path

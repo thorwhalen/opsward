@@ -226,6 +226,54 @@ def test_as_read_strips_a_bom_and_inlines_once():
     assert as_read("x\n\n    @AGENTS.md", "## B").endswith("    @AGENTS.md\n\n## B")
 
 
+
+# -- opsward#73: an import resolves against the importing file's folder --
+
+
+@pytest.mark.parametrize(
+    "path, text, relation",
+    [
+        ("CLAUDE.md", "@AGENTS.md\n", "import"),
+        ("CLAUDE.md", "@./AGENTS.md\n", "import"),
+        ("CLAUDE.md", "@../AGENTS.md\n", "copy"),
+        ("CLAUDE.md", "@docs/AGENTS.md\n", "copy"),
+        (".claude/CLAUDE.md", "@AGENTS.md\n", "copy"),
+        (".claude/CLAUDE.md", "See @AGENTS.md first.", "copy"),
+        (".claude/CLAUDE.md", "@../AGENTS.md\n", "import"),
+        (".claude/CLAUDE.md", "See @../AGENTS.md first.", "import"),
+    ],
+)
+def test_relation_resolves_the_import_from_the_importer(path, text, relation):
+    assert HostFile(path, text).relation == relation
+
+
+def test_as_read_inlines_only_an_import_that_resolves():
+    from opsward.portability import as_read
+
+    shim = "@AGENTS.md\n\n## Claude\n\nx"
+    assert as_read(shim, "## Build") == "## Build\n\n## Claude\n\nx"
+    assert as_read(shim, "## Build", path="CLAUDE.md") == "## Build\n\n## Claude\n\nx"
+    assert as_read(shim, "## Build", path=".claude/CLAUDE.md") == shim
+    up = "@../AGENTS.md\n\n## Claude\n\nx"
+    assert as_read(up, "## Build", path=".claude/CLAUDE.md") == (
+        "## Build\n\n## Claude\n\nx"
+    )
+    assert as_read(up, "## Build") == up
+
+
+def test_dot_claude_shim_is_credited_only_when_its_import_resolves(tmp_path):
+    body = "## Commands\n\n```bash\npytest\n```\n"
+    _write(tmp_path, "AGENTS.md", "# P\n\n" + body)
+    _write(tmp_path, ".claude/CLAUDE.md", "@AGENTS.md\n")
+    wrong = diagnose(scan(tmp_path, claude_config_dir=None))
+    assert wrong.portability.coverage["claude"] == "copy"
+    assert any("`@../AGENTS.md`" in s for s in wrong.suggestions)
+    _write(tmp_path, ".claude/CLAUDE.md", "@../AGENTS.md\n")
+    right = diagnose(scan(tmp_path, claude_config_dir=None))
+    assert right.portability.coverage["claude"] == "import"
+    assert right.scores[0].score > wrong.scores[0].score
+
+
 # -- opsward#67: the scored Portability component (ADR 0012) --
 
 

@@ -81,15 +81,10 @@ def diagnose(
     scores: list[ComponentScore] = []
     missing: list[str] = []
     suggestions: list[str] = []
-    from opsward.portability import analyze, as_read, has_canonical
+    from opsward.portability import analyze, claude_md_as_read, has_canonical
 
     # CLAUDE.md as Claude reads it: an `@AGENTS.md` shim is judged with its import inlined
-    read = replace(
-        scan_result,
-        claude_md_content=as_read(
-            scan_result.claude_md_content, scan_result.agents_md_content
-        ),
-    )
+    read = replace(scan_result, claude_md_content=claude_md_as_read(scan_result))
 
     # 1. CLAUDE.md quality (max 100, 6 dimensions)
     claude_score = _score_claude_md(
@@ -1185,13 +1180,15 @@ def _check_agents_md(
         return
 
     # Canonical↔render drift across every host's file (opsward#15)
-    from opsward.portability import summarize
+    from opsward.portability import canonical_import, claude_md_relpath, summarize
 
-    claude = sr.host_files.get("CLAUDE.md")
+    claude_path = claude_md_relpath(sr)
+    claude = sr.host_files.get(claude_path)
     if claude is not None and claude.relation == "copy":
+        shim = canonical_import(claude_path)
         suggestions.append(
-            "CLAUDE.md does not import AGENTS.md — make it a thin shim "
-            "(`@AGENTS.md` plus Claude-only deltas) so the two cannot drift"
+            f"{claude_path} does not import AGENTS.md — make it a thin shim "
+            f"(`{shim}` plus Claude-only deltas) so the two cannot drift"
         )
     suggestions.extend(summarize(report))
 

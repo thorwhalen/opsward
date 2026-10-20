@@ -6,7 +6,10 @@ of it, related to it in one of three ways:
 
 * ``symlink`` — the file is a symlink to ``AGENTS.md``: byte-identical, cannot drift;
 * ``import`` — the file imports it (``@AGENTS.md``) and adds host-only deltas: the
-  recommended shape for hosts with an import syntax (Claude Code, Gemini CLI);
+  recommended shape for hosts with an import syntax (Claude Code, Gemini CLI). The
+  import path resolves against the importing file's folder, as Claude Code resolves it:
+  ``.claude/CLAUDE.md`` needs ``@../AGENTS.md``, and an import that names some other
+  file (``@AGENTS.md`` there means ``.claude/AGENTS.md``) is no import of the canonical;
 * ``copy`` — a separate file: everything in it can drift from the canonical.
 
 The check is a *linter*: the canonical is authoritative and drift in a render is
@@ -45,6 +48,7 @@ render) are compared only when they import or link the canonical.
 [('diverged', 'build'), ('host_only', 'claude')]
 """
 
+import posixpath
 import re
 from collections.abc import Iterator, Mapping
 from dataclasses import dataclass, field
@@ -118,7 +122,8 @@ AGENT_HOSTS: Mapping[str, HostSpec] = {
     )
 }
 
-_IMPORT_RE = re.compile(rf"(?<!\S)@(?:\./)?{re.escape(CANONICAL)}(?![\w.])")
+# An ``@path/AGENTS.md`` import; whether it names the canonical depends on the importer
+_IMPORT_RE = re.compile(rf"(?<!\S)@((?:[\w.-]+/)*{re.escape(CANONICAL)})(?![\w.])")
 _HEADING_RE = re.compile(r"^ {0,3}(#{1,6})\s+(.*?)(?:\s+#+)?\s*$")
 _SETEXT_RE = re.compile(r"^ {0,3}(=+|-+)\s*$")
 _FENCE_RE = re.compile(r"^ {0,3}(`{3,}|~{3,})(.*)$")
@@ -143,9 +148,40 @@ class HostFile:
         if self.links_to_canonical:
             return "symlink"
         prose = "\n".join(line for line, fenced in _lines(self.content) if not fenced)
-        if _IMPORT_RE.search(_INLINE_CODE_RE.sub("", prose)):
+        if any(
+            resolves_to_canonical(m.group(1), importer=self.path)
+            for m in _IMPORT_RE.finditer(_INLINE_CODE_RE.sub("", prose))
+        ):
             return "import"
         return "copy"
+
+
+def resolves_to_canonical(import_path: str, *, importer: str) -> bool:
+    """Whether ``@import_path`` in the file *importer* (root-relative) names ``AGENTS.md``.
+
+    Imports resolve against the importing file's folder (Claude Code's rule), so the
+    same ``@AGENTS.md`` is the canonical from the root and a missing file from
+    ``.claude/``.
+
+    >>> resolves_to_canonical("AGENTS.md", importer="CLAUDE.md")
+    True
+    >>> resolves_to_canonical("AGENTS.md", importer=".claude/CLAUDE.md")
+    False
+    >>> resolves_to_canonical("../AGENTS.md", importer=".claude/CLAUDE.md")
+    True
+    """
+    base = posixpath.dirname(importer.replace("\\", "/"))
+    return posixpath.normpath(posixpath.join(base, import_path)) == CANONICAL
+
+
+def canonical_import(importer: str) -> str:
+    """The ``@…`` import that names ``AGENTS.md`` from the file *importer* (root-relative).
+
+    >>> canonical_import("CLAUDE.md"), canonical_import(".claude/CLAUDE.md")
+    ('@AGENTS.md', '@../AGENTS.md')
+    """
+    base = posixpath.dirname(importer.replace("\\", "/")) or "."
+    return "@" + posixpath.relpath(CANONICAL, base)
 
 
 @dataclass(frozen=True)
@@ -347,11 +383,13 @@ def summarize(report: PortabilityReport) -> Iterator[str]:
         )
 
 
-def as_read(render: str, canonical: str) -> str:
-    """*render* as its host reads it: an ``@AGENTS.md`` import replaced by *canonical*.
+def as_read(render: str, canonical: str, *, path: str = "CLAUDE.md") -> str:
+    """*render* (the file at root-relative *path*) as its host reads it, import inlined.
 
-    A line that is only the import is replaced in place; an import inside a sentence
-    appends the canonical at the end. A copy (no import) comes back unchanged, so
+    An ``@…AGENTS.md`` import that resolves to the canonical from *path*'s folder is
+    replaced by *canonical*: a line that is only the import is replaced in place; an
+    import inside a sentence appends the canonical at the end. A copy, or an import that
+    does not resolve (``@AGENTS.md`` in ``.claude/CLAUDE.md``), comes back unchanged, so
     scoring a shim judges what the agent actually sees, not the three-line file.
 
     >>> as_read("@AGENTS.md\\n\\n## Claude\\n\\nx", "## Build\\n\\npytest\\n")
@@ -360,26 +398,48 @@ def as_read(render: str, canonical: str) -> str:
     'Read @AGENTS.md first.\\n\\n## Build'
     >>> as_read("## Build\\n\\npytest", "## Other")
     '## Build\\n\\npytest'
+    >>> as_read("@AGENTS.md", "## Build", path=".claude/CLAUDE.md")
+    '@AGENTS.md'
+    >>> as_read("@../AGENTS.md", "## Build", path=".claude/CLAUDE.md")
+    '## Build'
     """
-    render = render.lstrip("﻿")
-    if not canonical or HostFile("render", render).relation != "import":
+    render = render.lstrip("\ufeff")
+    if not canonical or HostFile(path, render).relation != "import":
         return render
-    canonical = canonical.lstrip("﻿").strip("\n")
+    canonical = canonical.lstrip("\ufeff").strip("\n")
     lines, replaced = [], False
     for line, fenced in _lines(render):
         # Inlined once, and never from code (fenced, or indented as a code block)
-        if (
-            not replaced
-            and not fenced
-            and not line.startswith("    ")
-            and _IMPORT_RE.fullmatch(line.strip())
-        ):
+        m = None if replaced or fenced or line.startswith("    ") else (
+            _IMPORT_RE.fullmatch(line.strip())
+        )
+        if m and resolves_to_canonical(m.group(1), importer=path):
             lines.append(canonical)
             replaced = True
         else:
             lines.append(line)
     out = "\n".join(lines)
     return out if replaced else f"{out}\n\n{canonical}"
+
+
+def claude_md_as_read(scan_result) -> str:
+    """The scanned CLAUDE.md as Claude Code reads it (``as_read`` at its own path)."""
+    return as_read(
+        scan_result.claude_md_content,
+        scan_result.agents_md_content,
+        path=claude_md_relpath(scan_result),
+    )
+
+
+def claude_md_relpath(scan_result) -> str:
+    """The scanned CLAUDE.md's path relative to the project root (``CLAUDE.md`` if unknown)."""
+    p = scan_result.claude_md_path
+    if p is None:
+        return "CLAUDE.md"
+    try:
+        return Path(p).relative_to(scan_result.project_root).as_posix()
+    except ValueError:
+        return "CLAUDE.md"
 
 
 # Strongest first: a host covered several ways reports the least drift-prone one.
