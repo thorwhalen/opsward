@@ -1,9 +1,12 @@
 """Fleet mode (opsward#17, gap 1): diagnose many roots, roll up, never die on one."""
 
 import json
+import subprocess
+import sys
 from pathlib import Path
 
 from opsward import fleet, git_roots_under
+from opsward.fleet import manifest_roots
 
 FIXTURES = Path(__file__).parent / "fixtures"
 
@@ -40,3 +43,95 @@ def test_git_roots_under_finds_repos_one_level_down(tmp_path):
     (tmp_path / "a" / ".git").mkdir()
     (tmp_path / "b" / ".git").write_text("gitdir: elsewhere")
     assert [p.name for p in git_roots_under(tmp_path)] == ["a", "b"]
+
+
+# -- the `opsward fleet` command (#49) --
+
+
+def _fleet_cli(*args):
+    return subprocess.run(
+        [sys.executable, "-m", "opsward", "fleet", *args],
+        capture_output=True,
+        text=True,
+        cwd=str(Path(__file__).parent.parent),
+    )
+
+
+def test_fleet_cli_rolls_up_the_given_roots():
+    done = _fleet_cli(str(FIXTURES / "bare_project"), str(FIXTURES / "python_project"))
+    assert done.returncode == 0, done.stderr
+    assert "Fleet report: 2 repo(s)" in done.stdout and "bare_project" in done.stdout
+    assert str(FIXTURES) not in done.stdout
+
+
+def test_fleet_cli_json_is_the_name_keyed_summary():
+    done = _fleet_cli(str(FIXTURES / "bare_project"), "--format", "json")
+    data = json.loads(done.stdout)
+    assert list(data["repos"]) == ["bare_project"] and str(FIXTURES) not in done.stdout
+
+
+def test_fleet_cli_under_finds_git_repos(tmp_path):
+    for name in ("one", "two"):
+        (tmp_path / name / ".git").mkdir(parents=True)
+    done = _fleet_cli("--under", str(tmp_path), "--format", "json")
+    assert sorted(json.loads(done.stdout)["repos"]) == ["one", "two"]
+
+
+def test_fleet_cli_manifest_remembers_the_roots(tmp_path):
+    manifest = tmp_path / "state" / "fleet.json"
+    first = _fleet_cli(str(FIXTURES / "bare_project"), "--manifest", str(manifest))
+    assert first.returncode == 0, first.stderr
+    record = json.loads(manifest.read_text())
+    assert record["roots"] == [str((FIXTURES / "bare_project").resolve())]
+    assert list(record["report"]["repos"]) == ["bare_project"]
+    again = _fleet_cli("--manifest", str(manifest))  # no roots given: the manifest's
+    assert again.returncode == 0 and "Fleet report: 1 repo(s)" in again.stdout
+
+
+def test_fleet_cli_rejects_a_file_that_is_not_a_manifest(tmp_path):
+    bogus = tmp_path / "x.json"
+    bogus.write_text("[1, 2]")
+    done = _fleet_cli("--manifest", str(bogus))
+    assert done.returncode == 2 and "not an opsward fleet manifest" in done.stderr
+
+
+def test_fleet_cli_needs_some_roots():
+    done = _fleet_cli()
+    assert done.returncode == 2 and "no roots" in done.stderr
+
+
+def test_fleet_cli_rejects_a_manifest_whose_roots_are_not_a_list(tmp_path):
+    bogus = tmp_path / "m.json"
+    bogus.write_text('{"opsward_fleet_manifest": 1, "roots": "abc"}')
+    done = _fleet_cli("--manifest", str(bogus))
+    assert done.returncode == 2 and "must be a list" in done.stderr
+    done = _fleet_cli("--manifest", str(tmp_path))  # a directory, not a file
+    assert done.returncode == 2 and "cannot read the manifest" in done.stderr
+
+
+def test_fleet_cli_exits_1_on_a_bad_root_and_does_not_remember_it(tmp_path):
+    manifest = tmp_path / "m.json"
+    done = _fleet_cli(
+        str(FIXTURES / "bare_project"), str(tmp_path / "typo"), "-m", str(manifest)
+    )
+    assert done.returncode == 1 and "typo: not a directory" in done.stdout
+    assert json.loads(manifest.read_text())["roots"] == [
+        str((FIXTURES / "bare_project").resolve())
+    ]
+
+
+def test_fleet_cli_under_an_empty_folder_is_an_error(tmp_path):
+    done = _fleet_cli("--under", str(tmp_path))
+    assert done.returncode == 2 and "no git repos under" in done.stderr
+
+
+def test_repos_sharing_a_basename_keep_distinct_keys(tmp_path):
+    roots = [tmp_path / "a" / "proj", tmp_path / "b" / "proj"]
+    for r in roots:
+        r.mkdir(parents=True)
+    data = fleet(roots).to_dict()
+    assert sorted(data["repos"]) == ["a/proj", "b/proj"]
+
+
+def test_manifest_roots_of_a_missing_file_is_empty(tmp_path):
+    assert manifest_roots(tmp_path / "absent.json") == []

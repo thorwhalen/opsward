@@ -80,6 +80,19 @@ myproject: 3 issue(s)
   [empty_doc] `conventions.md` appears to be an empty stub (12 bytes)
 ```
 
+### Fleet
+
+Diagnose many repos at once and roll the results up (grades, what is missing where, the weakest components, the worst repos):
+
+```bash
+opsward fleet ~/proj/a ~/proj/b            # explicit roots
+opsward fleet --under ~/proj --depth 2     # every git repo under a folder
+opsward fleet --under ~/proj --manifest ~/.local/share/opsward/fleet.json
+opsward fleet --manifest ~/.local/share/opsward/fleet.json   # re-run the remembered fleet
+```
+
+`--manifest` remembers the fleet: it writes the roots and the latest name-keyed summary to that JSON file. The roots are this machine's paths, so keep the manifest out of version control (opsward warns when it sits in a git work tree unignored).
+
 ### Output Formats
 
 All CLI commands support `--format json` for machine-parseable output:
