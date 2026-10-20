@@ -40,6 +40,7 @@ def maintain(
     suggestions.extend(_check_empty_docs(scan_result))
     suggestions.extend(check_subagent_twins(scan_result))
     suggestions.extend(check_decisions(scan_result))
+    suggestions.extend(_check_config_changelog(scan_result))
 
     return [
         s if s.triage else replace(s, triage=DFLT_TRIAGE.get(s.category, "align"))
@@ -66,6 +67,7 @@ DFLT_TRIAGE: dict[str, str] = {
     "empty_doc": "align",
     "subagent_twin": "align",
     "stale_adr": "align",
+    "config_changelog": "align",
 }
 
 
@@ -278,3 +280,55 @@ def _extract_doc_refs(guide_content: str) -> Iterable[str]:
 def _suggest_guide_addition(doc_name: str) -> str:
     """Return a diff-like suggestion for adding a doc to docs_guide.md."""
     return f"+ | [{doc_name}.md]({doc_name}.md) | <!-- add description --> |"
+
+
+# ---------------------------------------------------------------------------
+# Config changelog (opsward#53): a dated line per change to the agent config
+# ---------------------------------------------------------------------------
+
+#: The convention's file, in the project's docs folder. Opt-in: the check runs only
+#: when the file exists.
+CONFIG_CHANGELOG = "config_changelog.md"
+
+#: What counts as "the agent config" for the changelog check, relative to the root.
+CONFIG_PATHS = ("CLAUDE.md", "AGENTS.md", ".claude")
+
+
+def _check_config_changelog(sr: ScanResult) -> Iterable[MaintenanceSuggestion]:
+    """Flag agent-config commits newer than the last commit to ``config_changelog.md``."""
+    from opsward.scan import docs_dir_for
+
+    log = docs_dir_for(sr.project_root, sr.project_type, sr.docs_guide_path) / CONFIG_CHANGELOG
+    if not log.is_file() or not (sr.project_root / ".git").exists():
+        return
+    logged = _last_commit_time(sr.project_root, [log])
+    changed = _last_commit_time(
+        sr.project_root, [sr.project_root / p for p in CONFIG_PATHS if (sr.project_root / p).exists()]
+    )
+    if logged is not None and changed is not None and changed > logged:
+        rel = log.relative_to(sr.project_root).as_posix()
+        yield MaintenanceSuggestion(
+            category="config_changelog",
+            description=(
+                f"the agent config changed after the last `{rel}` entry: "
+                "add a dated line saying what changed and why"
+            ),
+        )
+
+
+def _last_commit_time(repo_root: Path, paths: list[Path]) -> Optional[int]:
+    """Unix time of the newest commit touching any of ``paths``, or None (no git, no commit)."""
+    if not paths:
+        return None
+    try:
+        result = subprocess.run(
+            ["git", "log", "-1", "--format=%ct", "--", *map(str, paths)],
+            capture_output=True,
+            text=True,
+            cwd=str(repo_root),
+            timeout=5,
+        )
+        out = result.stdout.strip()
+        return int(out) if result.returncode == 0 and out else None
+    except (OSError, ValueError, subprocess.TimeoutExpired):
+        return None

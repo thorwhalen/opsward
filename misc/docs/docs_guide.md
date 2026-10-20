@@ -16,5 +16,6 @@ for your task.
 | `known_issues.md` | Before investigating a bug | Known bugs, quirks, and workarounds |
 | `roadmap.md` | Before proposing new work | Longer-term plans and feature ideas; check for a completed/archived banner before treating an item as still open |
 | `testing.md` | Before writing or running tests | How to run opsward's own test suite, frameworks used, coverage expectations |
+| `config_changelog.md` | When you change CLAUDE.md, AGENTS.md or `.claude/` | One dated line per agent-config change, newest first: what changed and why (`opsward maintain` flags a config commit newer than the last entry) |
 | `decisions/` | Before revisiting a past design choice | MADR-style architectural decision records, one file per decision; `decisions/README.md` indexes them |
 | `research/` | Before scoping a new meta-tooling feature | Deep-research reports backing the AI-asset meta-tooling epic (thorwhalen/opsward#19) |

@@ -82,6 +82,8 @@ myproject: 3 issue(s)
 
 Each finding carries a recommended triage: **align** (the code is right, update the config), **revert** (the config is right, restore the code) or **ignore** (the reference is legitimately volatile). To ignore one, put `<!-- opsward: ignore-path -->` at the end of its line, or alone on the line before it; every path check (stale paths, the currency score, cross-references, ADR drift) then skips it.
 
+**Config changelog** (opt-in): create `config_changelog.md` in the docs folder and give every change to the agent config (CLAUDE.md, AGENTS.md, `.claude/`) one dated line, newest first, saying what changed and why, e.g. `- 2026-10-20: moved the CLI-golden procedure out of CLAUDE.md (over budget); align`. Once the file exists, `opsward maintain` reports a `config_changelog` finding whenever a config commit is newer than the last changelog commit.
+
 ### Fleet
 
 Diagnose many repos at once and roll the results up (grades, what is missing where, the weakest components, the worst repos):

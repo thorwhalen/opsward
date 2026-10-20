@@ -63,7 +63,11 @@ For each issue, propose a concrete fix:
 
 Always ask the user before writing or editing. Show proposed changes first. For destructive operations (removing content, deleting files), explain why and get explicit confirmation.
 
-### 6. Verify
+### 6. Keep the config changelog (when the project has one)
+
+If the docs folder holds `config_changelog.md`, every change to the agent config (CLAUDE.md, AGENTS.md, anything under `.claude/`) gets one dated line, newest first, saying what changed and why: `- 2026-10-20: moved the CLI-golden procedure to misc/docs (CLAUDE.md over budget); align`. `opsward maintain` reports a `config_changelog` finding when a config commit is newer than the last changelog commit. Add the line in the same commit as the change.
+
+### 7. Verify
 
 ```bash
 opsward maintain .
