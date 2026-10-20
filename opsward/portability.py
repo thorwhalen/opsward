@@ -297,7 +297,9 @@ def lossy_findings(
     root = Path(root)
     skills_dir = root / ".claude" / "skills"
     try:
-        skill_dirs = sorted(p for p in skills_dir.iterdir() if (p / "SKILL.md").is_file())
+        skill_dirs = sorted(
+            p for p in skills_dir.iterdir() if (p / "SKILL.md").is_file()
+        )
     except OSError:
         return
     targets = [
