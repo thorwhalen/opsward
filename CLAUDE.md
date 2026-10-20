@@ -42,7 +42,7 @@ Key docs to read before starting work:
   - `decisions.py` — decision capture: the next numbered ADR from the template, the Y-statement log, and the `stale_adr` drift check (ADR 0010)
   - `subagents.py` — a skill's declared subagent twin (`metadata: subagent: true`): spec, rendered `.claude/agents/<name>.md` preloading the skill, sync states; used by generate, maintain and the diagnosis note (ADR 0009)
   - `fleet.py` — fleet mode: map `scan → diagnose` over N roots and aggregate into a `FleetReport` (opsward#17, gap 1)
-  - `lint.py` — strict schema lint (opsward#17, gap 2): every validator (`opsward`'s own spec check, the optional `skill` package's `validate()`) over the project's skills, plus the hooks config; pass/fail, no score. Shipped with `action.yml` (reusable Action) and `.pre-commit-hooks.yaml` at the repo root
+  - `lint.py` — strict schema lint (opsward#17, gap 2): every validator (`opsward`'s own spec check, the optional `skill` package's `validate()`, the external `agnix` and `skillcheck`, opt-in by name) over the project's skills, plus the hooks config; pass/fail, no score. Shipped with `action.yml` (reusable Action) and `.pre-commit-hooks.yaml` at the repo root
   - `evals.py` — opt-in, report-only evals (opsward#17, gap 3): LLM-as-judge (`judge_claude_md`) and with/without-config golden tasks (`run_golden_tasks`); free defaults `rubric_judge`/`echo_agent`, paid `anthropic_judge`/`anthropic_agent` never used by tests
   - `security.py` — OWASP-style advisories in `DiagnosisReport.advisories`; never scored
   - `cli.py` — CLI command functions (the `_dispatch_funcs` SSOT)

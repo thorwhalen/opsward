@@ -447,11 +447,12 @@ def lint(
     """Check skill specs and the hooks config: pass or fail, no score (exit 1 on any finding).
 
     The strict counterpart of `diagnose --min-score`, for CI and pre-commit. Validators:
-    opsward (its own agentskills.io check, always there) and skill (the skill package's
-    validate(); pip install 'opsward[lint]'). auto runs every one that is installed.
+    opsward (its own agentskills.io check, always there), skill (the skill package's
+    validate(); pip install 'opsward[lint]'), and the external agnix and skillcheck
+    linters (opt-in by name). auto runs opsward and skill, each when installed.
 
     :param project_roots: one or more project directories (default: current dir)
-    :param validators: 'auto', or a comma list of: opsward, skill
+    :param validators: 'auto', or a comma list of: opsward, skill, agnix, skillcheck
     :param format: output format — 'text' or 'json'
     """
     from opsward.lint import lint as _lint, resolve_validators

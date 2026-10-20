@@ -270,6 +270,9 @@ Two gates, for two jobs: `diagnose --min-score` is the cheap scored gate, and `l
 opsward lint .                          # opsward's own spec check, plus skill.validate() when installed
 opsward lint . --validators opsward     # only opsward's check
 pip install 'opsward[lint]'             # adds the `skill` package's validate()
+# external linters, opt-in by name (opsward does not install them; `auto` never runs them):
+npm install -g agnix                    # --validators agnix
+pip install skillcheck                  # --validators skillcheck
 ```
 
 The repo ships a reusable GitHub Action and pre-commit hooks:
