@@ -44,7 +44,7 @@ JUDGE_RUBRICS: dict[str, dict] = {
         "question": "Can a coding agent act on these instructions without guessing?",
         "bands": {
             "13-15": "Every instruction names a concrete command, path, pattern or rule; nothing needs interpretation.",
-            "9-12": "Mostly concrete; a few instructions are vague (\"keep code clean\") or lack the command to run.",
+            "9-12": 'Mostly concrete; a few instructions are vague ("keep code clean") or lack the command to run.',
             "5-8": "About half is aspiration or description rather than instruction.",
             "1-4": "Mostly generic advice an agent cannot turn into an action.",
             "0": "Empty, or nothing actionable.",
@@ -97,8 +97,11 @@ class JudgeRequest:
         r = self.rubric
         bands = "\n".join(f"- {band}: {text}" for band, text in r["bands"].items())
         return _JUDGE_TEMPLATE.format(
-            dimension=self.dimension, question=r["question"], max=r["max"],
-            bands=bands, content=self.content,
+            dimension=self.dimension,
+            question=r["question"],
+            max=r["max"],
+            bands=bands,
+            content=self.content,
         )
 
 
@@ -114,7 +117,10 @@ def rubric_judge(request: JudgeRequest) -> str:
     """
     from opsward import score
 
-    dim = {"actionability": score._dim_actionability, "conciseness": score._dim_conciseness}
+    dim = {
+        "actionability": score._dim_actionability,
+        "conciseness": score._dim_conciseness,
+    }
     notes: list[str] = []
     value = dim[request.dimension](request.content, notes)
     return json.dumps({"reasoning": "; ".join(notes) or "rubric score", "score": value})
@@ -129,34 +135,47 @@ def _client(client):
     try:
         import anthropic
     except ImportError as error:  # pragma: no cover - depends on the environment
-        raise ImportError("the paid judge needs the anthropic SDK: pip install 'opsward[eval]'") from error
+        raise ImportError(
+            "the paid judge needs the anthropic SDK: pip install 'opsward[eval]'"
+        ) from error
     return anthropic.Anthropic()
 
 
 def _text_of(response) -> str:
     if getattr(response, "stop_reason", None) == "refusal":
         raise RuntimeError("the model declined the request (stop_reason: refusal)")
-    return "".join(b.text for b in response.content if getattr(b, "type", None) == "text")
+    return "".join(
+        b.text for b in response.content if getattr(b, "type", None) == "text"
+    )
 
 
-def _create(client, *, model: str, max_tokens: int, messages: list, system: str | None = None):
+def _create(
+    client, *, model: str, max_tokens: int, messages: list, system: str | None = None
+):
     kwargs = dict(
-        model=model, max_tokens=max_tokens, messages=messages,
+        model=model,
+        max_tokens=max_tokens,
+        messages=messages,
         # On a policy decline the API re-runs the request on a fallback model.
-        betas=["server-side-fallback-2026-07-01"], fallbacks="default",
+        betas=["server-side-fallback-2026-07-01"],
+        fallbacks="default",
     )
     if system:
         kwargs["system"] = system
     return client.beta.messages.create(**kwargs)
 
 
-def anthropic_judge(*, model: str = DFLT_JUDGE_MODEL, client=None, max_tokens: int = DFLT_MAX_TOKENS) -> Judge:
+def anthropic_judge(
+    *, model: str = DFLT_JUDGE_MODEL, client=None, max_tokens: int = DFLT_MAX_TOKENS
+) -> Judge:
     """A paid judge over the Messages API. ``client`` defaults to ``anthropic.Anthropic()``."""
     client = _client(client)
 
     def judge(request: JudgeRequest) -> str:
         messages = [{"role": "user", "content": request.prompt}]
-        return _text_of(_create(client, model=model, max_tokens=max_tokens, messages=messages))
+        return _text_of(
+            _create(client, model=model, max_tokens=max_tokens, messages=messages)
+        )
 
     judge.judge_name = model  # type: ignore[attr-defined]
     return judge
@@ -187,7 +206,9 @@ def parse_verdict(reply: str, *, max_score: int) -> tuple[int, str]:
         raise ValueError("no JSON object with a `score` in the judge reply")
     value = _as_int(verdict["score"])
     if value is None or not 0 <= value <= max_score:
-        raise ValueError(f"score must be an integer in 0..{max_score}, got {verdict['score']!r}")
+        raise ValueError(
+            f"score must be an integer in 0..{max_score}, got {verdict['score']!r}"
+        )
     return value, str(verdict.get("reasoning", ""))
 
 
@@ -227,14 +248,19 @@ class JudgeReport:
     scores: dict[str, DimensionVerdict] = field(default_factory=dict)
 
     def to_dict(self) -> dict:
-        return {"judge": self.judge, "scores": {k: asdict(v) for k, v in self.scores.items()}}
+        return {
+            "judge": self.judge,
+            "scores": {k: asdict(v) for k, v in self.scores.items()},
+        }
 
     def __str__(self) -> str:
         lines = [f"Judge: {self.judge}"]
         for name, v in self.scores.items():
             shown = "n/a" if v.score is None else f"{v.score:g}/{v.max_score}"
             extra = f", spread {v.spread}" if len(v.samples) > 1 else ""
-            lines.append(f"  {name}: {shown} (rubric {v.rubric_score}/{v.max_score}{extra})")
+            lines.append(
+                f"  {name}: {shown} (rubric {v.rubric_score}/{v.max_score}{extra})"
+            )
             lines += [f"    error: {e}" for e in v.errors]
         return "\n".join(lines)
 
@@ -255,8 +281,12 @@ def judge_claude_md(
     if samples < 1:
         raise ValueError("samples must be at least 1")
     if unknown := [d for d in dimensions if d not in JUDGE_RUBRICS]:
-        raise ValueError(f"unknown dimension(s) {unknown} (known: {', '.join(JUDGE_RUBRICS)})")
-    report = JudgeReport(judge=getattr(judge, "judge_name", getattr(judge, "__name__", "judge")))
+        raise ValueError(
+            f"unknown dimension(s) {unknown} (known: {', '.join(JUDGE_RUBRICS)})"
+        )
+    report = JudgeReport(
+        judge=getattr(judge, "judge_name", getattr(judge, "__name__", "judge"))
+    )
     for dimension in dimensions:
         request = JudgeRequest(dimension, content)
         max_score = request.rubric["max"]
@@ -291,13 +321,21 @@ class GoldenTask:
     def __post_init__(self):
         for field_name in ("expect", "forbid"):
             patterns = getattr(self, field_name)
-            if isinstance(patterns, str) or not all(isinstance(p, str) for p in patterns):
-                raise ValueError(f"task {self.name!r}: `{field_name}` must be a list of regexes")
+            if isinstance(patterns, str) or not all(
+                isinstance(p, str) for p in patterns
+            ):
+                raise ValueError(
+                    f"task {self.name!r}: `{field_name}` must be a list of regexes"
+                )
             for p in patterns:
                 try:
                     re.compile(p)
-                except re.error as error:  # a bad pattern must not look like an agent failure
-                    raise ValueError(f"task {self.name!r}: bad regex {p!r}: {error}") from error
+                except (
+                    re.error
+                ) as error:  # a bad pattern must not look like an agent failure
+                    raise ValueError(
+                        f"task {self.name!r}: bad regex {p!r}: {error}"
+                    ) from error
 
     def passed(self, output: str) -> bool:
         return all(re.search(p, output, flags=re.M) for p in self.expect) and not any(
@@ -315,13 +353,23 @@ def echo_agent(task: GoldenTask, config: str) -> str:
     return f"{config}\n{task.prompt}"
 
 
-def anthropic_agent(*, model: str = DFLT_JUDGE_MODEL, client=None, max_tokens: int = DFLT_MAX_TOKENS) -> Agent:
+def anthropic_agent(
+    *, model: str = DFLT_JUDGE_MODEL, client=None, max_tokens: int = DFLT_MAX_TOKENS
+) -> Agent:
     """A paid single-call agent: the config is the system prompt, the task the user turn."""
     client = _client(client)
 
     def agent(task: GoldenTask, config: str) -> str:
         messages = [{"role": "user", "content": task.prompt}]
-        return _text_of(_create(client, model=model, max_tokens=max_tokens, messages=messages, system=config or None))
+        return _text_of(
+            _create(
+                client,
+                model=model,
+                max_tokens=max_tokens,
+                messages=messages,
+                system=config or None,
+            )
+        )
 
     return agent
 
@@ -334,12 +382,23 @@ def load_golden_tasks(path: str | Path) -> list[GoldenTask]:
         raise ValueError(f"{name}: expected a JSON list of tasks")
     tasks = []
     for i, d in enumerate(data):
-        if not (isinstance(d, dict) and isinstance(d.get("name"), str) and isinstance(d.get("prompt"), str)):
+        if not (
+            isinstance(d, dict)
+            and isinstance(d.get("name"), str)
+            and isinstance(d.get("prompt"), str)
+        ):
             raise ValueError(f"{name}, task {i}: needs a string `name` and `prompt`")
         for key in ("expect", "forbid"):
             if not isinstance(d.get(key, []), list):
                 raise ValueError(f"{name}, task {i}: `{key}` must be a list of regexes")
-        tasks.append(GoldenTask(d["name"], d["prompt"], tuple(d.get("expect", ())), tuple(d.get("forbid", ()))))
+        tasks.append(
+            GoldenTask(
+                d["name"],
+                d["prompt"],
+                tuple(d.get("expect", ())),
+                tuple(d.get("forbid", ())),
+            )
+        )
     return tasks
 
 
@@ -365,17 +424,32 @@ class GoldenReport:
         return self.rate("with") - self.rate("without")
 
     def to_dict(self) -> dict:
-        return {"runs": self.runs, "results": self.results, "errors": self.errors,
-                "with": self.rate("with"), "without": self.rate("without"), "delta": self.delta()}
+        return {
+            "runs": self.runs,
+            "results": self.results,
+            "errors": self.errors,
+            "with": self.rate("with"),
+            "without": self.rate("without"),
+            "delta": self.delta(),
+        }
 
     def __str__(self) -> str:
-        lines = [f"Golden tasks: {len(self.results)} x {self.runs} run(s); "
-                 f"pass rate {self.rate('with'):.0%} with the config, {self.rate('without'):.0%} without "
-                 f"(delta {self.delta():+.0%})"]
+        lines = [
+            f"Golden tasks: {len(self.results)} x {self.runs} run(s); "
+            f"pass rate {self.rate('with'):.0%} with the config, {self.rate('without'):.0%} without "
+            f"(delta {self.delta():+.0%})"
+        ]
         for name, r in self.results.items():
-            arms = [f"{r[a]}/{self.runs - r[a + '_errors']} {a}" for a in ("with", "without")]
+            arms = [
+                f"{r[a]}/{self.runs - r[a + '_errors']} {a}"
+                for a in ("with", "without")
+            ]
             lines.append(f"  {name}: {', '.join(arms)}")
-        lines += [f"  error in {name}: {e}" for name, errs in self.errors.items() for e in errs]
+        lines += [
+            f"  error in {name}: {e}"
+            for name, errs in self.errors.items()
+            for e in errs
+        ]
         return "\n".join(lines)
 
 
@@ -409,5 +483,7 @@ def run_golden_tasks(
                     counts[arm] += task.passed(agent(task, text))
                 except Exception as error:
                     counts[f"{arm}_errors"] += 1
-                    report.errors.setdefault(task.name, []).append(f"{arm}: {type(error).__name__}: {error}")
+                    report.errors.setdefault(task.name, []).append(
+                        f"{arm}: {type(error).__name__}: {error}"
+                    )
     return report
