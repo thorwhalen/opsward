@@ -216,3 +216,11 @@ def test_fleet_rolls_up_coverage_and_drift(tmp_path):
     assert report.to_dict()["portability_rollup"] == rollup
     assert "Host coverage (repos): claude 2" in str(report)
     assert "AGENTS.md drift: 1 repo(s) (stale 1, diverged 1)" in str(report)
+
+
+def test_as_read_strips_a_bom_and_inlines_once():
+    from opsward.portability import as_read
+
+    assert as_read("﻿@AGENTS.md\n", "## Build") == "## Build"
+    assert as_read("@AGENTS.md\n@AGENTS.md", "## Build") == "## Build\n@AGENTS.md"
+    assert as_read("x\n\n    @AGENTS.md", "## B").endswith("    @AGENTS.md\n\n## B")

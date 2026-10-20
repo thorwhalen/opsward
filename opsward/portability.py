@@ -249,12 +249,19 @@ def as_read(render: str, canonical: str) -> str:
     >>> as_read("## Build\\n\\npytest", "## Other")
     '## Build\\n\\npytest'
     """
+    render = render.lstrip("﻿")
     if not canonical or HostFile("render", render).relation != "import":
         return render
     canonical = canonical.lstrip("﻿").strip("\n")
     lines, replaced = [], False
     for line, fenced in _lines(render):
-        if not fenced and _IMPORT_RE.fullmatch(line.strip()):
+        # Inlined once, and never from code (fenced, or indented as a code block)
+        if (
+            not replaced
+            and not fenced
+            and not line.startswith("    ")
+            and _IMPORT_RE.fullmatch(line.strip())
+        ):
             lines.append(canonical)
             replaced = True
         else:
