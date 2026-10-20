@@ -8,13 +8,14 @@ violation with a repo-relative path. A validator is ``SkillInfo -> list[str]``:
   always available;
 * ``skill`` -- the ``skill`` package's ``skill.validate()`` (``pip install 'opsward[lint]'``),
   which composes its own registered validators;
-* ``agnix`` and ``skillcheck`` -- external linters, run as subprocesses when their
-  executable is on ``PATH`` (``npm install -g agnix``, ``pip install skillcheck``); their
-  JSON diagnostics of level ``error`` and ``warning`` become findings. opsward does not
-  depend on either.
+* ``agnix`` and ``skillcheck`` -- external linters, run as subprocesses
+  (``npm install -g agnix``, ``pip install skillcheck``); their JSON diagnostics of level
+  ``error`` and ``warning`` become findings. opsward does not depend on either, and they
+  are opt-in by name: their rule sets are wider and noisier than the spec check, so a
+  gate on ``"auto"`` must not turn red because a machine happens to have one installed.
 
-``"auto"`` (the default) is every validator that is available. A host can pass any
-mapping of name to validator instead.
+``"auto"`` (the default) is :data:`AUTO_VALIDATORS`, each when it is available. A host
+can pass any mapping of name to validator instead.
 
 >>> from pathlib import Path
 >>> from opsward.base import ScanResult, SkillInfo
@@ -96,9 +97,10 @@ def _run_json(argv: list[str], *, timeout: float = DFLT_EXTERNAL_TIMEOUT):
     try:
         return json.loads(done.stdout)
     except ValueError:
-        detail = (done.stderr or done.stdout).strip().splitlines()[-1:] or ["no output"]
+        lines = [ln.strip() for ln in (done.stderr or done.stdout).splitlines()]
+        detail = next((ln for ln in lines if ln), "no output")
         raise RuntimeError(
-            f"{argv[0]} exited {done.returncode} without JSON: {detail[0]}"
+            f"{argv[0]} exited {done.returncode} without JSON: {detail}"
         ) from None
 
 
@@ -156,6 +158,9 @@ VALIDATORS: dict[str, tuple[Validator, Callable[[], bool]]] = {
     "skillcheck": (skillcheck_validator, _on_path("skillcheck")),
 }
 
+#: What ``"auto"`` runs (each when available): the same set on every machine.
+AUTO_VALIDATORS = ("opsward", "skill")
+
 #: How to install each optional validator (named in the "not installed" error).
 INSTALL_HINTS = {
     "skill": "pip install 'opsward[lint]'",
@@ -188,7 +193,11 @@ def _resolve(spec) -> dict[str, Validator]:
     if isinstance(spec, Mapping):
         return dict(spec)
     if spec == "auto":
-        return {name: v for name, (v, available) in VALIDATORS.items() if available()}
+        return {
+            name: v
+            for name, (v, available) in VALIDATORS.items()
+            if name in AUTO_VALIDATORS and available()
+        }
     chosen = {}
     for name in filter(None, (s.strip() for s in spec.split(","))):
         if name not in VALIDATORS:

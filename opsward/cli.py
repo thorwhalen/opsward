@@ -449,7 +449,7 @@ def lint(
     The strict counterpart of `diagnose --min-score`, for CI and pre-commit. Validators:
     opsward (its own agentskills.io check, always there), skill (the skill package's
     validate(); pip install 'opsward[lint]'), and the external agnix and skillcheck
-    linters when on PATH. auto runs every one that is installed.
+    linters (opt-in by name). auto runs opsward and skill, each when installed.
 
     :param project_roots: one or more project directories (default: current dir)
     :param validators: 'auto', or a comma list of: opsward, skill, agnix, skillcheck

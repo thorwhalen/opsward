@@ -68,6 +68,15 @@ def test_unknown_or_uninstalled_validators_are_refused(monkeypatch):
     assert list(resolve_validators("auto")) == ["opsward"]
 
 
+def test_auto_never_picks_an_external_linter(monkeypatch):
+    import opsward.lint as mod
+
+    for name in ("agnix", "skillcheck"):
+        validator, _ = mod.VALIDATORS[name]
+        monkeypatch.setitem(mod.VALIDATORS, name, (validator, lambda: True))
+    assert not {"agnix", "skillcheck"} & set(resolve_validators("auto"))
+
+
 def _fake_run(stdout, *, calls=None):
     import subprocess
 
@@ -93,13 +102,19 @@ def test_agnix_and_skillcheck_json_become_findings(monkeypatch, tmp_path):
             {"level": "info", "rule": "VER-001", "message": "versions"},
         ]
     }
-    monkeypatch.setattr(mod.subprocess, "run", _fake_run(json.dumps(agnix_out), calls=calls))
+    monkeypatch.setattr(
+        mod.subprocess, "run", _fake_run(json.dumps(agnix_out), calls=calls)
+    )
     assert mod.agnix_validator(skill) == ["AS-004: bad name (line 2)", "AS-010: vague"]
     assert calls[0][:3] == ["agnix", "--format", "json"]
     check_out = {
         "results": [
-            {"diagnostics": [{"severity": "error", "rule": "r", "message": "m", "line": None},
-                             {"severity": "info", "rule": "i", "message": "x"}]}
+            {
+                "diagnostics": [
+                    {"severity": "error", "rule": "r", "message": "m", "line": None},
+                    {"severity": "info", "rule": "i", "message": "x"},
+                ]
+            }
         ]
     }
     monkeypatch.setattr(mod.subprocess, "run", _fake_run(json.dumps(check_out)))
@@ -111,7 +126,10 @@ def test_an_external_linter_without_json_is_a_validator_failure(monkeypatch):
     import opsward.lint as mod
 
     monkeypatch.setattr(mod.subprocess, "run", _fake_run("not json"))
-    sr = ScanResult(Path("r"), skills=[SkillInfo("s", Path("r/.claude/skills/s"), has_skill_md=True)])
+    sr = ScanResult(
+        Path("r"),
+        skills=[SkillInfo("s", Path("r/.claude/skills/s"), has_skill_md=True)],
+    )
     [finding] = lint(sr, validators={"agnix": mod.agnix_validator})
     assert "validator failed" in finding.message and "boom" in finding.message
 
@@ -145,7 +163,9 @@ def test_lint_cli_exits_1_on_findings_and_0_when_clean():
 
 
 def test_lint_cli_json_names_projects_not_paths():
-    done = _lint_cli("tests/fixtures/python_project", "-v", "opsward", "--format", "json")
+    done = _lint_cli(
+        "tests/fixtures/python_project", "-v", "opsward", "--format", "json"
+    )
     data = json.loads(done.stdout)
     assert {d["project"] for d in data} == {"python_project"}
     assert str(FIXTURES) not in done.stdout
