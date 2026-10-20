@@ -117,7 +117,9 @@ def diagnose(
     try:
         advisories = list(security.security_advisories(scan_result))
     except Exception as error:  # a heuristic must never take the report down with it
-        advisories = [security.Advisory(".", "check-failed", f"{type(error).__name__}: {error}")]
+        advisories = [
+            security.Advisory(".", "check-failed", f"{type(error).__name__}: {error}")
+        ]
 
     return DiagnosisReport(
         project_root=scan_result.project_root,

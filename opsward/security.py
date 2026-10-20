@@ -69,7 +69,9 @@ TEXT_RULES: dict[str, tuple[re.Pattern, str]] = {
         "tries to override the agent's other instructions (identity or goal hijack)",
     ),
     "secret": (
-        re.compile(r"\b(sk-(ant-)?[A-Za-z0-9_-]{20,}|ghp_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{30,}|AKIA[0-9A-Z]{16}|xox[bpa]-[A-Za-z0-9-]{20,})"),
+        re.compile(
+            r"\b(sk-(ant-)?[A-Za-z0-9_-]{20,}|ghp_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{30,}|AKIA[0-9A-Z]{16}|xox[bpa]-[A-Za-z0-9-]{20,})"
+        ),
         "looks like a credential committed in plain text; rotate it and load it from the environment",
     ),
 }
@@ -84,7 +86,9 @@ def _is_pinned(spec: str) -> bool:
     """``pkg@1.2``, ``@scope/pkg@1.2``, ``pkg==1.2`` are pinned; ``pkg``, ``pkg@latest`` are not."""
     if re.search(r"(==|~=|===)\s*\d", spec):
         return True
-    name, _, version = spec[1:].partition("@") if spec.startswith("@") else spec.partition("@")
+    name, _, version = (
+        spec[1:].partition("@") if spec.startswith("@") else spec.partition("@")
+    )
     return bool(version) and version not in ("latest", "next", "*")
 
 
@@ -100,7 +104,9 @@ def _unpinned(command: str) -> Iterator[str]:
     i = 0
     while i < len(tokens):
         token = tokens[i]
-        is_runner = token in _RUNNERS or (token == "pipx" and i + 1 < len(tokens) and tokens[i + 1] == "run")
+        is_runner = token in _RUNNERS or (
+            token == "pipx" and i + 1 < len(tokens) and tokens[i + 1] == "run"
+        )
         i += 2 if token == "pipx" and is_runner else 1
         if not is_runner:
             continue
@@ -169,13 +175,18 @@ def _texts(sr: ScanResult) -> Iterator[tuple[str, str]]:
         yield _rel(sr.agents_md_path or root / "AGENTS.md", root), sr.agents_md_content
     for skill in sr.skills:
         if skill.has_skill_md:
-            yield _rel(skill.path / "SKILL.md", root), read_text_safe(skill.path / "SKILL.md")
+            yield (
+                _rel(skill.path / "SKILL.md", root),
+                read_text_safe(skill.path / "SKILL.md"),
+            )
     for agent in sr.agents:
         yield _rel(agent.path, root), read_text_safe(agent.path)
 
 
 def _settings(root: Path) -> Iterator[tuple[str, dict]]:
-    for where, data in _json_files(root, [".claude/settings.json", ".claude/settings.local.json"]):
+    for where, data in _json_files(
+        root, [".claude/settings.json", ".claude/settings.local.json"]
+    ):
         if isinstance(data, dict):
             yield where, data
 
@@ -183,21 +194,44 @@ def _settings(root: Path) -> Iterator[tuple[str, dict]]:
 def _skill_tools(sr: ScanResult) -> Iterator[Advisory]:
     for skill in sr.skills:
         tools = skill.frontmatter.get("allowed-tools")
-        listed = tools.split() if isinstance(tools, str) else tools if isinstance(tools, list) else []
+        listed = (
+            tools.split()
+            if isinstance(tools, str)
+            else tools
+            if isinstance(tools, list)
+            else []
+        )
         if any(str(t).strip(",") in ("Bash", "Bash(*)", "*") for t in listed):
-            yield Advisory(_rel(skill.path / "SKILL.md", root=sr.project_root), "tool-over-grant",
-                           "`allowed-tools` grants unrestricted Bash; scope it, e.g. Bash(pytest:*)")
+            yield Advisory(
+                _rel(skill.path / "SKILL.md", root=sr.project_root),
+                "tool-over-grant",
+                "`allowed-tools` grants unrestricted Bash; scope it, e.g. Bash(pytest:*)",
+            )
 
 
 def _permission_advisories(root: Path) -> Iterator[Advisory]:
     for where, data in _settings(root):
-        perms = data.get("permissions") if isinstance(data.get("permissions"), dict) else {}
+        perms = (
+            data.get("permissions") if isinstance(data.get("permissions"), dict) else {}
+        )
         if perms.get("defaultMode") == "bypassPermissions":
-            yield Advisory(where, "tool-over-grant", "`defaultMode: bypassPermissions` skips every permission prompt")
+            yield Advisory(
+                where,
+                "tool-over-grant",
+                "`defaultMode: bypassPermissions` skips every permission prompt",
+            )
         allow = perms.get("allow") if isinstance(perms.get("allow"), list) else []
         if broad := [a for a in allow if a in ("Bash", "Bash(*)", "Bash(*:*)", "*")]:
-            yield Advisory(where, "tool-over-grant", f"`permissions.allow` grants {', '.join(broad)}; allow specific commands")
-        for server, spec in (data.get("mcpServers") or {}).items() if isinstance(data.get("mcpServers"), dict) else ():
+            yield Advisory(
+                where,
+                "tool-over-grant",
+                f"`permissions.allow` grants {', '.join(broad)}; allow specific commands",
+            )
+        for server, spec in (
+            (data.get("mcpServers") or {}).items()
+            if isinstance(data.get("mcpServers"), dict)
+            else ()
+        ):
             yield from _mcp_advisories(where, server, spec)
     for where, data in _json_files(root, [".mcp.json"]):
         servers = data.get("mcpServers") if isinstance(data, dict) else None
@@ -209,10 +243,20 @@ def _mcp_advisories(where: str, server: str, spec) -> Iterator[Advisory]:
     if not isinstance(spec, dict):
         return
     command = spec.get("command")
-    parts = command if isinstance(command, list) else [command] if isinstance(command, str) else []
+    parts = (
+        command
+        if isinstance(command, list)
+        else [command]
+        if isinstance(command, str)
+        else []
+    )
     command_line = " ".join(str(p) for p in [*parts, *_as_list(spec.get("args"))])
     for pkg in _unpinned(command_line):
-        yield Advisory(where, "unpinned-dependency", f"MCP server `{server}` runs `{pkg}` unpinned; pin a version")
+        yield Advisory(
+            where,
+            "unpinned-dependency",
+            f"MCP server `{server}` runs `{pkg}` unpinned; pin a version",
+        )
 
 
 def _text_advisories(where: str, text: str) -> Iterator[Advisory]:
@@ -228,6 +272,10 @@ def security_advisories(sr: ScanResult) -> Iterator[Advisory]:
     for where, commands in _hook_texts(sr.project_root):
         yield from _text_advisories(where, commands)
         for pkg in _unpinned(commands):
-            yield Advisory(where, "unpinned-dependency", f"a hook runs `{pkg}` unpinned; pin a version")
+            yield Advisory(
+                where,
+                "unpinned-dependency",
+                f"a hook runs `{pkg}` unpinned; pin a version",
+            )
     yield from _skill_tools(sr)
     yield from _permission_advisories(sr.project_root)
