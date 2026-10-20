@@ -1131,13 +1131,7 @@ def _find_section(content: str, heading_keywords: Sequence[str]) -> str:
 
 
 def _extract_paths(content: str) -> list[str]:
-    """Extract plausible file/directory paths from markdown content."""
-    # Match things like src/foo.py, ./bar/baz.ts, docs/guide.md
-    pattern = re.compile(r"(?:^|[\s`(])(\./)?(\w[\w\-.]*/[\w\-./]+\.\w+)", re.MULTILINE)
-    paths = []
-    for m in pattern.finditer(content):
-        path = (m.group(1) or "") + m.group(2)
-        # Filter out URLs
-        if "://" not in path and not path.startswith("http"):
-            paths.append(path)
-    return paths
+    """The shared path extractor (honours ``opsward: ignore-path``); see ``util.extract_paths``."""
+    from opsward.util import extract_paths
+
+    return extract_paths(content)

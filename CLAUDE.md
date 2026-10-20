@@ -45,7 +45,7 @@ Key docs to read before starting work:
   - `lint.py` — strict schema lint (opsward#17, gap 2): every validator (`opsward`'s own spec check, the optional `skill` package's `validate()`) over the project's skills, plus the hooks config; pass/fail, no score. Shipped with `action.yml` (reusable Action) and `.pre-commit-hooks.yaml` at the repo root
   - `evals.py` — opt-in, report-only evals (opsward#17, gap 3): LLM-as-judge (`judge_claude_md`) and with/without-config golden tasks (`run_golden_tasks`); free defaults `rubric_judge`/`echo_agent`, paid `anthropic_judge`/`anthropic_agent` never used by tests
   - `cli.py` — CLI command functions (the `_dispatch_funcs` SSOT)
-  - `util.py` — internal helpers (underscore-prefixed)
+  - `util.py` — shared helpers, incl. `extract_paths` (the one path extractor; honours the `opsward: ignore-path` marker)
   - `data/` — bundled package resources (accessed via `importlib.resources.files`)
     - `templates/` — generation templates organized by target project type
       - `shared/` — templates that work for any project type. **This is also where the installable Claude Code skills live**, as `opsward/data/templates/shared/<skill-name>/SKILL.md` (opsward, opsward-diagnose, opsward-generate, opsward-maintain, opsward-subagents) plus the `opsward/data/templates/shared/setup-auditor.md` agent. `generate.py` installs these into a target project's `.claude/`.

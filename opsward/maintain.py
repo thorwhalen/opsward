@@ -6,6 +6,7 @@ Checks for stale paths, out-of-sync docs_guide, and other maintenance issues.
 import re
 import subprocess
 from collections.abc import Iterable
+from dataclasses import replace
 from pathlib import Path
 from typing import Optional
 
@@ -13,7 +14,7 @@ from opsward.base import DiagnosisReport, MaintenanceSuggestion, ScanResult
 from opsward.score import _CONCISENESS_MAX_CHARS, claude_md_size_overrun, docs_dir_hint
 from opsward.decisions import check_decisions
 from opsward.subagents import check_subagent_twins
-from opsward.util import read_text_safe
+from opsward.util import extract_paths, read_text_safe
 
 
 def maintain(
@@ -40,7 +41,32 @@ def maintain(
     suggestions.extend(check_subagent_twins(scan_result))
     suggestions.extend(check_decisions(scan_result))
 
-    return suggestions
+    return [
+        s if s.triage else replace(s, triage=DFLT_TRIAGE.get(s.category, "align"))
+        for s in suggestions
+    ]
+
+
+#: The governance vocabulary for a drift finding (opsward#17, gap 5): who is right, the
+#: config or the code? Every finding carries the recommended one; the human or agent decides.
+TRIAGE_ACTIONS = {
+    "align": "the code is right: update the config or doc to match it",
+    "revert": "the config is right: restore the code or file it describes",
+    "ignore": "the reference is legitimately volatile: mark it `opsward: ignore-path`",
+}
+
+#: Recommended triage per finding category. Drift is usually the config lagging the code,
+#: so ``align`` is the default; nothing is recommended as ``revert`` or ``ignore`` blindly.
+DFLT_TRIAGE: dict[str, str] = {
+    "stale_path": "align",
+    "claude_md_size": "align",
+    "sync_issue": "align",
+    "outdated_doc": "align",
+    "incomplete_skill": "align",
+    "empty_doc": "align",
+    "subagent_twin": "align",
+    "stale_adr": "align",
+}
 
 
 # ---------------------------------------------------------------------------
@@ -225,15 +251,7 @@ def _check_empty_docs(sr: ScanResult) -> Iterable[MaintenanceSuggestion]:
 # ---------------------------------------------------------------------------
 
 
-def _extract_paths(content: str) -> list[str]:
-    """Extract plausible file/directory paths from markdown content."""
-    pattern = re.compile(r"(?:^|[\s`(])(\./)?(\w[\w\-.]*/[\w\-./]+\.\w+)", re.MULTILINE)
-    paths = []
-    for m in pattern.finditer(content):
-        path = (m.group(1) or "") + m.group(2)
-        if "://" not in path and not path.startswith("http"):
-            paths.append(path)
-    return paths
+_extract_paths = extract_paths  # the shared extractor; honours `opsward: ignore-path`
 
 
 def _extract_doc_refs(guide_content: str) -> Iterable[str]:
