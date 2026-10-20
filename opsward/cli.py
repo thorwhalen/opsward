@@ -593,7 +593,6 @@ def _decisions_dir(project_root: str) -> tuple[Path, Path]:
     return root, docs_dir_for(root, sr.project_type, sr.docs_guide_path) / "decisions"
 
 
-# The SSOT of the CLI surface: a name -> command mapping, with one nested group.
 def eval_(
     project_root: str,
     *,
@@ -662,11 +661,15 @@ def eval_(
         if sr.claude_md_path
         else None
     )
-    golden = (
-        evals.run_golden_tasks(golden_tasks, agent=agent, config=config, runs=runs)
-        if golden_tasks is not None
-        else None
-    )
+    try:
+        golden = (
+            evals.run_golden_tasks(golden_tasks, agent=agent, config=config, runs=runs)
+            if golden_tasks is not None
+            else None
+        )
+    except ValueError as e:  # e.g. two tasks share a name
+        print(f"Error: bad golden tasks: {e}", file=sys.stderr)
+        sys.exit(2)
     if format == "json":
         out = {
             "project": root.name,
@@ -686,6 +689,7 @@ def eval_(
         )
 
 
+# The SSOT of the CLI surface: a name -> command mapping, with one nested group.
 _dispatch_funcs = {
     "diagnose": diagnose,
     "generate": generate,

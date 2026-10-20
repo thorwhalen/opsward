@@ -125,3 +125,12 @@ def test_eval_reports_a_malformed_tasks_file(tmp_path):
         'eval', str(FIXTURES / 'python_project'), '--tasks', str(bad), expect_rc=2
     )
     assert 'cannot read the golden tasks' in stderr
+
+
+def test_eval_reports_duplicate_task_names(tmp_path):
+    dupes = tmp_path / 'tasks.json'
+    dupes.write_text(json.dumps([{'name': 'a', 'prompt': 'x'}] * 2))
+    _, stderr, _ = _run_cli(
+        'eval', str(FIXTURES / 'python_project'), '--tasks', str(dupes), expect_rc=2
+    )
+    assert 'must be unique' in stderr
