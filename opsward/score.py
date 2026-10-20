@@ -1149,7 +1149,9 @@ def _score_portability(
         return ComponentScore(
             name="Portability",
             score=100,
-            notes=[f"No AGENTS.md: not scored, its weight counts towards {_PORTABILITY_FALLBACK}"],
+            notes=[
+                f"No AGENTS.md: not scored, its weight counts towards {_PORTABILITY_FALLBACK}"
+            ],
         )
     by_path: dict[str, list[str]] = {}
     for f in report.findings:
