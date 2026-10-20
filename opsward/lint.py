@@ -84,7 +84,9 @@ VALIDATORS: dict[str, tuple[Validator, Callable[[], bool]]] = {
 }
 
 
-def resolve_validators(spec: str | Mapping[str, Validator] = DFLT_VALIDATORS) -> dict[str, Validator]:
+def resolve_validators(
+    spec: str | Mapping[str, Validator] = DFLT_VALIDATORS,
+) -> dict[str, Validator]:
     """Turn ``"auto"``, ``"opsward,skill"`` or a mapping into a name -> validator dict.
 
     :raises ValueError: an unknown name, or a named validator that is not installed.
@@ -110,7 +112,9 @@ def _resolve(spec) -> dict[str, Validator]:
     chosen = {}
     for name in filter(None, (s.strip() for s in spec.split(","))):
         if name not in VALIDATORS:
-            raise ValueError(f"unknown validator {name!r} (known: {', '.join(VALIDATORS)})")
+            raise ValueError(
+                f"unknown validator {name!r} (known: {', '.join(VALIDATORS)})"
+            )
         validator, available = VALIDATORS[name]
         if not available():
             raise ValueError(
