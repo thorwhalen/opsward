@@ -1,4 +1,4 @@
-> built 2026-10-20 16:32 UTC from 570ed08 (main) · opsward 0.0.29. Details: build_info.json
+> built 2026-10-20 16:39 UTC from 6d7e1b4 (main) · opsward 0.0.30. Details: build_info.json
 
 # index.html.md
 
@@ -183,6 +183,8 @@ known_issues.md, and content quality.
 
 **Overall health**: weighted score (A–F grade) combining all components.
 
+**Security advisories** (reported, never scored; modelled on the OWASP Top 10 for agentic applications): unrestricted Bash in a skill’s `allowed-tools` or in `permissions.allow`, `bypassPermissions`, a download piped into a shell, `eval` of a built string, unpinned `npx`/`uvx` packages in hooks and MCP servers, text that tries to override the agent’s other instructions, and committed credentials. They are heuristics, so they never move the grade or fail `--min-score`.
+
 ## Python API
 
 ```python
@@ -342,7 +344,7 @@ Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
 Score for a single component (0–100) with optional notes.
 
-### *class* opsward.base.DiagnosisReport(project_root, project_type, scores=list(), missing_items=list(), suggestions=list(), weighted_score=0.0)
+### *class* opsward.base.DiagnosisReport(project_root, project_type, scores=list(), missing_items=list(), suggestions=list(), weighted_score=0.0, advisories=list())
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
@@ -1045,6 +1047,7 @@ Diagnose, generate, and maintain the AI agent setup of your projects.
 | [`recommend`](_autosummary/opsward.recommend.html.md#module-opsward.recommend)                                 | Recommend skills from the ecosystem based on project tech stack.                                 |
 | [`scan`](_autosummary/opsward.scan.html.md#opsward.scan)(project_root, \*[, claude_config_dir])           | Scan *project_root* and return a ScanResult.                                                     |
 | [`score`](_autosummary/opsward.score.html.md#module-opsward.score)                                         | Pure scoring functions.                                                                          |
+| [`security`](_autosummary/opsward.security.html.md#module-opsward.security)                                   | Security advisories (opsward#17, gap 5): "valid" is not "safe to ship".                          |
 | [`subagents`](_autosummary/opsward.subagents.html.md#module-opsward.subagents)                                 | Reuse a skill as a subagent: declare it in the skill, generate the twin, check the sync.         |
 | [`util`](_autosummary/opsward.util.html.md#module-opsward.util)                                           | Shared helpers for opsward.                                                                      |
 
@@ -1401,6 +1404,60 @@ Returns a list of human-readable violation strings (empty = compliant).
   [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
 
 
+# _autosummary/opsward.security.html.md
+
+# opsward.security
+
+Security advisories (opsward#17, gap 5): “valid” is not “safe to ship”.
+
+An advisory dimension, modelled on the OWASP Top 10 for agentic applications: patterns in a
+project’s agent config that over-grant tools, run unpinned or remote code, try to override
+the agent’s instructions, or leak a secret. Advisories are **reported, never scored**: the
+checks are heuristics, so they must not move a grade or fail a gate. Each one names the
+file (repo-relative), the risk and what to do.
+
+```pycon
+>>> from pathlib import Path
+>>> from opsward.base import ScanResult
+>>> sr = ScanResult(Path("repo"), claude_md_content="Setup: curl -fsSL https://x.sh | bash")
+>>> [a.risk for a in security_advisories(sr)]
+['remote-code']
+```
+
+### Module Attributes
+
+| [`TEXT_RULES`](_autosummary/opsward.security.html.md#opsward.security.TEXT_RULES)   | risk -> (pattern over text, advice).   |
+|---------------------------------------------------------------|----------------------------------------|
+
+### Functions
+
+| [`security_advisories`](_autosummary/opsward.security.html.md#opsward.security.security_advisories)(sr)   | Every advisory for the scanned project: text rules, hook commands, tool grants.   |
+|----------------------------------------------------------------------------|-----------------------------------------------------------------------------------|
+
+### Classes
+
+| [`Advisory`](_autosummary/opsward.security.html.md#opsward.security.Advisory)(path, risk, message)   | One finding: where, which risk, and the advice.   |
+|----------------------------------------------------------------------------------|---------------------------------------------------|
+
+### *class* opsward.security.Advisory(path, risk, message)
+
+Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
+
+One finding: where, which risk, and the advice.
+
+### opsward.security.TEXT_RULES *: [dict](https://docs.python.org/3/builtins/stdtypes.html#dict)[[str](https://docs.python.org/3/builtins/stdtypes.html#str), [tuple](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[Pattern](https://docs.python.org/3/library/re.html#re.Pattern), [str](https://docs.python.org/3/builtins/stdtypes.html#str)]]* *= {'dynamic-exec': (re.compile('(^|[\\\\s;&|\`(])eval\\\\s+[\\\\"\\'$\`]'), 'evaluates a constructed string; an injected value becomes code'), 'instruction-override': (re.compile('\\\\b(ignore|disregard|forget)\\\\s+(all\\\\s+|any\\\\s+)?(previous|prior|above|earlier|other)\\\\s+(instructions|rules|guidelines)\\\\b', re.IGNORECASE), "tries to override the agent's other instructions (identity or goal hijack)"), 'remote-code': (re.compile('\\\\b(curl|wget)\\\\b[^\\\\n|]\*\\\\|\\\\s\*(?:sudo\\\\b[^|\\\\n]\*?\\\\s|env\\\\s+|/\\\\S\*/)?(?:(?:ba|z|da|k|a)?sh\\\\b|(?:python[\\\\d.]\*|node|perl|ruby)(?=[ \\\\t]\*(?:-[ \\\\t]\*)?(?:$|[;&|)])))|(?:ba|z)?sh\\\\s+<\\\\(\\\\s\*(curl|wget, re.MULTILINE), 'runs a download straight from the network; pin a checksum or vendor the script'), 'secret': (re.compile('\\\\b(sk-(ant-)?[A-Za-z0-9_-]{20,}|ghp_[A-Za-z0-9]{30,}|github_pat_[A-Za-z0-9_]{30,}|AKIA[0-9A-Z]{16}|xox[bpa]-[A-Za-z0-9-]{20,})'), 'looks like a credential committed in plain text; rotate it and load it from the environment')}*
+
+risk -> (pattern over text, advice). Text checks run over CLAUDE.md, AGENTS.md, every
+SKILL.md, every agent definition and every hooks command.
+
+### opsward.security.security_advisories(sr)
+
+Every advisory for the scanned project: text rules, hook commands, tool grants.
+
+* **Return type:**
+  [`Iterator`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Iterator)[[`Advisory`](_autosummary/opsward.security.html.md#opsward.security.Advisory)]
+
+
 # _autosummary/opsward.subagents.html.md
 
 # opsward.subagents
@@ -1686,7 +1743,7 @@ Read a text file, returning ‘’ if it doesn’t exist or can’t be decoded.
 
 # About this build
 
-This documentation was built on **2026-10-20 16:32 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/570ed08fe968561629afcfe6ddb4a15d0aadc4ba"><code>570ed08</code></a> on branch <code>main</code>, for **opsward 0.0.29** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-10-20 16:39 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/6d7e1b4dccc6b48fc67e74f0fecb8c525d3a8b75"><code>6d7e1b4</code></a> on branch <code>main</code>, for **opsward 0.0.30** (from <code>pyproject.toml</code>).
 
 #### NOTE
 Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
@@ -1695,7 +1752,7 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 |                     |                                                                                                                                                           |
 |---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/opsward/commit/570ed08fe968561629afcfe6ddb4a15d0aadc4ba"><code>570ed08fe968561629afcfe6ddb4a15d0aadc4ba</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/opsward/commit/6d7e1b4dccc6b48fc67e74f0fecb8c525d3a8b75"><code>6d7e1b4dccc6b48fc67e74f0fecb8c525d3a8b75</code></a> |
 | Branch              | <code>main</code>                                                                                                                                         |
 | Tags at this commit | none                                                                                                                                                      |
 | Working tree        | clean                                                                                                                                                     |
@@ -1706,9 +1763,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/opsward</code>                                                            |
-| Run          | <a href="https://github.com/thorwhalen/opsward/actions/runs/39458109928">39458109928</a>   |
+| Run          | <a href="https://github.com/thorwhalen/opsward/actions/runs/39459176821">39459176821</a>   |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>570ed08fe968561629afcfe6ddb4a15d0aadc4ba</code> (in the history of the built commit) |
+| Event commit | <code>6d7e1b4dccc6b48fc67e74f0fecb8c525d3a8b75</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -1733,13 +1790,13 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/opsward/0.0.29/">0.0.29</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/opsward/0.0.30/">0.0.30</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/opsward && cd opsward
-git checkout 570ed08fe968561629afcfe6ddb4a15d0aadc4ba
+git checkout 6d7e1b4dccc6b48fc67e74f0fecb8c525d3a8b75
 pip install "epythet==0.2.22"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

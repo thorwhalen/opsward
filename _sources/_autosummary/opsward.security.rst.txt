@@ -1,0 +1,24 @@
+opsward.security
+================
+
+.. automodule:: opsward.security
+
+   
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      TEXT_RULES
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      security_advisories
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      Advisory
+   

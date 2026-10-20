@@ -23,5 +23,6 @@
    recommend
    scan
    score
+   security
    subagents
    util

@@ -82,6 +82,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/opsward.recommend.html">opsward.recommend</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/opsward.scan.html">opsward.scan</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/opsward.score.html">opsward.score</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/opsward.security.html">opsward.security</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/opsward.subagents.html">opsward.subagents</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/opsward.util.html">opsward.util</a></li>
 </ul>
@@ -334,6 +335,7 @@ known_issues.md, and content quality.</p>
 <p><strong>Skills &amp; agents</strong>: SKILL.md presence, descriptions, setup-auditor agent.</p>
 <p><strong>Cross-references</strong>: paths in CLAUDE.md validated against the filesystem.</p>
 <p><strong>Overall health</strong>: weighted score (A–F grade) combining all components.</p>
+<p><strong>Security advisories</strong> (reported, never scored; modelled on the OWASP Top 10 for agentic applications): unrestricted Bash in a skill’s <code class="docutils literal notranslate"><span class="pre">allowed-tools</span></code> or in <code class="docutils literal notranslate"><span class="pre">permissions.allow</span></code>, <code class="docutils literal notranslate"><span class="pre">bypassPermissions</span></code>, a download piped into a shell, <code class="docutils literal notranslate"><span class="pre">eval</span></code> of a built string, unpinned <code class="docutils literal notranslate"><span class="pre">npx</span></code>/<code class="docutils literal notranslate"><span class="pre">uvx</span></code> packages in hooks and MCP servers, text that tries to override the agent’s other instructions, and committed credentials. They are heuristics, so they never move the grade or fail <code class="docutils literal notranslate"><span class="pre">--min-score</span></code>.</p>
 </section>
 <section id="python-api">
 <h2>Python API<a class="headerlink" href="#python-api" title="Link to this heading">#</a></h2>
@@ -481,7 +483,7 @@ known_issues.md, and content quality.</p>
 </section>
 </section>
 
-<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-10-20 16:32 UTC from <a href="https://github.com/thorwhalen/opsward/commit/570ed08fe968561629afcfe6ddb4a15d0aadc4ba">570ed08</a> (main) · opsward 0.0.29 · <a href="about-this-build.html">about this build</a></p>
+<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-10-20 16:39 UTC from <a href="https://github.com/thorwhalen/opsward/commit/6d7e1b4dccc6b48fc67e74f0fecb8c525d3a8b75">6d7e1b4</a> (main) · opsward 0.0.30 · <a href="about-this-build.html">about this build</a></p>
         </article><button class="back-to-top" type="button">
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
     <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
@@ -516,7 +518,7 @@ known_issues.md, and content quality.</p>
     </div>
   </div>
 </footer>
-      <script src="_static/documentation_options.js?v=828725f0"></script>
+      <script src="_static/documentation_options.js?v=61a342a2"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="_static/clipboard.min.js?v=a7894cd8"></script>
