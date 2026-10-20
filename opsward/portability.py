@@ -73,7 +73,9 @@ AGENT_HOSTS: Mapping[str, HostSpec] = {
             reads_agents_md=True,
         ),
         HostSpec("cursor", (".cursorrules",), (".cursor/rules",), reads_agents_md=True),
-        HostSpec("windsurf", (".windsurfrules", ".windsurfrules.md"), (".windsurf/rules",)),
+        HostSpec(
+            "windsurf", (".windsurfrules", ".windsurfrules.md"), (".windsurf/rules",)
+        ),
         HostSpec("gemini", ("GEMINI.md",)),
         HostSpec("aider", ("CONVENTIONS.md",), compared=False),
         HostSpec("cline", (".clinerules",), (".clinerules",), reads_agents_md=True),
@@ -171,7 +173,9 @@ def read_host_files(root: Path, *, hosts: Mapping[str, HostSpec] = AGENT_HOSTS) 
             p = root / rel
             if is_kind(p, "is_file"):
                 content = read_text_safe(p).lstrip("\ufeff")
-                found[rel] = HostFile(rel, content, same_as_canonical(p), compared=spec.compared)
+                found[rel] = HostFile(
+                    rel, content, same_as_canonical(p), compared=spec.compared
+                )
         for rel in spec.rule_dirs:
             if is_kind(root / rel, "is_dir"):
                 found[rel] = HostFile(rel, is_dir=True)
@@ -200,12 +204,15 @@ def analyze(
     return report
 
 
-def check_portability(root: Path, *, hosts: Mapping[str, HostSpec] = AGENT_HOSTS) -> PortabilityReport:
+def check_portability(
+    root: Path, *, hosts: Mapping[str, HostSpec] = AGENT_HOSTS
+) -> PortabilityReport:
     """``analyze`` over what is on disk under *root*: the library entry point."""
     root = Path(root)
     return analyze(
         read_text_safe(root / CANONICAL).lstrip("\ufeff"),
-        read_host_files(root, hosts=hosts), hosts=hosts
+        read_host_files(root, hosts=hosts),
+        hosts=hosts,
     )
 
 
@@ -325,7 +332,12 @@ def _lines(text: str) -> Iterator[tuple[str, bool]]:
             else:
                 yield line, False
         else:
-            if m and m.group(1)[0] == fence[0] and len(m.group(1)) >= len(fence) and not m.group(2).strip():
+            if (
+                m
+                and m.group(1)[0] == fence[0]
+                and len(m.group(1)) >= len(fence)
+                and not m.group(2).strip()
+            ):
                 fence = None
             yield line, True
 
