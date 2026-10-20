@@ -100,6 +100,10 @@ class ScanResult:
     agents_md_path: Optional[Path] = None
     agents_md_content: str = ""
 
+    # Other hosts' instruction files and rule folders, keyed by root-relative path
+    # (``opsward.portability.HostFile``); compared against AGENTS.md (opsward#15)
+    host_files: dict = field(default_factory=dict)
+
     # Monorepo detection
     is_monorepo: bool = False
     monorepo_packages: list[str] = field(default_factory=list)

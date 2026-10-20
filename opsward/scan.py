@@ -16,6 +16,7 @@ from opsward.base import (
     ScanResult,
     SkillInfo,
 )
+from opsward.portability import read_host_files
 from opsward.util import iter_files, iter_subdirs, read_json_safe, read_text_safe
 
 
@@ -87,6 +88,7 @@ def scan(project_root: Path, *, claude_config_dir: object = _USER_CONFIG) -> Sca
     if agents_md.is_file():
         result.agents_md_path = agents_md
         result.agents_md_content = read_text_safe(agents_md)
+    result.host_files = read_host_files(project_root)
 
     # Monorepo detection
     result.is_monorepo, result.monorepo_packages = _detect_monorepo(project_root)
