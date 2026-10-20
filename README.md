@@ -176,6 +176,8 @@ known_issues.md, and content quality.
 
 **Cross-references**: paths in CLAUDE.md validated against the filesystem.
 
+**Portability**: sections where a render (CLAUDE.md, GEMINI.md, …) drifts from AGENTS.md, 10 points each; never how many hosts a repo covers. Without an AGENTS.md it is not scored and its weight goes to CLAUDE.md quality (ADR 0012).
+
 **Overall health**: weighted score (A–F grade) combining all components.
 
 **Security advisories** (reported, never scored; modelled on the OWASP Top 10 for agentic applications): unrestricted Bash in a skill's `allowed-tools` or in `permissions.allow`, `bypassPermissions`, a download piped into a shell, `eval` of a built string, unpinned `npx`/`uvx` packages in hooks and MCP servers, text that tries to override the agent's other instructions, and committed credentials. They are heuristics, so they never move the grade or fail `--min-score`.

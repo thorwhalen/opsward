@@ -224,3 +224,36 @@ def test_as_read_strips_a_bom_and_inlines_once():
     assert as_read("﻿@AGENTS.md\n", "## Build") == "## Build"
     assert as_read("@AGENTS.md\n@AGENTS.md", "## Build") == "## Build\n@AGENTS.md"
     assert as_read("x\n\n    @AGENTS.md", "## B").endswith("    @AGENTS.md\n\n## B")
+
+
+# -- opsward#67: the scored Portability component (ADR 0012) --
+
+
+def _portability(root):
+    report = diagnose(scan(root, claude_config_dir=None))
+    return next(s for s in report.scores if s.name == "Portability"), report
+
+
+def test_portability_scores_drift_only(tmp_path):
+    _write(tmp_path, "CLAUDE.md", "# P\n\n## Build\n\npytest\n")
+    claude_only, before = _portability(tmp_path)
+    assert claude_only.score == 100  # no AGENTS.md: a Claude-only repo is not penalised
+    _write(tmp_path, "AGENTS.md", CANONICAL)
+    drifting, _ = _portability(tmp_path)
+    assert drifting.score == 100 - 10 * 2  # 1 diverged + 1 stale
+    _write(tmp_path, "CLAUDE.md", "@AGENTS.md\n")
+    shim, _ = _portability(tmp_path)
+    assert shim.score == 100 and shim.notes == []
+
+
+def test_without_agents_md_the_overall_score_is_unchanged(tmp_path):
+    from opsward import score
+
+    _write(tmp_path, "CLAUDE.md", "# P\n\n## Build\n\npytest\n")
+    report = diagnose(scan(tmp_path, claude_config_dir=None))
+    old = {**score._OVERALL_WEIGHTS, "CLAUDE.md quality": 0.35}
+    del old["Portability"]
+    by_name = {s.name: s.score for s in report.scores}
+    assert report.weighted_score == pytest.approx(
+        sum(by_name[k] * w for k, w in old.items())
+    )

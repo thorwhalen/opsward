@@ -15,6 +15,7 @@ Architectural decision records (MADR-style) for opsward: the load-bearing, expen
 | [0009](0009-skills-declare-their-subagent-twin.md) | A skill opts into a subagent twin with `metadata: subagent: true`; `generate` renders `.claude/agents/<name>.md` preloading it, `maintain` checks the sync; `context: fork` is the alternative for delegate-only skills | issue #26 |
 | [0010](0010-two-tier-decision-capture.md) | Two-tier decision capture: a Y-statement line in `log.md` or a numbered ADR, chosen by reversal cost; immutable and superseding; Evidence links the issue, discussion and PR; `opsward decision new|note` writes, `maintain` reports rot under `stale_adr` | issue #16 |
 | [0011](0011-cheap-first-dispatch-no-router-agent.md) | Proposed. No router agent: dispatch is route → listing → calibrated lexical retrieval → LLM adjudication over top-k; whatever routes sees the user's words; the retrieval layer stays off until the corpus is de-duplicated and a floor persisted (ir#111, aw#7); wiring tracked in #44 | issue #14, PR #43 |
+| [0012](0012-portability-scores-drift-only.md) | Proposed. A sixth component, Portability (0.05, taken from CLAUDE.md quality), scores AGENTS.md drift only, 10 points per finding, never hosts covered; without an AGENTS.md its weight returns to CLAUDE.md quality, so those repos score as before | issue #67 |
 
 PR and issue numbers refer to [thorwhalen/opsward](https://github.com/thorwhalen/opsward); each ADR links them in full.
 

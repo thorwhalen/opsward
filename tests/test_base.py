@@ -45,7 +45,7 @@ def test_diagnosis_report_fallback_average():
             ComponentScore(name='b', score=60),
         ],
     )
-    # weighted_score defaults to 0.0 (falsy), so falls back to average
+    # weighted_score defaults to None (not computed), so falls back to average
     assert report.overall_score == 70.0
 
 
