@@ -113,6 +113,7 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#opsward.cli.maintain"><code class="docutils literal notranslate"><span class="pre">maintain()</span></code></a></li>
 <li><a class="reference internal" href="#opsward.cli.new"><code class="docutils literal notranslate"><span class="pre">new()</span></code></a></li>
 <li><a class="reference internal" href="#opsward.cli.note"><code class="docutils literal notranslate"><span class="pre">note()</span></code></a></li>
+<li><a class="reference internal" href="#opsward.cli.portability"><code class="docutils literal notranslate"><span class="pre">portability()</span></code></a></li>
 <li><a class="reference internal" href="#opsward.cli.recommend"><code class="docutils literal notranslate"><span class="pre">recommend()</span></code></a></li>
 </ul>
 </div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
@@ -189,7 +190,10 @@ data-aria-dark="Switch to auto color mode">
 <tr class="row-even"><td><p><a class="reference internal" href="#opsward.cli.note" title="opsward.cli.note"><code class="xref py py-obj docutils literal notranslate"><span class="pre">note</span></code></a>(text[, write, project_root])</p></td>
 <td><p>Append TEXT as a dated one-line decision (a Y-statement) to decisions/log.md (dry run unless --write).</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.cli.recommend" title="opsward.cli.recommend"><code class="xref py py-obj docutils literal notranslate"><span class="pre">recommend</span></code></a>(*project_roots[, format])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.cli.portability" title="opsward.cli.portability"><code class="xref py py-obj docutils literal notranslate"><span class="pre">portability</span></code></a>(*project_roots[, format])</p></td>
+<td><p>Show which agent hosts find project instructions, and how renders drift from AGENTS.md.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#opsward.cli.recommend" title="opsward.cli.recommend"><code class="xref py py-obj docutils literal notranslate"><span class="pre">recommend</span></code></a>(*project_roots[, format])</p></td>
 <td><p>Recommend ecosystem skills based on the project's tech stack.</p></td>
 </tr>
 </tbody>
@@ -383,6 +387,23 @@ volatile reference: put <code class="code docutils literal notranslate"><span cl
 </dd></dl>
 
 <dl class="py function">
+<dt class="sig sig-object py" id="opsward.cli.portability">
+<span class="sig-prename descclassname"><span class="pre">opsward.cli.</span></span><span class="sig-name descname"><span class="pre">portability</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">project_roots</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'text'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/cli.html#portability"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.cli.portability" title="Link to this definition">#</a></dt>
+<dd><p>Show which agent hosts find project instructions, and how renders drift from AGENTS.md.</p>
+<p>One row per host (claude, codex, copilot, cursor, …) with how it is covered:
+symlink, import (an &#64;AGENTS.md shim), native (reads AGENTS.md itself), copy, rules,
+or none. Then every section where a render differs from AGENTS.md. Report-only.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>project_roots</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – one or more project directories (default: current dir)</p></li>
+<li><p><strong>format</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – output format — ‘text’ or ‘json’</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt class="sig sig-object py" id="opsward.cli.recommend">
 <span class="sig-prename descclassname"><span class="pre">opsward.cli.</span></span><span class="sig-name descname"><span class="pre">recommend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">project_roots</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'text'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/cli.html#recommend"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.cli.recommend" title="Link to this definition">#</a></dt>
 <dd><p>Recommend ecosystem skills based on the project’s tech stack.</p>
@@ -439,7 +460,7 @@ volatile reference: put <code class="code docutils literal notranslate"><span cl
     </div>
   </div>
 </footer>
-      <script src="../_static/documentation_options.js?v=39aadc1c"></script>
+      <script src="../_static/documentation_options.js?v=0e525676"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>

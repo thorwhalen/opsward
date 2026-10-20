@@ -645,233 +645,279 @@ data-aria-dark="Switch to auto color mode">
 
 </span><span data-line="487">
 </span><span data-line="488">
-</span><span data-line="489"><span class="k">def</span><span class="w"> </span><span class="nf">_not_ignored_in_a_repo</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span data-line="490"><span class="w">    </span><span class="sd">"""True when ``path`` lies in a git work tree and is not ignored (no git: False)."""</span>
-</span><span data-line="491">    <span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
-</span><span data-line="492">
-</span><span data-line="493">    <span class="k">try</span><span class="p">:</span>
-</span><span data-line="494">        <span class="n">done</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
-</span><span data-line="495">            <span class="p">[</span><span class="s2">"git"</span><span class="p">,</span> <span class="s2">"check-ignore"</span><span class="p">,</span> <span class="s2">"-q"</span><span class="p">,</span> <span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="p">],</span>
-</span><span data-line="496">            <span class="n">cwd</span><span class="o">=</span><span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span>
-</span><span data-line="497">            <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span data-line="498">        <span class="p">)</span>
-</span><span data-line="499">    <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
-</span><span data-line="500">        <span class="k">return</span> <span class="kc">False</span>
-</span><span data-line="501">    <span class="k">return</span> <span class="n">done</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">1</span>  <span class="c1"># 0: ignored, 1: not ignored, 128: not a repo</span>
-</span><span data-line="502">
+<div class="viewcode-block" id="portability">
+<a class="viewcode-back" href="../../_autosummary/opsward.cli.html#opsward.cli.portability">[docs]</a>
+</span><span data-line="489"><span class="k">def</span><span class="w"> </span><span class="nf">portability</span><span class="p">(</span>
+</span><span data-line="490">    <span class="o">*</span><span class="n">project_roots</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span data-line="491">    <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"text"</span><span class="p">,</span>
+</span><span data-line="492"><span class="p">):</span>
+</span><span data-line="493"><span class="w">    </span><span class="sd">"""Show which agent hosts find project instructions, and how renders drift from AGENTS.md.</span>
+</span><span data-line="494">
+</span><span data-line="495"><span class="sd">    One row per host (claude, codex, copilot, cursor, ...) with how it is covered:</span>
+</span><span data-line="496"><span class="sd">    symlink, import (an @AGENTS.md shim), native (reads AGENTS.md itself), copy, rules,</span>
+</span><span data-line="497"><span class="sd">    or none. Then every section where a render differs from AGENTS.md. Report-only.</span>
+</span><span data-line="498">
+</span><span data-line="499"><span class="sd">    :param project_roots: one or more project directories (default: current dir)</span>
+</span><span data-line="500"><span class="sd">    :param format: output format — 'text' or 'json'</span>
+</span><span data-line="501"><span class="sd">    """</span>
+</span><span data-line="502">    <span class="kn">from</span><span class="w"> </span><span class="nn">opsward.portability</span><span class="w"> </span><span class="kn">import</span> <span class="n">check_portability</span>
 </span><span data-line="503">
+</span><span data-line="504">    <span class="k">if</span> <span class="nb">format</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"text"</span><span class="p">,</span> <span class="s2">"json"</span><span class="p">):</span>
+</span><span data-line="505">        <span class="nb">print</span><span class="p">(</span><span class="s2">"Error: format must be 'text' or 'json'"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="506">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span data-line="507">    <span class="n">out</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="508">    <span class="k">for</span> <span class="n">root_str</span> <span class="ow">in</span> <span class="n">project_roots</span> <span class="ow">or</span> <span class="p">(</span><span class="s2">"."</span><span class="p">,):</span>
+</span><span data-line="509">        <span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">root_str</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+</span><span data-line="510">        <span class="k">if</span> <span class="ow">not</span> <span class="n">root</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+</span><span data-line="511">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error: </span><span class="si">{</span><span class="n">root_str</span><span class="si">}</span><span class="s2"> is not a directory"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="512">            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span data-line="513">        <span class="n">report</span> <span class="o">=</span> <span class="n">check_portability</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+</span><span data-line="514">        <span class="n">out</span><span class="o">.</span><span class="n">append</span><span class="p">({</span><span class="s2">"project"</span><span class="p">:</span> <span class="n">root</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">report</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()})</span>
+</span><span data-line="515">        <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">"json"</span><span class="p">:</span>
+</span><span data-line="516">            <span class="k">continue</span>
+</span><span data-line="517">        <span class="n">width</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">len</span><span class="p">,</span> <span class="n">report</span><span class="o">.</span><span class="n">coverage</span><span class="p">),</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+</span><span data-line="518">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">root</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">report</span><span class="o">.</span><span class="n">covered</span><span class="p">)</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">report</span><span class="o">.</span><span class="n">coverage</span><span class="p">)</span><span class="si">}</span><span class="s2"> host(s) covered"</span><span class="p">)</span>
+</span><span data-line="519">        <span class="k">for</span> <span class="n">host</span><span class="p">,</span> <span class="n">relation</span> <span class="ow">in</span> <span class="n">report</span><span class="o">.</span><span class="n">coverage</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+</span><span data-line="520">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">host</span><span class="si">:</span><span class="s2">&lt;</span><span class="si">{</span><span class="n">width</span><span class="si">}}</span><span class="s2">  </span><span class="si">{</span><span class="n">relation</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span data-line="521">        <span class="k">if</span> <span class="n">report</span><span class="o">.</span><span class="n">findings</span><span class="p">:</span>
+</span><span data-line="522">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  AGENTS.md drift (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">report</span><span class="o">.</span><span class="n">findings</span><span class="p">)</span><span class="si">}</span><span class="s2">):"</span><span class="p">)</span>
+</span><span data-line="523">            <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">report</span><span class="o">.</span><span class="n">findings</span><span class="p">:</span>
+</span><span data-line="524">                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span data-line="525">    <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">"json"</span><span class="p">:</span>
+</span><span data-line="526">        <span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span></div>
+
+</span><span data-line="527">
+</span><span data-line="528">
+</span><span data-line="529"><span class="k">def</span><span class="w"> </span><span class="nf">_not_ignored_in_a_repo</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span data-line="530"><span class="w">    </span><span class="sd">"""True when ``path`` lies in a git work tree and is not ignored (no git: False)."""</span>
+</span><span data-line="531">    <span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+</span><span data-line="532">
+</span><span data-line="533">    <span class="k">try</span><span class="p">:</span>
+</span><span data-line="534">        <span class="n">done</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+</span><span data-line="535">            <span class="p">[</span><span class="s2">"git"</span><span class="p">,</span> <span class="s2">"check-ignore"</span><span class="p">,</span> <span class="s2">"-q"</span><span class="p">,</span> <span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="p">],</span>
+</span><span data-line="536">            <span class="n">cwd</span><span class="o">=</span><span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span>
+</span><span data-line="537">            <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span data-line="538">        <span class="p">)</span>
+</span><span data-line="539">    <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+</span><span data-line="540">        <span class="k">return</span> <span class="kc">False</span>
+</span><span data-line="541">    <span class="k">return</span> <span class="n">done</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">1</span>  <span class="c1"># 0: ignored, 1: not ignored, 128: not a repo</span>
+</span><span data-line="542">
+</span><span data-line="543">
 <div class="viewcode-block" id="new">
 <a class="viewcode-back" href="../../_autosummary/opsward.cli.html#opsward.cli.new">[docs]</a>
-</span><span data-line="504"><span class="k">def</span><span class="w"> </span><span class="nf">new</span><span class="p">(</span>
-</span><span data-line="505">    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-</span><span data-line="506">    <span class="n">write</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-</span><span data-line="507">    <span class="n">project_root</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"."</span><span class="p">,</span>
-</span><span data-line="508">    <span class="n">status</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"Proposed"</span><span class="p">,</span>
-</span><span data-line="509">    <span class="n">evidence</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
-</span><span data-line="510"><span class="p">):</span>
-</span><span data-line="511"><span class="w">    </span><span class="sd">"""Allocate the next numbered ADR for TITLE (dry run unless --write; never overwrites).</span>
-</span><span data-line="512">
-</span><span data-line="513"><span class="sd">    :param title: the decision's title; the file name is derived from it</span>
-</span><span data-line="514"><span class="sd">    :param write: actually write the file (default: dry run)</span>
-</span><span data-line="515"><span class="sd">    :param project_root: the project directory (default: current dir)</span>
-</span><span data-line="516"><span class="sd">    :param status: initial status — Proposed (default), or Accepted when the human has accepted it</span>
-</span><span data-line="517"><span class="sd">    :param evidence: the issue, discussion or PR this rests on (a URL or #N)</span>
-</span><span data-line="518"><span class="sd">    """</span>
-</span><span data-line="519">    <span class="kn">from</span><span class="w"> </span><span class="nn">opsward.decisions</span><span class="w"> </span><span class="kn">import</span> <span class="n">clean_title</span><span class="p">,</span> <span class="n">new_adr</span>
-</span><span data-line="520">
-</span><span data-line="521">    <span class="k">if</span> <span class="ow">not</span> <span class="n">clean_title</span><span class="p">(</span><span class="n">title</span><span class="p">):</span>
-</span><span data-line="522">        <span class="nb">print</span><span class="p">(</span><span class="s2">"Error: the title is empty"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-</span><span data-line="523">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</span><span data-line="524">    <span class="k">if</span> <span class="n">status</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_ADR_STATUSES</span><span class="p">:</span>
-</span><span data-line="525">        <span class="nb">print</span><span class="p">(</span>
-</span><span data-line="526">            <span class="sa">f</span><span class="s2">"Error: status must be one of </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_ADR_STATUSES</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span>
-</span><span data-line="527">        <span class="p">)</span>
-</span><span data-line="528">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</span><span data-line="529">    <span class="n">root</span><span class="p">,</span> <span class="n">decisions_dir</span> <span class="o">=</span> <span class="n">_decisions_dir</span><span class="p">(</span><span class="n">project_root</span><span class="p">)</span>
-</span><span data-line="530">    <span class="n">gf</span> <span class="o">=</span> <span class="n">new_adr</span><span class="p">(</span><span class="n">decisions_dir</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="p">,</span> <span class="n">evidence</span><span class="o">=</span><span class="n">evidence</span><span class="p">)</span>
-</span><span data-line="531">    <span class="n">rel</span> <span class="o">=</span> <span class="n">_relative_path</span><span class="p">(</span><span class="n">gf</span><span class="o">.</span><span class="n">target_path</span><span class="p">,</span> <span class="n">root</span><span class="p">)</span>
-</span><span data-line="532">    <span class="k">if</span> <span class="n">gf</span><span class="o">.</span><span class="n">target_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-</span><span data-line="533">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"SKIP </span><span class="si">{</span><span class="n">rel</span><span class="si">}</span><span class="s2">  (already exists)"</span><span class="p">)</span>
-</span><span data-line="534">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-</span><span data-line="535">    <span class="k">if</span> <span class="n">write</span><span class="p">:</span>
-</span><span data-line="536">        <span class="n">gf</span><span class="o">.</span><span class="n">target_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span data-line="537">        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span>
-</span><span data-line="538">            <span class="n">gf</span><span class="o">.</span><span class="n">target_path</span><span class="p">,</span> <span class="s2">"x"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span>
-</span><span data-line="539">        <span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>  <span class="c1"># exclusive: never over a file</span>
-</span><span data-line="540">            <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">gf</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
-</span><span data-line="541">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Created </span><span class="si">{</span><span class="n">rel</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-</span><span data-line="542">    <span class="k">else</span><span class="p">:</span>
-</span><span data-line="543">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Would create </span><span class="si">{</span><span class="n">rel</span><span class="si">}</span><span class="se">\n\n</span><span class="s2">Dry run — pass --write to create it."</span><span class="p">)</span></div>
+</span><span data-line="544"><span class="k">def</span><span class="w"> </span><span class="nf">new</span><span class="p">(</span>
+</span><span data-line="545">    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span data-line="546">    <span class="n">write</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+</span><span data-line="547">    <span class="n">project_root</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"."</span><span class="p">,</span>
+</span><span data-line="548">    <span class="n">status</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"Proposed"</span><span class="p">,</span>
+</span><span data-line="549">    <span class="n">evidence</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
+</span><span data-line="550"><span class="p">):</span>
+</span><span data-line="551"><span class="w">    </span><span class="sd">"""Allocate the next numbered ADR for TITLE (dry run unless --write; never overwrites).</span>
+</span><span data-line="552">
+</span><span data-line="553"><span class="sd">    :param title: the decision's title; the file name is derived from it</span>
+</span><span data-line="554"><span class="sd">    :param write: actually write the file (default: dry run)</span>
+</span><span data-line="555"><span class="sd">    :param project_root: the project directory (default: current dir)</span>
+</span><span data-line="556"><span class="sd">    :param status: initial status — Proposed (default), or Accepted when the human has accepted it</span>
+</span><span data-line="557"><span class="sd">    :param evidence: the issue, discussion or PR this rests on (a URL or #N)</span>
+</span><span data-line="558"><span class="sd">    """</span>
+</span><span data-line="559">    <span class="kn">from</span><span class="w"> </span><span class="nn">opsward.decisions</span><span class="w"> </span><span class="kn">import</span> <span class="n">clean_title</span><span class="p">,</span> <span class="n">new_adr</span>
+</span><span data-line="560">
+</span><span data-line="561">    <span class="k">if</span> <span class="ow">not</span> <span class="n">clean_title</span><span class="p">(</span><span class="n">title</span><span class="p">):</span>
+</span><span data-line="562">        <span class="nb">print</span><span class="p">(</span><span class="s2">"Error: the title is empty"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="563">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span data-line="564">    <span class="k">if</span> <span class="n">status</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_ADR_STATUSES</span><span class="p">:</span>
+</span><span data-line="565">        <span class="nb">print</span><span class="p">(</span>
+</span><span data-line="566">            <span class="sa">f</span><span class="s2">"Error: status must be one of </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_ADR_STATUSES</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span>
+</span><span data-line="567">        <span class="p">)</span>
+</span><span data-line="568">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span data-line="569">    <span class="n">root</span><span class="p">,</span> <span class="n">decisions_dir</span> <span class="o">=</span> <span class="n">_decisions_dir</span><span class="p">(</span><span class="n">project_root</span><span class="p">)</span>
+</span><span data-line="570">    <span class="n">gf</span> <span class="o">=</span> <span class="n">new_adr</span><span class="p">(</span><span class="n">decisions_dir</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="p">,</span> <span class="n">evidence</span><span class="o">=</span><span class="n">evidence</span><span class="p">)</span>
+</span><span data-line="571">    <span class="n">rel</span> <span class="o">=</span> <span class="n">_relative_path</span><span class="p">(</span><span class="n">gf</span><span class="o">.</span><span class="n">target_path</span><span class="p">,</span> <span class="n">root</span><span class="p">)</span>
+</span><span data-line="572">    <span class="k">if</span> <span class="n">gf</span><span class="o">.</span><span class="n">target_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+</span><span data-line="573">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"SKIP </span><span class="si">{</span><span class="n">rel</span><span class="si">}</span><span class="s2">  (already exists)"</span><span class="p">)</span>
+</span><span data-line="574">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span data-line="575">    <span class="k">if</span> <span class="n">write</span><span class="p">:</span>
+</span><span data-line="576">        <span class="n">gf</span><span class="o">.</span><span class="n">target_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span data-line="577">        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span>
+</span><span data-line="578">            <span class="n">gf</span><span class="o">.</span><span class="n">target_path</span><span class="p">,</span> <span class="s2">"x"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span>
+</span><span data-line="579">        <span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>  <span class="c1"># exclusive: never over a file</span>
+</span><span data-line="580">            <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">gf</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span data-line="581">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Created </span><span class="si">{</span><span class="n">rel</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span data-line="582">    <span class="k">else</span><span class="p">:</span>
+</span><span data-line="583">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Would create </span><span class="si">{</span><span class="n">rel</span><span class="si">}</span><span class="se">\n\n</span><span class="s2">Dry run — pass --write to create it."</span><span class="p">)</span></div>
 
-</span><span data-line="544">
-</span><span data-line="545">
+</span><span data-line="584">
+</span><span data-line="585">
 <div class="viewcode-block" id="note">
 <a class="viewcode-back" href="../../_autosummary/opsward.cli.html#opsward.cli.note">[docs]</a>
-</span><span data-line="546"><span class="k">def</span><span class="w"> </span><span class="nf">note</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">write</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">project_root</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"."</span><span class="p">):</span>
-</span><span data-line="547"><span class="w">    </span><span class="sd">"""Append TEXT as a dated one-line decision (a Y-statement) to decisions/log.md (dry run unless --write).</span>
-</span><span data-line="548">
-</span><span data-line="549"><span class="sd">    :param text: the decision: "In the context of …, facing …, we decided for …, because …"</span>
-</span><span data-line="550"><span class="sd">    :param write: actually append (default: dry run); the log is created from its template when missing</span>
-</span><span data-line="551"><span class="sd">    :param project_root: the project directory (default: current dir)</span>
-</span><span data-line="552"><span class="sd">    """</span>
-</span><span data-line="553">    <span class="kn">from</span><span class="w"> </span><span class="nn">opsward.decisions</span><span class="w"> </span><span class="kn">import</span> <span class="n">log_append</span>
-</span><span data-line="554">
-</span><span data-line="555">    <span class="k">if</span> <span class="ow">not</span> <span class="s2">" "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">()):</span>
-</span><span data-line="556">        <span class="nb">print</span><span class="p">(</span><span class="s2">"Error: the text is empty"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-</span><span data-line="557">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</span><span data-line="558">    <span class="n">root</span><span class="p">,</span> <span class="n">decisions_dir</span> <span class="o">=</span> <span class="n">_decisions_dir</span><span class="p">(</span><span class="n">project_root</span><span class="p">)</span>
-</span><span data-line="559">    <span class="k">try</span><span class="p">:</span>
-</span><span data-line="560">        <span class="n">path</span><span class="p">,</span> <span class="n">content</span> <span class="o">=</span> <span class="n">log_append</span><span class="p">(</span><span class="n">decisions_dir</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
-</span><span data-line="561">    <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">UnicodeDecodeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-</span><span data-line="562">        <span class="nb">print</span><span class="p">(</span>
-</span><span data-line="563">            <span class="sa">f</span><span class="s2">"Error: cannot read the existing log, nothing written: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
-</span><span data-line="564">            <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span>
-</span><span data-line="565">        <span class="p">)</span>
-</span><span data-line="566">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</span><span data-line="567">    <span class="n">rel</span> <span class="o">=</span> <span class="n">_relative_path</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">root</span><span class="p">)</span>
-</span><span data-line="568">    <span class="k">if</span> <span class="n">write</span><span class="p">:</span>
-</span><span data-line="569">        <span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span data-line="570">        <span class="n">path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
-</span><span data-line="571">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Appended to </span><span class="si">{</span><span class="n">rel</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-</span><span data-line="572">    <span class="k">else</span><span class="p">:</span>
-</span><span data-line="573">        <span class="n">verb</span> <span class="o">=</span> <span class="s2">"append to"</span> <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="k">else</span> <span class="s2">"create"</span>
-</span><span data-line="574">        <span class="nb">print</span><span class="p">(</span>
-</span><span data-line="575">            <span class="sa">f</span><span class="s2">"Would </span><span class="si">{</span><span class="n">verb</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">rel</span><span class="si">}</span><span class="s2"> a dated entry: </span><span class="si">{</span><span class="s1">' '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">())</span><span class="si">}</span><span class="se">\n\n</span><span class="s2">Dry run — pass --write to do it."</span>
-</span><span data-line="576">        <span class="p">)</span></div>
-
-</span><span data-line="577">
-</span><span data-line="578">
-</span><span data-line="579"><span class="c1">#: The statuses `decision new` will stamp. Accepting is the operator's act: pass</span>
-</span><span data-line="580"><span class="c1">#: `--status Accepted` only when the human has said so (ADR 0010 §2).</span>
-</span><span data-line="581"><span class="n">_ADR_STATUSES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"Proposed"</span><span class="p">,</span> <span class="s2">"Accepted"</span><span class="p">)</span>
-</span><span data-line="582">
-</span><span data-line="583">
-</span><span data-line="584"><span class="k">def</span><span class="w"> </span><span class="nf">_decisions_dir</span><span class="p">(</span><span class="n">project_root</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="n">Path</span><span class="p">]:</span>
-</span><span data-line="585"><span class="w">    </span><span class="sd">"""(root, root/&lt;docs&gt;/decisions), by the same resolver `scan` uses to find ADRs."""</span>
-</span><span data-line="586">    <span class="kn">from</span><span class="w"> </span><span class="nn">opsward.scan</span><span class="w"> </span><span class="kn">import</span> <span class="n">docs_dir_for</span>
-</span><span data-line="587">
-</span><span data-line="588">    <span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">project_root</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
-</span><span data-line="589">    <span class="k">if</span> <span class="ow">not</span> <span class="n">root</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
-</span><span data-line="590">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error: </span><span class="si">{</span><span class="n">project_root</span><span class="si">}</span><span class="s2"> is not a directory"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-</span><span data-line="591">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</span><span data-line="592">    <span class="n">sr</span> <span class="o">=</span> <span class="n">scan</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">claude_config_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
-</span><span data-line="593">    <span class="k">return</span> <span class="n">root</span><span class="p">,</span> <span class="n">docs_dir_for</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_type</span><span class="p">,</span> <span class="n">sr</span><span class="o">.</span><span class="n">docs_guide_path</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"decisions"</span>
+</span><span data-line="586"><span class="k">def</span><span class="w"> </span><span class="nf">note</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">write</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">project_root</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"."</span><span class="p">):</span>
+</span><span data-line="587"><span class="w">    </span><span class="sd">"""Append TEXT as a dated one-line decision (a Y-statement) to decisions/log.md (dry run unless --write).</span>
+</span><span data-line="588">
+</span><span data-line="589"><span class="sd">    :param text: the decision: "In the context of …, facing …, we decided for …, because …"</span>
+</span><span data-line="590"><span class="sd">    :param write: actually append (default: dry run); the log is created from its template when missing</span>
+</span><span data-line="591"><span class="sd">    :param project_root: the project directory (default: current dir)</span>
+</span><span data-line="592"><span class="sd">    """</span>
+</span><span data-line="593">    <span class="kn">from</span><span class="w"> </span><span class="nn">opsward.decisions</span><span class="w"> </span><span class="kn">import</span> <span class="n">log_append</span>
 </span><span data-line="594">
-</span><span data-line="595">
+</span><span data-line="595">    <span class="k">if</span> <span class="ow">not</span> <span class="s2">" "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">()):</span>
+</span><span data-line="596">        <span class="nb">print</span><span class="p">(</span><span class="s2">"Error: the text is empty"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="597">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span data-line="598">    <span class="n">root</span><span class="p">,</span> <span class="n">decisions_dir</span> <span class="o">=</span> <span class="n">_decisions_dir</span><span class="p">(</span><span class="n">project_root</span><span class="p">)</span>
+</span><span data-line="599">    <span class="k">try</span><span class="p">:</span>
+</span><span data-line="600">        <span class="n">path</span><span class="p">,</span> <span class="n">content</span> <span class="o">=</span> <span class="n">log_append</span><span class="p">(</span><span class="n">decisions_dir</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+</span><span data-line="601">    <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">UnicodeDecodeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span data-line="602">        <span class="nb">print</span><span class="p">(</span>
+</span><span data-line="603">            <span class="sa">f</span><span class="s2">"Error: cannot read the existing log, nothing written: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+</span><span data-line="604">            <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span>
+</span><span data-line="605">        <span class="p">)</span>
+</span><span data-line="606">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span data-line="607">    <span class="n">rel</span> <span class="o">=</span> <span class="n">_relative_path</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">root</span><span class="p">)</span>
+</span><span data-line="608">    <span class="k">if</span> <span class="n">write</span><span class="p">:</span>
+</span><span data-line="609">        <span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span data-line="610">        <span class="n">path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+</span><span data-line="611">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Appended to </span><span class="si">{</span><span class="n">rel</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span data-line="612">    <span class="k">else</span><span class="p">:</span>
+</span><span data-line="613">        <span class="n">verb</span> <span class="o">=</span> <span class="s2">"append to"</span> <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="k">else</span> <span class="s2">"create"</span>
+</span><span data-line="614">        <span class="nb">print</span><span class="p">(</span>
+</span><span data-line="615">            <span class="sa">f</span><span class="s2">"Would </span><span class="si">{</span><span class="n">verb</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">rel</span><span class="si">}</span><span class="s2"> a dated entry: </span><span class="si">{</span><span class="s1">' '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">())</span><span class="si">}</span><span class="se">\n\n</span><span class="s2">Dry run — pass --write to do it."</span>
+</span><span data-line="616">        <span class="p">)</span></div>
+
+</span><span data-line="617">
+</span><span data-line="618">
+</span><span data-line="619"><span class="c1">#: The statuses `decision new` will stamp. Accepting is the operator's act: pass</span>
+</span><span data-line="620"><span class="c1">#: `--status Accepted` only when the human has said so (ADR 0010 §2).</span>
+</span><span data-line="621"><span class="n">_ADR_STATUSES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"Proposed"</span><span class="p">,</span> <span class="s2">"Accepted"</span><span class="p">)</span>
+</span><span data-line="622">
+</span><span data-line="623">
+</span><span data-line="624"><span class="k">def</span><span class="w"> </span><span class="nf">_decisions_dir</span><span class="p">(</span><span class="n">project_root</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="n">Path</span><span class="p">]:</span>
+</span><span data-line="625"><span class="w">    </span><span class="sd">"""(root, root/&lt;docs&gt;/decisions), by the same resolver `scan` uses to find ADRs."""</span>
+</span><span data-line="626">    <span class="kn">from</span><span class="w"> </span><span class="nn">opsward.scan</span><span class="w"> </span><span class="kn">import</span> <span class="n">docs_dir_for</span>
+</span><span data-line="627">
+</span><span data-line="628">    <span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">project_root</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+</span><span data-line="629">    <span class="k">if</span> <span class="ow">not</span> <span class="n">root</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+</span><span data-line="630">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error: </span><span class="si">{</span><span class="n">project_root</span><span class="si">}</span><span class="s2"> is not a directory"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="631">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span data-line="632">    <span class="n">sr</span> <span class="o">=</span> <span class="n">scan</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">claude_config_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</span><span data-line="633">    <span class="k">return</span> <span class="n">root</span><span class="p">,</span> <span class="n">docs_dir_for</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_type</span><span class="p">,</span> <span class="n">sr</span><span class="o">.</span><span class="n">docs_guide_path</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"decisions"</span>
+</span><span data-line="634">
+</span><span data-line="635">
 <div class="viewcode-block" id="eval_">
 <a class="viewcode-back" href="../../_autosummary/opsward.cli.html#opsward.cli.eval_">[docs]</a>
-</span><span data-line="596"><span class="k">def</span><span class="w"> </span><span class="nf">eval_</span><span class="p">(</span>
-</span><span data-line="597">    <span class="n">project_root</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-</span><span data-line="598">    <span class="o">*</span><span class="p">,</span>
-</span><span data-line="599">    <span class="n">judge</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"rubric"</span><span class="p">,</span>
-</span><span data-line="600">    <span class="n">samples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-</span><span data-line="601">    <span class="n">tasks</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
-</span><span data-line="602">    <span class="n">runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-</span><span data-line="603">    <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"text"</span><span class="p">,</span>
-</span><span data-line="604"><span class="p">):</span>
-</span><span data-line="605"><span class="w">    </span><span class="sd">"""Report-only evals of a project's agent setup: an LLM judge of CLAUDE.md, and golden tasks.</span>
-</span><span data-line="606">
-</span><span data-line="607"><span class="sd">    The judge scores CLAUDE.md's subjective dimensions next to the rubric's own score. The</span>
-</span><span data-line="608"><span class="sd">    golden tasks (a JSON list of {name, prompt, expect, forbid}, by default</span>
-</span><span data-line="609"><span class="sd">    &lt;docs&gt;/evals/golden_tasks.json) run with and without CLAUDE.md and report the pass-rate</span>
-</span><span data-line="610"><span class="sd">    delta. --judge rubric is free and deterministic (the rubric judge and an agent that</span>
-</span><span data-line="611"><span class="sd">    quotes the config: it checks the harness, not a model); --judge anthropic makes paid</span>
-</span><span data-line="612"><span class="sd">    calls (pip install 'opsward[eval]'). Exits 0 whenever it ran (a report, never a gate);</span>
-</span><span data-line="613"><span class="sd">    2 only on a usage error.</span>
-</span><span data-line="614">
-</span><span data-line="615"><span class="sd">    :param project_root: the project directory</span>
-</span><span data-line="616"><span class="sd">    :param judge: 'rubric' (free) or 'anthropic' (paid model calls)</span>
-</span><span data-line="617"><span class="sd">    :param samples: judge samples per dimension (the median is reported)</span>
-</span><span data-line="618"><span class="sd">    :param tasks: golden-tasks JSON file (default: &lt;docs&gt;/evals/golden_tasks.json, if present)</span>
-</span><span data-line="619"><span class="sd">    :param runs: runs per golden task and arm</span>
-</span><span data-line="620"><span class="sd">    :param format: output format — 'text' or 'json'</span>
-</span><span data-line="621"><span class="sd">    """</span>
-</span><span data-line="622">    <span class="kn">from</span><span class="w"> </span><span class="nn">opsward</span><span class="w"> </span><span class="kn">import</span> <span class="n">evals</span>
-</span><span data-line="623">
-</span><span data-line="624">    <span class="k">if</span> <span class="nb">format</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"text"</span><span class="p">,</span> <span class="s2">"json"</span><span class="p">):</span>
-</span><span data-line="625">        <span class="nb">print</span><span class="p">(</span><span class="s2">"Error: format must be 'text' or 'json'"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-</span><span data-line="626">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</span><span data-line="627">    <span class="k">if</span> <span class="n">judge</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"rubric"</span><span class="p">,</span> <span class="s2">"anthropic"</span><span class="p">):</span>
-</span><span data-line="628">        <span class="nb">print</span><span class="p">(</span><span class="s2">"Error: judge must be 'rubric' or 'anthropic'"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-</span><span data-line="629">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</span><span data-line="630">    <span class="k">if</span> <span class="n">samples</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">runs</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
-</span><span data-line="631">        <span class="nb">print</span><span class="p">(</span><span class="s2">"Error: samples and runs must be at least 1"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-</span><span data-line="632">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</span><span data-line="633">    <span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">project_root</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
-</span><span data-line="634">    <span class="k">if</span> <span class="ow">not</span> <span class="n">root</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
-</span><span data-line="635">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error: </span><span class="si">{</span><span class="n">project_root</span><span class="si">}</span><span class="s2"> is not a directory"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-</span><span data-line="636">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</span><span data-line="637">    <span class="n">sr</span> <span class="o">=</span> <span class="n">scan</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">claude_config_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
-</span><span data-line="638">    <span class="n">tasks_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tasks</span><span class="p">)</span> <span class="k">if</span> <span class="n">tasks</span> <span class="k">else</span> <span class="n">evals</span><span class="o">.</span><span class="n">golden_tasks_path</span><span class="p">(</span><span class="n">sr</span><span class="p">)</span>
-</span><span data-line="639">    <span class="k">if</span> <span class="n">tasks</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">tasks_path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
-</span><span data-line="640">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error: </span><span class="si">{</span><span class="n">tasks</span><span class="si">}</span><span class="s2"> is not a file"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-</span><span data-line="641">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</span><span data-line="642">    <span class="k">try</span><span class="p">:</span>
-</span><span data-line="643">        <span class="n">golden_tasks</span> <span class="o">=</span> <span class="p">(</span>
-</span><span data-line="644">            <span class="n">evals</span><span class="o">.</span><span class="n">load_golden_tasks</span><span class="p">(</span><span class="n">tasks_path</span><span class="p">)</span> <span class="k">if</span> <span class="n">tasks_path</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span>
-</span><span data-line="645">        <span class="p">)</span>
-</span><span data-line="646">    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># JSONDecodeError is a ValueError</span>
-</span><span data-line="647">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error: cannot read the golden tasks: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-</span><span data-line="648">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</span><span data-line="649">    <span class="k">if</span> <span class="n">judge</span> <span class="o">==</span> <span class="s2">"anthropic"</span><span class="p">:</span>
-</span><span data-line="650">        <span class="k">try</span><span class="p">:</span>
-</span><span data-line="651">            <span class="n">the_judge</span><span class="p">,</span> <span class="n">agent</span> <span class="o">=</span> <span class="n">evals</span><span class="o">.</span><span class="n">anthropic_judge</span><span class="p">(),</span> <span class="n">evals</span><span class="o">.</span><span class="n">anthropic_agent</span><span class="p">()</span>
-</span><span data-line="652">        <span class="k">except</span> <span class="p">(</span>
-</span><span data-line="653">            <span class="ne">Exception</span>
-</span><span data-line="654">        <span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># no SDK (ImportError) or no API key (the SDK's own error)</span>
-</span><span data-line="655">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error: cannot start the paid judge: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-</span><span data-line="656">            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</span><span data-line="657">    <span class="k">else</span><span class="p">:</span>
-</span><span data-line="658">        <span class="n">the_judge</span><span class="p">,</span> <span class="n">agent</span> <span class="o">=</span> <span class="n">evals</span><span class="o">.</span><span class="n">rubric_judge</span><span class="p">,</span> <span class="n">evals</span><span class="o">.</span><span class="n">echo_agent</span>
-</span><span data-line="659">
-</span><span data-line="660">    <span class="n">config</span> <span class="o">=</span> <span class="n">sr</span><span class="o">.</span><span class="n">claude_md_content</span>
-</span><span data-line="661">    <span class="n">judged</span> <span class="o">=</span> <span class="p">(</span>
-</span><span data-line="662">        <span class="n">evals</span><span class="o">.</span><span class="n">judge_claude_md</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">judge</span><span class="o">=</span><span class="n">the_judge</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="n">samples</span><span class="p">)</span>
-</span><span data-line="663">        <span class="k">if</span> <span class="n">sr</span><span class="o">.</span><span class="n">claude_md_path</span>
-</span><span data-line="664">        <span class="k">else</span> <span class="kc">None</span>
-</span><span data-line="665">    <span class="p">)</span>
-</span><span data-line="666">    <span class="k">try</span><span class="p">:</span>
-</span><span data-line="667">        <span class="n">golden</span> <span class="o">=</span> <span class="p">(</span>
-</span><span data-line="668">            <span class="n">evals</span><span class="o">.</span><span class="n">run_golden_tasks</span><span class="p">(</span><span class="n">golden_tasks</span><span class="p">,</span> <span class="n">agent</span><span class="o">=</span><span class="n">agent</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span> <span class="n">runs</span><span class="o">=</span><span class="n">runs</span><span class="p">)</span>
-</span><span data-line="669">            <span class="k">if</span> <span class="n">golden_tasks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-</span><span data-line="670">            <span class="k">else</span> <span class="kc">None</span>
-</span><span data-line="671">        <span class="p">)</span>
-</span><span data-line="672">    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># e.g. two tasks share a name</span>
-</span><span data-line="673">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error: bad golden tasks: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-</span><span data-line="674">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</span><span data-line="675">    <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">"json"</span><span class="p">:</span>
-</span><span data-line="676">        <span class="n">out</span> <span class="o">=</span> <span class="p">{</span>
-</span><span data-line="677">            <span class="s2">"project"</span><span class="p">:</span> <span class="n">root</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-</span><span data-line="678">            <span class="s2">"judge"</span><span class="p">:</span> <span class="n">judged</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">judged</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-</span><span data-line="679">            <span class="s2">"golden"</span><span class="p">:</span> <span class="n">golden</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">golden</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
-</span><span data-line="680">        <span class="p">}</span>
-</span><span data-line="681">        <span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
-</span><span data-line="682">        <span class="k">return</span>
-</span><span data-line="683">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">root</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: evals (report only)"</span><span class="p">)</span>
-</span><span data-line="684">    <span class="nb">print</span><span class="p">(</span><span class="n">judged</span> <span class="k">if</span> <span class="n">judged</span> <span class="k">else</span> <span class="s2">"Judge: no CLAUDE.md to judge"</span><span class="p">)</span>
-</span><span data-line="685">    <span class="k">if</span> <span class="n">golden</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span data-line="686">        <span class="nb">print</span><span class="p">(</span><span class="n">golden</span><span class="p">)</span>
-</span><span data-line="687">    <span class="k">else</span><span class="p">:</span>
-</span><span data-line="688">        <span class="nb">print</span><span class="p">(</span>
-</span><span data-line="689">            <span class="sa">f</span><span class="s2">"Golden tasks: none (add </span><span class="si">{</span><span class="n">evals</span><span class="o">.</span><span class="n">DFLT_GOLDEN_TASKS_RELPATH</span><span class="si">}</span><span class="s2"> under the "</span>
-</span><span data-line="690">            <span class="s2">"docs folder, or pass --tasks)"</span>
-</span><span data-line="691">        <span class="p">)</span></div>
+</span><span data-line="636"><span class="k">def</span><span class="w"> </span><span class="nf">eval_</span><span class="p">(</span>
+</span><span data-line="637">    <span class="n">project_root</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span data-line="638">    <span class="o">*</span><span class="p">,</span>
+</span><span data-line="639">    <span class="n">judge</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"rubric"</span><span class="p">,</span>
+</span><span data-line="640">    <span class="n">samples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+</span><span data-line="641">    <span class="n">tasks</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
+</span><span data-line="642">    <span class="n">runs</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+</span><span data-line="643">    <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"text"</span><span class="p">,</span>
+</span><span data-line="644"><span class="p">):</span>
+</span><span data-line="645"><span class="w">    </span><span class="sd">"""Report-only evals of a project's agent setup: an LLM judge of CLAUDE.md, and golden tasks.</span>
+</span><span data-line="646">
+</span><span data-line="647"><span class="sd">    The judge scores CLAUDE.md's subjective dimensions next to the rubric's own score. The</span>
+</span><span data-line="648"><span class="sd">    golden tasks (a JSON list of {name, prompt, expect, forbid}, by default</span>
+</span><span data-line="649"><span class="sd">    &lt;docs&gt;/evals/golden_tasks.json) run with and without CLAUDE.md and report the pass-rate</span>
+</span><span data-line="650"><span class="sd">    delta. --judge rubric is free and deterministic (the rubric judge and an agent that</span>
+</span><span data-line="651"><span class="sd">    quotes the config: it checks the harness, not a model); --judge anthropic makes paid</span>
+</span><span data-line="652"><span class="sd">    calls (pip install 'opsward[eval]'). Exits 0 whenever it ran (a report, never a gate);</span>
+</span><span data-line="653"><span class="sd">    2 only on a usage error.</span>
+</span><span data-line="654">
+</span><span data-line="655"><span class="sd">    :param project_root: the project directory</span>
+</span><span data-line="656"><span class="sd">    :param judge: 'rubric' (free) or 'anthropic' (paid model calls)</span>
+</span><span data-line="657"><span class="sd">    :param samples: judge samples per dimension (the median is reported)</span>
+</span><span data-line="658"><span class="sd">    :param tasks: golden-tasks JSON file (default: &lt;docs&gt;/evals/golden_tasks.json, if present)</span>
+</span><span data-line="659"><span class="sd">    :param runs: runs per golden task and arm</span>
+</span><span data-line="660"><span class="sd">    :param format: output format — 'text' or 'json'</span>
+</span><span data-line="661"><span class="sd">    """</span>
+</span><span data-line="662">    <span class="kn">from</span><span class="w"> </span><span class="nn">opsward</span><span class="w"> </span><span class="kn">import</span> <span class="n">evals</span>
+</span><span data-line="663">
+</span><span data-line="664">    <span class="k">if</span> <span class="nb">format</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"text"</span><span class="p">,</span> <span class="s2">"json"</span><span class="p">):</span>
+</span><span data-line="665">        <span class="nb">print</span><span class="p">(</span><span class="s2">"Error: format must be 'text' or 'json'"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="666">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span data-line="667">    <span class="k">if</span> <span class="n">judge</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"rubric"</span><span class="p">,</span> <span class="s2">"anthropic"</span><span class="p">):</span>
+</span><span data-line="668">        <span class="nb">print</span><span class="p">(</span><span class="s2">"Error: judge must be 'rubric' or 'anthropic'"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="669">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span data-line="670">    <span class="k">if</span> <span class="n">samples</span> <span class="o">&lt;</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">runs</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+</span><span data-line="671">        <span class="nb">print</span><span class="p">(</span><span class="s2">"Error: samples and runs must be at least 1"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="672">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span data-line="673">    <span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">project_root</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+</span><span data-line="674">    <span class="k">if</span> <span class="ow">not</span> <span class="n">root</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+</span><span data-line="675">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error: </span><span class="si">{</span><span class="n">project_root</span><span class="si">}</span><span class="s2"> is not a directory"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="676">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span data-line="677">    <span class="n">sr</span> <span class="o">=</span> <span class="n">scan</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">claude_config_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</span><span data-line="678">    <span class="n">tasks_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">tasks</span><span class="p">)</span> <span class="k">if</span> <span class="n">tasks</span> <span class="k">else</span> <span class="n">evals</span><span class="o">.</span><span class="n">golden_tasks_path</span><span class="p">(</span><span class="n">sr</span><span class="p">)</span>
+</span><span data-line="679">    <span class="k">if</span> <span class="n">tasks</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">tasks_path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+</span><span data-line="680">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error: </span><span class="si">{</span><span class="n">tasks</span><span class="si">}</span><span class="s2"> is not a file"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="681">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span data-line="682">    <span class="k">try</span><span class="p">:</span>
+</span><span data-line="683">        <span class="n">golden_tasks</span> <span class="o">=</span> <span class="p">(</span>
+</span><span data-line="684">            <span class="n">evals</span><span class="o">.</span><span class="n">load_golden_tasks</span><span class="p">(</span><span class="n">tasks_path</span><span class="p">)</span> <span class="k">if</span> <span class="n">tasks_path</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span> <span class="k">else</span> <span class="kc">None</span>
+</span><span data-line="685">        <span class="p">)</span>
+</span><span data-line="686">    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># JSONDecodeError is a ValueError</span>
+</span><span data-line="687">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error: cannot read the golden tasks: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="688">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span data-line="689">    <span class="k">if</span> <span class="n">judge</span> <span class="o">==</span> <span class="s2">"anthropic"</span><span class="p">:</span>
+</span><span data-line="690">        <span class="k">try</span><span class="p">:</span>
+</span><span data-line="691">            <span class="n">the_judge</span><span class="p">,</span> <span class="n">agent</span> <span class="o">=</span> <span class="n">evals</span><span class="o">.</span><span class="n">anthropic_judge</span><span class="p">(),</span> <span class="n">evals</span><span class="o">.</span><span class="n">anthropic_agent</span><span class="p">()</span>
+</span><span data-line="692">        <span class="k">except</span> <span class="p">(</span>
+</span><span data-line="693">            <span class="ne">Exception</span>
+</span><span data-line="694">        <span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># no SDK (ImportError) or no API key (the SDK's own error)</span>
+</span><span data-line="695">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error: cannot start the paid judge: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="696">            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span data-line="697">    <span class="k">else</span><span class="p">:</span>
+</span><span data-line="698">        <span class="n">the_judge</span><span class="p">,</span> <span class="n">agent</span> <span class="o">=</span> <span class="n">evals</span><span class="o">.</span><span class="n">rubric_judge</span><span class="p">,</span> <span class="n">evals</span><span class="o">.</span><span class="n">echo_agent</span>
+</span><span data-line="699">
+</span><span data-line="700">    <span class="kn">from</span><span class="w"> </span><span class="nn">opsward.portability</span><span class="w"> </span><span class="kn">import</span> <span class="n">as_read</span>
+</span><span data-line="701">
+</span><span data-line="702">    <span class="n">config</span> <span class="o">=</span> <span class="n">as_read</span><span class="p">(</span><span class="n">sr</span><span class="o">.</span><span class="n">claude_md_content</span><span class="p">,</span> <span class="n">sr</span><span class="o">.</span><span class="n">agents_md_content</span><span class="p">)</span>
+</span><span data-line="703">    <span class="n">judged</span> <span class="o">=</span> <span class="p">(</span>
+</span><span data-line="704">        <span class="n">evals</span><span class="o">.</span><span class="n">judge_claude_md</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">judge</span><span class="o">=</span><span class="n">the_judge</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="n">samples</span><span class="p">)</span>
+</span><span data-line="705">        <span class="k">if</span> <span class="n">sr</span><span class="o">.</span><span class="n">claude_md_path</span>
+</span><span data-line="706">        <span class="k">else</span> <span class="kc">None</span>
+</span><span data-line="707">    <span class="p">)</span>
+</span><span data-line="708">    <span class="k">try</span><span class="p">:</span>
+</span><span data-line="709">        <span class="n">golden</span> <span class="o">=</span> <span class="p">(</span>
+</span><span data-line="710">            <span class="n">evals</span><span class="o">.</span><span class="n">run_golden_tasks</span><span class="p">(</span><span class="n">golden_tasks</span><span class="p">,</span> <span class="n">agent</span><span class="o">=</span><span class="n">agent</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="n">config</span><span class="p">,</span> <span class="n">runs</span><span class="o">=</span><span class="n">runs</span><span class="p">)</span>
+</span><span data-line="711">            <span class="k">if</span> <span class="n">golden_tasks</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+</span><span data-line="712">            <span class="k">else</span> <span class="kc">None</span>
+</span><span data-line="713">        <span class="p">)</span>
+</span><span data-line="714">    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># e.g. two tasks share a name</span>
+</span><span data-line="715">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error: bad golden tasks: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="716">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span data-line="717">    <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">"json"</span><span class="p">:</span>
+</span><span data-line="718">        <span class="n">out</span> <span class="o">=</span> <span class="p">{</span>
+</span><span data-line="719">            <span class="s2">"project"</span><span class="p">:</span> <span class="n">root</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+</span><span data-line="720">            <span class="s2">"judge"</span><span class="p">:</span> <span class="n">judged</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">judged</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="721">            <span class="s2">"golden"</span><span class="p">:</span> <span class="n">golden</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="k">if</span> <span class="n">golden</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+</span><span data-line="722">        <span class="p">}</span>
+</span><span data-line="723">        <span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+</span><span data-line="724">        <span class="k">return</span>
+</span><span data-line="725">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">root</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: evals (report only)"</span><span class="p">)</span>
+</span><span data-line="726">    <span class="nb">print</span><span class="p">(</span><span class="n">judged</span> <span class="k">if</span> <span class="n">judged</span> <span class="k">else</span> <span class="s2">"Judge: no CLAUDE.md to judge"</span><span class="p">)</span>
+</span><span data-line="727">    <span class="k">if</span> <span class="n">golden</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="728">        <span class="nb">print</span><span class="p">(</span><span class="n">golden</span><span class="p">)</span>
+</span><span data-line="729">    <span class="k">else</span><span class="p">:</span>
+</span><span data-line="730">        <span class="nb">print</span><span class="p">(</span>
+</span><span data-line="731">            <span class="sa">f</span><span class="s2">"Golden tasks: none (add </span><span class="si">{</span><span class="n">evals</span><span class="o">.</span><span class="n">DFLT_GOLDEN_TASKS_RELPATH</span><span class="si">}</span><span class="s2"> under the "</span>
+</span><span data-line="732">            <span class="s2">"docs folder, or pass --tasks)"</span>
+</span><span data-line="733">        <span class="p">)</span></div>
 
-</span><span data-line="692">
-</span><span data-line="693">
-</span><span data-line="694"><span class="c1"># The SSOT of the CLI surface: a name -&gt; command mapping, with one nested group.</span>
-</span><span data-line="695"><span class="n">_dispatch_funcs</span> <span class="o">=</span> <span class="p">{</span>
-</span><span data-line="696">    <span class="s2">"diagnose"</span><span class="p">:</span> <span class="n">diagnose</span><span class="p">,</span>
-</span><span data-line="697">    <span class="s2">"generate"</span><span class="p">:</span> <span class="n">generate</span><span class="p">,</span>
-</span><span data-line="698">    <span class="s2">"maintain"</span><span class="p">:</span> <span class="n">maintain</span><span class="p">,</span>
-</span><span data-line="699">    <span class="s2">"recommend"</span><span class="p">:</span> <span class="n">recommend</span><span class="p">,</span>
-</span><span data-line="700">    <span class="s2">"install-skills"</span><span class="p">:</span> <span class="n">install_skills</span><span class="p">,</span>
-</span><span data-line="701">    <span class="s2">"find"</span><span class="p">:</span> <span class="n">find</span><span class="p">,</span>
-</span><span data-line="702">    <span class="s2">"fleet"</span><span class="p">:</span> <span class="n">fleet</span><span class="p">,</span>
-</span><span data-line="703">    <span class="s2">"lint"</span><span class="p">:</span> <span class="n">lint</span><span class="p">,</span>
-</span><span data-line="704">    <span class="s2">"eval"</span><span class="p">:</span> <span class="n">eval_</span><span class="p">,</span>
-</span><span data-line="705">    <span class="s2">"decision"</span><span class="p">:</span> <span class="p">[</span><span class="n">new</span><span class="p">,</span> <span class="n">note</span><span class="p">],</span>
-</span><span data-line="706"><span class="p">}</span>
+</span><span data-line="734">
+</span><span data-line="735">
+</span><span data-line="736"><span class="c1"># The SSOT of the CLI surface: a name -&gt; command mapping, with one nested group.</span>
+</span><span data-line="737"><span class="n">_dispatch_funcs</span> <span class="o">=</span> <span class="p">{</span>
+</span><span data-line="738">    <span class="s2">"diagnose"</span><span class="p">:</span> <span class="n">diagnose</span><span class="p">,</span>
+</span><span data-line="739">    <span class="s2">"generate"</span><span class="p">:</span> <span class="n">generate</span><span class="p">,</span>
+</span><span data-line="740">    <span class="s2">"maintain"</span><span class="p">:</span> <span class="n">maintain</span><span class="p">,</span>
+</span><span data-line="741">    <span class="s2">"recommend"</span><span class="p">:</span> <span class="n">recommend</span><span class="p">,</span>
+</span><span data-line="742">    <span class="s2">"install-skills"</span><span class="p">:</span> <span class="n">install_skills</span><span class="p">,</span>
+</span><span data-line="743">    <span class="s2">"find"</span><span class="p">:</span> <span class="n">find</span><span class="p">,</span>
+</span><span data-line="744">    <span class="s2">"fleet"</span><span class="p">:</span> <span class="n">fleet</span><span class="p">,</span>
+</span><span data-line="745">    <span class="s2">"lint"</span><span class="p">:</span> <span class="n">lint</span><span class="p">,</span>
+</span><span data-line="746">    <span class="s2">"portability"</span><span class="p">:</span> <span class="n">portability</span><span class="p">,</span>
+</span><span data-line="747">    <span class="s2">"eval"</span><span class="p">:</span> <span class="n">eval_</span><span class="p">,</span>
+</span><span data-line="748">    <span class="s2">"decision"</span><span class="p">:</span> <span class="p">[</span><span class="n">new</span><span class="p">,</span> <span class="n">note</span><span class="p">],</span>
+</span><span data-line="749"><span class="p">}</span>
 </span></pre></div>
         </article><button class="back-to-top" type="button">
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -899,7 +945,7 @@ data-aria-dark="Switch to auto color mode">
     </div>
   </div>
 </footer>
-      <script src="../../_static/documentation_options.js?v=39aadc1c"></script>
+      <script src="../../_static/documentation_options.js?v=0e525676"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>

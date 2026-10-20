@@ -433,6 +433,11 @@ known_issues.md, and content quality.</p>
 </span><span data-line="6">pip<span class="w"> </span>install<span class="w"> </span>skillcheck<span class="w">                  </span><span class="c1"># --validators skillcheck</span>
 </span></pre></div>
 </div>
+<p>One brief for every agent host: <code class="docutils literal notranslate"><span class="pre">AGENTS.md</span></code> is the canonical, and each host’s own file (<code class="docutils literal notranslate"><span class="pre">CLAUDE.md</span></code>, <code class="docutils literal notranslate"><span class="pre">GEMINI.md</span></code>, <code class="docutils literal notranslate"><span class="pre">.github/copilot-instructions.md</span></code>, …) is a symlink, an <code class="docutils literal notranslate"><span class="pre">&#64;AGENTS.md</span></code> import, or a copy that can drift. <code class="docutils literal notranslate"><span class="pre">portability</span></code> shows which hosts find instructions and every section where a render differs from <code class="docutils literal notranslate"><span class="pre">AGENTS.md</span></code>; <code class="docutils literal notranslate"><span class="pre">fleet</span></code> rolls the same counts up across repos. A <code class="docutils literal notranslate"><span class="pre">CLAUDE.md</span></code> that is <code class="docutils literal notranslate"><span class="pre">&#64;AGENTS.md</span></code> plus Claude-only deltas is scored as Claude reads it, with the import inlined.</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">opsward<span class="w"> </span>portability<span class="w"> </span>.<span class="w">                   </span><span class="c1"># host coverage table + drift findings (report-only)</span>
+</span><span data-line="2">opsward<span class="w"> </span>portability<span class="w"> </span>.<span class="w"> </span>--format<span class="w"> </span>json
+</span></pre></div>
+</div>
 <p>The repo ships a reusable GitHub Action and pre-commit hooks:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># a workflow step, after actions/checkout</span>
 </span><span data-line="2"><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">thorwhalen/opsward@&lt;a release tag&gt;</span>
@@ -494,7 +499,7 @@ known_issues.md, and content quality.</p>
 </section>
 </section>
 
-<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-10-20 19:00 UTC from <a href="https://github.com/thorwhalen/opsward/commit/2877085bbe8a40f9f48f25c328e95fb48859118c">2877085</a> (main) · opsward 0.0.35 · <a href="about-this-build.html">about this build</a></p>
+<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-10-20 19:13 UTC from <a href="https://github.com/thorwhalen/opsward/commit/e0a537064bd5c7eb0d5022c9836f7322251e29ab">e0a5370</a> (main) · opsward 0.0.36 · <a href="about-this-build.html">about this build</a></p>
         </article><button class="back-to-top" type="button">
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
     <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
@@ -529,7 +534,7 @@ known_issues.md, and content quality.</p>
     </div>
   </div>
 </footer>
-      <script src="_static/documentation_options.js?v=39aadc1c"></script>
+      <script src="_static/documentation_options.js?v=0e525676"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="_static/clipboard.min.js?v=a7894cd8"></script>

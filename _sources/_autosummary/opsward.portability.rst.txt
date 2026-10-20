@@ -4,11 +4,18 @@ opsward.portability
 .. automodule:: opsward.portability
 
    
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      DRIFT_KINDS
+   
    .. rubric:: Functions
 
    .. autosummary::
    
       analyze
+      as_read
       check_portability
       read_host_files
       summarize

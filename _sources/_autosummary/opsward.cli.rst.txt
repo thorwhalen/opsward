@@ -18,5 +18,6 @@ opsward.cli
       maintain
       new
       note
+      portability
       recommend
    

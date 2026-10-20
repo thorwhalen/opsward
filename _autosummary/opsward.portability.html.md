@@ -40,10 +40,16 @@ render) are compared only when they import or link the canonical.
 [('diverged', 'build'), ('host_only', 'claude')]
 ```
 
+### Module Attributes
+
+| [`DRIFT_KINDS`](#opsward.portability.DRIFT_KINDS)   | The drift finding kinds, in report order (see the module docstring).   |
+|----------------------------------------------------------------|------------------------------------------------------------------------|
+
 ### Functions
 
 | [`analyze`](#opsward.portability.analyze)(canonical, host_files, \*[, hosts])   | Coverage and drift of *host_files* against the *canonical* `AGENTS.md` text.   |
 |------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------|
+| [`as_read`](#opsward.portability.as_read)(render, canonical)                    | *render* as its host reads it: an `@AGENTS.md` import replaced by *canonical*. |
 | [`check_portability`](#opsward.portability.check_portability)(root, \*[, hosts])          | `analyze` over what is on disk under *root*: the library entry point.          |
 | [`read_host_files`](#opsward.portability.read_host_files)(root, \*[, hosts])            | Every host instruction file and rule folder present under *root*.              |
 | [`summarize`](#opsward.portability.summarize)(report)                             | One diagnose suggestion per drifting render.                                   |
@@ -55,6 +61,10 @@ render) are compared only when they import or link the canonical.
 | [`HostFile`](#opsward.portability.HostFile)(path[, content, ...])           | One host instruction file (or rule folder) as found on disk.                      |
 | [`HostSpec`](#opsward.portability.HostSpec)(name[, instruction_files, ...]) | Where one agent host looks for project instructions (research table, opsward#15). |
 | [`PortabilityReport`](#opsward.portability.PortabilityReport)([coverage, findings])  | Host coverage (host -> relation, `native` or `none`) and drift findings.          |
+
+### opsward.portability.DRIFT_KINDS *= ('stale', 'diverged', 'host_only')*
+
+The drift finding kinds, in report order (see the module docstring).
 
 ### *class* opsward.portability.DriftFinding(kind, path, section)
 
@@ -94,6 +104,26 @@ Coverage and drift of *host_files* against the *canonical* `AGENTS.md` text. Pur
 
 * **Return type:**
   [`PortabilityReport`](#opsward.portability.PortabilityReport)
+
+### opsward.portability.as_read(render, canonical)
+
+*render* as its host reads it: an `@AGENTS.md` import replaced by *canonical*.
+
+A line that is only the import is replaced in place; an import inside a sentence
+appends the canonical at the end. A copy (no import) comes back unchanged, so
+scoring a shim judges what the agent actually sees, not the three-line file.
+
+```pycon
+>>> as_read("@AGENTS.md\n\n## Claude\n\nx", "## Build\n\npytest\n")
+'## Build\n\npytest\n\n## Claude\n\nx'
+>>> as_read("Read @AGENTS.md first.", "## Build")
+'Read @AGENTS.md first.\n\n## Build'
+>>> as_read("## Build\n\npytest", "## Other")
+'## Build\n\npytest'
+```
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
 
 ### opsward.portability.check_portability(root, , hosts={'aider': HostSpec(name='aider', instruction_files=('CONVENTIONS.md',), rule_dirs=(), reads_agents_md=False, compared=False), 'claude': HostSpec(name='claude', instruction_files=('CLAUDE.md', '.claude/CLAUDE.md'), rule_dirs=('.claude/rules',), reads_agents_md=False, compared=True), 'cline': HostSpec(name='cline', instruction_files=('.clinerules',), rule_dirs=('.clinerules',), reads_agents_md=True, compared=True), 'codex': HostSpec(name='codex', instruction_files=(), rule_dirs=(), reads_agents_md=True, compared=True), 'copilot': HostSpec(name='copilot', instruction_files=('.github/copilot-instructions.md',), rule_dirs=('.github/instructions',), reads_agents_md=True, compared=True), 'cursor': HostSpec(name='cursor', instruction_files=('.cursorrules',), rule_dirs=('.cursor/rules',), reads_agents_md=True, compared=True), 'gemini': HostSpec(name='gemini', instruction_files=('GEMINI.md',), rule_dirs=(), reads_agents_md=False, compared=True), 'windsurf': HostSpec(name='windsurf', instruction_files=('.windsurfrules', '.windsurfrules.md'), rule_dirs=('.windsurf/rules',), reads_agents_md=False, compared=True), 'zed': HostSpec(name='zed', instruction_files=('.rules',), rule_dirs=(), reads_agents_md=True, compared=True)})
 

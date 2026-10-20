@@ -28,7 +28,7 @@ Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
 Score for a single component (0–100) with optional notes.
 
-### *class* opsward.base.DiagnosisReport(project_root, project_type, scores=list(), missing_items=list(), suggestions=list(), weighted_score=0.0, advisories=list())
+### *class* opsward.base.DiagnosisReport(project_root, project_type, scores=list(), missing_items=list(), suggestions=list(), weighted_score=0.0, advisories=list(), portability=None)
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 

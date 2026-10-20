@@ -103,6 +103,7 @@ data-aria-dark="Switch to auto color mode">
       <i class="i-lucide close"></i>
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#opsward.portability.DRIFT_KINDS"><code class="docutils literal notranslate"><span class="pre">DRIFT_KINDS</span></code></a></li>
 <li><a class="reference internal" href="#opsward.portability.DriftFinding"><code class="docutils literal notranslate"><span class="pre">DriftFinding</span></code></a></li>
 <li><a class="reference internal" href="#opsward.portability.HostFile"><code class="docutils literal notranslate"><span class="pre">HostFile</span></code></a><ul>
 <li><a class="reference internal" href="#opsward.portability.HostFile.relation"><code class="docutils literal notranslate"><span class="pre">HostFile.relation</span></code></a></li>
@@ -114,6 +115,7 @@ data-aria-dark="Switch to auto color mode">
 </ul>
 </li>
 <li><a class="reference internal" href="#opsward.portability.analyze"><code class="docutils literal notranslate"><span class="pre">analyze()</span></code></a></li>
+<li><a class="reference internal" href="#opsward.portability.as_read"><code class="docutils literal notranslate"><span class="pre">as_read()</span></code></a></li>
 <li><a class="reference internal" href="#opsward.portability.check_portability"><code class="docutils literal notranslate"><span class="pre">check_portability()</span></code></a></li>
 <li><a class="reference internal" href="#opsward.portability.read_host_files"><code class="docutils literal notranslate"><span class="pre">read_host_files()</span></code></a></li>
 <li><a class="reference internal" href="#opsward.portability.summarize"><code class="docutils literal notranslate"><span class="pre">summarize()</span></code></a></li>
@@ -192,6 +194,16 @@ render) are compared only when they import or link the canonical.</p>
 </span><span data-line="8"><span class="go">[('diverged', 'build'), ('host_only', 'claude')]</span>
 </span></pre></div>
 </div>
+<p class="rubric">Module Attributes</p>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.portability.DRIFT_KINDS" title="opsward.portability.DRIFT_KINDS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DRIFT_KINDS</span></code></a></p></td>
+<td><p>The drift finding kinds, in report order (see the module docstring).</p></td>
+</tr>
+</tbody>
+</table>
+</div>
 <p class="rubric">Functions</p>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
@@ -199,13 +211,16 @@ render) are compared only when they import or link the canonical.</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="#opsward.portability.analyze" title="opsward.portability.analyze"><code class="xref py py-obj docutils literal notranslate"><span class="pre">analyze</span></code></a>(canonical, host_files, *[, hosts])</p></td>
 <td><p>Coverage and drift of <em>host_files</em> against the <em>canonical</em> <code class="docutils literal notranslate"><span class="pre">AGENTS.md</span></code> text.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#opsward.portability.check_portability" title="opsward.portability.check_portability"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_portability</span></code></a>(root, *[, hosts])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#opsward.portability.as_read" title="opsward.portability.as_read"><code class="xref py py-obj docutils literal notranslate"><span class="pre">as_read</span></code></a>(render, canonical)</p></td>
+<td><p><em>render</em> as its host reads it: an <code class="docutils literal notranslate"><span class="pre">&#64;AGENTS.md</span></code> import replaced by <em>canonical</em>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.portability.check_portability" title="opsward.portability.check_portability"><code class="xref py py-obj docutils literal notranslate"><span class="pre">check_portability</span></code></a>(root, *[, hosts])</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">analyze</span></code> over what is on disk under <em>root</em>: the library entry point.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.portability.read_host_files" title="opsward.portability.read_host_files"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_host_files</span></code></a>(root, *[, hosts])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#opsward.portability.read_host_files" title="opsward.portability.read_host_files"><code class="xref py py-obj docutils literal notranslate"><span class="pre">read_host_files</span></code></a>(root, *[, hosts])</p></td>
 <td><p>Every host instruction file and rule folder present under <em>root</em>.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#opsward.portability.summarize" title="opsward.portability.summarize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">summarize</span></code></a>(report)</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.portability.summarize" title="opsward.portability.summarize"><code class="xref py py-obj docutils literal notranslate"><span class="pre">summarize</span></code></a>(report)</p></td>
 <td><p>One diagnose suggestion per drifting render.</p></td>
 </tr>
 </tbody>
@@ -230,6 +245,12 @@ render) are compared only when they import or link the canonical.</p>
 </tbody>
 </table>
 </div>
+<dl class="py data">
+<dt class="sig sig-object py" id="opsward.portability.DRIFT_KINDS">
+<span class="sig-prename descclassname"><span class="pre">opsward.portability.</span></span><span class="sig-name descname"><span class="pre">DRIFT_KINDS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">('stale',</span> <span class="pre">'diverged',</span> <span class="pre">'host_only')</span></span><a class="headerlink" href="#opsward.portability.DRIFT_KINDS" title="Link to this definition">#</a></dt>
+<dd><p>The drift finding kinds, in report order (see the module docstring).</p>
+</dd></dl>
+
 <dl class="py class">
 <dt class="sig sig-object py" id="opsward.portability.DriftFinding">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">opsward.portability.</span></span><span class="sig-name descname"><span class="pre">DriftFinding</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">kind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">section</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/portability.html#DriftFinding"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.portability.DriftFinding" title="Link to this definition">#</a></dt>
@@ -285,6 +306,28 @@ render) are compared only when they import or link the canonical.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#opsward.portability.PortabilityReport" title="opsward.portability.PortabilityReport"><code class="xref py py-class docutils literal notranslate"><span class="pre">PortabilityReport</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="opsward.portability.as_read">
+<span class="sig-prename descclassname"><span class="pre">opsward.portability.</span></span><span class="sig-name descname"><span class="pre">as_read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">render</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">canonical</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/portability.html#as_read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.portability.as_read" title="Link to this definition">#</a></dt>
+<dd><p><em>render</em> as its host reads it: an <code class="docutils literal notranslate"><span class="pre">&#64;AGENTS.md</span></code> import replaced by <em>canonical</em>.</p>
+<p>A line that is only the import is replaced in place; an import inside a sentence
+appends the canonical at the end. A copy (no import) comes back unchanged, so
+scoring a shim judges what the agent actually sees, not the three-line file.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="gp">&gt;&gt;&gt; </span><span class="n">as_read</span><span class="p">(</span><span class="s2">"@AGENTS.md</span><span class="se">\n\n</span><span class="s2">## Claude</span><span class="se">\n\n</span><span class="s2">x"</span><span class="p">,</span> <span class="s2">"## Build</span><span class="se">\n\n</span><span class="s2">pytest</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+</span><span data-line="2"><span class="go">'## Build\n\npytest\n\n## Claude\n\nx'</span>
+</span><span data-line="3"><span class="gp">&gt;&gt;&gt; </span><span class="n">as_read</span><span class="p">(</span><span class="s2">"Read @AGENTS.md first."</span><span class="p">,</span> <span class="s2">"## Build"</span><span class="p">)</span>
+</span><span data-line="4"><span class="go">'Read @AGENTS.md first.\n\n## Build'</span>
+</span><span data-line="5"><span class="gp">&gt;&gt;&gt; </span><span class="n">as_read</span><span class="p">(</span><span class="s2">"## Build</span><span class="se">\n\n</span><span class="s2">pytest"</span><span class="p">,</span> <span class="s2">"## Other"</span><span class="p">)</span>
+</span><span data-line="6"><span class="go">'## Build\n\npytest'</span>
+</span></pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -364,7 +407,7 @@ render) are compared only when they import or link the canonical.</p>
     </div>
   </div>
 </footer>
-      <script src="../_static/documentation_options.js?v=39aadc1c"></script>
+      <script src="../_static/documentation_options.js?v=0e525676"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>

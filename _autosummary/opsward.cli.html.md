@@ -15,6 +15,7 @@ CLI dispatch for opsward.
 | [`maintain`](#opsward.cli.maintain)(\*project_roots[, format])                 | Check for stale references, out-of-sync docs, and other drift.                                         |
 | [`new`](#opsward.cli.new)(title[, write, project_root, status, ...])      | Allocate the next numbered ADR for TITLE (dry run unless --write; never overwrites).                   |
 | [`note`](#opsward.cli.note)(text[, write, project_root])                   | Append TEXT as a dated one-line decision (a Y-statement) to decisions/log.md (dry run unless --write). |
+| [`portability`](#opsward.cli.portability)(\*project_roots[, format])              | Show which agent hosts find project instructions, and how renders drift from AGENTS.md.                |
 | [`recommend`](#opsward.cli.recommend)(\*project_roots[, format])                | Recommend ecosystem skills based on the project's tech stack.                                          |
 
 ### opsward.cli.diagnose(\*project_roots, format='text', verbose=False, min_score=80)
@@ -150,6 +151,18 @@ Append TEXT as a dated one-line decision (a Y-statement) to decisions/log.md (dr
   * **text** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – the decision: “In the context of …, facing …, we decided for …, because …”
   * **write** ([`bool`](https://docs.python.org/3/builtins/functions.html#bool)) – actually append (default: dry run); the log is created from its template when missing
   * **project_root** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – the project directory (default: current dir)
+
+### opsward.cli.portability(\*project_roots, format='text')
+
+Show which agent hosts find project instructions, and how renders drift from AGENTS.md.
+
+One row per host (claude, codex, copilot, cursor, …) with how it is covered:
+symlink, import (an @AGENTS.md shim), native (reads AGENTS.md itself), copy, rules,
+or none. Then every section where a render differs from AGENTS.md. Report-only.
+
+* **Parameters:**
+  * **project_roots** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – one or more project directories (default: current dir)
+  * **format** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – output format — ‘text’ or ‘json’
 
 ### opsward.cli.recommend(\*project_roots, format='text')
 
