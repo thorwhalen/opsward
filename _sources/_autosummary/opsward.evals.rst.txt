@@ -1,0 +1,38 @@
+opsward.evals
+=============
+
+.. automodule:: opsward.evals
+
+   
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      DFLT_JUDGE_MODEL
+      JUDGE_RUBRICS
+      Judge
+      Agent
+   
+   .. rubric:: Functions
+
+   .. autosummary::
+   
+      anthropic_agent
+      anthropic_judge
+      echo_agent
+      judge_claude_md
+      load_golden_tasks
+      parse_verdict
+      rubric_judge
+      run_golden_tasks
+   
+   .. rubric:: Classes
+
+   .. autosummary::
+   
+      DimensionVerdict
+      GoldenReport
+      GoldenTask
+      JudgeReport
+      JudgeRequest
+   

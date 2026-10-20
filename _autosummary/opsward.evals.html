@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en" data-accent-color="crimson" data-content_root="../">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"><title>opsward.evals - opsward</title><link rel="index" title="Index" href="../genindex.html" /><link rel="search" title="Search" href="../search.html" /><link rel="next" title="opsward.fleet" href="opsward.fleet.html" /><link rel="prev" title="opsward.discover" href="opsward.discover.html" /><script>
+    function setColorMode(t){let e=document.documentElement;e.setAttribute("data-color-mode",t);let a=window.matchMedia&&window.matchMedia("(prefers-color-scheme: dark)").matches,s=t;"auto"===t&&(s=a?"dark":"light"),"light"===s?(e.classList.remove("dark"),e.classList.add("light")):(e.classList.remove("light"),e.classList.add("dark"))}
+    setColorMode(localStorage._theme||"auto");
+  </script><link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=d88b86f9" />
+    <link rel="stylesheet" type="text/css" href="../_static/shibuya.css?v=2ceb65ce" />
+    <link rel="stylesheet" type="text/css" href="../_static/sphinx_autodoc_typehints.css?v=057ac668" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link media="print" rel="stylesheet" type="text/css" href="../_static/print.css?v=20ff2c19" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --sy-f-text: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+  --sy-f-heading: "Inter", var(--sy-f-sys), var(--sy-f-cjk), sans-serif;
+}
+</style>
+    
+  <meta property="og:type" content="website"/><meta property="og:title" content="opsward.evals"/>
+    <meta name="twitter:card" content="summary"/>
+  
+<link rel="alternate" type="text/markdown" href="opsward.evals.html.md">
+<link rel="describedby" href="../llms.txt" type="text/markdown">
+</head>
+<body><div class="sy-head">
+  <div class="sy-head-blur"></div>
+  <div class="sy-head-inner sy-container mx-auto">
+    <a class="sy-head-brand" href="../index.html">
+      
+      
+      <strong>opsward</strong>
+    </a>
+    <div class="sy-head-nav" id="head-nav">
+      <nav class="sy-head-links"></nav>
+      <div class="sy-head-extra flex items-center print:hidden"><form class="searchbox flex items-center" action="../search.html" method="get">
+  <input type="text" name="q" placeholder="Search" />
+  <kbd>/</kbd>
+</form><div class="sy-head-socials">
+  <a href="https://github.com/thorwhalen/opsward" aria-label="GitHub">
+    <iconify-icon icon="simple-icons:github"></iconify-icon>
+  </a></div></div>
+    </div>
+    <div class="sy-head-actions flex items-center shrink-0 print:hidden"><button class="js-theme theme-switch flex items-center"
+data-aria-auto="Switch to light color mode"
+data-aria-light="Switch to dark color mode"
+data-aria-dark="Switch to auto color mode">
+<i class="i-lucide theme-icon"></i>
+</button><button class="md:hidden flex items-center js-menu" aria-label="Menu" type="button" aria-controls="head-nav" aria-expanded="false">
+        <div class="hamburger">
+          <span class="hamburger_1"></span>
+          <span class="hamburger_2"></span>
+          <span class="hamburger_3"></span>
+        </div>
+      </button>
+    </div>
+  </div>
+</div>
+<div class="sy-page sy-container flex mx-auto">
+  <aside id="lside" class="sy-lside md:w-72 md:shrink-0 print:hidden">
+    <div class="sy-lside-inner md:sticky">
+      <div class="sy-scrollbar p-6">
+        <div class="globaltoc" data-expand-depth="0"><ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="opsward.html">opsward</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="opsward.base.html">opsward.base</a></li>
+<li class="toctree-l3"><a class="reference internal" href="opsward.cli.html">opsward.cli</a></li>
+<li class="toctree-l3"><a class="reference internal" href="opsward.data.html">opsward.data</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="opsward.data.templates.html">opsward.data.templates</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="opsward.decisions.html">opsward.decisions</a></li>
+<li class="toctree-l3"><a class="reference internal" href="opsward.discover.html">opsward.discover</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">opsward.evals</a></li>
+<li class="toctree-l3"><a class="reference internal" href="opsward.fleet.html">opsward.fleet</a></li>
+<li class="toctree-l3"><a class="reference internal" href="opsward.generate.html">opsward.generate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="opsward.lint.html">opsward.lint</a></li>
+<li class="toctree-l3"><a class="reference internal" href="opsward.maintain.html">opsward.maintain</a></li>
+<li class="toctree-l3"><a class="reference internal" href="opsward.recommend.html">opsward.recommend</a></li>
+<li class="toctree-l3"><a class="reference internal" href="opsward.scan.html">opsward.scan</a></li>
+<li class="toctree-l3"><a class="reference internal" href="opsward.score.html">opsward.score</a></li>
+<li class="toctree-l3"><a class="reference internal" href="opsward.subagents.html">opsward.subagents</a></li>
+<li class="toctree-l3"><a class="reference internal" href="opsward.util.html">opsward.util</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../ai-agents.html">For AI agents</a></li>
+</ul>
+
+        </div>
+      </div>
+    </div>
+  </aside>
+  <div class="lside-overlay js-menu" role="button" aria-label="Close left sidebar" aria-controls="lside" aria-expanded="false"></div>
+  <aside id="rside" class="sy-rside pb-3 w-64 shrink-0 order-last">
+    <button class="rside-close js-menu xl:hidden" aria-label="Close Table of Contents" type="button" aria-controls="rside" aria-expanded="false">
+      <i class="i-lucide close"></i>
+    </button>
+    <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#opsward.evals.Agent"><code class="docutils literal notranslate"><span class="pre">Agent</span></code></a></li>
+<li><a class="reference internal" href="#opsward.evals.DFLT_JUDGE_MODEL"><code class="docutils literal notranslate"><span class="pre">DFLT_JUDGE_MODEL</span></code></a></li>
+<li><a class="reference internal" href="#opsward.evals.DimensionVerdict"><code class="docutils literal notranslate"><span class="pre">DimensionVerdict</span></code></a></li>
+<li><a class="reference internal" href="#opsward.evals.GoldenReport"><code class="docutils literal notranslate"><span class="pre">GoldenReport</span></code></a><ul>
+<li><a class="reference internal" href="#opsward.evals.GoldenReport.delta"><code class="docutils literal notranslate"><span class="pre">GoldenReport.delta()</span></code></a></li>
+<li><a class="reference internal" href="#opsward.evals.GoldenReport.rate"><code class="docutils literal notranslate"><span class="pre">GoldenReport.rate()</span></code></a></li>
+</ul>
+</li>
+<li><a class="reference internal" href="#opsward.evals.GoldenTask"><code class="docutils literal notranslate"><span class="pre">GoldenTask</span></code></a></li>
+<li><a class="reference internal" href="#opsward.evals.JUDGE_RUBRICS"><code class="docutils literal notranslate"><span class="pre">JUDGE_RUBRICS</span></code></a></li>
+<li><a class="reference internal" href="#opsward.evals.Judge"><code class="docutils literal notranslate"><span class="pre">Judge</span></code></a></li>
+<li><a class="reference internal" href="#opsward.evals.JudgeReport"><code class="docutils literal notranslate"><span class="pre">JudgeReport</span></code></a></li>
+<li><a class="reference internal" href="#opsward.evals.JudgeRequest"><code class="docutils literal notranslate"><span class="pre">JudgeRequest</span></code></a></li>
+<li><a class="reference internal" href="#opsward.evals.anthropic_agent"><code class="docutils literal notranslate"><span class="pre">anthropic_agent()</span></code></a></li>
+<li><a class="reference internal" href="#opsward.evals.anthropic_judge"><code class="docutils literal notranslate"><span class="pre">anthropic_judge()</span></code></a></li>
+<li><a class="reference internal" href="#opsward.evals.echo_agent"><code class="docutils literal notranslate"><span class="pre">echo_agent()</span></code></a></li>
+<li><a class="reference internal" href="#opsward.evals.judge_claude_md"><code class="docutils literal notranslate"><span class="pre">judge_claude_md()</span></code></a></li>
+<li><a class="reference internal" href="#opsward.evals.load_golden_tasks"><code class="docutils literal notranslate"><span class="pre">load_golden_tasks()</span></code></a></li>
+<li><a class="reference internal" href="#opsward.evals.parse_verdict"><code class="docutils literal notranslate"><span class="pre">parse_verdict()</span></code></a></li>
+<li><a class="reference internal" href="#opsward.evals.rubric_judge"><code class="docutils literal notranslate"><span class="pre">rubric_judge()</span></code></a></li>
+<li><a class="reference internal" href="#opsward.evals.run_golden_tasks"><code class="docutils literal notranslate"><span class="pre">run_golden_tasks()</span></code></a></li>
+</ul>
+</div><div id="ethical-ad-placement" data-ea-publisher="readthedocs"></div></div>
+  </aside>
+  <div class="rside-overlay js-menu" role="button" aria-label="Close Table of Contents" aria-controls="rside" aria-expanded="false"></div>
+  <main class="sy-main w-full max-sm:max-w-full print:pt-6">
+<div class="sy-breadcrumbs" role="navigation">
+  <div class="sy-breadcrumbs-inner flex items-center">
+    <div class="md:hidden mr-3">
+      <button class="js-menu" aria-label="Menu" type="button" aria-controls="lside" aria-expanded="false">
+        <i class="i-lucide menu"></i>
+      </button>
+    </div>
+    <ol class="flex-1" itemscope itemtype="https://schema.org/BreadcrumbList"><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../index.html"><span itemprop="name">opsward</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="1" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="../api.html"><span itemprop="name">API reference</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="2" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <a itemprop="item" href="opsward.html"><span itemprop="name">opsward</span></a>
+        <span>/</span>
+        <meta itemprop="position" content="3" />
+      </li><li itemprop="itemListElement" itemscope itemtype="https://schema.org/ListItem">
+        <strong itemprop="name">opsward.evals</strong>
+        <meta itemprop="position" content="4" />
+      </li></ol>
+    <div class="xl:hidden ml-1">
+      <button class="js-menu" aria-label="Show table of contents" type="button" aria-controls="rside"
+        aria-expanded="false">
+        <i class="i-lucide outdent"></i>
+      </button>
+    </div>
+  </div>
+</div><div class="flex flex-col break-words justify-between">
+      <div class="relative min-w-0 max-w-6xl px-6 pb-6 pt-8 xl:px-12">
+  <article class="yue dark-code" role="main">
+          <section id="module-opsward.evals">
+<span id="opsward-evals"></span><h1>opsward.evals<a class="headerlink" href="#module-opsward.evals" title="Link to this heading">#</a></h1>
+<p>Eval harness (opsward#17, gap 3): opt-in, report-only quality signals beyond the rubric.</p>
+<p>Two layers, both of which <em>report</em> and never gate (model calls cost money and are
+nondeterministic, so the deterministic rubric stays the only gate):</p>
+<ul>
+<li><p><strong>LLM-as-judge</strong> for the rubric’s subjective dimensions (actionability, conciseness):
+<a class="reference internal" href="#opsward.evals.judge_claude_md" title="opsward.evals.judge_claude_md"><code class="xref py py-func docutils literal notranslate"><span class="pre">judge_claude_md()</span></code></a> asks a <em>judge</em> to score CLAUDE.md against an explicit rubric,</p>
+<blockquote>
+<div><p><code class="docutils literal notranslate"><span class="pre">samples</span></code> times, and reports the median next to the rubric’s own score.</p>
+</div></blockquote>
+</li>
+<li><p><strong>Golden tasks</strong>: <a class="reference internal" href="#opsward.evals.run_golden_tasks" title="opsward.evals.run_golden_tasks"><code class="xref py py-func docutils literal notranslate"><span class="pre">run_golden_tasks()</span></code></a> runs an <em>agent</em> on repo-specific tasks with
+and without a candidate config, and checks each output against the task’s <code class="docutils literal notranslate"><span class="pre">expect</span></code> /
+<code class="docutils literal notranslate"><span class="pre">forbid</span></code> patterns. The with-minus-without pass rate is the signal that a config helps.</p></li>
+</ul>
+<p>The judge and the agent are injected. <a class="reference internal" href="#opsward.evals.rubric_judge" title="opsward.evals.rubric_judge"><code class="xref py py-func docutils literal notranslate"><span class="pre">rubric_judge()</span></code></a> (the default judge) and
+<a class="reference internal" href="#opsward.evals.echo_agent" title="opsward.evals.echo_agent"><code class="xref py py-func docutils literal notranslate"><span class="pre">echo_agent()</span></code></a> are free and deterministic – they exercise the harness and anchor the
+scale – while <a class="reference internal" href="#opsward.evals.anthropic_judge" title="opsward.evals.anthropic_judge"><code class="xref py py-func docutils literal notranslate"><span class="pre">anthropic_judge()</span></code></a> and <a class="reference internal" href="#opsward.evals.anthropic_agent" title="opsward.evals.anthropic_agent"><code class="xref py py-func docutils literal notranslate"><span class="pre">anthropic_agent()</span></code></a> make paid calls through
+the <code class="docutils literal notranslate"><span class="pre">anthropic</span></code> SDK (<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">'opsward[eval]'</span></code>) and are never used by default.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="gp">&gt;&gt;&gt; </span><span class="n">report</span> <span class="o">=</span> <span class="n">judge_claude_md</span><span class="p">(</span><span class="s2">"# P</span><span class="se">\n\n</span><span class="s2">## Commands</span><span class="se">\n\n</span><span class="s2">```bash</span><span class="se">\n</span><span class="s2">pytest</span><span class="se">\n</span><span class="s2">```</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+</span><span data-line="2"><span class="gp">&gt;&gt;&gt; </span><span class="nb">sorted</span><span class="p">(</span><span class="n">report</span><span class="o">.</span><span class="n">scores</span><span class="p">),</span> <span class="n">report</span><span class="o">.</span><span class="n">judge</span>
+</span><span data-line="3"><span class="go">(['actionability', 'conciseness'], 'rubric')</span>
+</span><span data-line="4"><span class="gp">&gt;&gt;&gt; </span><span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span><span class="n">GoldenTask</span><span class="p">(</span><span class="s2">"kw"</span><span class="p">,</span> <span class="s2">"Write f(a, b, c)"</span><span class="p">,</span> <span class="n">expect</span><span class="o">=</span><span class="p">[</span><span class="sa">r</span><span class="s2">"\*,"</span><span class="p">])]</span>
+</span><span data-line="5"><span class="gp">&gt;&gt;&gt; </span><span class="n">golden</span> <span class="o">=</span> <span class="n">run_golden_tasks</span><span class="p">(</span><span class="n">tasks</span><span class="p">,</span> <span class="n">agent</span><span class="o">=</span><span class="n">echo_agent</span><span class="p">,</span> <span class="n">config</span><span class="o">=</span><span class="s2">"Use `*,` before the 3rd arg."</span><span class="p">)</span>
+</span><span data-line="6"><span class="gp">&gt;&gt;&gt; </span><span class="n">golden</span><span class="o">.</span><span class="n">delta</span><span class="p">()</span>
+</span><span data-line="7"><span class="go">1.0</span>
+</span></pre></div>
+</div>
+<p class="rubric">Module Attributes</p>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.evals.DFLT_JUDGE_MODEL" title="opsward.evals.DFLT_JUDGE_MODEL"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DFLT_JUDGE_MODEL</span></code></a></p></td>
+<td><p>Default model for the paid judge and agent; override with <code class="docutils literal notranslate"><span class="pre">model=</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#opsward.evals.JUDGE_RUBRICS" title="opsward.evals.JUDGE_RUBRICS"><code class="xref py py-obj docutils literal notranslate"><span class="pre">JUDGE_RUBRICS</span></code></a></p></td>
+<td><p>vague &quot;rate the quality&quot; prompts give noise, anchored bands do not.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.evals.Judge" title="opsward.evals.Judge"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Judge</span></code></a></p></td>
+<td><p>the JSON object above).</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#opsward.evals.Agent" title="opsward.evals.Agent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Agent</span></code></a></p></td>
+<td><p>An agent does a task under a config (CLAUDE.md text; <code class="docutils literal notranslate"><span class="pre">&quot;&quot;</span></code> = no config) and returns its output.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="rubric">Functions</p>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.evals.anthropic_agent" title="opsward.evals.anthropic_agent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">anthropic_agent</span></code></a>(*[, model, client, max_tokens])</p></td>
+<td><p>A paid single-call agent: the config is the system prompt, the task the user turn.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#opsward.evals.anthropic_judge" title="opsward.evals.anthropic_judge"><code class="xref py py-obj docutils literal notranslate"><span class="pre">anthropic_judge</span></code></a>(*[, model, client, max_tokens])</p></td>
+<td><p>A paid judge over the Messages API.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.evals.echo_agent" title="opsward.evals.echo_agent"><code class="xref py py-obj docutils literal notranslate"><span class="pre">echo_agent</span></code></a>(task, config)</p></td>
+<td><p>The free agent: &quot;does&quot; the task by quoting its config, so a config that states the convention passes and an empty one does not.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#opsward.evals.judge_claude_md" title="opsward.evals.judge_claude_md"><code class="xref py py-obj docutils literal notranslate"><span class="pre">judge_claude_md</span></code></a>(content, *[, judge, ...])</p></td>
+<td><p>Score CLAUDE.md <code class="docutils literal notranslate"><span class="pre">content</span></code> on each subjective dimension, <code class="docutils literal notranslate"><span class="pre">samples</span></code> times each.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.evals.load_golden_tasks" title="opsward.evals.load_golden_tasks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">load_golden_tasks</span></code></a>(path)</p></td>
+<td><p>Tasks from a JSON list of <code class="docutils literal notranslate"><span class="pre">{&quot;name&quot;,</span> <span class="pre">&quot;prompt&quot;,</span> <span class="pre">&quot;expect&quot;:</span> <span class="pre">[...],</span> <span class="pre">&quot;forbid&quot;:</span> <span class="pre">[...]}</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#opsward.evals.parse_verdict" title="opsward.evals.parse_verdict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">parse_verdict</span></code></a>(reply, *, max_score)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">(score,</span> <span class="pre">reasoning)</span></code> from a judge reply: the <em>last</em> JSON object in it with a <code class="docutils literal notranslate"><span class="pre">score</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.evals.rubric_judge" title="opsward.evals.rubric_judge"><code class="xref py py-obj docutils literal notranslate"><span class="pre">rubric_judge</span></code></a>(request)</p></td>
+<td><p>The free, deterministic judge: answers with opsward's own rubric score.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#opsward.evals.run_golden_tasks" title="opsward.evals.run_golden_tasks"><code class="xref py py-obj docutils literal notranslate"><span class="pre">run_golden_tasks</span></code></a>(tasks, *, agent, config[, ...])</p></td>
+<td><p>Run every task <code class="docutils literal notranslate"><span class="pre">runs</span></code> times under <code class="docutils literal notranslate"><span class="pre">config</span></code> and under <code class="docutils literal notranslate"><span class="pre">baseline</span></code>; count passes.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p class="rubric">Classes</p>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.evals.DimensionVerdict" title="opsward.evals.DimensionVerdict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">DimensionVerdict</span></code></a>(score, max_score, rubric_score)</p></td>
+<td><p>A dimension's judged score (median of the samples) next to the rubric's own.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#opsward.evals.GoldenReport" title="opsward.evals.GoldenReport"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GoldenReport</span></code></a>(runs[, results, errors])</p></td>
+<td><p>Per task and arm (<code class="docutils literal notranslate"><span class="pre">with</span></code> / <code class="docutils literal notranslate"><span class="pre">without</span></code> the config): runs passed and runs that errored.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.evals.GoldenTask" title="opsward.evals.GoldenTask"><code class="xref py py-obj docutils literal notranslate"><span class="pre">GoldenTask</span></code></a>(name, prompt[, expect, forbid])</p></td>
+<td><p>A repo-specific task, passed when the output matches every <code class="docutils literal notranslate"><span class="pre">expect</span></code> regex and no <code class="docutils literal notranslate"><span class="pre">forbid</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#opsward.evals.JudgeReport" title="opsward.evals.JudgeReport"><code class="xref py py-obj docutils literal notranslate"><span class="pre">JudgeReport</span></code></a>(judge[, scores])</p></td>
+<td><p>Every judged dimension.</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.evals.JudgeRequest" title="opsward.evals.JudgeRequest"><code class="xref py py-obj docutils literal notranslate"><span class="pre">JudgeRequest</span></code></a>(dimension, content)</p></td>
+<td><p>One dimension to judge: the rubric, the content, and the rendered prompt.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<dl class="py data">
+<dt class="sig sig-object py" id="opsward.evals.Agent">
+<span class="sig-prename descclassname"><span class="pre">opsward.evals.</span></span><span class="sig-name descname"><span class="pre">Agent</span></span><a class="headerlink" href="#opsward.evals.Agent" title="Link to this definition">#</a></dt>
+<dd><p>An agent does a task under a config (CLAUDE.md text; <code class="docutils literal notranslate"><span class="pre">&quot;&quot;</span></code> = no config) and returns its output.</p>
+<p>alias of <a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference internal" href="#opsward.evals.GoldenTask" title="opsward.evals.GoldenTask"><code class="xref py py-class docutils literal notranslate"><span class="pre">GoldenTask</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>], <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="opsward.evals.DFLT_JUDGE_MODEL">
+<span class="sig-prename descclassname"><span class="pre">opsward.evals.</span></span><span class="sig-name descname"><span class="pre">DFLT_JUDGE_MODEL</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'claude-opus-5-5'</span></span><a class="headerlink" href="#opsward.evals.DFLT_JUDGE_MODEL" title="Link to this definition">#</a></dt>
+<dd><p>Default model for the paid judge and agent; override with <code class="docutils literal notranslate"><span class="pre">model=</span></code>.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="opsward.evals.DimensionVerdict">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">opsward.evals.</span></span><span class="sig-name descname"><span class="pre">DimensionVerdict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">score</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_score</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rubric_score</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">list()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reasoning</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">list()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">list()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/evals.html#DimensionVerdict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.evals.DimensionVerdict" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>A dimension’s judged score (median of the samples) next to the rubric’s own.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="opsward.evals.GoldenReport">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">opsward.evals.</span></span><span class="sig-name descname"><span class="pre">GoldenReport</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">runs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">results</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">dict()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">dict()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/evals.html#GoldenReport"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.evals.GoldenReport" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Per task and arm (<code class="docutils literal notranslate"><span class="pre">with</span></code> / <code class="docutils literal notranslate"><span class="pre">without</span></code> the config): runs passed and runs that errored.</p>
+<p>A run whose agent raised is left out of its arm’s pass rate (it says nothing about the
+config), so a flaky agent cannot skew <a class="reference internal" href="#opsward.evals.GoldenReport.delta" title="opsward.evals.GoldenReport.delta"><code class="xref py py-meth docutils literal notranslate"><span class="pre">delta()</span></code></a>; the errors are listed.</p>
+<dl class="field-list simple">
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="opsward.evals.GoldenReport.delta">
+<span class="sig-name descname"><span class="pre">delta</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/evals.html#GoldenReport.delta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.evals.GoldenReport.delta" title="Link to this definition">#</a></dt>
+<dd><p>Pass rate with the config minus without: positive means the config helps.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="opsward.evals.GoldenReport.rate">
+<span class="sig-name descname"><span class="pre">rate</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">arm</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/evals.html#GoldenReport.rate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.evals.GoldenReport.rate" title="Link to this definition">#</a></dt>
+<dd><p>Passed / completed (non-errored) runs in <code class="docutils literal notranslate"><span class="pre">arm</span></code>; 0.0 when none completed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="opsward.evals.GoldenTask">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">opsward.evals.</span></span><span class="sig-name descname"><span class="pre">GoldenTask</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prompt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expect</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">forbid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/evals.html#GoldenTask"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.evals.GoldenTask" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>A repo-specific task, passed when the output matches every <code class="docutils literal notranslate"><span class="pre">expect</span></code> regex and no <code class="docutils literal notranslate"><span class="pre">forbid</span></code>.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="opsward.evals.JUDGE_RUBRICS">
+<span class="sig-prename descclassname"><span class="pre">opsward.evals.</span></span><span class="sig-name descname"><span class="pre">JUDGE_RUBRICS</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">]</span></span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">{'actionability':</span> <span class="pre">{'bands':</span> <span class="pre">{'0':</span> <span class="pre">'Empty,</span> <span class="pre">or</span> <span class="pre">nothing</span> <span class="pre">actionable.',</span> <span class="pre">'1-4':</span> <span class="pre">'Mostly</span> <span class="pre">generic</span> <span class="pre">advice</span> <span class="pre">an</span> <span class="pre">agent</span> <span class="pre">cannot</span> <span class="pre">turn</span> <span class="pre">into</span> <span class="pre">an</span> <span class="pre">action.',</span> <span class="pre">'13-15':</span> <span class="pre">'Every</span> <span class="pre">instruction</span> <span class="pre">names</span> <span class="pre">a</span> <span class="pre">concrete</span> <span class="pre">command,</span> <span class="pre">path,</span> <span class="pre">pattern</span> <span class="pre">or</span> <span class="pre">rule;</span> <span class="pre">nothing</span> <span class="pre">needs</span> <span class="pre">interpretation.',</span> <span class="pre">'5-8':</span> <span class="pre">'About</span> <span class="pre">half</span> <span class="pre">is</span> <span class="pre">aspiration</span> <span class="pre">or</span> <span class="pre">description</span> <span class="pre">rather</span> <span class="pre">than</span> <span class="pre">instruction.',</span> <span class="pre">'9-12':</span> <span class="pre">'Mostly</span> <span class="pre">concrete;</span> <span class="pre">a</span> <span class="pre">few</span> <span class="pre">instructions</span> <span class="pre">are</span> <span class="pre">vague</span> <span class="pre">(&quot;keep</span> <span class="pre">code</span> <span class="pre">clean&quot;)</span> <span class="pre">or</span> <span class="pre">lack</span> <span class="pre">the</span> <span class="pre">command</span> <span class="pre">to</span> <span class="pre">run.'},</span> <span class="pre">'max':</span> <span class="pre">15,</span> <span class="pre">'question':</span> <span class="pre">'Can</span> <span class="pre">a</span> <span class="pre">coding</span> <span class="pre">agent</span> <span class="pre">act</span> <span class="pre">on</span> <span class="pre">these</span> <span class="pre">instructions</span> <span class="pre">without</span> <span class="pre">guessing?'},</span> <span class="pre">'conciseness':</span> <span class="pre">{'bands':</span> <span class="pre">{'0':</span> <span class="pre">'Empty.',</span> <span class="pre">'1-4':</span> <span class="pre">'Bloated:</span> <span class="pre">the</span> <span class="pre">useful</span> <span class="pre">instructions</span> <span class="pre">are</span> <span class="pre">hard</span> <span class="pre">to</span> <span class="pre">find.',</span> <span class="pre">'13-15':</span> <span class="pre">'No</span> <span class="pre">filler,</span> <span class="pre">no</span> <span class="pre">repetition,</span> <span class="pre">no</span> <span class="pre">prose</span> <span class="pre">where</span> <span class="pre">a</span> <span class="pre">list</span> <span class="pre">or</span> <span class="pre">a</span> <span class="pre">command</span> <span class="pre">would</span> <span class="pre">do;</span> <span class="pre">detail</span> <span class="pre">lives</span> <span class="pre">in</span> <span class="pre">linked</span> <span class="pre">docs.',</span> <span class="pre">'5-8':</span> <span class="pre">'Noticeable</span> <span class="pre">padding:</span> <span class="pre">restated</span> <span class="pre">points,</span> <span class="pre">long</span> <span class="pre">explanations</span> <span class="pre">an</span> <span class="pre">agent</span> <span class="pre">does</span> <span class="pre">not</span> <span class="pre">need</span> <span class="pre">every</span> <span class="pre">session.',</span> <span class="pre">'9-12':</span> <span class="pre">'Mostly</span> <span class="pre">tight;</span> <span class="pre">some</span> <span class="pre">repetition</span> <span class="pre">or</span> <span class="pre">paragraphs</span> <span class="pre">that</span> <span class="pre">could</span> <span class="pre">be</span> <span class="pre">one</span> <span class="pre">line.'},</span> <span class="pre">'max':</span> <span class="pre">15,</span> <span class="pre">'question':</span> <span class="pre">&quot;Is</span> <span class="pre">it</span> <span class="pre">dense</span> <span class="pre">and</span> <span class="pre">scannable,</span> <span class="pre">with</span> <span class="pre">every</span> <span class="pre">line</span> <span class="pre">earning</span> <span class="pre">its</span> <span class="pre">place</span> <span class="pre">in</span> <span class="pre">an</span> <span class="pre">agent's</span> <span class="pre">context?&quot;}}</span></span><a class="headerlink" href="#opsward.evals.JUDGE_RUBRICS" title="Link to this definition">#</a></dt>
+<dd><p>vague “rate the quality” prompts give noise, anchored bands do not.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Explicit rubrics</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="opsward.evals.Judge">
+<span class="sig-prename descclassname"><span class="pre">opsward.evals.</span></span><span class="sig-name descname"><span class="pre">Judge</span></span><a class="headerlink" href="#opsward.evals.Judge" title="Link to this definition">#</a></dt>
+<dd><p>the JSON object above).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A judge reads a request and returns its raw reply (expected</p>
+</dd>
+</dl>
+<p>alias of <a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference internal" href="#opsward.evals.JudgeRequest" title="opsward.evals.JudgeRequest"><code class="xref py py-class docutils literal notranslate"><span class="pre">JudgeRequest</span></code></a>], <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="opsward.evals.JudgeReport">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">opsward.evals.</span></span><span class="sig-name descname"><span class="pre">JudgeReport</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">judge</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scores</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">dict()</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/evals.html#JudgeReport"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.evals.JudgeReport" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>Every judged dimension. Report-only: nothing here is meant to fail a build.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="opsward.evals.JudgeRequest">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">opsward.evals.</span></span><span class="sig-name descname"><span class="pre">JudgeRequest</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dimension</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">content</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/evals.html#JudgeRequest"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.evals.JudgeRequest" title="Link to this definition">#</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>One dimension to judge: the rubric, the content, and the rendered prompt.</p>
+<dl class="field-list simple">
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="opsward.evals.anthropic_agent">
+<span class="sig-prename descclassname"><span class="pre">opsward.evals.</span></span><span class="sig-name descname"><span class="pre">anthropic_agent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'claude-opus-5-5'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_tokens</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/evals.html#anthropic_agent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.evals.anthropic_agent" title="Link to this definition">#</a></dt>
+<dd><p>A paid single-call agent: the config is the system prompt, the task the user turn.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference internal" href="#opsward.evals.GoldenTask" title="opsward.evals.GoldenTask"><code class="xref py py-class docutils literal notranslate"><span class="pre">GoldenTask</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>], <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="opsward.evals.anthropic_judge">
+<span class="sig-prename descclassname"><span class="pre">opsward.evals.</span></span><span class="sig-name descname"><span class="pre">anthropic_judge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'claude-opus-5-5'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">client</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_tokens</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">16000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/evals.html#anthropic_judge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.evals.anthropic_judge" title="Link to this definition">#</a></dt>
+<dd><p>A paid judge over the Messages API. <code class="docutils literal notranslate"><span class="pre">client</span></code> defaults to <code class="docutils literal notranslate"><span class="pre">anthropic.Anthropic()</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Callable</span></code></a>[[<a class="reference internal" href="#opsward.evals.JudgeRequest" title="opsward.evals.JudgeRequest"><code class="xref py py-class docutils literal notranslate"><span class="pre">JudgeRequest</span></code></a>], <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="opsward.evals.echo_agent">
+<span class="sig-prename descclassname"><span class="pre">opsward.evals.</span></span><span class="sig-name descname"><span class="pre">echo_agent</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">task</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/evals.html#echo_agent"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.evals.echo_agent" title="Link to this definition">#</a></dt>
+<dd><p>The free agent: “does” the task by quoting its config, so a config that states the
+convention passes and an empty one does not. It tests the harness, not a model.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="opsward.evals.judge_claude_md">
+<span class="sig-prename descclassname"><span class="pre">opsward.evals.</span></span><span class="sig-name descname"><span class="pre">judge_claude_md</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">content</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">*</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">judge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;function</span> <span class="pre">rubric_judge&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dimensions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">('actionability'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">'conciseness')</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">samples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/evals.html#judge_claude_md"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.evals.judge_claude_md" title="Link to this definition">#</a></dt>
+<dd><p>Score CLAUDE.md <code class="docutils literal notranslate"><span class="pre">content</span></code> on each subjective dimension, <code class="docutils literal notranslate"><span class="pre">samples</span></code> times each.</p>
+<p>A reply that cannot be parsed is recorded as an error on its dimension, never raised.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><strong>ValueError</strong></a> – <code class="docutils literal notranslate"><span class="pre">samples</span> <span class="pre">&lt;</span> <span class="pre">1</span></code> or an unknown dimension (a mistake in the call).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#opsward.evals.JudgeReport" title="opsward.evals.JudgeReport"><code class="xref py py-class docutils literal notranslate"><span class="pre">JudgeReport</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="opsward.evals.load_golden_tasks">
+<span class="sig-prename descclassname"><span class="pre">opsward.evals.</span></span><span class="sig-name descname"><span class="pre">load_golden_tasks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">path</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/evals.html#load_golden_tasks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.evals.load_golden_tasks" title="Link to this definition">#</a></dt>
+<dd><p>Tasks from a JSON list of <code class="docutils literal notranslate"><span class="pre">{&quot;name&quot;,</span> <span class="pre">&quot;prompt&quot;,</span> <span class="pre">&quot;expect&quot;:</span> <span class="pre">[...],</span> <span class="pre">&quot;forbid&quot;:</span> <span class="pre">[...]}</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference internal" href="#opsward.evals.GoldenTask" title="opsward.evals.GoldenTask"><code class="xref py py-class docutils literal notranslate"><span class="pre">GoldenTask</span></code></a>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="opsward.evals.parse_verdict">
+<span class="sig-prename descclassname"><span class="pre">opsward.evals.</span></span><span class="sig-name descname"><span class="pre">parse_verdict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">reply</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_score</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/evals.html#parse_verdict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.evals.parse_verdict" title="Link to this definition">#</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">(score,</span> <span class="pre">reasoning)</span></code> from a judge reply: the <em>last</em> JSON object in it with a <code class="docutils literal notranslate"><span class="pre">score</span></code>.</p>
+<p>The last, because a judge that quotes a snippet or restates the format writes its
+verdict at the end. <code class="docutils literal notranslate"><span class="pre">9</span></code>, <code class="docutils literal notranslate"><span class="pre">9.0</span></code> and <code class="docutils literal notranslate"><span class="pre">&quot;9&quot;</span></code> are all read as 9.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><strong>ValueError</strong></a> – no JSON object with a <code class="docutils literal notranslate"><span class="pre">score</span></code>, or one that is not an integer in
+<code class="docutils literal notranslate"><span class="pre">0..max_score</span></code>.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span></p>
+</dd>
+</dl>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="gp">&gt;&gt;&gt; </span><span class="n">parse_verdict</span><span class="p">(</span><span class="s1">'Quote {"a": 1}. Verdict: {"reasoning": "ok", "score": 12}'</span><span class="p">,</span> <span class="n">max_score</span><span class="o">=</span><span class="mi">15</span><span class="p">)</span>
+</span><span data-line="2"><span class="go">(12, 'ok')</span>
+</span></pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="opsward.evals.rubric_judge">
+<span class="sig-prename descclassname"><span class="pre">opsward.evals.</span></span><span class="sig-name descname"><span class="pre">rubric_judge</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">request</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/evals.html#rubric_judge"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.evals.rubric_judge" title="Link to this definition">#</a></dt>
+<dd><p>The free, deterministic judge: answers with opsward’s own rubric score.</p>
+<p>It exercises the harness end to end and anchors the scale (a real judge’s scores are
+read next to it), but it is not an independent opinion.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="opsward.evals.run_golden_tasks">
+<span class="sig-prename descclassname"><span class="pre">opsward.evals.</span></span><span class="sig-name descname"><span class="pre">run_golden_tasks</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tasks</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">agent</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">baseline</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">runs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/evals.html#run_golden_tasks"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.evals.run_golden_tasks" title="Link to this definition">#</a></dt>
+<dd><p>Run every task <code class="docutils literal notranslate"><span class="pre">runs</span></code> times under <code class="docutils literal notranslate"><span class="pre">config</span></code> and under <code class="docutils literal notranslate"><span class="pre">baseline</span></code>; count passes.</p>
+<p>An agent error is recorded, never raised, and leaves that run out of the pass rate.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><strong>ValueError</strong></a> – two tasks share a name, or <code class="docutils literal notranslate"><span class="pre">runs</span> <span class="pre">&lt;</span> <span class="pre">1</span></code>.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#opsward.evals.GoldenReport" title="opsward.evals.GoldenReport"><code class="xref py py-class docutils literal notranslate"><span class="pre">GoldenReport</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</section>
+
+        </article><button class="back-to-top" type="button">
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+    <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
+  </svg>
+  <span>Back to top</span>
+</button><div class="navigation flex print:hidden"><div class="navigation-prev">
+    <a href="opsward.discover.html">
+      <i class="i-lucide chevron-left"></i>
+      <div class="page-info">
+        <span>Previous</span><div class="title">opsward.discover</div></div>
+    </a>
+  </div><div class="navigation-next">
+    <a href="opsward.fleet.html">
+      <div class="page-info">
+        <span>Next</span>
+        <div class="title">opsward.fleet</div>
+      </div>
+      <i class="i-lucide chevron-right"></i>
+    </a>
+  </div></div></div>
+    </div>
+  </main>
+</div>
+<footer class="sy-foot">
+  <div class="sy-foot-inner sy-container mx-auto">
+    <div class="sy-foot-reserved md:flex justify-between items-center">
+      <div class="sy-foot-copyright">
+  <p>
+    Made with
+    
+    <a href="https://shibuya.lepture.com">Shibuya theme</a>.
+  </p>
+</div>
+      <div class="sy-foot-socials">
+  <a href="https://github.com/thorwhalen/opsward" aria-label="GitHub">
+    <iconify-icon icon="simple-icons:github"></iconify-icon>
+  </a></div>
+    </div>
+  </div>
+</footer>
+      <script src="../_static/documentation_options.js?v=26ffa1e9"></script>
+      <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+      <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+      <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+      <script src="../_static/copybutton.js?v=fd10adb8"></script>
+      <script src="../_static/shibuya.js?v=50760d75"></script></body>
+</html>

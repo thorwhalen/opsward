@@ -12,6 +12,7 @@
 - [opsward.data.templates](opsward.data.templates.html.md): Generation templates organized by target project type.
 - [opsward.decisions](opsward.decisions.html.md): Decision capture: numbered ADRs, the one-line decision log, and their drift.
 - [opsward.discover](opsward.discover.html.md): Optional cross-repo asset discovery, delegating to the &#96;toolery&#96; package.
+- [opsward.evals](opsward.evals.html.md): Eval harness (opsward#17, gap 3): opt-in, report-only quality signals beyond the rubric.
 - [opsward.fleet](opsward.fleet.html.md): Diagnose every root and aggregate. A root that fails is recorded, never fatal.
 - [opsward.generate](opsward.generate.html.md): Determine which artifacts are missing, render templates, return files to create.
 - [opsward.lint](opsward.lint.html.md): Schema lint (opsward#17, gap 2): spec and config violations, pass or fail, no score.

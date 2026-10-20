@@ -14,6 +14,7 @@
 - [opsward.data.templates](_autosummary/opsward.data.templates.html.md): Generation templates organized by target project type.
 - [opsward.decisions](_autosummary/opsward.decisions.html.md): Decision capture: numbered ADRs, the one-line decision log, and their drift.
 - [opsward.discover](_autosummary/opsward.discover.html.md): Optional cross-repo asset discovery, delegating to the &#96;toolery&#96; package.
+- [opsward.evals](_autosummary/opsward.evals.html.md): Eval harness (opsward#17, gap 3): opt-in, report-only quality signals beyond the rubric.
 - [opsward.fleet](_autosummary/opsward.fleet.html.md): Diagnose every root and aggregate. A root that fails is recorded, never fatal.
 - [opsward.generate](_autosummary/opsward.generate.html.md): Determine which artifacts are missing, render templates, return files to create.
 - [opsward.lint](_autosummary/opsward.lint.html.md): Schema lint (opsward#17, gap 2): spec and config violations, pass or fail, no score.
@@ -24,7 +25,7 @@
 - [opsward.subagents](_autosummary/opsward.subagents.html.md): Reuse a skill as a subagent: declare it in the skill, generate the twin, check the sync.
 - [opsward.util](_autosummary/opsward.util.html.md): Shared helpers for opsward.
 - [For AI agents](ai-agents.html.md): &#96;opsward&#96; ships artifacts for coding agents alongside its code. This page lists
-- [About this build](about-this-build.html.md): This documentation was built on &#42;&#42;2026-10-20 16:16 UTC&#42;&#42; from commit &lt;a href="https://github.com/tho...
+- [About this build](about-this-build.html.md): This documentation was built on &#42;&#42;2026-10-20 16:24 UTC&#42;&#42; from commit &lt;a href="https://github.com/tho...
 
 ## Optional
 

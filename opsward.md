@@ -1,4 +1,4 @@
-> built 2026-10-20 16:16 UTC from 96c61fe (main) · opsward 0.0.27. Details: build_info.json
+> built 2026-10-20 16:24 UTC from 6e04508 (main) · opsward 0.0.28. Details: build_info.json
 
 # index.html.md
 
@@ -206,6 +206,24 @@ for skill in sr.skills:
 # Install skills programmatically
 skill_files = generate_skills(Path.home() / ".claude")
 ```
+
+### Evals (opt-in, report-only)
+
+The rubric scores form; evals ask whether a config actually helps. They make model calls, so they never gate and never run by default:
+
+```python
+from pathlib import Path
+from opsward.evals import judge_claude_md, anthropic_judge, run_golden_tasks, GoldenTask, anthropic_agent
+
+# LLM-as-judge for the subjective dimensions (actionability, conciseness), next to the rubric's score
+print(judge_claude_md(Path("CLAUDE.md").read_text(), judge=anthropic_judge(), samples=3))
+
+# Golden tasks: does the agent honour a convention with the config, and not without it?
+tasks = [GoldenTask("kw-only", "Write a function f(a, b, c).", expect=[r"\*,"])]
+print(run_golden_tasks(tasks, agent=anthropic_agent(), config=Path("CLAUDE.md").read_text(), runs=3))
+```
+
+`pip install 'opsward[eval]'` for the paid judge and agent. Without them, `judge_claude_md` defaults to `rubric_judge` (opsward’s own rubric, free) and `echo_agent` exercises the golden-task harness without a model.
 
 ## CI Integration
 
@@ -738,6 +756,219 @@ Harvests the requested `kinds` (comma-separated string or a sequence of
 backend (needs `toolery[ir]`). Defaults to the current directory when no roots given.
 
 
+# _autosummary/opsward.evals.html.md
+
+# opsward.evals
+
+Eval harness (opsward#17, gap 3): opt-in, report-only quality signals beyond the rubric.
+
+Two layers, both of which *report* and never gate (model calls cost money and are
+nondeterministic, so the deterministic rubric stays the only gate):
+
+* **LLM-as-judge** for the rubric’s subjective dimensions (actionability, conciseness):
+  [`judge_claude_md()`](_autosummary/opsward.evals.html.md#opsward.evals.judge_claude_md) asks a *judge* to score CLAUDE.md against an explicit rubric,
+  > `samples` times, and reports the median next to the rubric’s own score.
+* **Golden tasks**: [`run_golden_tasks()`](_autosummary/opsward.evals.html.md#opsward.evals.run_golden_tasks) runs an *agent* on repo-specific tasks with
+  and without a candidate config, and checks each output against the task’s `expect` /
+  `forbid` patterns. The with-minus-without pass rate is the signal that a config helps.
+
+The judge and the agent are injected. [`rubric_judge()`](_autosummary/opsward.evals.html.md#opsward.evals.rubric_judge) (the default judge) and
+[`echo_agent()`](_autosummary/opsward.evals.html.md#opsward.evals.echo_agent) are free and deterministic – they exercise the harness and anchor the
+scale – while [`anthropic_judge()`](_autosummary/opsward.evals.html.md#opsward.evals.anthropic_judge) and [`anthropic_agent()`](_autosummary/opsward.evals.html.md#opsward.evals.anthropic_agent) make paid calls through
+the `anthropic` SDK (`pip install 'opsward[eval]'`) and are never used by default.
+
+```pycon
+>>> report = judge_claude_md("# P\n\n## Commands\n\n```bash\npytest\n```\n")
+>>> sorted(report.scores), report.judge
+(['actionability', 'conciseness'], 'rubric')
+>>> tasks = [GoldenTask("kw", "Write f(a, b, c)", expect=[r"\*,"])]
+>>> golden = run_golden_tasks(tasks, agent=echo_agent, config="Use `*,` before the 3rd arg.")
+>>> golden.delta()
+1.0
+```
+
+### Module Attributes
+
+| [`DFLT_JUDGE_MODEL`](_autosummary/opsward.evals.html.md#opsward.evals.DFLT_JUDGE_MODEL)   | Default model for the paid judge and agent; override with `model=`.                            |
+|---------------------------------------------------------------------|------------------------------------------------------------------------------------------------|
+| [`JUDGE_RUBRICS`](_autosummary/opsward.evals.html.md#opsward.evals.JUDGE_RUBRICS)      | vague "rate the quality" prompts give noise, anchored bands do not.                            |
+| [`Judge`](_autosummary/opsward.evals.html.md#opsward.evals.Judge)              | the JSON object above).                                                                        |
+| [`Agent`](_autosummary/opsward.evals.html.md#opsward.evals.Agent)              | An agent does a task under a config (CLAUDE.md text; `""` = no config) and returns its output. |
+
+### Functions
+
+| [`anthropic_agent`](_autosummary/opsward.evals.html.md#opsward.evals.anthropic_agent)(\*[, model, client, max_tokens])   | A paid single-call agent: the config is the system prompt, the task the user turn.                                              |
+|-----------------------------------------------------------------------------------------------------|---------------------------------------------------------------------------------------------------------------------------------|
+| [`anthropic_judge`](_autosummary/opsward.evals.html.md#opsward.evals.anthropic_judge)(\*[, model, client, max_tokens])   | A paid judge over the Messages API.                                                                                             |
+| [`echo_agent`](_autosummary/opsward.evals.html.md#opsward.evals.echo_agent)(task, config)                           | The free agent: "does" the task by quoting its config, so a config that states the convention passes and an empty one does not. |
+| [`judge_claude_md`](_autosummary/opsward.evals.html.md#opsward.evals.judge_claude_md)(content, \*[, judge, ...])         | Score CLAUDE.md `content` on each subjective dimension, `samples` times each.                                                   |
+| [`load_golden_tasks`](_autosummary/opsward.evals.html.md#opsward.evals.load_golden_tasks)(path)                            | Tasks from a JSON list of `{"name", "prompt", "expect": [...], "forbid": [...]}`.                                               |
+| [`parse_verdict`](_autosummary/opsward.evals.html.md#opsward.evals.parse_verdict)(reply, \*, max_score)                | `(score, reasoning)` from a judge reply: the *last* JSON object in it with a `score`.                                           |
+| [`rubric_judge`](_autosummary/opsward.evals.html.md#opsward.evals.rubric_judge)(request)                              | The free, deterministic judge: answers with opsward's own rubric score.                                                         |
+| [`run_golden_tasks`](_autosummary/opsward.evals.html.md#opsward.evals.run_golden_tasks)(tasks, \*, agent, config[, ...])  | Run every task `runs` times under `config` and under `baseline`; count passes.                                                  |
+
+### Classes
+
+| [`DimensionVerdict`](_autosummary/opsward.evals.html.md#opsward.evals.DimensionVerdict)(score, max_score, rubric_score)   | A dimension's judged score (median of the samples) next to the rubric's own.               |
+|-----------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------|
+| [`GoldenReport`](_autosummary/opsward.evals.html.md#opsward.evals.GoldenReport)(runs[, results, errors])              | Per task and arm (`with` / `without` the config): runs passed and runs that errored.       |
+| [`GoldenTask`](_autosummary/opsward.evals.html.md#opsward.evals.GoldenTask)(name, prompt[, expect, forbid])         | A repo-specific task, passed when the output matches every `expect` regex and no `forbid`. |
+| [`JudgeReport`](_autosummary/opsward.evals.html.md#opsward.evals.JudgeReport)(judge[, scores])                       | Every judged dimension.                                                                    |
+| [`JudgeRequest`](_autosummary/opsward.evals.html.md#opsward.evals.JudgeRequest)(dimension, content)                   | One dimension to judge: the rubric, the content, and the rendered prompt.                  |
+
+### opsward.evals.Agent
+
+An agent does a task under a config (CLAUDE.md text; `""` = no config) and returns its output.
+
+alias of [`Callable`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable)[[[`GoldenTask`](_autosummary/opsward.evals.html.md#opsward.evals.GoldenTask), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)], [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
+
+### opsward.evals.DFLT_JUDGE_MODEL *= 'claude-opus-5-5'*
+
+Default model for the paid judge and agent; override with `model=`.
+
+### *class* opsward.evals.DimensionVerdict(score, max_score, rubric_score, samples=list(), reasoning=list(), errors=list())
+
+Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
+
+A dimension’s judged score (median of the samples) next to the rubric’s own.
+
+### *class* opsward.evals.GoldenReport(runs, results=dict(), errors=dict())
+
+Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
+
+Per task and arm (`with` / `without` the config): runs passed and runs that errored.
+
+A run whose agent raised is left out of its arm’s pass rate (it says nothing about the
+config), so a flaky agent cannot skew [`delta()`](_autosummary/opsward.evals.html.md#opsward.evals.GoldenReport.delta); the errors are listed.
+
+#### delta()
+
+Pass rate with the config minus without: positive means the config helps.
+
+* **Return type:**
+  [`float`](https://docs.python.org/3/builtins/functions.html#float)
+
+#### rate(arm)
+
+Passed / completed (non-errored) runs in `arm`; 0.0 when none completed.
+
+* **Return type:**
+  [`float`](https://docs.python.org/3/builtins/functions.html#float)
+
+### *class* opsward.evals.GoldenTask(name, prompt, expect=(), forbid=())
+
+Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
+
+A repo-specific task, passed when the output matches every `expect` regex and no `forbid`.
+
+### opsward.evals.JUDGE_RUBRICS *: [dict](https://docs.python.org/3/builtins/stdtypes.html#dict)[[str](https://docs.python.org/3/builtins/stdtypes.html#str), [dict](https://docs.python.org/3/builtins/stdtypes.html#dict)]* *= {'actionability': {'bands': {'0': 'Empty, or nothing actionable.', '1-4': 'Mostly generic advice an agent cannot turn into an action.', '13-15': 'Every instruction names a concrete command, path, pattern or rule; nothing needs interpretation.', '5-8': 'About half is aspiration or description rather than instruction.', '9-12': 'Mostly concrete; a few instructions are vague ("keep code clean") or lack the command to run.'}, 'max': 15, 'question': 'Can a coding agent act on these instructions without guessing?'}, 'conciseness': {'bands': {'0': 'Empty.', '1-4': 'Bloated: the useful instructions are hard to find.', '13-15': 'No filler, no repetition, no prose where a list or a command would do; detail lives in linked docs.', '5-8': 'Noticeable padding: restated points, long explanations an agent does not need every session.', '9-12': 'Mostly tight; some repetition or paragraphs that could be one line.'}, 'max': 15, 'question': "Is it dense and scannable, with every line earning its place in an agent's context?"}}*
+
+vague “rate the quality” prompts give noise, anchored bands do not.
+
+* **Type:**
+  Explicit rubrics
+
+### opsward.evals.Judge
+
+the JSON object above).
+
+* **Type:**
+  A judge reads a request and returns its raw reply (expected
+
+alias of [`Callable`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable)[[[`JudgeRequest`](_autosummary/opsward.evals.html.md#opsward.evals.JudgeRequest)], [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
+
+### *class* opsward.evals.JudgeReport(judge, scores=dict())
+
+Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
+
+Every judged dimension. Report-only: nothing here is meant to fail a build.
+
+### *class* opsward.evals.JudgeRequest(dimension, content)
+
+Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
+
+One dimension to judge: the rubric, the content, and the rendered prompt.
+
+### opsward.evals.anthropic_agent(, model='claude-opus-5-5', client=None, max_tokens=16000)
+
+A paid single-call agent: the config is the system prompt, the task the user turn.
+
+* **Return type:**
+  [`Callable`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable)[[[`GoldenTask`](_autosummary/opsward.evals.html.md#opsward.evals.GoldenTask), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)], [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
+
+### opsward.evals.anthropic_judge(, model='claude-opus-5-5', client=None, max_tokens=16000)
+
+A paid judge over the Messages API. `client` defaults to `anthropic.Anthropic()`.
+
+* **Return type:**
+  [`Callable`](https://docs.python.org/3/library/collections.abc.html#collections.abc.Callable)[[[`JudgeRequest`](_autosummary/opsward.evals.html.md#opsward.evals.JudgeRequest)], [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
+
+### opsward.evals.echo_agent(task, config)
+
+The free agent: “does” the task by quoting its config, so a config that states the
+convention passes and an empty one does not. It tests the harness, not a model.
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
+
+### opsward.evals.judge_claude_md(content, \*, judge=<function rubric_judge>, dimensions=('actionability', 'conciseness'), samples=1)
+
+Score CLAUDE.md `content` on each subjective dimension, `samples` times each.
+
+A reply that cannot be parsed is recorded as an error on its dimension, never raised.
+
+* **Raises:**
+  [**ValueError**](https://docs.python.org/3/builtins/exceptions.html#ValueError) – `samples < 1` or an unknown dimension (a mistake in the call).
+* **Return type:**
+  [`JudgeReport`](_autosummary/opsward.evals.html.md#opsward.evals.JudgeReport)
+
+### opsward.evals.load_golden_tasks(path)
+
+Tasks from a JSON list of `{"name", "prompt", "expect": [...], "forbid": [...]}`.
+
+* **Return type:**
+  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`GoldenTask`](_autosummary/opsward.evals.html.md#opsward.evals.GoldenTask)]
+
+### opsward.evals.parse_verdict(reply, , max_score)
+
+`(score, reasoning)` from a judge reply: the *last* JSON object in it with a `score`.
+
+The last, because a judge that quotes a snippet or restates the format writes its
+verdict at the end. `9`, `9.0` and `"9"` are all read as 9.
+
+* **Raises:**
+  [**ValueError**](https://docs.python.org/3/builtins/exceptions.html#ValueError) – no JSON object with a `score`, or one that is not an integer in
+  `0..max_score`.
+* **Return type:**
+  [`tuple`](https://docs.python.org/3/builtins/stdtypes.html#tuple)[[`int`](https://docs.python.org/3/builtins/functions.html#int), [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
+
+```pycon
+>>> parse_verdict('Quote {"a": 1}. Verdict: {"reasoning": "ok", "score": 12}', max_score=15)
+(12, 'ok')
+```
+
+### opsward.evals.rubric_judge(request)
+
+The free, deterministic judge: answers with opsward’s own rubric score.
+
+It exercises the harness end to end and anchors the scale (a real judge’s scores are
+read next to it), but it is not an independent opinion.
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
+
+### opsward.evals.run_golden_tasks(tasks, , agent, config, baseline='', runs=1)
+
+Run every task `runs` times under `config` and under `baseline`; count passes.
+
+An agent error is recorded, never raised, and leaves that run out of the pass rate.
+
+* **Raises:**
+  [**ValueError**](https://docs.python.org/3/builtins/exceptions.html#ValueError) – two tasks share a name, or `runs < 1`.
+* **Return type:**
+  [`GoldenReport`](_autosummary/opsward.evals.html.md#opsward.evals.GoldenReport)
+
+
 # _autosummary/opsward.fleet.html.md
 
 # opsward.fleet
@@ -788,6 +1019,7 @@ Diagnose, generate, and maintain the AI agent setup of your projects.
 | [`data`](_autosummary/opsward.data.html.md#module-opsward.data)                                           | Bundled package resources for opsward, accessed via `importlib.resources.files("opsward.data")`. |
 | [`decisions`](_autosummary/opsward.decisions.html.md#module-opsward.decisions)                                 | Decision capture: numbered ADRs, the one-line decision log, and their drift.                     |
 | [`discover`](_autosummary/opsward.discover.html.md#module-opsward.discover)                                   | Optional cross-repo asset discovery, delegating to the `toolery` package.                        |
+| [`evals`](_autosummary/opsward.evals.html.md#module-opsward.evals)                                         | Eval harness (opsward#17, gap 3): opt-in, report-only quality signals beyond the rubric.         |
 | [`fleet`](_autosummary/opsward.fleet.html.md#opsward.fleet)(roots, \*[, diagnose_root, check_dirs])        | Diagnose every root and aggregate.                                                               |
 | [`generate`](_autosummary/opsward.generate.html.md#opsward.generate)(scan_result, \*[, agents_md, hooks])     | Determine which artifacts are missing, render templates, return files to create.                 |
 | [`lint`](_autosummary/opsward.lint.html.md#module-opsward.lint)                                           | Schema lint (opsward#17, gap 2): spec and config violations, pass or fail, no score.             |
@@ -1391,18 +1623,16 @@ Read a text file, returning ‘’ if it doesn’t exist or can’t be decoded.
 
 # About this build
 
-This documentation was built on **2026-10-20 16:16 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/96c61fe523e2a08165678a3dc6151b630f17f414"><code>96c61fe</code></a> on branch <code>main</code>, for **opsward 0.0.27** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-10-20 16:24 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/6e04508d70d1b7e31b339bb0171b9ed1550ac6c5"><code>6e04508</code></a> on branch <code>main</code>, for **opsward 0.0.28** (from <code>pyproject.toml</code>).
 
-#### WARNING
-The documentation and the package may be misaligned:
-
-- The documented version (0.0.27) is behind the latest release on PyPI (0.0.28): `pip install opsward` gives newer code than these docs describe.
+#### NOTE
+Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
 
 ## Source
 
 |                     |                                                                                                                                                           |
 |---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/opsward/commit/96c61fe523e2a08165678a3dc6151b630f17f414"><code>96c61fe523e2a08165678a3dc6151b630f17f414</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/opsward/commit/6e04508d70d1b7e31b339bb0171b9ed1550ac6c5"><code>6e04508d70d1b7e31b339bb0171b9ed1550ac6c5</code></a> |
 | Branch              | <code>main</code>                                                                                                                                         |
 | Tags at this commit | none                                                                                                                                                      |
 | Working tree        | clean                                                                                                                                                     |
@@ -1413,15 +1643,15 @@ The documentation and the package may be misaligned:
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/opsward</code>                                                            |
-| Run          | <a href="https://github.com/thorwhalen/opsward/actions/runs/39455764610">39455764610</a>   |
+| Run          | <a href="https://github.com/thorwhalen/opsward/actions/runs/39456879580">39456879580</a>   |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>96c61fe523e2a08165678a3dc6151b630f17f414</code> (in the history of the built commit) |
+| Event commit | <code>6e04508d70d1b7e31b339bb0171b9ed1550ac6c5</code> (in the history of the built commit) |
 
 ## Tools
 
 |          |         |
 |----------|---------|
-| epythet  | 0.2.21  |
+| epythet  | 0.2.22  |
 | Sphinx   | 9.1.1   |
 | docutils | 0.22.4  |
 | Python   | 3.12.15 |
@@ -1440,14 +1670,14 @@ The documentation and the package may be misaligned:
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/opsward/0.0.28/">0.0.28</a>, newer than the documented version (0.0.27).
+Latest release: <a href="https://pypi.org/project/opsward/0.0.28/">0.0.28</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/opsward && cd opsward
-git checkout 96c61fe523e2a08165678a3dc6151b630f17f414
-pip install "epythet==0.2.21"
+git checkout 6e04508d70d1b7e31b339bb0171b9ed1550ac6c5
+pip install "epythet==0.2.22"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```
 

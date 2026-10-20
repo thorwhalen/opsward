@@ -15,6 +15,7 @@
    data
    decisions
    discover
+   evals
    fleet
    generate
    lint
