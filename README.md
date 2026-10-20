@@ -285,7 +285,7 @@ npm install -g agnix                    # --validators agnix
 pip install skillcheck                  # --validators skillcheck
 ```
 
-One brief for every agent host: `AGENTS.md` is the canonical, and each host's own file (`CLAUDE.md`, `GEMINI.md`, `.github/copilot-instructions.md`, …) is a symlink, an `@AGENTS.md` import, or a copy that can drift. `portability` shows which hosts find instructions and every section where a render differs from `AGENTS.md`; `fleet` rolls the same counts up across repos. A `CLAUDE.md` that is `@AGENTS.md` plus Claude-only deltas is scored as Claude reads it, with the import inlined.
+One brief for every agent host: `AGENTS.md` is the canonical, and each host's own file (`CLAUDE.md`, `GEMINI.md`, `.github/copilot-instructions.md`, …) is a symlink, an `@AGENTS.md` import, or a copy that can drift. `portability` shows which hosts find instructions and every section where a render differs from `AGENTS.md`; `fleet` rolls the same counts up across repos. With `opsward[lint]` installed, `portability` also lists project skills rendered for a host whose format drops some of their fields (`allowed-tools`, `license`, bundled resources): the `lossy` kind, reported and never scored. A `CLAUDE.md` that is `@AGENTS.md` plus Claude-only deltas is scored as Claude reads it, with the import inlined.
 
 ```bash
 opsward portability .                   # host coverage table + drift findings (report-only)

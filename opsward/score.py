@@ -1155,7 +1155,8 @@ def _score_portability(
         )
     by_path: dict[str, list[str]] = {}
     for f in report.findings:
-        by_path.setdefault(f.path, []).append(f.kind)
+        if f.kind in DRIFT_KINDS:
+            by_path.setdefault(f.path, []).append(f.kind)
     notes = [
         f"{path}: {len(kinds)} section(s) drift from AGENTS.md ("
         + ", ".join(
@@ -1164,7 +1165,8 @@ def _score_portability(
         + ") → run `opsward portability` for the list"
         for path, kinds in by_path.items()
     ]
-    score = max(0, 100 - _PORTABILITY_DRIFT_PENALTY * len(report.findings))
+    drift = [f for f in report.findings if f.kind in DRIFT_KINDS]
+    score = max(0, 100 - _PORTABILITY_DRIFT_PENALTY * len(drift))
     return ComponentScore(name="Portability", score=score, notes=notes)
 
 

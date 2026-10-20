@@ -265,3 +265,73 @@ def test_a_blank_agents_md_counts_as_absent(tmp_path):
     score, report = _portability(tmp_path)
     assert score.score == 100 and report.portability.findings == []
     assert report.portability.coverage["codex"] == "none"
+
+
+# -- opsward#68: the lossy kind, fed by the skill package's registry --
+
+
+def _needs_skill_losses():
+    translate = pytest.importorskip("skill.translate", reason="needs opsward[lint]")
+    if not hasattr(translate, "lost_fields"):
+        pytest.skip("needs a skill release with translation_losses (thorwhalen/skill#14)")
+
+
+def test_lossy_skill_renders_are_reported_not_scored(tmp_path):
+    _needs_skill_losses()
+    _write(
+        tmp_path,
+        ".claude/skills/greet/SKILL.md",
+        "---\nname: greet\ndescription: Say hello\nlicense: MIT\nallowed-tools: Bash\n---\n\nHi.\n",
+    )
+    _write(tmp_path, ".cursor/rules/greet.mdc", "---\ndescription: Say hello\n---\nHi.\n")
+    _write(tmp_path, ".windsurf/rules/other.md", "x")  # not this skill's render
+    report = portability(tmp_path)
+    lossy = [f for f in report.findings if f.kind == "lossy"]
+    assert [(f.path, f.section) for f in lossy] == [(".cursor/rules/greet.mdc", "greet")]
+    assert "allowed-tools" in lossy[0].lost and "license" in lossy[0].lost
+    assert "loses allowed-tools" in str(lossy[0])
+    assert report.to_dict()["findings"][0]["lost"] == list(lossy[0].lost)
+    score, _ = _portability(tmp_path)
+    assert score.score == 100
+
+
+def test_hosts_and_the_skill_registry_are_joined_not_copied():
+    _needs_skill_losses()
+    from skill.install import agent_targets
+
+    from opsward.portability import AGENT_HOSTS
+
+    linked = {h.skill_target for h in AGENT_HOSTS.values() if h.skill_target}
+    assert linked <= set(agent_targets), linked - set(agent_targets)
+    # every host the skill package can install into is a host opsward knows
+    assert set(agent_targets) <= linked, set(agent_targets) - linked
+
+
+def test_lossy_review_cases(tmp_path):
+    _needs_skill_losses()
+    import subprocess
+    import sys
+
+    skill_md = "---\nname: {}\ndescription: d\nlicense: MIT\n---\n\nHi.\n"
+    _write(tmp_path, ".claude/skills/greet/SKILL.md", skill_md.format("greet"))
+    _write(tmp_path, ".claude/skills/evil/SKILL.md", skill_md.format("../../../outside"))
+    _write(tmp_path, ".cursor/rules/greet.mdc", "x")
+    _write(tmp_path, "outside.mdc", "x")
+    _write(tmp_path, "AGENTS.md", "# A\n<!-- skill:greet -->\n")
+    (tmp_path / "GEMINI.md").symlink_to("AGENTS.md")
+    report = portability(tmp_path)
+    assert [f.path for f in report.findings if f.kind == "lossy"] == [".cursor/rules/greet.mdc"]
+    out = subprocess.run(
+        [sys.executable, "-m", "opsward", "portability", str(tmp_path)],
+        capture_output=True, text=True,
+    ).stdout
+    assert "Lossy skill renders (1):" in out and "AGENTS.md drift" not in out
+
+
+def test_to_dict_keeps_an_empty_section():
+    from opsward.portability import DriftFinding, PortabilityReport
+
+    report = PortabilityReport(findings=[DriftFinding("host_only", "CLAUDE.md", "")])
+    assert report.to_dict()["findings"] == [
+        {"kind": "host_only", "path": "CLAUDE.md", "section": ""}
+    ]

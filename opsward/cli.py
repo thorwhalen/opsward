@@ -494,12 +494,13 @@ def portability(
 
     One row per host (claude, codex, copilot, cursor, ...) with how it is covered:
     symlink, import (an @AGENTS.md shim), native (reads AGENTS.md itself), copy, rules,
-    or none. Then every section where a render differs from AGENTS.md. Report-only.
+    or none. Then every section where a render differs from AGENTS.md, and (with
+    opsward[lint]) every project skill whose render drops fields. Report-only.
 
     :param project_roots: one or more project directories (default: current dir)
     :param format: output format — 'text' or 'json'
     """
-    from opsward.portability import check_portability
+    from opsward.portability import LOSSY, check_portability
 
     if format not in ("text", "json"):
         print("Error: format must be 'text' or 'json'", file=sys.stderr)
@@ -520,10 +521,15 @@ def portability(
         )
         for host, relation in report.coverage.items():
             print(f"  {host:<{width}}  {relation}")
-        if report.findings:
-            print(f"  AGENTS.md drift ({len(report.findings)}):")
-            for f in report.findings:
-                print(f"    {f}")
+        lossy = [f for f in report.findings if f.kind == LOSSY]
+        for title, found in (
+            ("AGENTS.md drift", [f for f in report.findings if f.kind != LOSSY]),
+            ("Lossy skill renders", lossy),
+        ):
+            if found:
+                print(f"  {title} ({len(found)}):")
+                for f in found:
+                    print(f"    {f}")
     if format == "json":
         print(json.dumps(out, indent=2))
 
