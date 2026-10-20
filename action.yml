@@ -1,0 +1,61 @@
+name: opsward
+description: Gate a project's AI agent setup — the scored `opsward diagnose --min-score` and the strict `opsward lint`.
+branding:
+  icon: check-circle
+  color: green
+
+# Usage, in a workflow step after actions/checkout:
+#
+#   - uses: thorwhalen/opsward@<a release tag>
+#     with:
+#       min-score: "70"        # "" skips the scored gate
+#       lint: "true"           # "false" skips the lint
+#
+# Inputs reach the shell through env vars only, never interpolated into the script.
+inputs:
+  path:
+    description: Project directory to check.
+    default: "."
+  min-score:
+    description: Minimum overall `opsward diagnose` score; empty skips the scored gate.
+    default: "80"
+  lint:
+    description: Run `opsward lint`; only "false" skips it (so a typo fails closed).
+    default: "true"
+  validators:
+    description: Lint validators — "auto", or a comma list of opsward, skill.
+    default: "auto"
+  opsward-spec:
+    description: pip requirement for opsward, e.g. "opsward[lint]==0.0.30"; empty installs the action's own ref, with the lint extra.
+    default: ""
+  python-version:
+    description: Python used to run opsward.
+    default: "3.12"
+
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+    - name: Install opsward
+      shell: bash
+      env:
+        OPSWARD_SPEC: ${{ inputs.opsward-spec }}
+      # GITHUB_ACTION_PATH is the checkout of the ref named in `uses:`, so a pinned tag
+      # runs that tag's opsward, not whatever PyPI has today.
+      run: python -m pip install --quiet "${OPSWARD_SPEC:-${GITHUB_ACTION_PATH}[lint]}"
+    - name: opsward diagnose (score gate)
+      if: inputs.min-score != ''
+      shell: bash
+      env:
+        OPSWARD_PATH: ${{ inputs.path }}
+        OPSWARD_MIN_SCORE: ${{ inputs.min-score }}
+      run: opsward diagnose "$OPSWARD_PATH" --min-score "$OPSWARD_MIN_SCORE"
+    - name: opsward lint
+      if: inputs.lint != 'false'
+      shell: bash
+      env:
+        OPSWARD_PATH: ${{ inputs.path }}
+        OPSWARD_VALIDATORS: ${{ inputs.validators }}
+      run: opsward lint "$OPSWARD_PATH" --validators "$OPSWARD_VALIDATORS"

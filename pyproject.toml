@@ -40,6 +40,9 @@ Issues = "https://github.com/thorwhalen/opsward/issues"
 Changelog = "https://github.com/thorwhalen/opsward/blob/main/CHANGELOG.md"
 
 [project.optional-dependencies]
+lint = [
+    "skill",
+]
 dev = [
     "pytest>=7.0",
     "pytest-cov>=4.0",

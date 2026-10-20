@@ -42,6 +42,7 @@ Key docs to read before starting work:
   - `decisions.py` — decision capture: the next numbered ADR from the template, the Y-statement log, and the `stale_adr` drift check (ADR 0010)
   - `subagents.py` — a skill's declared subagent twin (`metadata: subagent: true`): spec, rendered `.claude/agents/<name>.md` preloading the skill, sync states; used by generate, maintain and the diagnosis note (ADR 0009)
   - `fleet.py` — fleet mode: map `scan → diagnose` over N roots and aggregate into a `FleetReport` (opsward#17, gap 1)
+  - `lint.py` — strict schema lint (opsward#17, gap 2): every validator (`opsward`'s own spec check, the optional `skill` package's `validate()`) over the project's skills, plus the hooks config; pass/fail, no score. Shipped with `action.yml` (reusable Action) and `.pre-commit-hooks.yaml` at the repo root
   - `cli.py` — CLI command functions (the `_dispatch_funcs` SSOT)
   - `util.py` — internal helpers (underscore-prefixed)
   - `data/` — bundled package resources (accessed via `importlib.resources.files`)
@@ -64,6 +65,7 @@ python -m opsward generate /path/to/project           # Generate missing pieces
 python -m opsward maintain /path/to/project            # Check for staleness/drift
 python -m opsward recommend /path/to/project           # Recommend ecosystem skills from tech stack
 python -m opsward fleet --under /path/to/projects      # Diagnose every repo under a folder, rolled up
+python -m opsward lint /path/to/project               # Strict spec/config lint (exit 1 on any finding)
 python -m opsward install-skills --write               # Install Claude Code skills
 python -m opsward decision new "title" --write          # Allocate the next numbered ADR
 python -m opsward decision note "In the context of …" --write   # One-line decision in misc/docs/decisions/log.md
@@ -103,6 +105,7 @@ _dispatch_funcs = {
     "install-skills": install_skills,
     "find": find,
     "fleet": fleet,
+    "lint": lint,
     "decision": [new, note],
 }
 ```
