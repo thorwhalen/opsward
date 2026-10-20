@@ -139,9 +139,7 @@ class FleetReport:
             ]
         if self.errors:
             lines.append("Could not diagnose:")
-            lines += [
-                f"  {names[root]}: {why}" for root, why in self.errors.items()
-            ]
+            lines += [f"  {names[root]}: {why}" for root, why in self.errors.items()]
         return "\n".join(lines)
 
 
@@ -206,7 +204,9 @@ def git_roots_under(parent: str | Path, *, depth: int = 1) -> Iterator[Path]:
 MANIFEST_VERSION = 1
 
 
-def manifest_record(roots: Iterable[str | Path], report: FleetReport, *, updated: str | None = None) -> dict:
+def manifest_record(
+    roots: Iterable[str | Path], report: FleetReport, *, updated: str | None = None
+) -> dict:
     """The per-machine fleet manifest: the roots that make up the fleet and the last summary.
 
     The roots are this machine's (absolute) paths, which is why the manifest is
@@ -224,11 +224,15 @@ def manifest_record(roots: Iterable[str | Path], report: FleetReport, *, updated
     }
 
 
-def write_manifest(path: str | Path, roots: Iterable[str | Path], report: FleetReport) -> Path:
+def write_manifest(
+    path: str | Path, roots: Iterable[str | Path], report: FleetReport
+) -> Path:
     """Write :func:`manifest_record` as JSON to ``path`` (parents created) and return it."""
     path = Path(path)
     path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(manifest_record(roots, report), indent=2) + "\n", encoding="utf-8")
+    path.write_text(
+        json.dumps(manifest_record(roots, report), indent=2) + "\n", encoding="utf-8"
+    )
     return path
 
 
