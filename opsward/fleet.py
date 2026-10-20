@@ -59,7 +59,9 @@ class FleetReport:
 
     def missing_rollup(self) -> dict[str, int]:
         """How many repos miss each item, most common first ("CLAUDE.md": 47)."""
-        counts = Counter(item for r in self.reports for item in dict.fromkeys(r.missing_items))
+        counts = Counter(
+            item for r in self.reports for item in dict.fromkeys(r.missing_items)
+        )
         return dict(counts.most_common())
 
     def component_rollup(
@@ -69,22 +71,33 @@ class FleetReport:
         by_name: dict[str, list[float]] = {}
         for report in self.reports:
             for s in report.scores:
-                by_name.setdefault(s.name, []).append(100 * s.score / s.max_score if s.max_score else 0.0)
+                by_name.setdefault(s.name, []).append(
+                    100 * s.score / s.max_score if s.max_score else 0.0
+                )
         return {
-            name: {"mean_pct": round(mean(pcts), 1), "weak": sum(p < weak_pct for p in pcts), "repos": len(pcts)}
+            name: {
+                "mean_pct": round(mean(pcts), 1),
+                "weak": sum(p < weak_pct for p in pcts),
+                "repos": len(pcts),
+            }
             for name, pcts in sorted(by_name.items(), key=lambda kv: mean(kv[1]))
         }
 
     def worst(self, n: int = DFLT_WORST_SHOWN) -> list[DiagnosisReport]:
         """The ``n`` lowest-scoring repos, ties broken by name."""
-        return sorted(self.reports, key=lambda r: (r.overall_score, r.project_root.name))[:n]
+        return sorted(
+            self.reports, key=lambda r: (r.overall_score, r.project_root.name)
+        )[:n]
 
     def to_dict(self) -> dict:
         """A JSON-ready summary keyed by repo *name*, never by absolute path."""
         return {
             "repos": {
-                r.project_root.name: {"score": round(r.overall_score, 1), "grade": r.grade,
-                                      "missing": list(r.missing_items)}
+                r.project_root.name: {
+                    "score": round(r.overall_score, 1),
+                    "grade": r.grade,
+                    "missing": list(r.missing_items),
+                }
                 for r in self.reports
             },
             "errors": {Path(k).name: v for k, v in self.errors.items()},
@@ -97,19 +110,29 @@ class FleetReport:
     def __str__(self) -> str:
         n = len(self.reports)
         lines = [f"Fleet report: {n} repo(s), mean score {self.mean_score():.1f}"]
-        lines.append("Grades: " + ", ".join(f"{g} {c}" for g, c in self.grade_counts().items()))
+        lines.append(
+            "Grades: " + ", ".join(f"{g} {c}" for g, c in self.grade_counts().items())
+        )
         if missing := self.missing_rollup():
             lines.append("Missing across the fleet:")
             lines += [f"  {item}: {count}/{n}" for item, count in missing.items()]
         if components := self.component_rollup():
             lines.append("Components, weakest first (mean %, weak repos):")
-            lines += [f"  {name}: {c['mean_pct']}%, {c['weak']}/{c['repos']}" for name, c in components.items()]
+            lines += [
+                f"  {name}: {c['mean_pct']}%, {c['weak']}/{c['repos']}"
+                for name, c in components.items()
+            ]
         if self.reports:
             lines.append("Worst repos:")
-            lines += [f"  {r.project_root.name}: {r.overall_score:.1f} ({r.grade})" for r in self.worst()]
+            lines += [
+                f"  {r.project_root.name}: {r.overall_score:.1f} ({r.grade})"
+                for r in self.worst()
+            ]
         if self.errors:
             lines.append("Could not diagnose:")
-            lines += [f"  {Path(root).name}: {why}" for root, why in self.errors.items()]
+            lines += [
+                f"  {Path(root).name}: {why}" for root, why in self.errors.items()
+            ]
         return "\n".join(lines)
 
 
@@ -141,6 +164,11 @@ def git_roots_under(parent: str | Path, *, depth: int = 1) -> Iterator[Path]:
     """Directories under ``parent`` (to ``depth`` levels) that hold a ``.git``, sorted."""
     level = [Path(parent)]
     for _ in range(depth):
-        children = sorted(p for d in level for p in d.iterdir() if p.is_dir() and not p.name.startswith("."))
+        children = sorted(
+            p
+            for d in level
+            for p in d.iterdir()
+            if p.is_dir() and not p.name.startswith(".")
+        )
         yield from (p for p in children if (p / ".git").exists())
         level = [p for p in children if not (p / ".git").exists()]
