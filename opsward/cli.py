@@ -143,6 +143,10 @@ def maintain(
 ):
     """Check for stale references, out-of-sync docs, and other drift.
 
+    Each finding carries a recommended triage: align (update the config to match the
+    code), revert (restore the code the config describes) or ignore (a legitimately
+    volatile reference: put `opsward: ignore-path` on its line).
+
     :param project_roots: one or more paths to project directories
     :param format: output format — 'text' or 'json'
     """
@@ -169,7 +173,8 @@ def maintain(
 
         print(f"{root.name}: {len(suggestions)} issue(s)\n")
         for ms in suggestions:
-            print(f"  [{ms.category}] {ms.description}")
+            tag = f"{ms.category} → {ms.triage}" if ms.triage else ms.category
+            print(f"  [{tag}] {ms.description}")
             if ms.diff:
                 for line in ms.diff.splitlines():
                     print(f"    {line}")
@@ -181,6 +186,7 @@ def maintain(
                 "category": ms.category,
                 "description": ms.description,
                 "diff": ms.diff,
+                "triage": ms.triage,
             }
             for ms in all_suggestions
         ]

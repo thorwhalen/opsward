@@ -75,10 +75,12 @@ opsward maintain .
 ```
 myproject: 3 issue(s)
 
-  [stale_path] CLAUDE.md references `src/old_module.py` but it does not exist
-  [sync_issue] `new_doc.md` exists in docs/ but is not listed in docs_guide.md
-  [empty_doc] `conventions.md` appears to be an empty stub (12 bytes)
+  [stale_path → align] CLAUDE.md references `src/old_module.py` but it does not exist
+  [sync_issue → align] `new_doc.md` exists in docs/ but is not listed in docs_guide.md
+  [empty_doc → align] `conventions.md` appears to be an empty stub (12 bytes)
 ```
+
+Each finding carries a recommended triage: **align** (the code is right, update the config), **revert** (the config is right, restore the code) or **ignore** (the reference is legitimately volatile). To ignore one, put `<!-- opsward: ignore-path -->` at the end of its line, or alone on the line before it; every path check (stale paths, the currency score, cross-references, ADR drift) then skips it.
 
 ### Fleet
 

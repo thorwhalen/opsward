@@ -227,3 +227,4 @@ class MaintenanceSuggestion:
     category: str  # e.g. 'stale_path', 'outdated_doc', 'sync_issue', 'claude_md_size', 'subagent_twin'
     description: str
     diff: str = ""
+    triage: str = ""  # recommended action: 'align' | 'revert' | 'ignore' (maintain.TRIAGE_ACTIONS)

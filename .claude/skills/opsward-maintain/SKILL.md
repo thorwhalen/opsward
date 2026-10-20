@@ -43,7 +43,15 @@ Group all issues (opsward's + yours) by severity:
 - **Medium priority**: Outdated docs, incomplete descriptions, missing new content
 - **Low priority**: Empty stubs, minor formatting, cosmetic issues
 
-### 4. Propose and apply fixes
+### 4. Triage every drift finding: align, revert or ignore
+
+Each finding carries a recommended `triage` (in `--format json`, and after the category in the text output). Decide one of three per finding, and say which in your proposal:
+
+- **align**: the code is right and the config is stale: update the reference, the doc or the skill to match the code. The usual case.
+- **revert**: the config is right and the code drifted from it (a file deleted by mistake, a convention broken): restore the code, not the doc.
+- **ignore**: the reference is legitimately volatile (a generated file, an example path, a file that exists only on some machines): add `<!-- opsward: ignore-path -->` at the end of that line, or alone on the line before it, and opsward stops checking the paths it covers.
+
+### 5. Propose and apply fixes
 
 For each issue, propose a concrete fix:
 - **Stale path**: Determine if the file was renamed, moved, or deleted. Update or remove the reference.
@@ -55,7 +63,7 @@ For each issue, propose a concrete fix:
 
 Always ask the user before writing or editing. Show proposed changes first. For destructive operations (removing content, deleting files), explain why and get explicit confirmation.
 
-### 5. Verify
+### 6. Verify
 
 ```bash
 opsward maintain .
