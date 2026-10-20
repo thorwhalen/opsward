@@ -209,7 +209,7 @@ def cited_paths(content: str) -> list[str]:
     from opsward.maintain import _extract_paths  # the same extractor CLAUDE.md uses
     from opsward.util import checked_lines  # `opsward: ignore-path` covers links too
 
-    prose = checked_lines(_STRIKE_RE.sub("", _FENCE_RE.sub("", content)))
+    prose = _STRIKE_RE.sub("", _FENCE_RE.sub("", checked_lines(content)))
     found = set()
     for line in prose.splitlines():
         historical = bool(_HISTORICAL_RE.search(line))

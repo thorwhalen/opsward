@@ -85,20 +85,30 @@ _PATH_PATTERN = re.compile(r"(?:^|[\s`(])(\./)?(\w[\w\-.]*/[\w\-./]+\.\w+)", re.
 def checked_lines(content: str, *, marker: str = IGNORE_PATH_MARKER) -> str:
     """``content`` without the lines an ignore-path marker covers.
 
+    A marker quoted in backticks (prose *about* the marker) is not a marker.
+
     >>> checked_lines("a/b.py\\nold/c.py <!-- opsward: ignore-path -->\\n# opsward: ignore-path\\ntmp/d.py\\ne/f.py")
     'a/b.py\\ne/f.py'
+    >>> checked_lines("<!-- opsward: ignore-path -->\\n<!-- opsward: ignore-path -->\\nx/y.py\\nz/w.py")
+    'z/w.py'
+    >>> checked_lines("Use `<!-- opsward: ignore-path -->` on src/a.py")
+    'Use `<!-- opsward: ignore-path -->` on src/a.py'
     """
     kept, skip_next = [], False
     for line in content.splitlines():
+        unquoted = _BACKTICKED.sub("", line)
+        if marker in unquoted:
+            alone = bool(re.fullmatch(rf"\s*(<!--|#)?\s*{re.escape(marker)}\s*(-->)?\s*", line))
+            skip_next = alone  # a marker alone on its line covers the next one (and chains)
+            continue
         if skip_next:
             skip_next = False
             continue
-        if marker in line:
-            rest = line.replace(marker, "").strip(" \t#<>!-")
-            skip_next = not rest  # a marker alone on its line covers the next one
-            continue
         kept.append(line)
     return "\n".join(kept)
+
+
+_BACKTICKED = re.compile(r"`[^`\n]*`")
 
 
 def extract_paths(content: str) -> list[str]:

@@ -173,7 +173,8 @@ def maintain(
 
         print(f"{root.name}: {len(suggestions)} issue(s)\n")
         for ms in suggestions:
-            print(f"  [{ms.category} → {ms.triage}] {ms.description}")
+            tag = f"{ms.category} → {ms.triage}" if ms.triage else ms.category
+            print(f"  [{tag}] {ms.description}")
             if ms.diff:
                 for line in ms.diff.splitlines():
                     print(f"    {line}")
