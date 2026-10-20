@@ -358,6 +358,85 @@ def find(
             print(f"          {card.source_uri}")
 
 
+def fleet(
+    *project_roots: str,
+    under: str = "",
+    depth: int = 1,
+    format: str = "text",
+    manifest: str = "",
+):
+    """Diagnose many projects at once and roll the results up into one fleet report.
+
+    The fleet is the given roots, plus the git repos found under --under. With --manifest
+    the fleet is remembered: the roots and the latest summary are written to that JSON
+    file, and a later run with only --manifest re-diagnoses the same roots. The manifest
+    holds this machine's paths, so keep it out of version control.
+
+    :param project_roots: project directories to diagnose
+    :param under: also diagnose every git repo found under this directory
+    :param depth: how many levels below --under to look for git repos
+    :param format: output format — 'text' or 'json' (the name-keyed summary)
+    :param manifest: JSON file that remembers the fleet's roots and its latest summary
+    """
+    from opsward.fleet import (
+        fleet as _fleet,
+        git_roots_under,
+        manifest_roots,
+        write_manifest,
+    )
+
+    roots = [str(Path(r).resolve()) for r in project_roots]
+    if under:
+        parent = Path(under)
+        if not parent.is_dir():
+            print(f"Error: {under} is not a directory", file=sys.stderr)
+            sys.exit(2)
+        roots += [str(p.resolve()) for p in git_roots_under(parent, depth=depth)]
+    if manifest and not project_roots and not under:
+        try:
+            roots = manifest_roots(manifest)
+        except ValueError as e:  # json.JSONDecodeError is a ValueError
+            print(f"Error: cannot read the manifest: {e}", file=sys.stderr)
+            sys.exit(2)
+    if not roots and not under:
+        print(
+            "Error: no roots — give project directories, --under DIR, "
+            "or an existing --manifest",
+            file=sys.stderr,
+        )
+        sys.exit(2)
+
+    roots = list(dict.fromkeys(roots))
+    report = _fleet(roots)
+    if format == "json":
+        print(json.dumps(report.to_dict(), indent=2))
+    else:
+        print(report)
+    if manifest:
+        path = write_manifest(manifest, roots, report)
+        if _not_ignored_in_a_repo(path):
+            print(
+                f"Warning: {path.name} is inside a git work tree and not ignored; "
+                "it holds this machine's paths, so add it to .gitignore",
+                file=sys.stderr,
+            )
+
+
+def _not_ignored_in_a_repo(path: Path) -> bool:
+    """True when ``path`` lies in a git work tree and is not ignored (no git: False)."""
+    import subprocess
+
+    try:
+        done = subprocess.run(
+            ["git", "check-ignore", "-q", path.name],
+            cwd=path.parent,
+            capture_output=True,
+        )
+    except OSError:
+        return False
+    return done.returncode == 1  # 0: ignored, 1: not ignored, 128: not a repo
+
+
 def new(
     title: str,
     write: bool = False,
@@ -458,5 +537,6 @@ _dispatch_funcs = {
     "recommend": recommend,
     "install-skills": install_skills,
     "find": find,
+    "fleet": fleet,
     "decision": [new, note],
 }

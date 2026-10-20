@@ -6,9 +6,9 @@
       ],
       "returncode": 0,
       "stderr": "",
-      "stdout": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,decision} ...\n\npositional arguments:\n  {diagnose,generate,maintain,recommend,install-skills,find,decision}\n    diagnose            Diagnose the AI agent setup of one or more projects. :param project_roots:\n                        one or more paths to project directories :param format: output format —\n                        'text' or 'json' :param verbose: show additional detail in text output\n                        :param min_score: minimum overall score to pass (exit 0); below this exits\n                        1\n    generate            Generate missing AI setup artifacts for one or more projects. By default,\n                        shows what would be created (dry run). Use --write to actually write\n                        files. Existing files are never overwritten. :param project_roots: one or\n                        more paths to project directories :param write: actually write files\n                        (default: dry run) :param format: output format — 'text' or 'json' :param\n                        agents_md: also generate AGENTS.md (cross-platform agent instructions)\n                        :param hooks: also generate starter hook scripts\n    maintain            Check for stale references, out-of-sync docs, and other drift. :param\n                        project_roots: one or more paths to project directories :param format:\n                        output format — 'text' or 'json'\n    recommend           Recommend ecosystem skills based on the project's tech stack. Analyzes\n                        dependencies and suggests skills from the community catalog. :param\n                        project_roots: one or more paths to project directories :param format:\n                        output format — 'text' or 'json'\n    install-skills      Install opsward's Claude Code skills (and agents) into a project or\n                        globally. By default, shows what would be created (dry run). Use --write\n                        to actually write files. Existing files are never overwritten. :param\n                        target: project directory (ignored when --global is set) :param\n                        global_install: install into ~/.claude/ instead of the project :param\n                        agents: also install agent definitions (default: True) :param write:\n                        actually write files (default: dry run)\n    find                Find assets (skills, agents, docs) across one or more projects by QUERY.\n                        Cross-repo asset discovery via the toolery package (install with: pip\n                        install 'opsward[discovery]'). :param query: search query :param\n                        project_roots: one or more project directories (default: current dir)\n                        :param kinds: comma-separated asset kinds — skill, agent, doc :param\n                        semantic: use toolery's ir semantic backend (needs toolery[ir]) :param\n                        limit: max results to show\n    decision\n\noptions:\n  -h, --help            show this help message and exit\n",
+      "stdout": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,fleet,decision} ...\n\npositional arguments:\n  {diagnose,generate,maintain,recommend,install-skills,find,fleet,decision}\n    diagnose            Diagnose the AI agent setup of one or more projects. :param project_roots:\n                        one or more paths to project directories :param format: output format —\n                        'text' or 'json' :param verbose: show additional detail in text output\n                        :param min_score: minimum overall score to pass (exit 0); below this exits\n                        1\n    generate            Generate missing AI setup artifacts for one or more projects. By default,\n                        shows what would be created (dry run). Use --write to actually write\n                        files. Existing files are never overwritten. :param project_roots: one or\n                        more paths to project directories :param write: actually write files\n                        (default: dry run) :param format: output format — 'text' or 'json' :param\n                        agents_md: also generate AGENTS.md (cross-platform agent instructions)\n                        :param hooks: also generate starter hook scripts\n    maintain            Check for stale references, out-of-sync docs, and other drift. :param\n                        project_roots: one or more paths to project directories :param format:\n                        output format — 'text' or 'json'\n    recommend           Recommend ecosystem skills based on the project's tech stack. Analyzes\n                        dependencies and suggests skills from the community catalog. :param\n                        project_roots: one or more paths to project directories :param format:\n                        output format — 'text' or 'json'\n    install-skills      Install opsward's Claude Code skills (and agents) into a project or\n                        globally. By default, shows what would be created (dry run). Use --write\n                        to actually write files. Existing files are never overwritten. :param\n                        target: project directory (ignored when --global is set) :param\n                        global_install: install into ~/.claude/ instead of the project :param\n                        agents: also install agent definitions (default: True) :param write:\n                        actually write files (default: dry run)\n    find                Find assets (skills, agents, docs) across one or more projects by QUERY.\n                        Cross-repo asset discovery via the toolery package (install with: pip\n                        install 'opsward[discovery]'). :param query: search query :param\n                        project_roots: one or more project directories (default: current dir)\n                        :param kinds: comma-separated asset kinds — skill, agent, doc :param\n                        semantic: use toolery's ir semantic backend (needs toolery[ir]) :param\n                        limit: max results to show\n    fleet               Diagnose many projects at once and roll the results up into one fleet\n                        report. The fleet is the given roots, plus the git repos found under\n                        --under. With --manifest the fleet is remembered: the roots and the latest\n                        summary are written to that JSON file, and a later run with only\n                        --manifest re-diagnoses the same roots. The manifest holds this machine's\n                        paths, so keep it out of version control. :param project_roots: project\n                        directories to diagnose :param under: also diagnose every git repo found\n                        under this directory :param depth: how many levels below --under to look\n                        for git repos :param format: output format — 'text' or 'json' (the name-\n                        keyed summary) :param manifest: JSON file that remembers the fleet's roots\n                        and its latest summary\n    decision\n\noptions:\n  -h, --help            show this help message and exit\n",
       "tier": 3,
-      "usage": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,decision} ..."
+      "usage": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,fleet,decision} ..."
     },
     {
       "argv": [
@@ -75,6 +75,17 @@
       "stdout": "usage: opsward find [-h] [-k KINDS] [-s] [-l LIMIT] query [project-roots ...]\n\nFind assets (skills, agents, docs) across one or more projects by QUERY.\n\nCross-repo asset discovery via the toolery package\n(install with: pip install 'opsward[discovery]').\n\n:param query: search query\n:param project_roots: one or more project directories (default: current dir)\n:param kinds: comma-separated asset kinds — skill, agent, doc\n:param semantic: use toolery's ir semantic backend (needs toolery[ir])\n:param limit: max results to show\n\npositional arguments:\n  query                 -\n  project-roots         -\n\noptions:\n  -h, --help            show this help message and exit\n  -k KINDS, --kinds KINDS\n                        'skill,agent'\n  -s, --semantic        False\n  -l LIMIT, --limit LIMIT\n                        10\n",
       "tier": 3,
       "usage": "usage: opsward find [-h] [-k KINDS] [-s] [-l LIMIT] query [project-roots ...]"
+    },
+    {
+      "argv": [
+        "fleet",
+        "--help"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "usage: opsward fleet [-h] [-u UNDER] [-d DEPTH] [-f FORMAT] [-m MANIFEST] [project-roots ...]\n\nDiagnose many projects at once and roll the results up into one fleet report.\n\nThe fleet is the given roots, plus the git repos found under --under. With --manifest\nthe fleet is remembered: the roots and the latest summary are written to that JSON\nfile, and a later run with only --manifest re-diagnoses the same roots. The manifest\nholds this machine's paths, so keep it out of version control.\n\n:param project_roots: project directories to diagnose\n:param under: also diagnose every git repo found under this directory\n:param depth: how many levels below --under to look for git repos\n:param format: output format — 'text' or 'json' (the name-keyed summary)\n:param manifest: JSON file that remembers the fleet's roots and its latest summary\n\npositional arguments:\n  project-roots         -\n\noptions:\n  -h, --help            show this help message and exit\n  -u UNDER, --under UNDER\n                        ''\n  -d DEPTH, --depth DEPTH\n                        1\n  -f FORMAT, --format FORMAT\n                        'text'\n  -m MANIFEST, --manifest MANIFEST\n                        ''\n",
+      "tier": 3,
+      "usage": "usage: opsward fleet [-h] [-u UNDER] [-d DEPTH] [-f FORMAT] [-m MANIFEST] [project-roots ...]"
     },
     {
       "argv": [
@@ -163,6 +174,30 @@
       "returncode": 0,
       "stderr": "",
       "stdout": "python_project: no skill recommendations\n",
+      "tier": 1,
+      "usage": ""
+    },
+    {
+      "argv": [
+        "fleet",
+        "tests/fixtures/bare_project",
+        "tests/fixtures/python_project"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "Fleet report: 2 repo(s), mean score 26.9\nGrades: F 2\nMissing across the fleet:\n  docs/conventions.md: 2/2\n  docs/known_issues.md: 2/2\n  CLAUDE.md: 1/2\n  docs_guide.md: 1/2\n  docs/architecture.md: 1/2\nComponents, weakest first (mean %, weak repos):\n  Setup (rules/agents/hooks): 20.0%, 2/2\n  CLAUDE.md quality: 24.5%, 2/2\n  Cross-references: 25.0%, 2/2\n  Documentation: 27.5%, 2/2\n  Skills: 35.0%, 1/2\nWorst repos:\n  bare_project: 0.0 (F)\n  python_project: 53.9 (F)\n",
+      "tier": 1,
+      "usage": ""
+    },
+    {
+      "argv": [
+        "fleet",
+        "-u",
+        "tests/fixtures"
+      ],
+      "returncode": 0,
+      "stderr": "",
+      "stdout": "Fleet report: 0 repo(s), mean score 0.0\n",
       "tier": 1,
       "usage": ""
     },
@@ -336,19 +371,19 @@
       "argv": [],
       "returncode": 0,
       "stderr": "",
-      "stdout": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,decision} ...\n",
+      "stdout": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,fleet,decision} ...\n",
       "tier": 1,
-      "usage": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,decision} ..."
+      "usage": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,fleet,decision} ..."
     },
     {
       "argv": [
         "nosuchcommand"
       ],
       "returncode": 2,
-      "stderr": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,decision} ...\nopsward: error: argument {diagnose,generate,maintain,recommend,install-skills,find,decision}: invalid choice: 'nosuchcommand' (choose from 'diagnose', 'generate', 'maintain', 'recommend', 'install-skills', 'find', 'decision')\n",
+      "stderr": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,fleet,decision} ...\nopsward: error: argument {diagnose,generate,maintain,recommend,install-skills,find,fleet,decision}: invalid choice: 'nosuchcommand' (choose from 'diagnose', 'generate', 'maintain', 'recommend', 'install-skills', 'find', 'fleet', 'decision')\n",
       "stdout": "",
       "tier": 1,
-      "usage": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,decision} ... opsward: error: argument {diagnose,generate,maintain,recommend,install-skills,find,decision}: invalid choice: 'nosuchcommand' (choose from 'diagnose', 'generate', 'maintain', 'recommend', 'install-skills', 'find', 'decision')"
+      "usage": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,fleet,decision} ... opsward: error: argument {diagnose,generate,maintain,recommend,install-skills,find,fleet,decision}: invalid choice: 'nosuchcommand' (choose from 'diagnose', 'generate', 'maintain', 'recommend', 'install-skills', 'find', 'fleet', 'decision')"
     },
     {
       "argv": [
@@ -356,10 +391,10 @@
         "--nosuchflag"
       ],
       "returncode": 2,
-      "stderr": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,decision} ...\nopsward: error: unrecognized arguments: --nosuchflag\n",
+      "stderr": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,fleet,decision} ...\nopsward: error: unrecognized arguments: --nosuchflag\n",
       "stdout": "",
       "tier": 1,
-      "usage": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,decision} ... opsward: error: unrecognized arguments: --nosuchflag"
+      "usage": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,fleet,decision} ... opsward: error: unrecognized arguments: --nosuchflag"
     },
     {
       "argv": [
@@ -393,10 +428,10 @@
         "tests/fixtures/bare_project"
       ],
       "returncode": 2,
-      "stderr": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,decision} ...\nopsward: error: unrecognized arguments: --nosuchflag\n",
+      "stderr": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,fleet,decision} ...\nopsward: error: unrecognized arguments: --nosuchflag\n",
       "stdout": "",
       "tier": 1,
-      "usage": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,decision} ... opsward: error: unrecognized arguments: --nosuchflag"
+      "usage": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,fleet,decision} ... opsward: error: unrecognized arguments: --nosuchflag"
     },
     {
       "argv": [
@@ -414,9 +449,9 @@
       ],
       "returncode": 0,
       "stderr": "",
-      "stdout": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,decision} ...\n",
+      "stdout": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,fleet,decision} ...\n",
       "tier": 1,
-      "usage": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,decision} ..."
+      "usage": "usage: opsward [-h] {diagnose,generate,maintain,recommend,install-skills,find,fleet,decision} ..."
     },
     {
       "argv": [
@@ -431,7 +466,41 @@
     },
     {
       "argv": [
+        "fleet"
+      ],
+      "returncode": 2,
+      "stderr": "Error: no roots — give project directories, --under DIR, or an existing --manifest\n",
+      "stdout": "",
+      "tier": 1,
+      "usage": ""
+    },
+    {
+      "argv": [
+        "fleet",
+        "--depth",
+        "notanint"
+      ],
+      "returncode": 2,
+      "stderr": "usage: opsward fleet [-h] [-u UNDER] [-d DEPTH] [-f FORMAT] [-m MANIFEST] [project-roots ...]\nopsward fleet: error: argument -d/--depth: invalid int value: 'notanint'\n",
+      "stdout": "",
+      "tier": 1,
+      "usage": "usage: opsward fleet [-h] [-u UNDER] [-d DEPTH] [-f FORMAT] [-m MANIFEST] [project-roots ...] opsward fleet: error: argument -d/--depth: invalid int value: 'notanint'"
+    },
+    {
+      "argv": [
         "diagnose",
+        "./no/such/directory/opsward-characterization"
+      ],
+      "returncode": 2,
+      "stderr": "Error: ./no/such/directory/opsward-characterization is not a directory\n",
+      "stdout": "",
+      "tier": 1,
+      "usage": ""
+    },
+    {
+      "argv": [
+        "fleet",
+        "--under",
         "./no/such/directory/opsward-characterization"
       ],
       "returncode": 2,
@@ -451,13 +520,13 @@
     "TERM": "dumb"
   },
   "newlines": "lf",
-  "note": "argh 0.31.3, opsward 4e0b04f, pre-cw-migration, CPython 3.10",
+  "note": null,
   "prog": [
     "opsward"
   ],
   "recorded_with": {
     "implementation": "CPython",
-    "platform": "Darwin",
-    "python": "3.10.13"
+    "platform": "Linux",
+    "python": "3.10.21"
   }
 }

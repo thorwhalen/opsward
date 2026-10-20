@@ -63,6 +63,7 @@ python -m opsward diagnose /path/to/proj1 /path/to/proj2  # Multi-project
 python -m opsward generate /path/to/project           # Generate missing pieces
 python -m opsward maintain /path/to/project            # Check for staleness/drift
 python -m opsward recommend /path/to/project           # Recommend ecosystem skills from tech stack
+python -m opsward fleet --under /path/to/projects      # Diagnose every repo under a folder, rolled up
 python -m opsward install-skills --write               # Install Claude Code skills
 python -m opsward decision new "title" --write          # Allocate the next numbered ADR
 python -m opsward decision note "In the context of …" --write   # One-line decision in misc/docs/decisions/log.md
@@ -101,6 +102,7 @@ _dispatch_funcs = {
     "recommend": recommend,
     "install-skills": install_skills,
     "find": find,
+    "fleet": fleet,
     "decision": [new, note],
 }
 ```
@@ -213,7 +215,7 @@ See `misc/docs/target_artifacts.md` for the full spec of generated artifacts.
 - Templates are **not** Jinja2. Use `string.Template` for simplicity and zero deps. If a template needs conditionals, split it into separate template files per variant.
 - The `diagnose` function returns a `DiagnosisReport` dataclass that is both human-readable (via `__str__`) and machine-consumable (via dataclass fields). The CLI pretty-prints it; library users get structured data.
 - The `scan.py` module must be **purely read-only** — it never modifies the target project. This is a hard invariant. It uses `pathlib.Path` and `os.walk`, never writes.
-- For multi-project scanning, each project gets its own `DiagnosisReport`. The CLI's `diagnose` accepts multiple roots (`*project_roots`) and reports each independently. The aggregate is library-only for now: `opsward.fleet.fleet(roots)` returns a `FleetReport` (grade counts, missing-item and component rollups, worst repos, a name-keyed `to_dict()`), and `git_roots_under(parent)` lists the repos under a folder.
+- For multi-project scanning, each project gets its own `DiagnosisReport`. The CLI's `diagnose` accepts multiple roots (`*project_roots`) and reports each independently. The aggregate is `opsward fleet` (CLI) over `opsward.fleet.fleet(roots)`, which returns a `FleetReport` (grade counts, missing-item and component rollups, worst repos, a name-keyed `to_dict()`); `git_roots_under(parent)` lists the repos under a folder. `--manifest PATH` writes the per-machine manifest (absolute roots + the summary): it must stay out of version control.
 - The `ow` shim package is a separate `pyproject.toml` / directory. It literally just does `from opsward import *` and declares `opsward` as a dependency.
 
 ## Git Workflow

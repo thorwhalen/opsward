@@ -19,6 +19,7 @@ maintain --help
 recommend --help
 install-skills --help
 find --help
+fleet --help
 decision --help
 decision new --help
 decision note --help
@@ -29,6 +30,10 @@ diagnose tests/fixtures/python_project
 generate tests/fixtures/bare_project
 maintain tests/fixtures/stale_project
 recommend tests/fixtures/python_project
+# `fleet` text output names repos, never paths; the fixtures hold no `.git`, so `--under`
+# finds an empty fleet. `--manifest` writes a file, so it has no case here (tests/ cover it).
+fleet tests/fixtures/bare_project tests/fixtures/python_project
+fleet -u tests/fixtures
 # `decision` dry runs print only repo-relative paths and the text; the dated entry itself
 # is not printed, so the note case stays portable across days and machines.
 decision new "Pin the thing" --project-root tests/fixtures/python_project
@@ -65,6 +70,9 @@ generate --write --nosuchflag tests/fixtures/bare_project
 find
 decision
 decision new
+fleet
+fleet --depth notanint
 
 # -- tier 1: a runtime error path (opsward's own sys.exit(2)) --
 diagnose ./no/such/directory/opsward-characterization
+fleet --under ./no/such/directory/opsward-characterization

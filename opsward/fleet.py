@@ -22,9 +22,11 @@ which repos are worst.
 
 from __future__ import annotations
 
+import json
 from collections import Counter
 from collections.abc import Callable, Iterable, Iterator
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from pathlib import Path
 from statistics import mean
 
@@ -110,9 +112,8 @@ class FleetReport:
     def __str__(self) -> str:
         n = len(self.reports)
         lines = [f"Fleet report: {n} repo(s), mean score {self.mean_score():.1f}"]
-        lines.append(
-            "Grades: " + ", ".join(f"{g} {c}" for g, c in self.grade_counts().items())
-        )
+        if grades := self.grade_counts():
+            lines.append("Grades: " + ", ".join(f"{g} {c}" for g, c in grades.items()))
         if missing := self.missing_rollup():
             lines.append("Missing across the fleet:")
             lines += [f"  {item}: {count}/{n}" for item, count in missing.items()]
@@ -172,3 +173,47 @@ def git_roots_under(parent: str | Path, *, depth: int = 1) -> Iterator[Path]:
         )
         yield from (p for p in children if (p / ".git").exists())
         level = [p for p in children if not (p / ".git").exists()]
+
+
+#: Format version of the fleet manifest written by :func:`write_manifest`.
+MANIFEST_VERSION = 1
+
+
+def manifest_record(roots: Iterable[str | Path], report: FleetReport, *, updated: str | None = None) -> dict:
+    """The per-machine fleet manifest: the roots that make up the fleet and the last summary.
+
+    The roots are this machine's (absolute) paths, which is why the manifest is
+    per-machine and must stay out of version control; the summary is name-keyed.
+
+    >>> rec = manifest_record(["a", "b"], FleetReport(), updated="2026-10-20T00:00:00+00:00")
+    >>> rec["roots"], rec["report"]["repos"], rec["updated"]
+    (['a', 'b'], {}, '2026-10-20T00:00:00+00:00')
+    """
+    return {
+        "opsward_fleet_manifest": MANIFEST_VERSION,
+        "updated": updated or datetime.now(timezone.utc).isoformat(timespec="seconds"),
+        "roots": [str(r) for r in roots],
+        "report": report.to_dict(),
+    }
+
+
+def write_manifest(path: str | Path, roots: Iterable[str | Path], report: FleetReport) -> Path:
+    """Write :func:`manifest_record` as JSON to ``path`` (parents created) and return it."""
+    path = Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(manifest_record(roots, report), indent=2) + "\n", encoding="utf-8")
+    return path
+
+
+def manifest_roots(path: str | Path) -> list[str]:
+    """The fleet's roots as recorded in the manifest at ``path``; ``[]`` if it does not exist.
+
+    :raises ValueError: when the file exists but is not a fleet manifest.
+    """
+    path = Path(path)
+    if not path.exists():
+        return []
+    data = json.loads(path.read_text(encoding="utf-8"))
+    if not isinstance(data, dict) or "opsward_fleet_manifest" not in data:
+        raise ValueError(f"{path.name} is not an opsward fleet manifest")
+    return [str(r) for r in data.get("roots", [])]
