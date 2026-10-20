@@ -412,8 +412,10 @@ def as_read(render: str, canonical: str, *, path: str = "CLAUDE.md") -> str:
     lines, replaced = [], False
     for line, fenced in _lines(render):
         # Inlined once, and never from code (fenced, or indented as a code block)
-        m = None if replaced or fenced or line.startswith("    ") else (
-            _IMPORT_RE.fullmatch(line.strip())
+        m = (
+            None
+            if replaced or fenced or line.startswith("    ")
+            else (_IMPORT_RE.fullmatch(line.strip()))
         )
         if m and resolves_to_canonical(m.group(1), importer=path):
             lines.append(canonical)
