@@ -76,6 +76,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/opsward.discover.html">opsward.discover</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/opsward.fleet.html">opsward.fleet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/opsward.generate.html">opsward.generate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="_autosummary/opsward.lint.html">opsward.lint</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/opsward.maintain.html">opsward.maintain</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/opsward.recommend.html">opsward.recommend</a></li>
 <li class="toctree-l3"><a class="reference internal" href="_autosummary/opsward.scan.html">opsward.scan</a></li>
@@ -380,6 +381,29 @@ known_issues.md, and content quality.</p>
 </span><span data-line="13"><span class="w">      </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">run</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">opsward diagnose . --min-score 60</span>
 </span></pre></div>
 </div>
+<p>Two gates, for two jobs: <code class="docutils literal notranslate"><span class="pre">diagnose</span> <span class="pre">--min-score</span></code> is the cheap scored gate, and <code class="docutils literal notranslate"><span class="pre">lint</span></code> is the strict one, pass or fail with no score. <code class="docutils literal notranslate"><span class="pre">lint</span></code> checks every project skill against the agentskills.io spec and the hooks config for shapes Claude Code silently ignores, and exits 1 on any finding:</p>
+<div class="highlight-bash notranslate"><div class="highlight"><pre><span></span><span data-line="1">opsward<span class="w"> </span>lint<span class="w"> </span>.<span class="w">                          </span><span class="c1"># opsward's own spec check, plus skill.validate() when installed</span>
+</span><span data-line="2">opsward<span class="w"> </span>lint<span class="w"> </span>.<span class="w"> </span>--validators<span class="w"> </span>opsward<span class="w">     </span><span class="c1"># only opsward's check</span>
+</span><span data-line="3">pip<span class="w"> </span>install<span class="w"> </span><span class="s1">'opsward[lint]'</span><span class="w">             </span><span class="c1"># adds the `skill` package's validate()</span>
+</span></pre></div>
+</div>
+<p>The repo ships a reusable GitHub Action and pre-commit hooks:</p>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># a workflow step, after actions/checkout</span>
+</span><span data-line="2"><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">uses</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">thorwhalen/opsward@&lt;a release tag&gt;</span>
+</span><span data-line="3"><span class="w">  </span><span class="nt">with</span><span class="p">:</span>
+</span><span data-line="4"><span class="w">    </span><span class="nt">min-score</span><span class="p">:</span><span class="w"> </span><span class="s">"70"</span><span class="w">   </span><span class="c1"># "" skips the scored gate</span>
+</span><span data-line="5"><span class="w">    </span><span class="nt">lint</span><span class="p">:</span><span class="w"> </span><span class="s">"true"</span>
+</span></pre></div>
+</div>
+<div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="c1"># .pre-commit-config.yaml</span>
+</span><span data-line="2"><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">repo</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">https://github.com/thorwhalen/opsward</span>
+</span><span data-line="3"><span class="w">  </span><span class="nt">rev</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">&lt;a release tag&gt;</span>
+</span><span data-line="4"><span class="w">  </span><span class="nt">hooks</span><span class="p">:</span>
+</span><span data-line="5"><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">opsward-lint</span>
+</span><span data-line="6"><span class="w">    </span><span class="p p-Indicator">-</span><span class="w"> </span><span class="nt">id</span><span class="p">:</span><span class="w"> </span><span class="l l-Scalar l-Scalar-Plain">opsward-diagnose</span>
+</span><span data-line="7"><span class="w">      </span><span class="nt">args</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">[</span><span class="nv">--min-score</span><span class="p p-Indicator">,</span><span class="w"> </span><span class="s">"70"</span><span class="p p-Indicator">]</span>
+</span></pre></div>
+</div>
 </section>
 <section id="related-work">
 <h2>Related Work<a class="headerlink" href="#related-work" title="Link to this heading">#</a></h2>
@@ -424,7 +448,7 @@ known_issues.md, and content quality.</p>
 </section>
 </section>
 
-<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-10-20 16:07 UTC from <a href="https://github.com/thorwhalen/opsward/commit/f0274788e7510f7fc59dc1a4a46ba6be3f9e0cec">f027478</a> (main) · opsward 0.0.26 · <a href="about-this-build.html">about this build</a></p>
+<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-10-20 16:16 UTC from <a href="https://github.com/thorwhalen/opsward/commit/96c61fe523e2a08165678a3dc6151b630f17f414">96c61fe</a> (main) · opsward 0.0.27 · <a href="about-this-build.html">about this build</a></p>
         </article><button class="back-to-top" type="button">
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
     <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
@@ -459,7 +483,7 @@ known_issues.md, and content quality.</p>
     </div>
   </div>
 </footer>
-      <script src="_static/documentation_options.js?v=6a9d8632"></script>
+      <script src="_static/documentation_options.js?v=cee5022b"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="_static/clipboard.min.js?v=a7894cd8"></script>

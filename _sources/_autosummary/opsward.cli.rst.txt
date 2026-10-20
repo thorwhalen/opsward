@@ -13,6 +13,7 @@ opsward.cli
       fleet
       generate
       install_skills
+      lint
       maintain
       new
       note

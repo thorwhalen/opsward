@@ -76,6 +76,7 @@ data-aria-dark="Switch to auto color mode">
 <li class="toctree-l3"><a class="reference internal" href="opsward.discover.html">opsward.discover</a></li>
 <li class="toctree-l3"><a class="reference internal" href="opsward.fleet.html">opsward.fleet</a></li>
 <li class="toctree-l3"><a class="reference internal" href="opsward.generate.html">opsward.generate</a></li>
+<li class="toctree-l3"><a class="reference internal" href="opsward.lint.html">opsward.lint</a></li>
 <li class="toctree-l3"><a class="reference internal" href="opsward.maintain.html">opsward.maintain</a></li>
 <li class="toctree-l3"><a class="reference internal" href="opsward.recommend.html">opsward.recommend</a></li>
 <li class="toctree-l3"><a class="reference internal" href="opsward.scan.html">opsward.scan</a></li>
@@ -104,6 +105,7 @@ data-aria-dark="Switch to auto color mode">
 <li><a class="reference internal" href="#opsward.cli.fleet"><code class="docutils literal notranslate"><span class="pre">fleet()</span></code></a></li>
 <li><a class="reference internal" href="#opsward.cli.generate"><code class="docutils literal notranslate"><span class="pre">generate()</span></code></a></li>
 <li><a class="reference internal" href="#opsward.cli.install_skills"><code class="docutils literal notranslate"><span class="pre">install_skills()</span></code></a></li>
+<li><a class="reference internal" href="#opsward.cli.lint"><code class="docutils literal notranslate"><span class="pre">lint()</span></code></a></li>
 <li><a class="reference internal" href="#opsward.cli.maintain"><code class="docutils literal notranslate"><span class="pre">maintain()</span></code></a></li>
 <li><a class="reference internal" href="#opsward.cli.new"><code class="docutils literal notranslate"><span class="pre">new()</span></code></a></li>
 <li><a class="reference internal" href="#opsward.cli.note"><code class="docutils literal notranslate"><span class="pre">note()</span></code></a></li>
@@ -168,16 +170,19 @@ data-aria-dark="Switch to auto color mode">
 <tr class="row-odd"><td><p><a class="reference internal" href="#opsward.cli.install_skills" title="opsward.cli.install_skills"><code class="xref py py-obj docutils literal notranslate"><span class="pre">install_skills</span></code></a>([target, global_install, ...])</p></td>
 <td><p>Install opsward's Claude Code skills (and agents) into a project or globally.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#opsward.cli.maintain" title="opsward.cli.maintain"><code class="xref py py-obj docutils literal notranslate"><span class="pre">maintain</span></code></a>(*project_roots[, format])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#opsward.cli.lint" title="opsward.cli.lint"><code class="xref py py-obj docutils literal notranslate"><span class="pre">lint</span></code></a>(*project_roots[, validators, format])</p></td>
+<td><p>Check skill specs and the hooks config: pass or fail, no score (exit 1 on any finding).</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.cli.maintain" title="opsward.cli.maintain"><code class="xref py py-obj docutils literal notranslate"><span class="pre">maintain</span></code></a>(*project_roots[, format])</p></td>
 <td><p>Check for stale references, out-of-sync docs, and other drift.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.cli.new" title="opsward.cli.new"><code class="xref py py-obj docutils literal notranslate"><span class="pre">new</span></code></a>(title[, write, project_root, status, ...])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#opsward.cli.new" title="opsward.cli.new"><code class="xref py py-obj docutils literal notranslate"><span class="pre">new</span></code></a>(title[, write, project_root, status, ...])</p></td>
 <td><p>Allocate the next numbered ADR for TITLE (dry run unless --write; never overwrites).</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#opsward.cli.note" title="opsward.cli.note"><code class="xref py py-obj docutils literal notranslate"><span class="pre">note</span></code></a>(text[, write, project_root])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.cli.note" title="opsward.cli.note"><code class="xref py py-obj docutils literal notranslate"><span class="pre">note</span></code></a>(text[, write, project_root])</p></td>
 <td><p>Append TEXT as a dated one-line decision (a Y-statement) to decisions/log.md (dry run unless --write).</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.cli.recommend" title="opsward.cli.recommend"><code class="xref py py-obj docutils literal notranslate"><span class="pre">recommend</span></code></a>(*project_roots[, format])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#opsward.cli.recommend" title="opsward.cli.recommend"><code class="xref py py-obj docutils literal notranslate"><span class="pre">recommend</span></code></a>(*project_roots[, format])</p></td>
 <td><p>Recommend ecosystem skills based on the project's tech stack.</p></td>
 </tr>
 </tbody>
@@ -272,6 +277,24 @@ actually write files. Existing files are never overwritten.</p>
 <li><p><strong>global_install</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – install into ~/.claude/ instead of the project</p></li>
 <li><p><strong>agents</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – also install agent definitions (default: True)</p></li>
 <li><p><strong>write</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – actually write files (default: dry run)</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="opsward.cli.lint">
+<span class="sig-prename descclassname"><span class="pre">opsward.cli.</span></span><span class="sig-name descname"><span class="pre">lint</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">project_roots</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validators</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'auto'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'text'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/cli.html#lint"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.cli.lint" title="Link to this definition">#</a></dt>
+<dd><p>Check skill specs and the hooks config: pass or fail, no score (exit 1 on any finding).</p>
+<p>The strict counterpart of <code class="code docutils literal notranslate"><span class="pre">diagnose</span> <span class="pre">--min-score</span></code>, for CI and pre-commit. Validators:
+opsward (its own agentskills.io check, always there) and skill (the skill package’s
+validate(); pip install ‘opsward[lint]’). auto runs every one that is installed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>project_roots</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – one or more project directories (default: current dir)</p></li>
+<li><p><strong>validators</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – ‘auto’, or a comma list of: opsward, skill</p></li>
+<li><p><strong>format</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – output format — ‘text’ or ‘json’</p></li>
 </ul>
 </dd>
 </dl>
@@ -380,7 +403,7 @@ actually write files. Existing files are never overwritten.</p>
     </div>
   </div>
 </footer>
-      <script src="../_static/documentation_options.js?v=6a9d8632"></script>
+      <script src="../_static/documentation_options.js?v=cee5022b"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>

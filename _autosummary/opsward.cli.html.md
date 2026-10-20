@@ -10,6 +10,7 @@ CLI dispatch for opsward.
 | [`fleet`](#opsward.cli.fleet)(\*project_roots[, under, depth, ...])         | Diagnose many projects at once and roll the results up into one fleet report.                          |
 | [`generate`](#opsward.cli.generate)(\*project_roots[, write, format, ...])     | Generate missing AI setup artifacts for one or more projects.                                          |
 | [`install_skills`](#opsward.cli.install_skills)([target, global_install, ...])       | Install opsward's Claude Code skills (and agents) into a project or globally.                          |
+| [`lint`](#opsward.cli.lint)(\*project_roots[, validators, format])         | Check skill specs and the hooks config: pass or fail, no score (exit 1 on any finding).                |
 | [`maintain`](#opsward.cli.maintain)(\*project_roots[, format])                 | Check for stale references, out-of-sync docs, and other drift.                                         |
 | [`new`](#opsward.cli.new)(title[, write, project_root, status, ...])      | Allocate the next numbered ADR for TITLE (dry run unless --write; never overwrites).                   |
 | [`note`](#opsward.cli.note)(text[, write, project_root])                   | Append TEXT as a dated one-line decision (a Y-statement) to decisions/log.md (dry run unless --write). |
@@ -82,6 +83,19 @@ actually write files. Existing files are never overwritten.
   * **global_install** ([`bool`](https://docs.python.org/3/builtins/functions.html#bool)) – install into ~/.claude/ instead of the project
   * **agents** ([`bool`](https://docs.python.org/3/builtins/functions.html#bool)) – also install agent definitions (default: True)
   * **write** ([`bool`](https://docs.python.org/3/builtins/functions.html#bool)) – actually write files (default: dry run)
+
+### opsward.cli.lint(\*project_roots, validators='auto', format='text')
+
+Check skill specs and the hooks config: pass or fail, no score (exit 1 on any finding).
+
+The strict counterpart of `diagnose --min-score`, for CI and pre-commit. Validators:
+opsward (its own agentskills.io check, always there) and skill (the skill package’s
+validate(); pip install ‘opsward[lint]’). auto runs every one that is installed.
+
+* **Parameters:**
+  * **project_roots** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – one or more project directories (default: current dir)
+  * **validators** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – ‘auto’, or a comma list of: opsward, skill
+  * **format** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – output format — ‘text’ or ‘json’
 
 ### opsward.cli.maintain(\*project_roots, format='text')
 

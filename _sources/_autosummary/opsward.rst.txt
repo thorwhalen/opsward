@@ -17,6 +17,7 @@
    discover
    fleet
    generate
+   lint
    maintain
    recommend
    scan
