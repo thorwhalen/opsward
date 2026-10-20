@@ -44,6 +44,7 @@ Key docs to read before starting work:
   - `fleet.py` — fleet mode: map `scan → diagnose` over N roots and aggregate into a `FleetReport` (opsward#17, gap 1)
   - `lint.py` — strict schema lint (opsward#17, gap 2): every validator (`opsward`'s own spec check, the optional `skill` package's `validate()`) over the project's skills, plus the hooks config; pass/fail, no score. Shipped with `action.yml` (reusable Action) and `.pre-commit-hooks.yaml` at the repo root
   - `evals.py` — opt-in, report-only evals (opsward#17, gap 3): LLM-as-judge (`judge_claude_md`) and with/without-config golden tasks (`run_golden_tasks`); free defaults `rubric_judge`/`echo_agent`, paid `anthropic_judge`/`anthropic_agent` never used by tests
+  - `security.py` — OWASP-style advisories in `DiagnosisReport.advisories`; never scored
   - `cli.py` — CLI command functions (the `_dispatch_funcs` SSOT)
   - `util.py` — shared helpers, incl. `extract_paths` (the one path extractor; honours the `opsward: ignore-path` marker)
   - `data/` — bundled package resources (accessed via `importlib.resources.files`)

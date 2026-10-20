@@ -141,6 +141,9 @@ class DiagnosisReport:
     # Weighted overall score (0–100), set by score.py
     weighted_score: float = 0.0
 
+    # Security advisories (opsward.security.Advisory): reported, never scored
+    advisories: list = field(default_factory=list)
+
     @property
     def overall_score(self) -> float:
         """Weighted score if set, else simple average."""
@@ -191,6 +194,11 @@ class DiagnosisReport:
             lines.append("Suggestions:")
             for i, sug in enumerate(self.suggestions, 1):
                 lines.append(f"  {i}. {sug}")
+
+        if self.advisories:
+            lines.append("")
+            lines.append("Security advisories (not scored):")
+            lines += [f"  ! {a}" for a in self.advisories]
 
         return "\n".join(lines)
 

@@ -176,6 +176,8 @@ known_issues.md, and content quality.
 
 **Overall health**: weighted score (A–F grade) combining all components.
 
+**Security advisories** (reported, never scored; modelled on the OWASP Top 10 for agentic applications): unrestricted Bash in a skill's `allowed-tools` or in `permissions.allow`, `bypassPermissions`, a download piped into a shell, `eval` of a built string, unpinned `npx`/`uvx` packages in hooks and MCP servers, text that tries to override the agent's other instructions, and committed credentials. They are heuristics, so they never move the grade or fail `--min-score`.
+
 ## Python API
 
 ```python
