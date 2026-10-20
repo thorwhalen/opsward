@@ -142,8 +142,8 @@ class DiagnosisReport:
     missing_items: list[str] = field(default_factory=list)
     suggestions: list[str] = field(default_factory=list)
 
-    # Weighted overall score (0–100), set by score.py
-    weighted_score: float = 0.0
+    # Weighted overall score (0–100), set by score.py; None when not computed
+    weighted_score: Optional[float] = None
 
     # Security advisories (opsward.security.Advisory): reported, never scored
     advisories: list = field(default_factory=list)
@@ -154,8 +154,8 @@ class DiagnosisReport:
 
     @property
     def overall_score(self) -> float:
-        """Weighted score if set, else simple average."""
-        if self.weighted_score:
+        """Weighted score if set (0.0 included), else simple average."""
+        if self.weighted_score is not None:
             return self.weighted_score
         if not self.scores:
             return 0.0

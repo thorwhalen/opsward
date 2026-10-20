@@ -69,7 +69,7 @@ def jsts_scan():
 def test_diagnose_returns_report(python_scan):
     report = diagnose(python_scan)
     assert report.project_type is ProjectType.python
-    assert len(report.scores) == 5  # 5 components
+    assert len(report.scores) == 6  # 6 components
 
 
 def test_score_names(python_scan):
@@ -81,6 +81,7 @@ def test_score_names(python_scan):
         "Skills",
         "Setup (rules/agents/hooks)",
         "Cross-references",
+        "Portability",
     }
 
 
@@ -649,3 +650,16 @@ def test_duplicate_agent_names_count_once_and_are_reported():
         (agents / "b" / "x.md").unlink()
         single = next(c for c in diagnose(scan(root, claude_config_dir=None)).scores if c.name.startswith("Setup"))
         assert single.score == setup.score  # the second file earned nothing
+
+
+def test_overall_weights_sum_to_one_and_name_every_component():
+    from opsward.score import _OVERALL_WEIGHTS
+
+    assert abs(sum(_OVERALL_WEIGHTS.values()) - 1.0) < 1e-9
+    report = diagnose(ScanResult(project_root=Path("/tmp/empty")))
+    assert [s.name for s in report.scores] == list(_OVERALL_WEIGHTS)
+
+
+def test_a_weighted_score_of_zero_is_not_replaced_by_the_average():
+    report = diagnose(ScanResult(project_root=Path("/tmp/empty")))
+    assert report.weighted_score == 0 and report.overall_score == 0

@@ -27,12 +27,20 @@ if TYPE_CHECKING:
 # ---------------------------------------------------------------------------
 
 _OVERALL_WEIGHTS: dict[str, float] = {
-    "CLAUDE.md quality": 0.35,
+    "CLAUDE.md quality": 0.30,
     "Documentation": 0.25,
     "Skills": 0.20,
     "Setup (rules/agents/hooks)": 0.10,
     "Cross-references": 0.10,
+    # Drift between AGENTS.md and its renders only, never hosts covered (ADR 0012)
+    "Portability": 0.05,
 }
+
+#: Portability points each AGENTS.md drift finding costs (stale, diverged or host-only).
+_PORTABILITY_DRIFT_PENALTY = 10
+#: Without an AGENTS.md nothing can drift: Portability's weight counts towards this
+#: component instead, so a repo without one scores exactly as before ADR 0012.
+_PORTABILITY_FALLBACK = "CLAUDE.md quality"
 
 #: CLAUDE.md size (chars) above which Conciseness loses points. An always-loaded
 #: file is paid for on every request; narrative belongs in docs/.
@@ -73,7 +81,7 @@ def diagnose(
     scores: list[ComponentScore] = []
     missing: list[str] = []
     suggestions: list[str] = []
-    from opsward.portability import analyze, as_read
+    from opsward.portability import analyze, as_read, has_canonical
 
     # CLAUDE.md as Claude reads it: an `@AGENTS.md` shim is judged with its import inlined
     read = replace(
@@ -115,15 +123,18 @@ def diagnose(
     xref_score = _score_cross_references(read, suggestions=suggestions)
     scores.append(xref_score)
 
-    # 6. AGENTS.md cross-platform check (advisory, not scored)
+    # 6. Portability: AGENTS.md↔render drift (coverage itself is reported, not scored)
     portability = analyze(scan_result.agents_md_content, scan_result.host_files)
+    has_agents_md = has_canonical(scan_result.agents_md_content)
+    scores.append(_score_portability(portability, applies=has_agents_md))
     _check_agents_md(scan_result, portability, suggestions=suggestions)
 
     # Weighted overall
     score_map = {s.name: s.score for s in scores}
-    weighted = sum(
-        score_map.get(name, 0) * weight for name, weight in _OVERALL_WEIGHTS.items()
-    )
+    weights = dict(_OVERALL_WEIGHTS)
+    if not has_agents_md:
+        weights[_PORTABILITY_FALLBACK] += weights.pop("Portability")
+    weighted = sum(score_map.get(name, 0) * weight for name, weight in weights.items())
 
     from opsward import security  # advisory dimension: reported, never weighted
 
@@ -1114,11 +1125,54 @@ def _score_cross_references(
 # ---------------------------------------------------------------------------
 
 
+def _score_portability(
+    report: "PortabilityReport", *, applies: bool = True
+) -> ComponentScore:
+    """100 minus a fixed penalty per drift finding.
+
+    A repo is never scored on how many hosts it covers. Without an AGENTS.md
+    (``applies=False``) nothing can drift: the component shows 100 and ``diagnose``
+    moves its weight to ``_PORTABILITY_FALLBACK``, so a Claude-only repo is neither
+    penalised nor rewarded (ADR 0012).
+
+    >>> from opsward.portability import DriftFinding, PortabilityReport
+    >>> _score_portability(PortabilityReport()).score
+    100
+    >>> drift = [DriftFinding("stale", "CLAUDE.md", s) for s in "abc"]
+    >>> s = _score_portability(PortabilityReport(findings=drift))
+    >>> s.score, s.notes
+    (70, ['CLAUDE.md: 3 section(s) drift from AGENTS.md (stale 3) → run `opsward portability` for the list'])
+    """
+    from opsward.portability import DRIFT_KINDS
+
+    if not applies:
+        return ComponentScore(
+            name="Portability",
+            score=100,
+            notes=[f"No AGENTS.md: not scored, its weight counts towards {_PORTABILITY_FALLBACK}"],
+        )
+    by_path: dict[str, list[str]] = {}
+    for f in report.findings:
+        by_path.setdefault(f.path, []).append(f.kind)
+    notes = [
+        f"{path}: {len(kinds)} section(s) drift from AGENTS.md ("
+        + ", ".join(
+            f"{k.replace('_', '-')} {kinds.count(k)}" for k in DRIFT_KINDS if k in kinds
+        )
+        + ") → run `opsward portability` for the list"
+        for path, kinds in by_path.items()
+    ]
+    score = max(0, 100 - _PORTABILITY_DRIFT_PENALTY * len(report.findings))
+    return ComponentScore(name="Portability", score=score, notes=notes)
+
+
 def _check_agents_md(
     sr: ScanResult, report: "PortabilityReport", *, suggestions: list[str]
 ) -> None:
     """Advisory check for AGENTS.md (cross-platform agent instructions)."""
-    if not sr.agents_md_content:
+    from opsward.portability import has_canonical
+
+    if not has_canonical(sr.agents_md_content):
         if sr.claude_md_content:
             suggestions.append(
                 "No AGENTS.md found — run `opsward generate --agents-md` to create "

@@ -109,10 +109,13 @@ Weighted combination:
 
 | Component | Weight |
 |-----------|--------|
-| CLAUDE.md quality | 35% |
+| CLAUDE.md quality | 30% |
 | Documentation completeness | 25% |
 | Skills inventory | 20% |
 | Rules/agents/hooks | 10% |
 | Cross-reference integrity | 10% |
+| Portability | 5% |
+
+Portability (ADR 0012) scores drift between `AGENTS.md` and its renders only: 100 minus 10 per stale, diverged or host-only section, floor 0. It never scores how many hosts a repo covers. Without an `AGENTS.md` it does not apply: its 5% counts towards CLAUDE.md quality, which is then 35% as before. A `CLAUDE.md` that imports `@AGENTS.md` is scored with the import inlined.
 
 Letter grades: A (90-100), B (80-89), C (70-79), D (60-69), F (<60).
