@@ -369,8 +369,9 @@ def fleet(
 
     The fleet is the given roots, plus the git repos found under --under. With --manifest
     the fleet is remembered: the roots and the latest summary are written to that JSON
-    file, and a later run with only --manifest re-diagnoses the same roots. The manifest
-    holds this machine's paths, so keep it out of version control.
+    file, and a later run with only --manifest re-diagnoses the same roots (given roots or
+    --under replace them). The manifest holds this machine's absolute paths, so keep it
+    out of version control. Exits 1 when any root could not be diagnosed.
 
     :param project_roots: project directories to diagnose
     :param under: also diagnose every git repo found under this directory
@@ -392,13 +393,16 @@ def fleet(
             print(f"Error: {under} is not a directory", file=sys.stderr)
             sys.exit(2)
         roots += [str(p.resolve()) for p in git_roots_under(parent, depth=depth)]
+        if not roots:
+            print(f"Error: no git repos under {under}", file=sys.stderr)
+            sys.exit(2)
     if manifest and not project_roots and not under:
         try:
             roots = manifest_roots(manifest)
-        except ValueError as e:  # json.JSONDecodeError is a ValueError
+        except (ValueError, OSError) as e:  # JSONDecodeError is a ValueError
             print(f"Error: cannot read the manifest: {e}", file=sys.stderr)
             sys.exit(2)
-    if not roots and not under:
+    if not roots:
         print(
             "Error: no roots — give project directories, --under DIR, "
             "or an existing --manifest",
@@ -413,13 +417,20 @@ def fleet(
     else:
         print(report)
     if manifest:
-        path = write_manifest(manifest, roots, report)
+        # A typo'd root is not a fleet member: remember only roots that exist.
+        members = [r for r in roots if report.errors.get(r) != "not a directory"]
+        try:
+            path = write_manifest(manifest, members, report)
+        except OSError as e:
+            print(f"Error: cannot write the manifest: {e}", file=sys.stderr)
+            sys.exit(2)
         if _not_ignored_in_a_repo(path):
             print(
                 f"Warning: {path.name} is inside a git work tree and not ignored; "
                 "it holds this machine's paths, so add it to .gitignore",
                 file=sys.stderr,
             )
+    sys.exit(1 if report.errors else 0)
 
 
 def _not_ignored_in_a_repo(path: Path) -> bool:

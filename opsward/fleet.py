@@ -91,18 +91,25 @@ class FleetReport:
             self.reports, key=lambda r: (r.overall_score, r.project_root.name)
         )[:n]
 
+    def names(self) -> dict[str, str]:
+        """Root (as a string) -> display name: the basename, or more when basenames clash."""
+        return unique_names(
+            [*(str(r.project_root) for r in self.reports), *self.errors]
+        )
+
     def to_dict(self) -> dict:
         """A JSON-ready summary keyed by repo *name*, never by absolute path."""
+        names = self.names()
         return {
             "repos": {
-                r.project_root.name: {
+                names[str(r.project_root)]: {
                     "score": round(r.overall_score, 1),
                     "grade": r.grade,
                     "missing": list(r.missing_items),
                 }
                 for r in self.reports
             },
-            "errors": {Path(k).name: v for k, v in self.errors.items()},
+            "errors": {names[k]: v for k, v in self.errors.items()},
             "grade_counts": self.grade_counts(),
             "mean_score": round(self.mean_score(), 1),
             "missing_rollup": self.missing_rollup(),
@@ -111,6 +118,7 @@ class FleetReport:
 
     def __str__(self) -> str:
         n = len(self.reports)
+        names = self.names()
         lines = [f"Fleet report: {n} repo(s), mean score {self.mean_score():.1f}"]
         if grades := self.grade_counts():
             lines.append("Grades: " + ", ".join(f"{g} {c}" for g, c in grades.items()))
@@ -126,15 +134,34 @@ class FleetReport:
         if self.reports:
             lines.append("Worst repos:")
             lines += [
-                f"  {r.project_root.name}: {r.overall_score:.1f} ({r.grade})"
+                f"  {names[str(r.project_root)]}: {r.overall_score:.1f} ({r.grade})"
                 for r in self.worst()
             ]
         if self.errors:
             lines.append("Could not diagnose:")
             lines += [
-                f"  {Path(root).name}: {why}" for root, why in self.errors.items()
+                f"  {names[root]}: {why}" for root, why in self.errors.items()
             ]
         return "\n".join(lines)
+
+
+def unique_names(paths: Iterable[str | Path]) -> dict[str, str]:
+    """Each path's shortest trailing part that no other path shares (never the full path).
+
+    >>> unique_names(["/x/a/proj", "/x/b/proj", "/x/c"])
+    {'/x/a/proj': 'a/proj', '/x/b/proj': 'b/proj', '/x/c': 'c'}
+    """
+    paths = list(dict.fromkeys(map(str, paths)))
+    parts = {p: Path(p).parts for p in paths}
+    names = {}
+    for p in paths:
+        tail = parts[p][-1:]
+        for k in range(1, len(parts[p]) + 1):
+            tail = parts[p][-k:]
+            if not any(q != p and parts[q][-k:] == tail for q in paths):
+                break
+        names[p] = "/".join(tail)
+    return names
 
 
 def fleet(
@@ -209,6 +236,7 @@ def manifest_roots(path: str | Path) -> list[str]:
     """The fleet's roots as recorded in the manifest at ``path``; ``[]`` if it does not exist.
 
     :raises ValueError: when the file exists but is not a fleet manifest.
+    :raises OSError: when it cannot be read (a directory, no permission).
     """
     path = Path(path)
     if not path.exists():
@@ -216,4 +244,7 @@ def manifest_roots(path: str | Path) -> list[str]:
     data = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(data, dict) or "opsward_fleet_manifest" not in data:
         raise ValueError(f"{path.name} is not an opsward fleet manifest")
-    return [str(r) for r in data.get("roots", [])]
+    roots = data.get("roots", [])
+    if not isinstance(roots, list) or not all(isinstance(r, str) for r in roots):
+        raise ValueError(f"{path.name}: `roots` must be a list of paths")
+    return roots

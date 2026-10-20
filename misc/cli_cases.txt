@@ -31,7 +31,7 @@ generate tests/fixtures/bare_project
 maintain tests/fixtures/stale_project
 recommend tests/fixtures/python_project
 # `fleet` text output names repos, never paths; the fixtures hold no `.git`, so `--under`
-# finds an empty fleet. `--manifest` writes a file, so it has no case here (tests/ cover it).
+# finds no repos (exit 2). `--manifest` writes a file, so it has no case here (tests/ cover it).
 fleet tests/fixtures/bare_project tests/fixtures/python_project
 fleet -u tests/fixtures
 # `decision` dry runs print only repo-relative paths and the text; the dated entry itself

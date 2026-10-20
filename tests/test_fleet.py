@@ -100,5 +100,38 @@ def test_fleet_cli_needs_some_roots():
     assert done.returncode == 2 and "no roots" in done.stderr
 
 
+def test_fleet_cli_rejects_a_manifest_whose_roots_are_not_a_list(tmp_path):
+    bogus = tmp_path / "m.json"
+    bogus.write_text('{"opsward_fleet_manifest": 1, "roots": "abc"}')
+    done = _fleet_cli("--manifest", str(bogus))
+    assert done.returncode == 2 and "must be a list" in done.stderr
+    done = _fleet_cli("--manifest", str(tmp_path))  # a directory, not a file
+    assert done.returncode == 2 and "cannot read the manifest" in done.stderr
+
+
+def test_fleet_cli_exits_1_on_a_bad_root_and_does_not_remember_it(tmp_path):
+    manifest = tmp_path / "m.json"
+    done = _fleet_cli(
+        str(FIXTURES / "bare_project"), str(tmp_path / "typo"), "-m", str(manifest)
+    )
+    assert done.returncode == 1 and "typo: not a directory" in done.stdout
+    assert json.loads(manifest.read_text())["roots"] == [
+        str((FIXTURES / "bare_project").resolve())
+    ]
+
+
+def test_fleet_cli_under_an_empty_folder_is_an_error(tmp_path):
+    done = _fleet_cli("--under", str(tmp_path))
+    assert done.returncode == 2 and "no git repos under" in done.stderr
+
+
+def test_repos_sharing_a_basename_keep_distinct_keys(tmp_path):
+    roots = [tmp_path / "a" / "proj", tmp_path / "b" / "proj"]
+    for r in roots:
+        r.mkdir(parents=True)
+    data = fleet(roots).to_dict()
+    assert sorted(data["repos"]) == ["a/proj", "b/proj"]
+
+
 def test_manifest_roots_of_a_missing_file_is_empty(tmp_path):
     assert manifest_roots(tmp_path / "absent.json") == []
