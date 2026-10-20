@@ -79,7 +79,9 @@ def iter_files(
 #: and the paths on it are not checked; alone on its line, it covers the next line too.
 IGNORE_PATH_MARKER = "opsward: ignore-path"
 
-_PATH_PATTERN = re.compile(r"(?:^|[\s`(])(\./)?(\w[\w\-.]*/[\w\-./]+\.\w+)", re.MULTILINE)
+_PATH_PATTERN = re.compile(
+    r"(?:^|[\s`(])(\./)?(\w[\w\-.]*/[\w\-./]+\.\w+)", re.MULTILINE
+)
 
 
 def checked_lines(content: str, *, marker: str = IGNORE_PATH_MARKER) -> str:
@@ -98,8 +100,12 @@ def checked_lines(content: str, *, marker: str = IGNORE_PATH_MARKER) -> str:
     for line in content.splitlines():
         unquoted = _BACKTICKED.sub("", line)
         if marker in unquoted:
-            alone = bool(re.fullmatch(rf"\s*(<!--|#)?\s*{re.escape(marker)}\s*(-->)?\s*", line))
-            skip_next = alone  # a marker alone on its line covers the next one (and chains)
+            alone = bool(
+                re.fullmatch(rf"\s*(<!--|#)?\s*{re.escape(marker)}\s*(-->)?\s*", line)
+            )
+            skip_next = (
+                alone  # a marker alone on its line covers the next one (and chains)
+            )
             continue
         if skip_next:
             skip_next = False
