@@ -649,7 +649,9 @@ def eval_(
     if judge == "anthropic":
         try:
             the_judge, agent = evals.anthropic_judge(), evals.anthropic_agent()
-        except Exception as e:  # no SDK (ImportError) or no API key (the SDK's own error)
+        except (
+            Exception
+        ) as e:  # no SDK (ImportError) or no API key (the SDK's own error)
             print(f"Error: cannot start the paid judge: {e}", file=sys.stderr)
             sys.exit(2)
     else:
