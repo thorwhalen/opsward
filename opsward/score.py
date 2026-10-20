@@ -5,9 +5,9 @@ All functions are pure — same input, same output.
 
 import re
 from collections.abc import Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
 from opsward.subagents import twin_summary
 from opsward.base import (
@@ -17,6 +17,9 @@ from opsward.base import (
     ScanResult,
     SkillInfo,
 )
+
+if TYPE_CHECKING:
+    from opsward.portability import PortabilityReport
 
 
 # ---------------------------------------------------------------------------
@@ -70,10 +73,19 @@ def diagnose(
     scores: list[ComponentScore] = []
     missing: list[str] = []
     suggestions: list[str] = []
+    from opsward.portability import analyze, as_read
+
+    # CLAUDE.md as Claude reads it: an `@AGENTS.md` shim is judged with its import inlined
+    read = replace(
+        scan_result,
+        claude_md_content=as_read(
+            scan_result.claude_md_content, scan_result.agents_md_content
+        ),
+    )
 
     # 1. CLAUDE.md quality (max 100, 6 dimensions)
     claude_score = _score_claude_md(
-        scan_result.claude_md_content,
+        read.claude_md_content,
         scan_result.project_root,
         missing=missing,
         suggestions=suggestions,
@@ -83,7 +95,7 @@ def diagnose(
     scores.append(claude_score)
 
     # 2. Documentation completeness (max 100)
-    doc_score = _score_docs(scan_result, missing=missing, suggestions=suggestions)
+    doc_score = _score_docs(read, missing=missing, suggestions=suggestions)
     scores.append(doc_score)
 
     # 3. Skills (max 100)
@@ -100,11 +112,12 @@ def diagnose(
     scores.append(setup_score)
 
     # 5. Cross-reference integrity (max 100)
-    xref_score = _score_cross_references(scan_result, suggestions=suggestions)
+    xref_score = _score_cross_references(read, suggestions=suggestions)
     scores.append(xref_score)
 
     # 6. AGENTS.md cross-platform check (advisory, not scored)
-    _check_agents_md(scan_result, suggestions=suggestions)
+    portability = analyze(scan_result.agents_md_content, scan_result.host_files)
+    _check_agents_md(scan_result, portability, suggestions=suggestions)
 
     # Weighted overall
     score_map = {s.name: s.score for s in scores}
@@ -129,6 +142,7 @@ def diagnose(
         suggestions=suggestions,
         weighted_score=weighted,
         advisories=advisories,
+        portability=portability,
     )
 
 
@@ -1100,7 +1114,9 @@ def _score_cross_references(
 # ---------------------------------------------------------------------------
 
 
-def _check_agents_md(sr: ScanResult, *, suggestions: list[str]) -> None:
+def _check_agents_md(
+    sr: ScanResult, report: "PortabilityReport", *, suggestions: list[str]
+) -> None:
     """Advisory check for AGENTS.md (cross-platform agent instructions)."""
     if not sr.agents_md_content:
         if sr.claude_md_content:
@@ -1111,9 +1127,8 @@ def _check_agents_md(sr: ScanResult, *, suggestions: list[str]) -> None:
         return
 
     # Canonical↔render drift across every host's file (opsward#15)
-    from opsward.portability import analyze, summarize
+    from opsward.portability import summarize
 
-    report = analyze(sr.agents_md_content, sr.host_files)
     claude = sr.host_files.get("CLAUDE.md")
     if claude is not None and claude.relation == "copy":
         suggestions.append(

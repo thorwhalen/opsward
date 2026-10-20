@@ -46,6 +46,8 @@ from typing import Optional
 from opsward.util import read_text_safe
 
 CANONICAL = "AGENTS.md"
+#: The drift finding kinds, in report order (see the module docstring).
+DRIFT_KINDS = ("stale", "diverged", "host_only")
 
 
 @dataclass(frozen=True)
@@ -224,13 +226,41 @@ def summarize(report: PortabilityReport) -> Iterator[str]:
     for path, findings in by_path.items():
         counts = {
             kind: sum(f.kind == kind for f in findings)
-            for kind in ("stale", "diverged", "host_only")
+            for kind in DRIFT_KINDS
         }
         parts = [f"{n} {kind.replace('_', '-')}" for kind, n in counts.items() if n]
         yield (
             f"{path} drifts from AGENTS.md ({', '.join(parts)} section(s)) — "
             "see `opsward.check_portability(root)` for the list"
         )
+
+
+def as_read(render: str, canonical: str) -> str:
+    """*render* as its host reads it: an ``@AGENTS.md`` import replaced by *canonical*.
+
+    A line that is only the import is replaced in place; an import inside a sentence
+    appends the canonical at the end. A copy (no import) comes back unchanged, so
+    scoring a shim judges what the agent actually sees, not the three-line file.
+
+    >>> as_read("@AGENTS.md\\n\\n## Claude\\n\\nx", "## Build\\n\\npytest\\n")
+    '## Build\\n\\npytest\\n\\n## Claude\\n\\nx'
+    >>> as_read("Read @AGENTS.md first.", "## Build")
+    'Read @AGENTS.md first.\\n\\n## Build'
+    >>> as_read("## Build\\n\\npytest", "## Other")
+    '## Build\\n\\npytest'
+    """
+    if not canonical or HostFile("render", render).relation != "import":
+        return render
+    canonical = canonical.lstrip("﻿").strip("\n")
+    lines, replaced = [], False
+    for line, fenced in _lines(render):
+        if not fenced and _IMPORT_RE.fullmatch(line.strip()):
+            lines.append(canonical)
+            replaced = True
+        else:
+            lines.append(line)
+    out = "\n".join(lines)
+    return out if replaced else f"{out}\n\n{canonical}"
 
 
 # Strongest first: a host covered several ways reports the least drift-prone one.

@@ -486,6 +486,46 @@ def lint(
     sys.exit(1 if findings else 0)
 
 
+def portability(
+    *project_roots: str,
+    format: str = "text",
+):
+    """Show which agent hosts find project instructions, and how renders drift from AGENTS.md.
+
+    One row per host (claude, codex, copilot, cursor, ...) with how it is covered:
+    symlink, import (an @AGENTS.md shim), native (reads AGENTS.md itself), copy, rules,
+    or none. Then every section where a render differs from AGENTS.md. Report-only.
+
+    :param project_roots: one or more project directories (default: current dir)
+    :param format: output format — 'text' or 'json'
+    """
+    from opsward.portability import check_portability
+
+    if format not in ("text", "json"):
+        print("Error: format must be 'text' or 'json'", file=sys.stderr)
+        sys.exit(2)
+    out = []
+    for root_str in project_roots or (".",):
+        root = Path(root_str).resolve()
+        if not root.is_dir():
+            print(f"Error: {root_str} is not a directory", file=sys.stderr)
+            sys.exit(2)
+        report = check_portability(root)
+        out.append({"project": root.name, **report.to_dict()})
+        if format == "json":
+            continue
+        width = max(map(len, report.coverage), default=0)
+        print(f"{root.name}: {len(report.covered)}/{len(report.coverage)} host(s) covered")
+        for host, relation in report.coverage.items():
+            print(f"  {host:<{width}}  {relation}")
+        if report.findings:
+            print(f"  AGENTS.md drift ({len(report.findings)}):")
+            for f in report.findings:
+                print(f"    {f}")
+    if format == "json":
+        print(json.dumps(out, indent=2))
+
+
 def _not_ignored_in_a_repo(path: Path) -> bool:
     """True when ``path`` lies in a git work tree and is not ignored (no git: False)."""
     import subprocess
@@ -657,7 +697,9 @@ def eval_(
     else:
         the_judge, agent = evals.rubric_judge, evals.echo_agent
 
-    config = sr.claude_md_content
+    from opsward.portability import as_read
+
+    config = as_read(sr.claude_md_content, sr.agents_md_content)
     judged = (
         evals.judge_claude_md(config, judge=the_judge, samples=samples)
         if sr.claude_md_path
@@ -701,6 +743,7 @@ _dispatch_funcs = {
     "find": find,
     "fleet": fleet,
     "lint": lint,
+    "portability": portability,
     "eval": eval_,
     "decision": [new, note],
 }

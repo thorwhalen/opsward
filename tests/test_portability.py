@@ -151,3 +151,68 @@ def test_clinerules_file_and_dot_claude_claude_md(tmp_path):
     report = portability(tmp_path)
     assert report.coverage["cline"] == "copy"
     assert report.coverage["claude"] == "copy"
+
+
+# -- opsward#69: a shim is scored as read, the CLI command, the fleet rollup --
+
+
+def test_a_shim_is_scored_with_its_import_inlined(tmp_path):
+    body = "## Commands\n\n```bash\npytest\nruff check .\n```\n\n## Architecture\n\n- `src/` holds the code\n"
+    _write(tmp_path, "AGENTS.md", "# P\n\n" + body)
+    _write(tmp_path, "CLAUDE.md", "@AGENTS.md\n")
+    shim = diagnose(scan(tmp_path, claude_config_dir=None))
+    _write(tmp_path, "CLAUDE.md", "# P\n\n" + body)
+    copy = diagnose(scan(tmp_path, claude_config_dir=None))
+    assert shim.scores[0].score == copy.scores[0].score > 0
+    assert shim.portability.coverage["claude"] == "import"
+    assert copy.portability.coverage["claude"] == "copy"
+
+
+def test_as_read_leaves_fenced_imports_and_copies_alone():
+    from opsward.portability import as_read
+
+    fenced = "```\n@AGENTS.md\n```\n"
+    assert as_read(fenced, "## Build") == fenced
+    assert as_read("@AGENTS.md", "") == "@AGENTS.md"
+
+
+def test_portability_cli_prints_coverage_and_drift(tmp_path):
+    import json
+    import subprocess
+    import sys
+
+    _write(tmp_path, "AGENTS.md", CANONICAL)
+    _write(tmp_path, "CLAUDE.md", "# P\n\n## Build\n\npytest -x\n")
+
+    def run(*args):
+        return subprocess.run(
+            [sys.executable, "-m", "opsward", "portability", str(tmp_path), *args],
+            capture_output=True,
+            text=True,
+        )
+
+    text = run()
+    assert text.returncode == 0, text.stderr
+    assert "claude    copy" in text.stdout and "codex     native" in text.stdout
+    assert "CLAUDE.md: section 'build' differs from AGENTS.md" in text.stdout
+    data = json.loads(run("--format", "json").stdout)
+    assert data[0]["project"] == tmp_path.name
+    assert {"kind": "stale", "path": "CLAUDE.md", "section": "layout"} in data[0]["findings"]
+    assert run("--format", "yaml").returncode == 2
+
+
+def test_fleet_rolls_up_coverage_and_drift(tmp_path):
+    from opsward import fleet
+
+    for name, claude in [("shim", "@AGENTS.md\n"), ("copy", "# P\n\n## Build\n\nx\n")]:
+        _write(tmp_path / name, "AGENTS.md", CANONICAL)
+        _write(tmp_path / name, "CLAUDE.md", claude)
+    (tmp_path / "bare").mkdir()
+    report = fleet([tmp_path / n for n in ("shim", "copy", "bare")])
+    rollup = report.portability_rollup()
+    assert rollup["covered"]["claude"] == 2 and rollup["covered"]["codex"] == 2
+    assert rollup["uncovered"] == 1 and rollup["drifting_repos"] == 1
+    assert rollup["drift"] == {"stale": 1, "diverged": 1, "host_only": 0}
+    assert report.to_dict()["portability_rollup"] == rollup
+    assert "Host coverage (repos): claude 2" in str(report)
+    assert "AGENTS.md drift: 1 repo(s) (stale 1, diverged 1)" in str(report)

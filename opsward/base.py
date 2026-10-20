@@ -148,6 +148,10 @@ class DiagnosisReport:
     # Security advisories (opsward.security.Advisory): reported, never scored
     advisories: list = field(default_factory=list)
 
+    # Host coverage and AGENTS.md drift (opsward.portability.PortabilityReport):
+    # reported, never scored (opsward#15)
+    portability: Optional[object] = None
+
     @property
     def overall_score(self) -> float:
         """Weighted score if set, else simple average."""
