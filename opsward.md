@@ -1,4 +1,4 @@
-> built 2026-10-20 15:14 UTC from e7e67b4 (main) · opsward 0.0.25. Details: build_info.json
+> built 2026-10-20 16:07 UTC from f027478 (main) · opsward 0.0.26. Details: build_info.json
 
 # index.html.md
 
@@ -85,6 +85,19 @@ myproject: 3 issue(s)
   [sync_issue] `new_doc.md` exists in docs/ but is not listed in docs_guide.md
   [empty_doc] `conventions.md` appears to be an empty stub (12 bytes)
 ```
+
+### Fleet
+
+Diagnose many repos at once and roll the results up (grades, what is missing where, the weakest components, the worst repos):
+
+```bash
+opsward fleet ~/proj/a ~/proj/b            # explicit roots
+opsward fleet --under ~/proj --depth 2     # every git repo under a folder
+opsward fleet --under ~/proj --manifest ~/.local/share/opsward/fleet.json
+opsward fleet --manifest ~/.local/share/opsward/fleet.json   # re-run the remembered fleet
+```
+
+`--manifest` remembers the fleet: it writes the roots and the latest name-keyed summary to that JSON file. The roots are this machine’s paths, so keep the manifest out of version control (opsward warns when it sits in a git work tree unignored).
 
 ### Output Formats
 
@@ -340,6 +353,7 @@ CLI dispatch for opsward.
 | [`diagnose`](_autosummary/opsward.cli.html.md#opsward.cli.diagnose)(\*project_roots[, format, verbose, ...])   | Diagnose the AI agent setup of one or more projects.                                                   |
 |------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------|
 | [`find`](_autosummary/opsward.cli.html.md#opsward.cli.find)(query, \*project_roots[, kinds, ...])          | Find assets (skills, agents, docs) across one or more projects by QUERY.                               |
+| [`fleet`](_autosummary/opsward.cli.html.md#opsward.cli.fleet)(\*project_roots[, under, depth, ...])         | Diagnose many projects at once and roll the results up into one fleet report.                          |
 | [`generate`](_autosummary/opsward.cli.html.md#opsward.cli.generate)(\*project_roots[, write, format, ...])     | Generate missing AI setup artifacts for one or more projects.                                          |
 | [`install_skills`](_autosummary/opsward.cli.html.md#opsward.cli.install_skills)([target, global_install, ...])       | Install opsward's Claude Code skills (and agents) into a project or globally.                          |
 | [`maintain`](_autosummary/opsward.cli.html.md#opsward.cli.maintain)(\*project_roots[, format])                 | Check for stale references, out-of-sync docs, and other drift.                                         |
@@ -370,6 +384,23 @@ Cross-repo asset discovery via the toolery package
   * **kinds** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – comma-separated asset kinds — skill, agent, doc
   * **semantic** ([`bool`](https://docs.python.org/3/builtins/functions.html#bool)) – use toolery’s ir semantic backend (needs toolery[ir])
   * **limit** ([`int`](https://docs.python.org/3/builtins/functions.html#int)) – max results to show
+
+### opsward.cli.fleet(\*project_roots, under='', depth=1, format='text', manifest='')
+
+Diagnose many projects at once and roll the results up into one fleet report.
+
+The fleet is the given roots, plus the git repos found under –under. With –manifest
+the fleet is remembered: the roots and the latest summary are written to that JSON
+file, and a later run with only –manifest re-diagnoses the same roots (given roots or
+–under replace them). The manifest holds this machine’s absolute paths, so keep it
+out of version control. Exits 1 when any root could not be diagnosed.
+
+* **Parameters:**
+  * **project_roots** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – project directories to diagnose
+  * **under** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – also diagnose every git repo found under this directory
+  * **depth** ([`int`](https://docs.python.org/3/builtins/functions.html#int)) – how many levels below –under to look for git repos
+  * **format** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – output format — ‘text’ or ‘json’ (the name-keyed summary)
+  * **manifest** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – JSON file that remembers the fleet’s roots and its latest summary
 
 ### opsward.cli.generate(\*project_roots, write=False, format='text', agents_md=False, hooks=False)
 
@@ -1199,18 +1230,16 @@ Read a text file, returning ‘’ if it doesn’t exist or can’t be decoded.
 
 # About this build
 
-This documentation was built on **2026-10-20 15:14 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/e7e67b48a291b19be1cba596b8f520ea3805d4e2"><code>e7e67b4</code></a> on branch <code>main</code>, for **opsward 0.0.25** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-10-20 16:07 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/f0274788e7510f7fc59dc1a4a46ba6be3f9e0cec"><code>f027478</code></a> on branch <code>main</code>, for **opsward 0.0.26** (from <code>pyproject.toml</code>).
 
-#### WARNING
-The documentation and the package may be misaligned:
-
-- The documented version (0.0.25) is behind the latest release on PyPI (0.0.26): `pip install opsward` gives newer code than these docs describe.
+#### NOTE
+Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
 
 ## Source
 
 |                     |                                                                                                                                                           |
 |---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/opsward/commit/e7e67b48a291b19be1cba596b8f520ea3805d4e2"><code>e7e67b48a291b19be1cba596b8f520ea3805d4e2</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/opsward/commit/f0274788e7510f7fc59dc1a4a46ba6be3f9e0cec"><code>f0274788e7510f7fc59dc1a4a46ba6be3f9e0cec</code></a> |
 | Branch              | <code>main</code>                                                                                                                                         |
 | Tags at this commit | none                                                                                                                                                      |
 | Working tree        | clean                                                                                                                                                     |
@@ -1221,9 +1250,9 @@ The documentation and the package may be misaligned:
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/opsward</code>                                                            |
-| Run          | <a href="https://github.com/thorwhalen/opsward/actions/runs/39446270728">39446270728</a>   |
+| Run          | <a href="https://github.com/thorwhalen/opsward/actions/runs/39454349630">39454349630</a>   |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>e7e67b48a291b19be1cba596b8f520ea3805d4e2</code> (in the history of the built commit) |
+| Event commit | <code>f0274788e7510f7fc59dc1a4a46ba6be3f9e0cec</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -1248,13 +1277,13 @@ The documentation and the package may be misaligned:
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/opsward/0.0.26/">0.0.26</a>, newer than the documented version (0.0.25).
+Latest release: <a href="https://pypi.org/project/opsward/0.0.26/">0.0.26</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/opsward && cd opsward
-git checkout e7e67b48a291b19be1cba596b8f520ea3805d4e2
+git checkout f0274788e7510f7fc59dc1a4a46ba6be3f9e0cec
 pip install "epythet==0.2.21"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

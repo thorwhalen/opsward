@@ -101,6 +101,7 @@ data-aria-dark="Switch to auto color mode">
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
 <li><a class="reference internal" href="#opsward.cli.diagnose"><code class="docutils literal notranslate"><span class="pre">diagnose()</span></code></a></li>
 <li><a class="reference internal" href="#opsward.cli.find"><code class="docutils literal notranslate"><span class="pre">find()</span></code></a></li>
+<li><a class="reference internal" href="#opsward.cli.fleet"><code class="docutils literal notranslate"><span class="pre">fleet()</span></code></a></li>
 <li><a class="reference internal" href="#opsward.cli.generate"><code class="docutils literal notranslate"><span class="pre">generate()</span></code></a></li>
 <li><a class="reference internal" href="#opsward.cli.install_skills"><code class="docutils literal notranslate"><span class="pre">install_skills()</span></code></a></li>
 <li><a class="reference internal" href="#opsward.cli.maintain"><code class="docutils literal notranslate"><span class="pre">maintain()</span></code></a></li>
@@ -158,22 +159,25 @@ data-aria-dark="Switch to auto color mode">
 <tr class="row-even"><td><p><a class="reference internal" href="#opsward.cli.find" title="opsward.cli.find"><code class="xref py py-obj docutils literal notranslate"><span class="pre">find</span></code></a>(query, *project_roots[, kinds, ...])</p></td>
 <td><p>Find assets (skills, agents, docs) across one or more projects by QUERY.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.cli.generate" title="opsward.cli.generate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate</span></code></a>(*project_roots[, write, format, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.cli.fleet" title="opsward.cli.fleet"><code class="xref py py-obj docutils literal notranslate"><span class="pre">fleet</span></code></a>(*project_roots[, under, depth, ...])</p></td>
+<td><p>Diagnose many projects at once and roll the results up into one fleet report.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#opsward.cli.generate" title="opsward.cli.generate"><code class="xref py py-obj docutils literal notranslate"><span class="pre">generate</span></code></a>(*project_roots[, write, format, ...])</p></td>
 <td><p>Generate missing AI setup artifacts for one or more projects.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#opsward.cli.install_skills" title="opsward.cli.install_skills"><code class="xref py py-obj docutils literal notranslate"><span class="pre">install_skills</span></code></a>([target, global_install, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.cli.install_skills" title="opsward.cli.install_skills"><code class="xref py py-obj docutils literal notranslate"><span class="pre">install_skills</span></code></a>([target, global_install, ...])</p></td>
 <td><p>Install opsward's Claude Code skills (and agents) into a project or globally.</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.cli.maintain" title="opsward.cli.maintain"><code class="xref py py-obj docutils literal notranslate"><span class="pre">maintain</span></code></a>(*project_roots[, format])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#opsward.cli.maintain" title="opsward.cli.maintain"><code class="xref py py-obj docutils literal notranslate"><span class="pre">maintain</span></code></a>(*project_roots[, format])</p></td>
 <td><p>Check for stale references, out-of-sync docs, and other drift.</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#opsward.cli.new" title="opsward.cli.new"><code class="xref py py-obj docutils literal notranslate"><span class="pre">new</span></code></a>(title[, write, project_root, status, ...])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.cli.new" title="opsward.cli.new"><code class="xref py py-obj docutils literal notranslate"><span class="pre">new</span></code></a>(title[, write, project_root, status, ...])</p></td>
 <td><p>Allocate the next numbered ADR for TITLE (dry run unless --write; never overwrites).</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.cli.note" title="opsward.cli.note"><code class="xref py py-obj docutils literal notranslate"><span class="pre">note</span></code></a>(text[, write, project_root])</p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="#opsward.cli.note" title="opsward.cli.note"><code class="xref py py-obj docutils literal notranslate"><span class="pre">note</span></code></a>(text[, write, project_root])</p></td>
 <td><p>Append TEXT as a dated one-line decision (a Y-statement) to decisions/log.md (dry run unless --write).</p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="#opsward.cli.recommend" title="opsward.cli.recommend"><code class="xref py py-obj docutils literal notranslate"><span class="pre">recommend</span></code></a>(*project_roots[, format])</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.cli.recommend" title="opsward.cli.recommend"><code class="xref py py-obj docutils literal notranslate"><span class="pre">recommend</span></code></a>(*project_roots[, format])</p></td>
 <td><p>Recommend ecosystem skills based on the project's tech stack.</p></td>
 </tr>
 </tbody>
@@ -209,6 +213,28 @@ data-aria-dark="Switch to auto color mode">
 <li><p><strong>kinds</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – comma-separated asset kinds — skill, agent, doc</p></li>
 <li><p><strong>semantic</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – use toolery’s ir semantic backend (needs toolery[ir])</p></li>
 <li><p><strong>limit</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – max results to show</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="opsward.cli.fleet">
+<span class="sig-prename descclassname"><span class="pre">opsward.cli.</span></span><span class="sig-name descname"><span class="pre">fleet</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">project_roots</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">under</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">depth</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'text'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">manifest</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/cli.html#fleet"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.cli.fleet" title="Link to this definition">#</a></dt>
+<dd><p>Diagnose many projects at once and roll the results up into one fleet report.</p>
+<p>The fleet is the given roots, plus the git repos found under –under. With –manifest
+the fleet is remembered: the roots and the latest summary are written to that JSON
+file, and a later run with only –manifest re-diagnoses the same roots (given roots or
+–under replace them). The manifest holds this machine’s absolute paths, so keep it
+out of version control. Exits 1 when any root could not be diagnosed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>project_roots</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – project directories to diagnose</p></li>
+<li><p><strong>under</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – also diagnose every git repo found under this directory</p></li>
+<li><p><strong>depth</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – how many levels below –under to look for git repos</p></li>
+<li><p><strong>format</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – output format — ‘text’ or ‘json’ (the name-keyed summary)</p></li>
+<li><p><strong>manifest</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – JSON file that remembers the fleet’s roots and its latest summary</p></li>
 </ul>
 </dd>
 </dl>
@@ -354,7 +380,7 @@ actually write files. Existing files are never overwritten.</p>
     </div>
   </div>
 </footer>
-      <script src="../_static/documentation_options.js?v=5d650c58"></script>
+      <script src="../_static/documentation_options.js?v=6a9d8632"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>

@@ -7,6 +7,7 @@ CLI dispatch for opsward.
 | [`diagnose`](#opsward.cli.diagnose)(\*project_roots[, format, verbose, ...])   | Diagnose the AI agent setup of one or more projects.                                                   |
 |------------------------------------------------------------------------------------------------------|--------------------------------------------------------------------------------------------------------|
 | [`find`](#opsward.cli.find)(query, \*project_roots[, kinds, ...])          | Find assets (skills, agents, docs) across one or more projects by QUERY.                               |
+| [`fleet`](#opsward.cli.fleet)(\*project_roots[, under, depth, ...])         | Diagnose many projects at once and roll the results up into one fleet report.                          |
 | [`generate`](#opsward.cli.generate)(\*project_roots[, write, format, ...])     | Generate missing AI setup artifacts for one or more projects.                                          |
 | [`install_skills`](#opsward.cli.install_skills)([target, global_install, ...])       | Install opsward's Claude Code skills (and agents) into a project or globally.                          |
 | [`maintain`](#opsward.cli.maintain)(\*project_roots[, format])                 | Check for stale references, out-of-sync docs, and other drift.                                         |
@@ -37,6 +38,23 @@ Cross-repo asset discovery via the toolery package
   * **kinds** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – comma-separated asset kinds — skill, agent, doc
   * **semantic** ([`bool`](https://docs.python.org/3/builtins/functions.html#bool)) – use toolery’s ir semantic backend (needs toolery[ir])
   * **limit** ([`int`](https://docs.python.org/3/builtins/functions.html#int)) – max results to show
+
+### opsward.cli.fleet(\*project_roots, under='', depth=1, format='text', manifest='')
+
+Diagnose many projects at once and roll the results up into one fleet report.
+
+The fleet is the given roots, plus the git repos found under –under. With –manifest
+the fleet is remembered: the roots and the latest summary are written to that JSON
+file, and a later run with only –manifest re-diagnoses the same roots (given roots or
+–under replace them). The manifest holds this machine’s absolute paths, so keep it
+out of version control. Exits 1 when any root could not be diagnosed.
+
+* **Parameters:**
+  * **project_roots** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – project directories to diagnose
+  * **under** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – also diagnose every git repo found under this directory
+  * **depth** ([`int`](https://docs.python.org/3/builtins/functions.html#int)) – how many levels below –under to look for git repos
+  * **format** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – output format — ‘text’ or ‘json’ (the name-keyed summary)
+  * **manifest** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – JSON file that remembers the fleet’s roots and its latest summary
 
 ### opsward.cli.generate(\*project_roots, write=False, format='text', agents_md=False, hooks=False)
 
