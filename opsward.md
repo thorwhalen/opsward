@@ -1,4 +1,4 @@
-> built 2026-10-20 16:24 UTC from 6e04508 (main) · opsward 0.0.28. Details: build_info.json
+> built 2026-10-20 16:32 UTC from 570ed08 (main) · opsward 0.0.29. Details: build_info.json
 
 # index.html.md
 
@@ -81,10 +81,12 @@ opsward maintain .
 ```default
 myproject: 3 issue(s)
 
-  [stale_path] CLAUDE.md references `src/old_module.py` but it does not exist
-  [sync_issue] `new_doc.md` exists in docs/ but is not listed in docs_guide.md
-  [empty_doc] `conventions.md` appears to be an empty stub (12 bytes)
+  [stale_path → align] CLAUDE.md references `src/old_module.py` but it does not exist
+  [sync_issue → align] `new_doc.md` exists in docs/ but is not listed in docs_guide.md
+  [empty_doc → align] `conventions.md` appears to be an empty stub (12 bytes)
 ```
+
+Each finding carries a recommended triage: **align** (the code is right, update the config), **revert** (the config is right, restore the code) or **ignore** (the reference is legitimately volatile). To ignore one, put `<!-- opsward: ignore-path -->` at the end of its line, or alone on the line before it; every path check (stale paths, the currency score, cross-references, ADR drift) then skips it.
 
 ### Fleet
 
@@ -213,14 +215,26 @@ The rubric scores form; evals ask whether a config actually helps. They make mod
 
 ```python
 from pathlib import Path
-from opsward.evals import judge_claude_md, anthropic_judge, run_golden_tasks, GoldenTask, anthropic_agent
+from opsward.evals import (
+    judge_claude_md,
+    anthropic_judge,
+    run_golden_tasks,
+    GoldenTask,
+    anthropic_agent,
+)
 
 # LLM-as-judge for the subjective dimensions (actionability, conciseness), next to the rubric's score
-print(judge_claude_md(Path("CLAUDE.md").read_text(), judge=anthropic_judge(), samples=3))
+print(
+    judge_claude_md(Path("CLAUDE.md").read_text(), judge=anthropic_judge(), samples=3)
+)
 
 # Golden tasks: does the agent honour a convention with the config, and not without it?
 tasks = [GoldenTask("kw-only", "Write a function f(a, b, c).", expect=[r"\*,"])]
-print(run_golden_tasks(tasks, agent=anthropic_agent(), config=Path("CLAUDE.md").read_text(), runs=3))
+print(
+    run_golden_tasks(
+        tasks, agent=anthropic_agent(), config=Path("CLAUDE.md").read_text(), runs=3
+    )
+)
 ```
 
 `pip install 'opsward[eval]'` for the paid judge and agent. Without them, `judge_claude_md` defaults to `rubric_judge` (opsward’s own rubric, free) and `echo_agent` exercises the golden-task harness without a model.
@@ -357,7 +371,7 @@ Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
 A file to be written by the generate step.
 
-### *class* opsward.base.MaintenanceSuggestion(category, description, diff='')
+### *class* opsward.base.MaintenanceSuggestion(category, description, diff='', triage='')
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
@@ -492,6 +506,10 @@ validate(); pip install ‘opsward[lint]’). auto runs every one that is instal
 ### opsward.cli.maintain(\*project_roots, format='text')
 
 Check for stale references, out-of-sync docs, and other drift.
+
+Each finding carries a recommended triage: align (update the config to match the
+code), revert (restore the code the config describes) or ignore (a legitimately
+volatile reference: put `opsward: ignore-path` on its line).
 
 * **Parameters:**
   * **project_roots** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – one or more paths to project directories
@@ -1575,13 +1593,58 @@ Counts by state, for the diagnosis note.
 
 Shared helpers for opsward.
 
+### Module Attributes
+
+| [`IGNORE_PATH_MARKER`](_autosummary/opsward.util.html.md#opsward.util.IGNORE_PATH_MARKER)   | Put this on a line (as `<!-- opsward: ignore-path -->` or `# opsward: ignore-path`) and the paths on it are not checked; alone on its line, it covers the next line too.   |
+|-----------------------------------------------------------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+
 ### Functions
 
-| [`iter_files`](_autosummary/opsward.util.html.md#opsward.util.iter_files)(directory, \*[, suffix, ...])   | Yield files in *directory*, optionally filtered by suffix.              |
-|---------------------------------------------------------------------------------------------|-------------------------------------------------------------------------|
-| [`iter_subdirs`](_autosummary/opsward.util.html.md#opsward.util.iter_subdirs)(directory)                    | Yield immediate subdirectories of *directory*, sorted by name.          |
-| [`read_json_safe`](_autosummary/opsward.util.html.md#opsward.util.read_json_safe)(path)                       | Read a JSON file, returning None on any failure.                        |
-| [`read_text_safe`](_autosummary/opsward.util.html.md#opsward.util.read_text_safe)(path)                       | Read a text file, returning '' if it doesn't exist or can't be decoded. |
+| [`checked_lines`](_autosummary/opsward.util.html.md#opsward.util.checked_lines)(content, \*[, marker])     | `content` without the lines an ignore-path marker covers.                           |
+|-------------------------------------------------------------------------------------------|-------------------------------------------------------------------------------------|
+| [`extract_paths`](_autosummary/opsward.util.html.md#opsward.util.extract_paths)(content)                   | Plausible repo-relative file paths cited in markdown, minus URLs and ignored lines. |
+| [`iter_files`](_autosummary/opsward.util.html.md#opsward.util.iter_files)(directory, \*[, suffix, ...]) | Yield files in *directory*, optionally filtered by suffix.                          |
+| [`iter_subdirs`](_autosummary/opsward.util.html.md#opsward.util.iter_subdirs)(directory)                  | Yield immediate subdirectories of *directory*, sorted by name.                      |
+| [`read_json_safe`](_autosummary/opsward.util.html.md#opsward.util.read_json_safe)(path)                     | Read a JSON file, returning None on any failure.                                    |
+| [`read_text_safe`](_autosummary/opsward.util.html.md#opsward.util.read_text_safe)(path)                     | Read a text file, returning '' if it doesn't exist or can't be decoded.             |
+
+### opsward.util.IGNORE_PATH_MARKER *= 'opsward: ignore-path'*
+
+Put this on a line (as `<!-- opsward: ignore-path -->` or `# opsward: ignore-path`)
+and the paths on it are not checked; alone on its line, it covers the next line too.
+
+### opsward.util.checked_lines(content, , marker='opsward: ignore-path')
+
+`content` without the lines an ignore-path marker covers.
+
+A marker quoted in backticks (prose *about* the marker) is not a marker.
+
+```pycon
+>>> checked_lines("a/b.py\nold/c.py <!-- opsward: ignore-path -->\n# opsward: ignore-path\ntmp/d.py\ne/f.py")
+'a/b.py\ne/f.py'
+>>> checked_lines("<!-- opsward: ignore-path -->\n<!-- opsward: ignore-path -->\nx/y.py\nz/w.py")
+'z/w.py'
+>>> checked_lines("Use `<!-- opsward: ignore-path -->` on src/a.py")
+'Use `<!-- opsward: ignore-path -->` on src/a.py'
+```
+
+* **Return type:**
+  [`str`](https://docs.python.org/3/builtins/stdtypes.html#str)
+
+### opsward.util.extract_paths(content)
+
+Plausible repo-relative file paths cited in markdown, minus URLs and ignored lines.
+
+The one extractor behind the currency score, the cross-reference check, the stale-path
+finding and the ADR drift check, so `opsward: ignore-path` silences all of them.
+
+```pycon
+>>> extract_paths("See `src/a.py`, https://x.io/b.html and ./docs/c.md")
+['src/a.py', './docs/c.md']
+```
+
+* **Return type:**
+  [`list`](https://docs.python.org/3/builtins/stdtypes.html#list)[[`str`](https://docs.python.org/3/builtins/stdtypes.html#str)]
 
 ### opsward.util.iter_files(directory, , suffix='', recursive=False, \_seen=None)
 
@@ -1623,7 +1686,7 @@ Read a text file, returning ‘’ if it doesn’t exist or can’t be decoded.
 
 # About this build
 
-This documentation was built on **2026-10-20 16:24 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/6e04508d70d1b7e31b339bb0171b9ed1550ac6c5"><code>6e04508</code></a> on branch <code>main</code>, for **opsward 0.0.28** (from <code>pyproject.toml</code>).
+This documentation was built on **2026-10-20 16:32 UTC** from commit <a href="https://github.com/thorwhalen/opsward/commit/570ed08fe968561629afcfe6ddb4a15d0aadc4ba"><code>570ed08</code></a> on branch <code>main</code>, for **opsward 0.0.29** (from <code>pyproject.toml</code>).
 
 #### NOTE
 Nothing suggests a mismatch: the tree was clean at the commit above, and the documented version is the one on PyPI.
@@ -1632,7 +1695,7 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 |                     |                                                                                                                                                           |
 |---------------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Commit              | <a href="https://github.com/thorwhalen/opsward/commit/6e04508d70d1b7e31b339bb0171b9ed1550ac6c5"><code>6e04508d70d1b7e31b339bb0171b9ed1550ac6c5</code></a> |
+| Commit              | <a href="https://github.com/thorwhalen/opsward/commit/570ed08fe968561629afcfe6ddb4a15d0aadc4ba"><code>570ed08fe968561629afcfe6ddb4a15d0aadc4ba</code></a> |
 | Branch              | <code>main</code>                                                                                                                                         |
 | Tags at this commit | none                                                                                                                                                      |
 | Working tree        | clean                                                                                                                                                     |
@@ -1643,9 +1706,9 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 |              |                                                                                            |
 |--------------|--------------------------------------------------------------------------------------------|
 | Repository   | <code>thorwhalen/opsward</code>                                                            |
-| Run          | <a href="https://github.com/thorwhalen/opsward/actions/runs/39456879580">39456879580</a>   |
+| Run          | <a href="https://github.com/thorwhalen/opsward/actions/runs/39458109928">39458109928</a>   |
 | Ref          | <code>refs/heads/main</code>                                                               |
-| Event commit | <code>6e04508d70d1b7e31b339bb0171b9ed1550ac6c5</code> (in the history of the built commit) |
+| Event commit | <code>570ed08fe968561629afcfe6ddb4a15d0aadc4ba</code> (in the history of the built commit) |
 
 ## Tools
 
@@ -1670,13 +1733,13 @@ Nothing suggests a mismatch: the tree was clean at the commit above, and the doc
 
 ## Package on PyPI
 
-Latest release: <a href="https://pypi.org/project/opsward/0.0.28/">0.0.28</a>, the same as the documented version.
+Latest release: <a href="https://pypi.org/project/opsward/0.0.29/">0.0.29</a>, the same as the documented version.
 
 ## Reproduce
 
 ```bash
 git clone https://github.com/thorwhalen/opsward && cd opsward
-git checkout 6e04508d70d1b7e31b339bb0171b9ed1550ac6c5
+git checkout 570ed08fe968561629afcfe6ddb4a15d0aadc4ba
 pip install "epythet==0.2.22"
 epythet quickstart . --ignore tests/ scrap/ examples/
 ```

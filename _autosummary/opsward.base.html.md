@@ -57,7 +57,7 @@ Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 
 A file to be written by the generate step.
 
-### *class* opsward.base.MaintenanceSuggestion(category, description, diff='')
+### *class* opsward.base.MaintenanceSuggestion(category, description, diff='', triage='')
 
 Bases: [`object`](https://docs.python.org/3/builtins/functions.html#object)
 

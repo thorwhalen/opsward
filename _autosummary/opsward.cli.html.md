@@ -101,6 +101,10 @@ validate(); pip install ‘opsward[lint]’). auto runs every one that is instal
 
 Check for stale references, out-of-sync docs, and other drift.
 
+Each finding carries a recommended triage: align (update the config to match the
+code), revert (restore the code the config describes) or ignore (a legitimately
+volatile reference: put `opsward: ignore-path` on its line).
+
 * **Parameters:**
   * **project_roots** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – one or more paths to project directories
   * **format** ([`str`](https://docs.python.org/3/builtins/stdtypes.html#str)) – output format — ‘text’ or ‘json’

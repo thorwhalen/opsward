@@ -218,11 +218,12 @@ skill templates, and agents — only what’s missing, never overwrites existing
 </div>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1">myproject: 3 issue(s)
 </span><span data-line="2">
-</span><span data-line="3">  [stale_path] CLAUDE.md references `src/old_module.py` but it does not exist
-</span><span data-line="4">  [sync_issue] `new_doc.md` exists in docs/ but is not listed in docs_guide.md
-</span><span data-line="5">  [empty_doc] `conventions.md` appears to be an empty stub (12 bytes)
+</span><span data-line="3">  [stale_path → align] CLAUDE.md references `src/old_module.py` but it does not exist
+</span><span data-line="4">  [sync_issue → align] `new_doc.md` exists in docs/ but is not listed in docs_guide.md
+</span><span data-line="5">  [empty_doc → align] `conventions.md` appears to be an empty stub (12 bytes)
 </span></pre></div>
 </div>
+<p>Each finding carries a recommended triage: <strong>align</strong> (the code is right, update the config), <strong>revert</strong> (the config is right, restore the code) or <strong>ignore</strong> (the reference is legitimately volatile). To ignore one, put <code class="docutils literal notranslate"><span class="pre">&lt;!--</span> <span class="pre">opsward:</span> <span class="pre">ignore-path</span> <span class="pre">--&gt;</span></code> at the end of its line, or alone on the line before it; every path check (stale paths, the currency score, cross-references, ADR drift) then skips it.</p>
 </section>
 <section id="fleet">
 <h3>Fleet<a class="headerlink" href="#fleet" title="Link to this heading">#</a></h3>
@@ -363,14 +364,26 @@ known_issues.md, and content quality.</p>
 <h3>Evals (opt-in, report-only)<a class="headerlink" href="#evals-opt-in-report-only" title="Link to this heading">#</a></h3>
 <p>The rubric scores form; evals ask whether a config actually helps. They make model calls, so they never gate and never run by default:</p>
 <div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-</span><span data-line="2"><span class="kn">from</span><span class="w"> </span><span class="nn">opsward.evals</span><span class="w"> </span><span class="kn">import</span> <span class="n">judge_claude_md</span><span class="p">,</span> <span class="n">anthropic_judge</span><span class="p">,</span> <span class="n">run_golden_tasks</span><span class="p">,</span> <span class="n">GoldenTask</span><span class="p">,</span> <span class="n">anthropic_agent</span>
-</span><span data-line="3">
-</span><span data-line="4"><span class="c1"># LLM-as-judge for the subjective dimensions (actionability, conciseness), next to the rubric's score</span>
-</span><span data-line="5"><span class="nb">print</span><span class="p">(</span><span class="n">judge_claude_md</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s2">"CLAUDE.md"</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(),</span> <span class="n">judge</span><span class="o">=</span><span class="n">anthropic_judge</span><span class="p">(),</span> <span class="n">samples</span><span class="o">=</span><span class="mi">3</span><span class="p">))</span>
-</span><span data-line="6">
-</span><span data-line="7"><span class="c1"># Golden tasks: does the agent honour a convention with the config, and not without it?</span>
-</span><span data-line="8"><span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span><span class="n">GoldenTask</span><span class="p">(</span><span class="s2">"kw-only"</span><span class="p">,</span> <span class="s2">"Write a function f(a, b, c)."</span><span class="p">,</span> <span class="n">expect</span><span class="o">=</span><span class="p">[</span><span class="sa">r</span><span class="s2">"\*,"</span><span class="p">])]</span>
-</span><span data-line="9"><span class="nb">print</span><span class="p">(</span><span class="n">run_golden_tasks</span><span class="p">(</span><span class="n">tasks</span><span class="p">,</span> <span class="n">agent</span><span class="o">=</span><span class="n">anthropic_agent</span><span class="p">(),</span> <span class="n">config</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">"CLAUDE.md"</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(),</span> <span class="n">runs</span><span class="o">=</span><span class="mi">3</span><span class="p">))</span>
+</span><span data-line="2"><span class="kn">from</span><span class="w"> </span><span class="nn">opsward.evals</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+</span><span data-line="3">    <span class="n">judge_claude_md</span><span class="p">,</span>
+</span><span data-line="4">    <span class="n">anthropic_judge</span><span class="p">,</span>
+</span><span data-line="5">    <span class="n">run_golden_tasks</span><span class="p">,</span>
+</span><span data-line="6">    <span class="n">GoldenTask</span><span class="p">,</span>
+</span><span data-line="7">    <span class="n">anthropic_agent</span><span class="p">,</span>
+</span><span data-line="8"><span class="p">)</span>
+</span><span data-line="9">
+</span><span data-line="10"><span class="c1"># LLM-as-judge for the subjective dimensions (actionability, conciseness), next to the rubric's score</span>
+</span><span data-line="11"><span class="nb">print</span><span class="p">(</span>
+</span><span data-line="12">    <span class="n">judge_claude_md</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="s2">"CLAUDE.md"</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(),</span> <span class="n">judge</span><span class="o">=</span><span class="n">anthropic_judge</span><span class="p">(),</span> <span class="n">samples</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
+</span><span data-line="13"><span class="p">)</span>
+</span><span data-line="14">
+</span><span data-line="15"><span class="c1"># Golden tasks: does the agent honour a convention with the config, and not without it?</span>
+</span><span data-line="16"><span class="n">tasks</span> <span class="o">=</span> <span class="p">[</span><span class="n">GoldenTask</span><span class="p">(</span><span class="s2">"kw-only"</span><span class="p">,</span> <span class="s2">"Write a function f(a, b, c)."</span><span class="p">,</span> <span class="n">expect</span><span class="o">=</span><span class="p">[</span><span class="sa">r</span><span class="s2">"\*,"</span><span class="p">])]</span>
+</span><span data-line="17"><span class="nb">print</span><span class="p">(</span>
+</span><span data-line="18">    <span class="n">run_golden_tasks</span><span class="p">(</span>
+</span><span data-line="19">        <span class="n">tasks</span><span class="p">,</span> <span class="n">agent</span><span class="o">=</span><span class="n">anthropic_agent</span><span class="p">(),</span> <span class="n">config</span><span class="o">=</span><span class="n">Path</span><span class="p">(</span><span class="s2">"CLAUDE.md"</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(),</span> <span class="n">runs</span><span class="o">=</span><span class="mi">3</span>
+</span><span data-line="20">    <span class="p">)</span>
+</span><span data-line="21"><span class="p">)</span>
 </span></pre></div>
 </div>
 <p><code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">'opsward[eval]'</span></code> for the paid judge and agent. Without them, <code class="docutils literal notranslate"><span class="pre">judge_claude_md</span></code> defaults to <code class="docutils literal notranslate"><span class="pre">rubric_judge</span></code> (opsward’s own rubric, free) and <code class="docutils literal notranslate"><span class="pre">echo_agent</span></code> exercises the golden-task harness without a model.</p>
@@ -468,7 +481,7 @@ known_issues.md, and content quality.</p>
 </section>
 </section>
 
-<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-10-20 16:24 UTC from <a href="https://github.com/thorwhalen/opsward/commit/6e04508d70d1b7e31b339bb0171b9ed1550ac6c5">6e04508</a> (main) · opsward 0.0.28 · <a href="about-this-build.html">about this build</a></p>
+<p class="epythet-provenance" style="font-size:.8em;opacity:.65;margin-top:2.5em;text-align:right">built 2026-10-20 16:32 UTC from <a href="https://github.com/thorwhalen/opsward/commit/570ed08fe968561629afcfe6ddb4a15d0aadc4ba">570ed08</a> (main) · opsward 0.0.29 · <a href="about-this-build.html">about this build</a></p>
         </article><button class="back-to-top" type="button">
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
     <path d="M13 20h-2V8l-5.5 5.5-1.42-1.42L12 4.16l7.92 7.92-1.42 1.42L13 8v12z"></path>
@@ -503,7 +516,7 @@ known_issues.md, and content quality.</p>
     </div>
   </div>
 </footer>
-      <script src="_static/documentation_options.js?v=26ffa1e9"></script>
+      <script src="_static/documentation_options.js?v=828725f0"></script>
       <script src="_static/doctools.js?v=fd6eb6e6"></script>
       <script src="_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="_static/clipboard.min.js?v=a7894cd8"></script>

@@ -4,10 +4,18 @@ opsward.util
 .. automodule:: opsward.util
 
    
+   .. rubric:: Module Attributes
+
+   .. autosummary::
+   
+      IGNORE_PATH_MARKER
+   
    .. rubric:: Functions
 
    .. autosummary::
    
+      checked_lines
+      extract_paths
       iter_files
       iter_subdirs
       read_json_safe

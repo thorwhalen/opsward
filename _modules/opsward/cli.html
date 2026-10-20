@@ -284,483 +284,489 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="143"><span class="p">):</span>
 </span><span data-line="144"><span class="w">    </span><span class="sd">"""Check for stale references, out-of-sync docs, and other drift.</span>
 </span><span data-line="145">
-</span><span data-line="146"><span class="sd">    :param project_roots: one or more paths to project directories</span>
-</span><span data-line="147"><span class="sd">    :param format: output format — 'text' or 'json'</span>
-</span><span data-line="148"><span class="sd">    """</span>
-</span><span data-line="149">    <span class="k">if</span> <span class="ow">not</span> <span class="n">project_roots</span><span class="p">:</span>
-</span><span data-line="150">        <span class="n">project_roots</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"."</span><span class="p">,)</span>
-</span><span data-line="151">
-</span><span data-line="152">    <span class="n">all_suggestions</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span data-line="153">    <span class="k">for</span> <span class="n">root_str</span> <span class="ow">in</span> <span class="n">project_roots</span><span class="p">:</span>
-</span><span data-line="154">        <span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">root_str</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
-</span><span data-line="155">        <span class="k">if</span> <span class="ow">not</span> <span class="n">root</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
-</span><span data-line="156">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error: </span><span class="si">{</span><span class="n">root_str</span><span class="si">}</span><span class="s2"> is not a directory"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-</span><span data-line="157">            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</span><span data-line="158">
-</span><span data-line="159">        <span class="n">sr</span> <span class="o">=</span> <span class="n">scan</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
-</span><span data-line="160">        <span class="n">suggestions</span> <span class="o">=</span> <span class="n">_maintain</span><span class="p">(</span><span class="n">sr</span><span class="p">)</span>
-</span><span data-line="161">        <span class="n">all_suggestions</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">suggestions</span><span class="p">)</span>
+</span><span data-line="146"><span class="sd">    Each finding carries a recommended triage: align (update the config to match the</span>
+</span><span data-line="147"><span class="sd">    code), revert (restore the code the config describes) or ignore (a legitimately</span>
+</span><span data-line="148"><span class="sd">    volatile reference: put `opsward: ignore-path` on its line).</span>
+</span><span data-line="149">
+</span><span data-line="150"><span class="sd">    :param project_roots: one or more paths to project directories</span>
+</span><span data-line="151"><span class="sd">    :param format: output format — 'text' or 'json'</span>
+</span><span data-line="152"><span class="sd">    """</span>
+</span><span data-line="153">    <span class="k">if</span> <span class="ow">not</span> <span class="n">project_roots</span><span class="p">:</span>
+</span><span data-line="154">        <span class="n">project_roots</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"."</span><span class="p">,)</span>
+</span><span data-line="155">
+</span><span data-line="156">    <span class="n">all_suggestions</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="157">    <span class="k">for</span> <span class="n">root_str</span> <span class="ow">in</span> <span class="n">project_roots</span><span class="p">:</span>
+</span><span data-line="158">        <span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">root_str</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+</span><span data-line="159">        <span class="k">if</span> <span class="ow">not</span> <span class="n">root</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+</span><span data-line="160">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error: </span><span class="si">{</span><span class="n">root_str</span><span class="si">}</span><span class="s2"> is not a directory"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="161">            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
 </span><span data-line="162">
-</span><span data-line="163">        <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">"json"</span><span class="p">:</span>
-</span><span data-line="164">            <span class="k">continue</span>
-</span><span data-line="165">
-</span><span data-line="166">        <span class="k">if</span> <span class="ow">not</span> <span class="n">suggestions</span><span class="p">:</span>
-</span><span data-line="167">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">root</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: no maintenance issues found"</span><span class="p">)</span>
+</span><span data-line="163">        <span class="n">sr</span> <span class="o">=</span> <span class="n">scan</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+</span><span data-line="164">        <span class="n">suggestions</span> <span class="o">=</span> <span class="n">_maintain</span><span class="p">(</span><span class="n">sr</span><span class="p">)</span>
+</span><span data-line="165">        <span class="n">all_suggestions</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">suggestions</span><span class="p">)</span>
+</span><span data-line="166">
+</span><span data-line="167">        <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">"json"</span><span class="p">:</span>
 </span><span data-line="168">            <span class="k">continue</span>
 </span><span data-line="169">
-</span><span data-line="170">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">root</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">suggestions</span><span class="p">)</span><span class="si">}</span><span class="s2"> issue(s)</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
-</span><span data-line="171">        <span class="k">for</span> <span class="n">ms</span> <span class="ow">in</span> <span class="n">suggestions</span><span class="p">:</span>
-</span><span data-line="172">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  [</span><span class="si">{</span><span class="n">ms</span><span class="o">.</span><span class="n">category</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="n">ms</span><span class="o">.</span><span class="n">description</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-</span><span data-line="173">            <span class="k">if</span> <span class="n">ms</span><span class="o">.</span><span class="n">diff</span><span class="p">:</span>
-</span><span data-line="174">                <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">ms</span><span class="o">.</span><span class="n">diff</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
-</span><span data-line="175">                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    </span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-</span><span data-line="176">        <span class="nb">print</span><span class="p">()</span>
-</span><span data-line="177">
-</span><span data-line="178">    <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">"json"</span><span class="p">:</span>
-</span><span data-line="179">        <span class="n">data</span> <span class="o">=</span> <span class="p">[</span>
-</span><span data-line="180">            <span class="p">{</span>
-</span><span data-line="181">                <span class="s2">"category"</span><span class="p">:</span> <span class="n">ms</span><span class="o">.</span><span class="n">category</span><span class="p">,</span>
-</span><span data-line="182">                <span class="s2">"description"</span><span class="p">:</span> <span class="n">ms</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
-</span><span data-line="183">                <span class="s2">"diff"</span><span class="p">:</span> <span class="n">ms</span><span class="o">.</span><span class="n">diff</span><span class="p">,</span>
-</span><span data-line="184">            <span class="p">}</span>
-</span><span data-line="185">            <span class="k">for</span> <span class="n">ms</span> <span class="ow">in</span> <span class="n">all_suggestions</span>
-</span><span data-line="186">        <span class="p">]</span>
-</span><span data-line="187">        <span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
-</span><span data-line="188">
-</span><span data-line="189">    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">all_suggestions</span> <span class="k">else</span> <span class="mi">1</span><span class="p">)</span></div>
-
-</span><span data-line="190">
-</span><span data-line="191">
-</span><span data-line="192"><span class="k">def</span><span class="w"> </span><span class="nf">_relative_path</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">base</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span data-line="193"><span class="w">    </span><span class="sd">"""Return path relative to base, or absolute if not under base.</span>
+</span><span data-line="170">        <span class="k">if</span> <span class="ow">not</span> <span class="n">suggestions</span><span class="p">:</span>
+</span><span data-line="171">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">root</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: no maintenance issues found"</span><span class="p">)</span>
+</span><span data-line="172">            <span class="k">continue</span>
+</span><span data-line="173">
+</span><span data-line="174">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">root</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">suggestions</span><span class="p">)</span><span class="si">}</span><span class="s2"> issue(s)</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+</span><span data-line="175">        <span class="k">for</span> <span class="n">ms</span> <span class="ow">in</span> <span class="n">suggestions</span><span class="p">:</span>
+</span><span data-line="176">            <span class="n">tag</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">ms</span><span class="o">.</span><span class="n">category</span><span class="si">}</span><span class="s2"> → </span><span class="si">{</span><span class="n">ms</span><span class="o">.</span><span class="n">triage</span><span class="si">}</span><span class="s2">"</span> <span class="k">if</span> <span class="n">ms</span><span class="o">.</span><span class="n">triage</span> <span class="k">else</span> <span class="n">ms</span><span class="o">.</span><span class="n">category</span>
+</span><span data-line="177">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  [</span><span class="si">{</span><span class="n">tag</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="n">ms</span><span class="o">.</span><span class="n">description</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span data-line="178">            <span class="k">if</span> <span class="n">ms</span><span class="o">.</span><span class="n">diff</span><span class="p">:</span>
+</span><span data-line="179">                <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">ms</span><span class="o">.</span><span class="n">diff</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
+</span><span data-line="180">                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    </span><span class="si">{</span><span class="n">line</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span data-line="181">        <span class="nb">print</span><span class="p">()</span>
+</span><span data-line="182">
+</span><span data-line="183">    <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">"json"</span><span class="p">:</span>
+</span><span data-line="184">        <span class="n">data</span> <span class="o">=</span> <span class="p">[</span>
+</span><span data-line="185">            <span class="p">{</span>
+</span><span data-line="186">                <span class="s2">"category"</span><span class="p">:</span> <span class="n">ms</span><span class="o">.</span><span class="n">category</span><span class="p">,</span>
+</span><span data-line="187">                <span class="s2">"description"</span><span class="p">:</span> <span class="n">ms</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+</span><span data-line="188">                <span class="s2">"diff"</span><span class="p">:</span> <span class="n">ms</span><span class="o">.</span><span class="n">diff</span><span class="p">,</span>
+</span><span data-line="189">                <span class="s2">"triage"</span><span class="p">:</span> <span class="n">ms</span><span class="o">.</span><span class="n">triage</span><span class="p">,</span>
+</span><span data-line="190">            <span class="p">}</span>
+</span><span data-line="191">            <span class="k">for</span> <span class="n">ms</span> <span class="ow">in</span> <span class="n">all_suggestions</span>
+</span><span data-line="192">        <span class="p">]</span>
+</span><span data-line="193">        <span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
 </span><span data-line="194">
-</span><span data-line="195"><span class="sd">    Rendered with forward slashes regardless of host OS (#21): this is display</span>
-</span><span data-line="196"><span class="sd">    text, not a filesystem path, and a Windows-separated path leaking into</span>
-</span><span data-line="197"><span class="sd">    printed output (or into generated doc content) is not portable.</span>
-</span><span data-line="198"><span class="sd">    """</span>
-</span><span data-line="199">    <span class="k">try</span><span class="p">:</span>
-</span><span data-line="200">        <span class="k">return</span> <span class="n">path</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">base</span><span class="p">)</span><span class="o">.</span><span class="n">as_posix</span><span class="p">()</span>
-</span><span data-line="201">    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-</span><span data-line="202">        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-</span><span data-line="203">
-</span><span data-line="204">
-</span><span data-line="205"><span class="k">def</span><span class="w"> </span><span class="nf">_print_verbose</span><span class="p">(</span><span class="n">sr</span><span class="p">):</span>
-</span><span data-line="206"><span class="w">    </span><span class="sd">"""Print extra scan details."""</span>
-</span><span data-line="207">    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Detailed inventory:"</span><span class="p">)</span>
-</span><span data-line="208">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  Skills:  </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">sr</span><span class="o">.</span><span class="n">skills</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-</span><span data-line="209">    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">sr</span><span class="o">.</span><span class="n">skills</span><span class="p">:</span>
-</span><span data-line="210">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    - </span><span class="si">{</span><span class="n">s</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> (SKILL.md: </span><span class="si">{</span><span class="s1">'yes'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">s</span><span class="o">.</span><span class="n">has_skill_md</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'no'</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
-</span><span data-line="211">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  Agents:  </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">sr</span><span class="o">.</span><span class="n">agents</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-</span><span data-line="212">    <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">sr</span><span class="o">.</span><span class="n">agents</span><span class="p">:</span>
-</span><span data-line="213">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    - </span><span class="si">{</span><span class="n">a</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-</span><span data-line="214">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  Rules:   </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">sr</span><span class="o">.</span><span class="n">rules</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-</span><span data-line="215">    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">sr</span><span class="o">.</span><span class="n">rules</span><span class="p">:</span>
-</span><span data-line="216">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    - </span><span class="si">{</span><span class="n">r</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-</span><span data-line="217">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  Docs:    </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">sr</span><span class="o">.</span><span class="n">docs</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-</span><span data-line="218">    <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">sr</span><span class="o">.</span><span class="n">docs</span><span class="p">:</span>
-</span><span data-line="219">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    - </span><span class="si">{</span><span class="n">d</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">d</span><span class="o">.</span><span class="n">size_bytes</span><span class="si">}</span><span class="s2"> bytes)"</span><span class="p">)</span>
-</span><span data-line="220">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  Hooks:   </span><span class="si">{</span><span class="s1">'yes'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">sr</span><span class="o">.</span><span class="n">hooks_config</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'no'</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-</span><span data-line="221">
-</span><span data-line="222">
+</span><span data-line="195">    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">0</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">all_suggestions</span> <span class="k">else</span> <span class="mi">1</span><span class="p">)</span></div>
+
+</span><span data-line="196">
+</span><span data-line="197">
+</span><span data-line="198"><span class="k">def</span><span class="w"> </span><span class="nf">_relative_path</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">base</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span data-line="199"><span class="w">    </span><span class="sd">"""Return path relative to base, or absolute if not under base.</span>
+</span><span data-line="200">
+</span><span data-line="201"><span class="sd">    Rendered with forward slashes regardless of host OS (#21): this is display</span>
+</span><span data-line="202"><span class="sd">    text, not a filesystem path, and a Windows-separated path leaking into</span>
+</span><span data-line="203"><span class="sd">    printed output (or into generated doc content) is not portable.</span>
+</span><span data-line="204"><span class="sd">    """</span>
+</span><span data-line="205">    <span class="k">try</span><span class="p">:</span>
+</span><span data-line="206">        <span class="k">return</span> <span class="n">path</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">base</span><span class="p">)</span><span class="o">.</span><span class="n">as_posix</span><span class="p">()</span>
+</span><span data-line="207">    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+</span><span data-line="208">        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+</span><span data-line="209">
+</span><span data-line="210">
+</span><span data-line="211"><span class="k">def</span><span class="w"> </span><span class="nf">_print_verbose</span><span class="p">(</span><span class="n">sr</span><span class="p">):</span>
+</span><span data-line="212"><span class="w">    </span><span class="sd">"""Print extra scan details."""</span>
+</span><span data-line="213">    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Detailed inventory:"</span><span class="p">)</span>
+</span><span data-line="214">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  Skills:  </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">sr</span><span class="o">.</span><span class="n">skills</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span data-line="215">    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">sr</span><span class="o">.</span><span class="n">skills</span><span class="p">:</span>
+</span><span data-line="216">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    - </span><span class="si">{</span><span class="n">s</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> (SKILL.md: </span><span class="si">{</span><span class="s1">'yes'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">s</span><span class="o">.</span><span class="n">has_skill_md</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'no'</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+</span><span data-line="217">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  Agents:  </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">sr</span><span class="o">.</span><span class="n">agents</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span data-line="218">    <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">sr</span><span class="o">.</span><span class="n">agents</span><span class="p">:</span>
+</span><span data-line="219">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    - </span><span class="si">{</span><span class="n">a</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span data-line="220">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  Rules:   </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">sr</span><span class="o">.</span><span class="n">rules</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span data-line="221">    <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">sr</span><span class="o">.</span><span class="n">rules</span><span class="p">:</span>
+</span><span data-line="222">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    - </span><span class="si">{</span><span class="n">r</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span data-line="223">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  Docs:    </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">sr</span><span class="o">.</span><span class="n">docs</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span data-line="224">    <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">sr</span><span class="o">.</span><span class="n">docs</span><span class="p">:</span>
+</span><span data-line="225">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    - </span><span class="si">{</span><span class="n">d</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">d</span><span class="o">.</span><span class="n">size_bytes</span><span class="si">}</span><span class="s2"> bytes)"</span><span class="p">)</span>
+</span><span data-line="226">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  Hooks:   </span><span class="si">{</span><span class="s1">'yes'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="n">sr</span><span class="o">.</span><span class="n">hooks_config</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">'no'</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span data-line="227">
+</span><span data-line="228">
 <div class="viewcode-block" id="install_skills">
 <a class="viewcode-back" href="../../_autosummary/opsward.cli.html#opsward.cli.install_skills">[docs]</a>
-</span><span data-line="223"><span class="k">def</span><span class="w"> </span><span class="nf">install_skills</span><span class="p">(</span>
-</span><span data-line="224">    <span class="n">target</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"."</span><span class="p">,</span>
-</span><span data-line="225">    <span class="o">*</span><span class="p">,</span>
-</span><span data-line="226">    <span class="n">global_install</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-</span><span data-line="227">    <span class="n">agents</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
-</span><span data-line="228">    <span class="n">write</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-</span><span data-line="229"><span class="p">):</span>
-</span><span data-line="230"><span class="w">    </span><span class="sd">"""Install opsward's Claude Code skills (and agents) into a project or globally.</span>
-</span><span data-line="231">
-</span><span data-line="232"><span class="sd">    By default, shows what would be created (dry run). Use --write to</span>
-</span><span data-line="233"><span class="sd">    actually write files. Existing files are never overwritten.</span>
-</span><span data-line="234">
-</span><span data-line="235"><span class="sd">    :param target: project directory (ignored when --global is set)</span>
-</span><span data-line="236"><span class="sd">    :param global_install: install into ~/.claude/ instead of the project</span>
-</span><span data-line="237"><span class="sd">    :param agents: also install agent definitions (default: True)</span>
-</span><span data-line="238"><span class="sd">    :param write: actually write files (default: dry run)</span>
-</span><span data-line="239"><span class="sd">    """</span>
-</span><span data-line="240">    <span class="k">if</span> <span class="n">global_install</span><span class="p">:</span>
-</span><span data-line="241">        <span class="n">target_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">".claude"</span>
-</span><span data-line="242">    <span class="k">else</span><span class="p">:</span>
-</span><span data-line="243">        <span class="n">target_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">target</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span> <span class="o">/</span> <span class="s2">".claude"</span>
-</span><span data-line="244">
-</span><span data-line="245">    <span class="c1"># Optionally scan the project for variable substitution</span>
-</span><span data-line="246">    <span class="n">sr</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span data-line="247">    <span class="k">if</span> <span class="ow">not</span> <span class="n">global_install</span><span class="p">:</span>
-</span><span data-line="248">        <span class="n">project_root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">target</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
-</span><span data-line="249">        <span class="k">if</span> <span class="n">project_root</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
-</span><span data-line="250">            <span class="n">sr</span> <span class="o">=</span> <span class="n">scan</span><span class="p">(</span><span class="n">project_root</span><span class="p">)</span>
-</span><span data-line="251">
-</span><span data-line="252">    <span class="n">files</span> <span class="o">=</span> <span class="n">_generate_skills</span><span class="p">(</span>
-</span><span data-line="253">        <span class="n">target_dir</span><span class="p">,</span>
-</span><span data-line="254">        <span class="n">scan_result</span><span class="o">=</span><span class="n">sr</span><span class="p">,</span>
-</span><span data-line="255">        <span class="n">include_agents</span><span class="o">=</span><span class="n">agents</span><span class="p">,</span>
-</span><span data-line="256">    <span class="p">)</span>
+</span><span data-line="229"><span class="k">def</span><span class="w"> </span><span class="nf">install_skills</span><span class="p">(</span>
+</span><span data-line="230">    <span class="n">target</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"."</span><span class="p">,</span>
+</span><span data-line="231">    <span class="o">*</span><span class="p">,</span>
+</span><span data-line="232">    <span class="n">global_install</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+</span><span data-line="233">    <span class="n">agents</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+</span><span data-line="234">    <span class="n">write</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+</span><span data-line="235"><span class="p">):</span>
+</span><span data-line="236"><span class="w">    </span><span class="sd">"""Install opsward's Claude Code skills (and agents) into a project or globally.</span>
+</span><span data-line="237">
+</span><span data-line="238"><span class="sd">    By default, shows what would be created (dry run). Use --write to</span>
+</span><span data-line="239"><span class="sd">    actually write files. Existing files are never overwritten.</span>
+</span><span data-line="240">
+</span><span data-line="241"><span class="sd">    :param target: project directory (ignored when --global is set)</span>
+</span><span data-line="242"><span class="sd">    :param global_install: install into ~/.claude/ instead of the project</span>
+</span><span data-line="243"><span class="sd">    :param agents: also install agent definitions (default: True)</span>
+</span><span data-line="244"><span class="sd">    :param write: actually write files (default: dry run)</span>
+</span><span data-line="245"><span class="sd">    """</span>
+</span><span data-line="246">    <span class="k">if</span> <span class="n">global_install</span><span class="p">:</span>
+</span><span data-line="247">        <span class="n">target_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">home</span><span class="p">()</span> <span class="o">/</span> <span class="s2">".claude"</span>
+</span><span data-line="248">    <span class="k">else</span><span class="p">:</span>
+</span><span data-line="249">        <span class="n">target_dir</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">target</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span> <span class="o">/</span> <span class="s2">".claude"</span>
+</span><span data-line="250">
+</span><span data-line="251">    <span class="c1"># Optionally scan the project for variable substitution</span>
+</span><span data-line="252">    <span class="n">sr</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span data-line="253">    <span class="k">if</span> <span class="ow">not</span> <span class="n">global_install</span><span class="p">:</span>
+</span><span data-line="254">        <span class="n">project_root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">target</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+</span><span data-line="255">        <span class="k">if</span> <span class="n">project_root</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+</span><span data-line="256">            <span class="n">sr</span> <span class="o">=</span> <span class="n">scan</span><span class="p">(</span><span class="n">project_root</span><span class="p">)</span>
 </span><span data-line="257">
-</span><span data-line="258">    <span class="k">if</span> <span class="ow">not</span> <span class="n">files</span><span class="p">:</span>
-</span><span data-line="259">        <span class="nb">print</span><span class="p">(</span><span class="s2">"Nothing to install — all skills already present."</span><span class="p">)</span>
-</span><span data-line="260">        <span class="k">return</span>
-</span><span data-line="261">
-</span><span data-line="262">    <span class="n">action</span> <span class="o">=</span> <span class="s2">"Installing"</span> <span class="k">if</span> <span class="n">write</span> <span class="k">else</span> <span class="s2">"Would install"</span>
-</span><span data-line="263">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">action</span><span class="si">}</span><span class="s2"> into </span><span class="si">{</span><span class="n">target_dir</span><span class="si">}</span><span class="s2">/</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
-</span><span data-line="264">
-</span><span data-line="265">    <span class="k">for</span> <span class="n">gf</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
-</span><span data-line="266">        <span class="n">rel</span> <span class="o">=</span> <span class="n">_relative_path</span><span class="p">(</span><span class="n">gf</span><span class="o">.</span><span class="n">target_path</span><span class="p">,</span> <span class="n">target_dir</span><span class="p">)</span>
-</span><span data-line="267">        <span class="n">exists</span> <span class="o">=</span> <span class="n">gf</span><span class="o">.</span><span class="n">target_path</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
-</span><span data-line="268">        <span class="k">if</span> <span class="n">exists</span><span class="p">:</span>
-</span><span data-line="269">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  SKIP </span><span class="si">{</span><span class="n">rel</span><span class="si">}</span><span class="s2">  (already exists)"</span><span class="p">)</span>
-</span><span data-line="270">        <span class="k">else</span><span class="p">:</span>
-</span><span data-line="271">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">action</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">rel</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-</span><span data-line="272">
-</span><span data-line="273">        <span class="k">if</span> <span class="n">write</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">exists</span><span class="p">:</span>
-</span><span data-line="274">            <span class="n">gf</span><span class="o">.</span><span class="n">target_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span data-line="275">            <span class="n">gf</span><span class="o">.</span><span class="n">target_path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">gf</span><span class="o">.</span><span class="n">content</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
-</span><span data-line="276">
-</span><span data-line="277">    <span class="k">if</span> <span class="ow">not</span> <span class="n">write</span><span class="p">:</span>
-</span><span data-line="278">        <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Dry run — pass --write to install files."</span><span class="p">)</span></div>
+</span><span data-line="258">    <span class="n">files</span> <span class="o">=</span> <span class="n">_generate_skills</span><span class="p">(</span>
+</span><span data-line="259">        <span class="n">target_dir</span><span class="p">,</span>
+</span><span data-line="260">        <span class="n">scan_result</span><span class="o">=</span><span class="n">sr</span><span class="p">,</span>
+</span><span data-line="261">        <span class="n">include_agents</span><span class="o">=</span><span class="n">agents</span><span class="p">,</span>
+</span><span data-line="262">    <span class="p">)</span>
+</span><span data-line="263">
+</span><span data-line="264">    <span class="k">if</span> <span class="ow">not</span> <span class="n">files</span><span class="p">:</span>
+</span><span data-line="265">        <span class="nb">print</span><span class="p">(</span><span class="s2">"Nothing to install — all skills already present."</span><span class="p">)</span>
+</span><span data-line="266">        <span class="k">return</span>
+</span><span data-line="267">
+</span><span data-line="268">    <span class="n">action</span> <span class="o">=</span> <span class="s2">"Installing"</span> <span class="k">if</span> <span class="n">write</span> <span class="k">else</span> <span class="s2">"Would install"</span>
+</span><span data-line="269">    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">action</span><span class="si">}</span><span class="s2"> into </span><span class="si">{</span><span class="n">target_dir</span><span class="si">}</span><span class="s2">/</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+</span><span data-line="270">
+</span><span data-line="271">    <span class="k">for</span> <span class="n">gf</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
+</span><span data-line="272">        <span class="n">rel</span> <span class="o">=</span> <span class="n">_relative_path</span><span class="p">(</span><span class="n">gf</span><span class="o">.</span><span class="n">target_path</span><span class="p">,</span> <span class="n">target_dir</span><span class="p">)</span>
+</span><span data-line="273">        <span class="n">exists</span> <span class="o">=</span> <span class="n">gf</span><span class="o">.</span><span class="n">target_path</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span>
+</span><span data-line="274">        <span class="k">if</span> <span class="n">exists</span><span class="p">:</span>
+</span><span data-line="275">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  SKIP </span><span class="si">{</span><span class="n">rel</span><span class="si">}</span><span class="s2">  (already exists)"</span><span class="p">)</span>
+</span><span data-line="276">        <span class="k">else</span><span class="p">:</span>
+</span><span data-line="277">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">action</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">rel</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span data-line="278">
+</span><span data-line="279">        <span class="k">if</span> <span class="n">write</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">exists</span><span class="p">:</span>
+</span><span data-line="280">            <span class="n">gf</span><span class="o">.</span><span class="n">target_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span data-line="281">            <span class="n">gf</span><span class="o">.</span><span class="n">target_path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">gf</span><span class="o">.</span><span class="n">content</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+</span><span data-line="282">
+</span><span data-line="283">    <span class="k">if</span> <span class="ow">not</span> <span class="n">write</span><span class="p">:</span>
+</span><span data-line="284">        <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Dry run — pass --write to install files."</span><span class="p">)</span></div>
 
-</span><span data-line="279">
-</span><span data-line="280">
+</span><span data-line="285">
+</span><span data-line="286">
 <div class="viewcode-block" id="recommend">
 <a class="viewcode-back" href="../../_autosummary/opsward.cli.html#opsward.cli.recommend">[docs]</a>
-</span><span data-line="281"><span class="k">def</span><span class="w"> </span><span class="nf">recommend</span><span class="p">(</span>
-</span><span data-line="282">    <span class="o">*</span><span class="n">project_roots</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-</span><span data-line="283">    <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"text"</span><span class="p">,</span>
-</span><span data-line="284"><span class="p">):</span>
-</span><span data-line="285"><span class="w">    </span><span class="sd">"""Recommend ecosystem skills based on the project's tech stack.</span>
-</span><span data-line="286">
-</span><span data-line="287"><span class="sd">    Analyzes dependencies and suggests skills from the community catalog.</span>
-</span><span data-line="288">
-</span><span data-line="289"><span class="sd">    :param project_roots: one or more paths to project directories</span>
-</span><span data-line="290"><span class="sd">    :param format: output format — 'text' or 'json'</span>
-</span><span data-line="291"><span class="sd">    """</span>
-</span><span data-line="292">    <span class="k">if</span> <span class="ow">not</span> <span class="n">project_roots</span><span class="p">:</span>
-</span><span data-line="293">        <span class="n">project_roots</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"."</span><span class="p">,)</span>
+</span><span data-line="287"><span class="k">def</span><span class="w"> </span><span class="nf">recommend</span><span class="p">(</span>
+</span><span data-line="288">    <span class="o">*</span><span class="n">project_roots</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span data-line="289">    <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"text"</span><span class="p">,</span>
+</span><span data-line="290"><span class="p">):</span>
+</span><span data-line="291"><span class="w">    </span><span class="sd">"""Recommend ecosystem skills based on the project's tech stack.</span>
+</span><span data-line="292">
+</span><span data-line="293"><span class="sd">    Analyzes dependencies and suggests skills from the community catalog.</span>
 </span><span data-line="294">
-</span><span data-line="295">    <span class="n">all_recs</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span data-line="296">    <span class="k">for</span> <span class="n">root_str</span> <span class="ow">in</span> <span class="n">project_roots</span><span class="p">:</span>
-</span><span data-line="297">        <span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">root_str</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
-</span><span data-line="298">        <span class="k">if</span> <span class="ow">not</span> <span class="n">root</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
-</span><span data-line="299">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error: </span><span class="si">{</span><span class="n">root_str</span><span class="si">}</span><span class="s2"> is not a directory"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-</span><span data-line="300">            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</span><span data-line="301">
-</span><span data-line="302">        <span class="n">sr</span> <span class="o">=</span> <span class="n">scan</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
-</span><span data-line="303">        <span class="n">recs</span> <span class="o">=</span> <span class="n">_recommend_skills</span><span class="p">(</span><span class="n">sr</span><span class="p">)</span>
-</span><span data-line="304">        <span class="n">all_recs</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">recs</span><span class="p">)</span>
-</span><span data-line="305">
-</span><span data-line="306">        <span class="k">if</span> <span class="nb">format</span> <span class="o">!=</span> <span class="s2">"json"</span><span class="p">:</span>
-</span><span data-line="307">            <span class="k">if</span> <span class="ow">not</span> <span class="n">recs</span><span class="p">:</span>
-</span><span data-line="308">                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">root</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: no skill recommendations"</span><span class="p">)</span>
-</span><span data-line="309">            <span class="k">else</span><span class="p">:</span>
-</span><span data-line="310">                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">root</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">recs</span><span class="p">)</span><span class="si">}</span><span class="s2"> recommended skill(s)</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
-</span><span data-line="311">                <span class="k">for</span> <span class="n">rec</span> <span class="ow">in</span> <span class="n">recs</span><span class="p">:</span>
-</span><span data-line="312">                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">rec</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-</span><span data-line="313">                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    Reason: </span><span class="si">{</span><span class="n">rec</span><span class="o">.</span><span class="n">reason</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-</span><span data-line="314">                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    Source: </span><span class="si">{</span><span class="n">rec</span><span class="o">.</span><span class="n">source</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-</span><span data-line="315">                <span class="nb">print</span><span class="p">()</span>
-</span><span data-line="316">
-</span><span data-line="317">    <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">"json"</span><span class="p">:</span>
-</span><span data-line="318">        <span class="n">data</span> <span class="o">=</span> <span class="p">[</span>
-</span><span data-line="319">            <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">"reason"</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">reason</span><span class="p">,</span> <span class="s2">"source"</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">source</span><span class="p">}</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">all_recs</span>
-</span><span data-line="320">        <span class="p">]</span>
-</span><span data-line="321">        <span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span></div>
-
+</span><span data-line="295"><span class="sd">    :param project_roots: one or more paths to project directories</span>
+</span><span data-line="296"><span class="sd">    :param format: output format — 'text' or 'json'</span>
+</span><span data-line="297"><span class="sd">    """</span>
+</span><span data-line="298">    <span class="k">if</span> <span class="ow">not</span> <span class="n">project_roots</span><span class="p">:</span>
+</span><span data-line="299">        <span class="n">project_roots</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"."</span><span class="p">,)</span>
+</span><span data-line="300">
+</span><span data-line="301">    <span class="n">all_recs</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="302">    <span class="k">for</span> <span class="n">root_str</span> <span class="ow">in</span> <span class="n">project_roots</span><span class="p">:</span>
+</span><span data-line="303">        <span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">root_str</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+</span><span data-line="304">        <span class="k">if</span> <span class="ow">not</span> <span class="n">root</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+</span><span data-line="305">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error: </span><span class="si">{</span><span class="n">root_str</span><span class="si">}</span><span class="s2"> is not a directory"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="306">            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span data-line="307">
+</span><span data-line="308">        <span class="n">sr</span> <span class="o">=</span> <span class="n">scan</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+</span><span data-line="309">        <span class="n">recs</span> <span class="o">=</span> <span class="n">_recommend_skills</span><span class="p">(</span><span class="n">sr</span><span class="p">)</span>
+</span><span data-line="310">        <span class="n">all_recs</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">recs</span><span class="p">)</span>
+</span><span data-line="311">
+</span><span data-line="312">        <span class="k">if</span> <span class="nb">format</span> <span class="o">!=</span> <span class="s2">"json"</span><span class="p">:</span>
+</span><span data-line="313">            <span class="k">if</span> <span class="ow">not</span> <span class="n">recs</span><span class="p">:</span>
+</span><span data-line="314">                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">root</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: no skill recommendations"</span><span class="p">)</span>
+</span><span data-line="315">            <span class="k">else</span><span class="p">:</span>
+</span><span data-line="316">                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">root</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">recs</span><span class="p">)</span><span class="si">}</span><span class="s2"> recommended skill(s)</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+</span><span data-line="317">                <span class="k">for</span> <span class="n">rec</span> <span class="ow">in</span> <span class="n">recs</span><span class="p">:</span>
+</span><span data-line="318">                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">rec</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span data-line="319">                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    Reason: </span><span class="si">{</span><span class="n">rec</span><span class="o">.</span><span class="n">reason</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span data-line="320">                    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"    Source: </span><span class="si">{</span><span class="n">rec</span><span class="o">.</span><span class="n">source</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span data-line="321">                <span class="nb">print</span><span class="p">()</span>
 </span><span data-line="322">
-</span><span data-line="323">
+</span><span data-line="323">    <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">"json"</span><span class="p">:</span>
+</span><span data-line="324">        <span class="n">data</span> <span class="o">=</span> <span class="p">[</span>
+</span><span data-line="325">            <span class="p">{</span><span class="s2">"name"</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s2">"reason"</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">reason</span><span class="p">,</span> <span class="s2">"source"</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">source</span><span class="p">}</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">all_recs</span>
+</span><span data-line="326">        <span class="p">]</span>
+</span><span data-line="327">        <span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span></div>
+
+</span><span data-line="328">
+</span><span data-line="329">
 <div class="viewcode-block" id="find">
 <a class="viewcode-back" href="../../_autosummary/opsward.cli.html#opsward.cli.find">[docs]</a>
-</span><span data-line="324"><span class="k">def</span><span class="w"> </span><span class="nf">find</span><span class="p">(</span>
-</span><span data-line="325">    <span class="n">query</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-</span><span data-line="326">    <span class="o">*</span><span class="n">project_roots</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-</span><span data-line="327">    <span class="n">kinds</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"skill,agent"</span><span class="p">,</span>
-</span><span data-line="328">    <span class="n">semantic</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-</span><span data-line="329">    <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
-</span><span data-line="330"><span class="p">):</span>
-</span><span data-line="331"><span class="w">    </span><span class="sd">"""Find assets (skills, agents, docs) across one or more projects by QUERY.</span>
-</span><span data-line="332">
-</span><span data-line="333"><span class="sd">    Cross-repo asset discovery via the toolery package</span>
-</span><span data-line="334"><span class="sd">    (install with: pip install 'opsward[discovery]').</span>
-</span><span data-line="335">
-</span><span data-line="336"><span class="sd">    :param query: search query</span>
-</span><span data-line="337"><span class="sd">    :param project_roots: one or more project directories (default: current dir)</span>
-</span><span data-line="338"><span class="sd">    :param kinds: comma-separated asset kinds — skill, agent, doc</span>
-</span><span data-line="339"><span class="sd">    :param semantic: use toolery's ir semantic backend (needs toolery[ir])</span>
-</span><span data-line="340"><span class="sd">    :param limit: max results to show</span>
-</span><span data-line="341"><span class="sd">    """</span>
-</span><span data-line="342">    <span class="kn">from</span><span class="w"> </span><span class="nn">opsward.discover</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_assets</span>
-</span><span data-line="343">
-</span><span data-line="344">    <span class="n">roots</span> <span class="o">=</span> <span class="n">project_roots</span> <span class="ow">or</span> <span class="p">(</span><span class="s2">"."</span><span class="p">,)</span>
-</span><span data-line="345">    <span class="k">try</span><span class="p">:</span>
-</span><span data-line="346">        <span class="n">hits</span> <span class="o">=</span> <span class="n">find_assets</span><span class="p">(</span>
-</span><span data-line="347">            <span class="o">*</span><span class="n">roots</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="n">query</span><span class="p">,</span> <span class="n">kinds</span><span class="o">=</span><span class="n">kinds</span><span class="p">,</span> <span class="n">semantic</span><span class="o">=</span><span class="n">semantic</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="n">limit</span>
-</span><span data-line="348">        <span class="p">)</span>
-</span><span data-line="349">    <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-</span><span data-line="350">        <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-</span><span data-line="351">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</span><span data-line="352">    <span class="k">if</span> <span class="ow">not</span> <span class="n">hits</span><span class="p">:</span>
-</span><span data-line="353">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"No assets matching </span><span class="si">{</span><span class="n">query</span><span class="si">!r}</span><span class="s2"> in </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">roots</span><span class="p">)</span><span class="si">}</span><span class="s2">."</span><span class="p">)</span>
-</span><span data-line="354">        <span class="k">return</span>
-</span><span data-line="355">    <span class="k">for</span> <span class="n">card</span><span class="p">,</span> <span class="n">score</span> <span class="ow">in</span> <span class="n">hits</span><span class="p">:</span>
-</span><span data-line="356">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">score</span><span class="si">:</span><span class="s2">6.2f</span><span class="si">}</span><span class="s2">  [</span><span class="si">{</span><span class="n">card</span><span class="o">.</span><span class="n">kind</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="n">card</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-</span><span data-line="357">        <span class="k">if</span> <span class="n">card</span><span class="o">.</span><span class="n">source_uri</span><span class="p">:</span>
-</span><span data-line="358">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"          </span><span class="si">{</span><span class="n">card</span><span class="o">.</span><span class="n">source_uri</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span></div>
+</span><span data-line="330"><span class="k">def</span><span class="w"> </span><span class="nf">find</span><span class="p">(</span>
+</span><span data-line="331">    <span class="n">query</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span data-line="332">    <span class="o">*</span><span class="n">project_roots</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span data-line="333">    <span class="n">kinds</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"skill,agent"</span><span class="p">,</span>
+</span><span data-line="334">    <span class="n">semantic</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+</span><span data-line="335">    <span class="n">limit</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+</span><span data-line="336"><span class="p">):</span>
+</span><span data-line="337"><span class="w">    </span><span class="sd">"""Find assets (skills, agents, docs) across one or more projects by QUERY.</span>
+</span><span data-line="338">
+</span><span data-line="339"><span class="sd">    Cross-repo asset discovery via the toolery package</span>
+</span><span data-line="340"><span class="sd">    (install with: pip install 'opsward[discovery]').</span>
+</span><span data-line="341">
+</span><span data-line="342"><span class="sd">    :param query: search query</span>
+</span><span data-line="343"><span class="sd">    :param project_roots: one or more project directories (default: current dir)</span>
+</span><span data-line="344"><span class="sd">    :param kinds: comma-separated asset kinds — skill, agent, doc</span>
+</span><span data-line="345"><span class="sd">    :param semantic: use toolery's ir semantic backend (needs toolery[ir])</span>
+</span><span data-line="346"><span class="sd">    :param limit: max results to show</span>
+</span><span data-line="347"><span class="sd">    """</span>
+</span><span data-line="348">    <span class="kn">from</span><span class="w"> </span><span class="nn">opsward.discover</span><span class="w"> </span><span class="kn">import</span> <span class="n">find_assets</span>
+</span><span data-line="349">
+</span><span data-line="350">    <span class="n">roots</span> <span class="o">=</span> <span class="n">project_roots</span> <span class="ow">or</span> <span class="p">(</span><span class="s2">"."</span><span class="p">,)</span>
+</span><span data-line="351">    <span class="k">try</span><span class="p">:</span>
+</span><span data-line="352">        <span class="n">hits</span> <span class="o">=</span> <span class="n">find_assets</span><span class="p">(</span>
+</span><span data-line="353">            <span class="o">*</span><span class="n">roots</span><span class="p">,</span> <span class="n">query</span><span class="o">=</span><span class="n">query</span><span class="p">,</span> <span class="n">kinds</span><span class="o">=</span><span class="n">kinds</span><span class="p">,</span> <span class="n">semantic</span><span class="o">=</span><span class="n">semantic</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="n">limit</span>
+</span><span data-line="354">        <span class="p">)</span>
+</span><span data-line="355">    <span class="k">except</span> <span class="ne">ImportError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span data-line="356">        <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">),</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="357">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span data-line="358">    <span class="k">if</span> <span class="ow">not</span> <span class="n">hits</span><span class="p">:</span>
+</span><span data-line="359">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"No assets matching </span><span class="si">{</span><span class="n">query</span><span class="si">!r}</span><span class="s2"> in </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">roots</span><span class="p">)</span><span class="si">}</span><span class="s2">."</span><span class="p">)</span>
+</span><span data-line="360">        <span class="k">return</span>
+</span><span data-line="361">    <span class="k">for</span> <span class="n">card</span><span class="p">,</span> <span class="n">score</span> <span class="ow">in</span> <span class="n">hits</span><span class="p">:</span>
+</span><span data-line="362">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">score</span><span class="si">:</span><span class="s2">6.2f</span><span class="si">}</span><span class="s2">  [</span><span class="si">{</span><span class="n">card</span><span class="o">.</span><span class="n">kind</span><span class="si">}</span><span class="s2">] </span><span class="si">{</span><span class="n">card</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span data-line="363">        <span class="k">if</span> <span class="n">card</span><span class="o">.</span><span class="n">source_uri</span><span class="p">:</span>
+</span><span data-line="364">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"          </span><span class="si">{</span><span class="n">card</span><span class="o">.</span><span class="n">source_uri</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span></div>
 
-</span><span data-line="359">
-</span><span data-line="360">
+</span><span data-line="365">
+</span><span data-line="366">
 <div class="viewcode-block" id="fleet">
 <a class="viewcode-back" href="../../_autosummary/opsward.cli.html#opsward.cli.fleet">[docs]</a>
-</span><span data-line="361"><span class="k">def</span><span class="w"> </span><span class="nf">fleet</span><span class="p">(</span>
-</span><span data-line="362">    <span class="o">*</span><span class="n">project_roots</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-</span><span data-line="363">    <span class="n">under</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
-</span><span data-line="364">    <span class="n">depth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
-</span><span data-line="365">    <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"text"</span><span class="p">,</span>
-</span><span data-line="366">    <span class="n">manifest</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
-</span><span data-line="367"><span class="p">):</span>
-</span><span data-line="368"><span class="w">    </span><span class="sd">"""Diagnose many projects at once and roll the results up into one fleet report.</span>
-</span><span data-line="369">
-</span><span data-line="370"><span class="sd">    The fleet is the given roots, plus the git repos found under --under. With --manifest</span>
-</span><span data-line="371"><span class="sd">    the fleet is remembered: the roots and the latest summary are written to that JSON</span>
-</span><span data-line="372"><span class="sd">    file, and a later run with only --manifest re-diagnoses the same roots (given roots or</span>
-</span><span data-line="373"><span class="sd">    --under replace them). The manifest holds this machine's absolute paths, so keep it</span>
-</span><span data-line="374"><span class="sd">    out of version control. Exits 1 when any root could not be diagnosed.</span>
+</span><span data-line="367"><span class="k">def</span><span class="w"> </span><span class="nf">fleet</span><span class="p">(</span>
+</span><span data-line="368">    <span class="o">*</span><span class="n">project_roots</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span data-line="369">    <span class="n">under</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
+</span><span data-line="370">    <span class="n">depth</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+</span><span data-line="371">    <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"text"</span><span class="p">,</span>
+</span><span data-line="372">    <span class="n">manifest</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
+</span><span data-line="373"><span class="p">):</span>
+</span><span data-line="374"><span class="w">    </span><span class="sd">"""Diagnose many projects at once and roll the results up into one fleet report.</span>
 </span><span data-line="375">
-</span><span data-line="376"><span class="sd">    :param project_roots: project directories to diagnose</span>
-</span><span data-line="377"><span class="sd">    :param under: also diagnose every git repo found under this directory</span>
-</span><span data-line="378"><span class="sd">    :param depth: how many levels below --under to look for git repos</span>
-</span><span data-line="379"><span class="sd">    :param format: output format — 'text' or 'json' (the name-keyed summary)</span>
-</span><span data-line="380"><span class="sd">    :param manifest: JSON file that remembers the fleet's roots and its latest summary</span>
-</span><span data-line="381"><span class="sd">    """</span>
-</span><span data-line="382">    <span class="kn">from</span><span class="w"> </span><span class="nn">opsward.fleet</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
-</span><span data-line="383">        <span class="n">fleet</span> <span class="k">as</span> <span class="n">_fleet</span><span class="p">,</span>
-</span><span data-line="384">        <span class="n">git_roots_under</span><span class="p">,</span>
-</span><span data-line="385">        <span class="n">manifest_roots</span><span class="p">,</span>
-</span><span data-line="386">        <span class="n">write_manifest</span><span class="p">,</span>
-</span><span data-line="387">    <span class="p">)</span>
-</span><span data-line="388">
-</span><span data-line="389">    <span class="n">roots</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">r</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">())</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">project_roots</span><span class="p">]</span>
-</span><span data-line="390">    <span class="k">if</span> <span class="n">under</span><span class="p">:</span>
-</span><span data-line="391">        <span class="n">parent</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">under</span><span class="p">)</span>
-</span><span data-line="392">        <span class="k">if</span> <span class="ow">not</span> <span class="n">parent</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
-</span><span data-line="393">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error: </span><span class="si">{</span><span class="n">under</span><span class="si">}</span><span class="s2"> is not a directory"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-</span><span data-line="394">            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</span><span data-line="395">        <span class="n">roots</span> <span class="o">+=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">resolve</span><span class="p">())</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">git_roots_under</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="n">depth</span><span class="p">)]</span>
-</span><span data-line="396">        <span class="k">if</span> <span class="ow">not</span> <span class="n">roots</span><span class="p">:</span>
-</span><span data-line="397">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error: no git repos under </span><span class="si">{</span><span class="n">under</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-</span><span data-line="398">            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</span><span data-line="399">    <span class="k">if</span> <span class="n">manifest</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">project_roots</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">under</span><span class="p">:</span>
-</span><span data-line="400">        <span class="k">try</span><span class="p">:</span>
-</span><span data-line="401">            <span class="n">roots</span> <span class="o">=</span> <span class="n">manifest_roots</span><span class="p">(</span><span class="n">manifest</span><span class="p">)</span>
-</span><span data-line="402">        <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">OSError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># JSONDecodeError is a ValueError</span>
-</span><span data-line="403">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error: cannot read the manifest: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="376"><span class="sd">    The fleet is the given roots, plus the git repos found under --under. With --manifest</span>
+</span><span data-line="377"><span class="sd">    the fleet is remembered: the roots and the latest summary are written to that JSON</span>
+</span><span data-line="378"><span class="sd">    file, and a later run with only --manifest re-diagnoses the same roots (given roots or</span>
+</span><span data-line="379"><span class="sd">    --under replace them). The manifest holds this machine's absolute paths, so keep it</span>
+</span><span data-line="380"><span class="sd">    out of version control. Exits 1 when any root could not be diagnosed.</span>
+</span><span data-line="381">
+</span><span data-line="382"><span class="sd">    :param project_roots: project directories to diagnose</span>
+</span><span data-line="383"><span class="sd">    :param under: also diagnose every git repo found under this directory</span>
+</span><span data-line="384"><span class="sd">    :param depth: how many levels below --under to look for git repos</span>
+</span><span data-line="385"><span class="sd">    :param format: output format — 'text' or 'json' (the name-keyed summary)</span>
+</span><span data-line="386"><span class="sd">    :param manifest: JSON file that remembers the fleet's roots and its latest summary</span>
+</span><span data-line="387"><span class="sd">    """</span>
+</span><span data-line="388">    <span class="kn">from</span><span class="w"> </span><span class="nn">opsward.fleet</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+</span><span data-line="389">        <span class="n">fleet</span> <span class="k">as</span> <span class="n">_fleet</span><span class="p">,</span>
+</span><span data-line="390">        <span class="n">git_roots_under</span><span class="p">,</span>
+</span><span data-line="391">        <span class="n">manifest_roots</span><span class="p">,</span>
+</span><span data-line="392">        <span class="n">write_manifest</span><span class="p">,</span>
+</span><span data-line="393">    <span class="p">)</span>
+</span><span data-line="394">
+</span><span data-line="395">    <span class="n">roots</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="p">(</span><span class="n">r</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">())</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">project_roots</span><span class="p">]</span>
+</span><span data-line="396">    <span class="k">if</span> <span class="n">under</span><span class="p">:</span>
+</span><span data-line="397">        <span class="n">parent</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">under</span><span class="p">)</span>
+</span><span data-line="398">        <span class="k">if</span> <span class="ow">not</span> <span class="n">parent</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+</span><span data-line="399">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error: </span><span class="si">{</span><span class="n">under</span><span class="si">}</span><span class="s2"> is not a directory"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="400">            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span data-line="401">        <span class="n">roots</span> <span class="o">+=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">resolve</span><span class="p">())</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">git_roots_under</span><span class="p">(</span><span class="n">parent</span><span class="p">,</span> <span class="n">depth</span><span class="o">=</span><span class="n">depth</span><span class="p">)]</span>
+</span><span data-line="402">        <span class="k">if</span> <span class="ow">not</span> <span class="n">roots</span><span class="p">:</span>
+</span><span data-line="403">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error: no git repos under </span><span class="si">{</span><span class="n">under</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
 </span><span data-line="404">            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</span><span data-line="405">    <span class="k">if</span> <span class="ow">not</span> <span class="n">roots</span><span class="p">:</span>
-</span><span data-line="406">        <span class="nb">print</span><span class="p">(</span>
-</span><span data-line="407">            <span class="s2">"Error: no roots — give project directories, --under DIR, "</span>
-</span><span data-line="408">            <span class="s2">"or an existing --manifest"</span><span class="p">,</span>
-</span><span data-line="409">            <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span>
-</span><span data-line="410">        <span class="p">)</span>
-</span><span data-line="411">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</span><span data-line="412">
-</span><span data-line="413">    <span class="n">roots</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">roots</span><span class="p">))</span>
-</span><span data-line="414">    <span class="n">report</span> <span class="o">=</span> <span class="n">_fleet</span><span class="p">(</span><span class="n">roots</span><span class="p">)</span>
-</span><span data-line="415">    <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">"json"</span><span class="p">:</span>
-</span><span data-line="416">        <span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">report</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
-</span><span data-line="417">    <span class="k">else</span><span class="p">:</span>
-</span><span data-line="418">        <span class="nb">print</span><span class="p">(</span><span class="n">report</span><span class="p">)</span>
-</span><span data-line="419">    <span class="k">if</span> <span class="n">manifest</span><span class="p">:</span>
-</span><span data-line="420">        <span class="c1"># A typo'd root is not a fleet member: remember only roots that exist.</span>
-</span><span data-line="421">        <span class="n">members</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">roots</span> <span class="k">if</span> <span class="n">report</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">"not a directory"</span><span class="p">]</span>
-</span><span data-line="422">        <span class="k">try</span><span class="p">:</span>
-</span><span data-line="423">            <span class="n">path</span> <span class="o">=</span> <span class="n">write_manifest</span><span class="p">(</span><span class="n">manifest</span><span class="p">,</span> <span class="n">members</span><span class="p">,</span> <span class="n">report</span><span class="p">)</span>
-</span><span data-line="424">        <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-</span><span data-line="425">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error: cannot write the manifest: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-</span><span data-line="426">            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</span><span data-line="427">        <span class="k">if</span> <span class="n">_not_ignored_in_a_repo</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
-</span><span data-line="428">            <span class="nb">print</span><span class="p">(</span>
-</span><span data-line="429">                <span class="sa">f</span><span class="s2">"Warning: </span><span class="si">{</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> is inside a git work tree and not ignored; "</span>
-</span><span data-line="430">                <span class="s2">"it holds this machine's paths, so add it to .gitignore"</span><span class="p">,</span>
-</span><span data-line="431">                <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span>
-</span><span data-line="432">            <span class="p">)</span>
-</span><span data-line="433">    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span> <span class="k">if</span> <span class="n">report</span><span class="o">.</span><span class="n">errors</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span></div>
+</span><span data-line="405">    <span class="k">if</span> <span class="n">manifest</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">project_roots</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">under</span><span class="p">:</span>
+</span><span data-line="406">        <span class="k">try</span><span class="p">:</span>
+</span><span data-line="407">            <span class="n">roots</span> <span class="o">=</span> <span class="n">manifest_roots</span><span class="p">(</span><span class="n">manifest</span><span class="p">)</span>
+</span><span data-line="408">        <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">OSError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>  <span class="c1"># JSONDecodeError is a ValueError</span>
+</span><span data-line="409">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error: cannot read the manifest: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="410">            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span data-line="411">    <span class="k">if</span> <span class="ow">not</span> <span class="n">roots</span><span class="p">:</span>
+</span><span data-line="412">        <span class="nb">print</span><span class="p">(</span>
+</span><span data-line="413">            <span class="s2">"Error: no roots — give project directories, --under DIR, "</span>
+</span><span data-line="414">            <span class="s2">"or an existing --manifest"</span><span class="p">,</span>
+</span><span data-line="415">            <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span>
+</span><span data-line="416">        <span class="p">)</span>
+</span><span data-line="417">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span data-line="418">
+</span><span data-line="419">    <span class="n">roots</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">dict</span><span class="o">.</span><span class="n">fromkeys</span><span class="p">(</span><span class="n">roots</span><span class="p">))</span>
+</span><span data-line="420">    <span class="n">report</span> <span class="o">=</span> <span class="n">_fleet</span><span class="p">(</span><span class="n">roots</span><span class="p">)</span>
+</span><span data-line="421">    <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">"json"</span><span class="p">:</span>
+</span><span data-line="422">        <span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">report</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(),</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+</span><span data-line="423">    <span class="k">else</span><span class="p">:</span>
+</span><span data-line="424">        <span class="nb">print</span><span class="p">(</span><span class="n">report</span><span class="p">)</span>
+</span><span data-line="425">    <span class="k">if</span> <span class="n">manifest</span><span class="p">:</span>
+</span><span data-line="426">        <span class="c1"># A typo'd root is not a fleet member: remember only roots that exist.</span>
+</span><span data-line="427">        <span class="n">members</span> <span class="o">=</span> <span class="p">[</span><span class="n">r</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">roots</span> <span class="k">if</span> <span class="n">report</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">r</span><span class="p">)</span> <span class="o">!=</span> <span class="s2">"not a directory"</span><span class="p">]</span>
+</span><span data-line="428">        <span class="k">try</span><span class="p">:</span>
+</span><span data-line="429">            <span class="n">path</span> <span class="o">=</span> <span class="n">write_manifest</span><span class="p">(</span><span class="n">manifest</span><span class="p">,</span> <span class="n">members</span><span class="p">,</span> <span class="n">report</span><span class="p">)</span>
+</span><span data-line="430">        <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span data-line="431">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error: cannot write the manifest: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="432">            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span data-line="433">        <span class="k">if</span> <span class="n">_not_ignored_in_a_repo</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+</span><span data-line="434">            <span class="nb">print</span><span class="p">(</span>
+</span><span data-line="435">                <span class="sa">f</span><span class="s2">"Warning: </span><span class="si">{</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> is inside a git work tree and not ignored; "</span>
+</span><span data-line="436">                <span class="s2">"it holds this machine's paths, so add it to .gitignore"</span><span class="p">,</span>
+</span><span data-line="437">                <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span>
+</span><span data-line="438">            <span class="p">)</span>
+</span><span data-line="439">    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span> <span class="k">if</span> <span class="n">report</span><span class="o">.</span><span class="n">errors</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span></div>
 
-</span><span data-line="434">
-</span><span data-line="435">
+</span><span data-line="440">
+</span><span data-line="441">
 <div class="viewcode-block" id="lint">
 <a class="viewcode-back" href="../../_autosummary/opsward.cli.html#opsward.cli.lint">[docs]</a>
-</span><span data-line="436"><span class="k">def</span><span class="w"> </span><span class="nf">lint</span><span class="p">(</span>
-</span><span data-line="437">    <span class="o">*</span><span class="n">project_roots</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-</span><span data-line="438">    <span class="n">validators</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"auto"</span><span class="p">,</span>
-</span><span data-line="439">    <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"text"</span><span class="p">,</span>
-</span><span data-line="440"><span class="p">):</span>
-</span><span data-line="441"><span class="w">    </span><span class="sd">"""Check skill specs and the hooks config: pass or fail, no score (exit 1 on any finding).</span>
-</span><span data-line="442">
-</span><span data-line="443"><span class="sd">    The strict counterpart of `diagnose --min-score`, for CI and pre-commit. Validators:</span>
-</span><span data-line="444"><span class="sd">    opsward (its own agentskills.io check, always there) and skill (the skill package's</span>
-</span><span data-line="445"><span class="sd">    validate(); pip install 'opsward[lint]'). auto runs every one that is installed.</span>
-</span><span data-line="446">
-</span><span data-line="447"><span class="sd">    :param project_roots: one or more project directories (default: current dir)</span>
-</span><span data-line="448"><span class="sd">    :param validators: 'auto', or a comma list of: opsward, skill</span>
-</span><span data-line="449"><span class="sd">    :param format: output format — 'text' or 'json'</span>
-</span><span data-line="450"><span class="sd">    """</span>
-</span><span data-line="451">    <span class="kn">from</span><span class="w"> </span><span class="nn">opsward.lint</span><span class="w"> </span><span class="kn">import</span> <span class="n">lint</span> <span class="k">as</span> <span class="n">_lint</span><span class="p">,</span> <span class="n">resolve_validators</span>
+</span><span data-line="442"><span class="k">def</span><span class="w"> </span><span class="nf">lint</span><span class="p">(</span>
+</span><span data-line="443">    <span class="o">*</span><span class="n">project_roots</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span data-line="444">    <span class="n">validators</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"auto"</span><span class="p">,</span>
+</span><span data-line="445">    <span class="nb">format</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"text"</span><span class="p">,</span>
+</span><span data-line="446"><span class="p">):</span>
+</span><span data-line="447"><span class="w">    </span><span class="sd">"""Check skill specs and the hooks config: pass or fail, no score (exit 1 on any finding).</span>
+</span><span data-line="448">
+</span><span data-line="449"><span class="sd">    The strict counterpart of `diagnose --min-score`, for CI and pre-commit. Validators:</span>
+</span><span data-line="450"><span class="sd">    opsward (its own agentskills.io check, always there) and skill (the skill package's</span>
+</span><span data-line="451"><span class="sd">    validate(); pip install 'opsward[lint]'). auto runs every one that is installed.</span>
 </span><span data-line="452">
-</span><span data-line="453">    <span class="k">if</span> <span class="nb">format</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"text"</span><span class="p">,</span> <span class="s2">"json"</span><span class="p">):</span>
-</span><span data-line="454">        <span class="nb">print</span><span class="p">(</span><span class="s2">"Error: format must be 'text' or 'json'"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-</span><span data-line="455">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</span><span data-line="456">    <span class="k">try</span><span class="p">:</span>
-</span><span data-line="457">        <span class="n">chosen</span> <span class="o">=</span> <span class="n">resolve_validators</span><span class="p">(</span><span class="n">validators</span><span class="p">)</span>
-</span><span data-line="458">    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-</span><span data-line="459">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-</span><span data-line="460">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</span><span data-line="461">    <span class="n">findings</span> <span class="o">=</span> <span class="p">[]</span>
-</span><span data-line="462">    <span class="k">for</span> <span class="n">root_str</span> <span class="ow">in</span> <span class="n">project_roots</span> <span class="ow">or</span> <span class="p">(</span><span class="s2">"."</span><span class="p">,):</span>
-</span><span data-line="463">        <span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">root_str</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
-</span><span data-line="464">        <span class="k">if</span> <span class="ow">not</span> <span class="n">root</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
-</span><span data-line="465">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error: </span><span class="si">{</span><span class="n">root_str</span><span class="si">}</span><span class="s2"> is not a directory"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-</span><span data-line="466">            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</span><span data-line="467">        <span class="n">found</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">_lint</span><span class="p">(</span><span class="n">scan</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">claude_config_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">),</span> <span class="n">validators</span><span class="o">=</span><span class="n">chosen</span><span class="p">))</span>
-</span><span data-line="468">        <span class="n">findings</span> <span class="o">+=</span> <span class="p">[{</span><span class="s2">"project"</span><span class="p">:</span> <span class="n">root</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">f</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()}</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">found</span><span class="p">]</span>
-</span><span data-line="469">        <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">"json"</span><span class="p">:</span>
-</span><span data-line="470">            <span class="k">continue</span>
-</span><span data-line="471">        <span class="k">if</span> <span class="ow">not</span> <span class="n">found</span><span class="p">:</span>
-</span><span data-line="472">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">root</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: clean (</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">chosen</span><span class="p">)</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
-</span><span data-line="473">            <span class="k">continue</span>
-</span><span data-line="474">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">root</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">found</span><span class="p">)</span><span class="si">}</span><span class="s2"> finding(s) (</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">chosen</span><span class="p">)</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
-</span><span data-line="475">        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">found</span><span class="p">:</span>
-</span><span data-line="476">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-</span><span data-line="477">    <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">"json"</span><span class="p">:</span>
-</span><span data-line="478">        <span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">findings</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
-</span><span data-line="479">    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span> <span class="k">if</span> <span class="n">findings</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span></div>
+</span><span data-line="453"><span class="sd">    :param project_roots: one or more project directories (default: current dir)</span>
+</span><span data-line="454"><span class="sd">    :param validators: 'auto', or a comma list of: opsward, skill</span>
+</span><span data-line="455"><span class="sd">    :param format: output format — 'text' or 'json'</span>
+</span><span data-line="456"><span class="sd">    """</span>
+</span><span data-line="457">    <span class="kn">from</span><span class="w"> </span><span class="nn">opsward.lint</span><span class="w"> </span><span class="kn">import</span> <span class="n">lint</span> <span class="k">as</span> <span class="n">_lint</span><span class="p">,</span> <span class="n">resolve_validators</span>
+</span><span data-line="458">
+</span><span data-line="459">    <span class="k">if</span> <span class="nb">format</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"text"</span><span class="p">,</span> <span class="s2">"json"</span><span class="p">):</span>
+</span><span data-line="460">        <span class="nb">print</span><span class="p">(</span><span class="s2">"Error: format must be 'text' or 'json'"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="461">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span data-line="462">    <span class="k">try</span><span class="p">:</span>
+</span><span data-line="463">        <span class="n">chosen</span> <span class="o">=</span> <span class="n">resolve_validators</span><span class="p">(</span><span class="n">validators</span><span class="p">)</span>
+</span><span data-line="464">    <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span data-line="465">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="466">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span data-line="467">    <span class="n">findings</span> <span class="o">=</span> <span class="p">[]</span>
+</span><span data-line="468">    <span class="k">for</span> <span class="n">root_str</span> <span class="ow">in</span> <span class="n">project_roots</span> <span class="ow">or</span> <span class="p">(</span><span class="s2">"."</span><span class="p">,):</span>
+</span><span data-line="469">        <span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">root_str</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+</span><span data-line="470">        <span class="k">if</span> <span class="ow">not</span> <span class="n">root</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+</span><span data-line="471">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error: </span><span class="si">{</span><span class="n">root_str</span><span class="si">}</span><span class="s2"> is not a directory"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="472">            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span data-line="473">        <span class="n">found</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">_lint</span><span class="p">(</span><span class="n">scan</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">claude_config_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">),</span> <span class="n">validators</span><span class="o">=</span><span class="n">chosen</span><span class="p">))</span>
+</span><span data-line="474">        <span class="n">findings</span> <span class="o">+=</span> <span class="p">[{</span><span class="s2">"project"</span><span class="p">:</span> <span class="n">root</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">f</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()}</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">found</span><span class="p">]</span>
+</span><span data-line="475">        <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">"json"</span><span class="p">:</span>
+</span><span data-line="476">            <span class="k">continue</span>
+</span><span data-line="477">        <span class="k">if</span> <span class="ow">not</span> <span class="n">found</span><span class="p">:</span>
+</span><span data-line="478">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">root</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: clean (</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">chosen</span><span class="p">)</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+</span><span data-line="479">            <span class="k">continue</span>
+</span><span data-line="480">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">root</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">found</span><span class="p">)</span><span class="si">}</span><span class="s2"> finding(s) (</span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">chosen</span><span class="p">)</span><span class="si">}</span><span class="s2">)"</span><span class="p">)</span>
+</span><span data-line="481">        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">found</span><span class="p">:</span>
+</span><span data-line="482">            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  </span><span class="si">{</span><span class="n">f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span data-line="483">    <span class="k">if</span> <span class="nb">format</span> <span class="o">==</span> <span class="s2">"json"</span><span class="p">:</span>
+</span><span data-line="484">        <span class="nb">print</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">findings</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">))</span>
+</span><span data-line="485">    <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span> <span class="k">if</span> <span class="n">findings</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span></div>
 
-</span><span data-line="480">
-</span><span data-line="481">
-</span><span data-line="482"><span class="k">def</span><span class="w"> </span><span class="nf">_not_ignored_in_a_repo</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span data-line="483"><span class="w">    </span><span class="sd">"""True when ``path`` lies in a git work tree and is not ignored (no git: False)."""</span>
-</span><span data-line="484">    <span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
-</span><span data-line="485">
-</span><span data-line="486">    <span class="k">try</span><span class="p">:</span>
-</span><span data-line="487">        <span class="n">done</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
-</span><span data-line="488">            <span class="p">[</span><span class="s2">"git"</span><span class="p">,</span> <span class="s2">"check-ignore"</span><span class="p">,</span> <span class="s2">"-q"</span><span class="p">,</span> <span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="p">],</span>
-</span><span data-line="489">            <span class="n">cwd</span><span class="o">=</span><span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span>
-</span><span data-line="490">            <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-</span><span data-line="491">        <span class="p">)</span>
-</span><span data-line="492">    <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
-</span><span data-line="493">        <span class="k">return</span> <span class="kc">False</span>
-</span><span data-line="494">    <span class="k">return</span> <span class="n">done</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">1</span>  <span class="c1"># 0: ignored, 1: not ignored, 128: not a repo</span>
-</span><span data-line="495">
-</span><span data-line="496">
+</span><span data-line="486">
+</span><span data-line="487">
+</span><span data-line="488"><span class="k">def</span><span class="w"> </span><span class="nf">_not_ignored_in_a_repo</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span data-line="489"><span class="w">    </span><span class="sd">"""True when ``path`` lies in a git work tree and is not ignored (no git: False)."""</span>
+</span><span data-line="490">    <span class="kn">import</span><span class="w"> </span><span class="nn">subprocess</span>
+</span><span data-line="491">
+</span><span data-line="492">    <span class="k">try</span><span class="p">:</span>
+</span><span data-line="493">        <span class="n">done</span> <span class="o">=</span> <span class="n">subprocess</span><span class="o">.</span><span class="n">run</span><span class="p">(</span>
+</span><span data-line="494">            <span class="p">[</span><span class="s2">"git"</span><span class="p">,</span> <span class="s2">"check-ignore"</span><span class="p">,</span> <span class="s2">"-q"</span><span class="p">,</span> <span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="p">],</span>
+</span><span data-line="495">            <span class="n">cwd</span><span class="o">=</span><span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span>
+</span><span data-line="496">            <span class="n">capture_output</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+</span><span data-line="497">        <span class="p">)</span>
+</span><span data-line="498">    <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
+</span><span data-line="499">        <span class="k">return</span> <span class="kc">False</span>
+</span><span data-line="500">    <span class="k">return</span> <span class="n">done</span><span class="o">.</span><span class="n">returncode</span> <span class="o">==</span> <span class="mi">1</span>  <span class="c1"># 0: ignored, 1: not ignored, 128: not a repo</span>
+</span><span data-line="501">
+</span><span data-line="502">
 <div class="viewcode-block" id="new">
 <a class="viewcode-back" href="../../_autosummary/opsward.cli.html#opsward.cli.new">[docs]</a>
-</span><span data-line="497"><span class="k">def</span><span class="w"> </span><span class="nf">new</span><span class="p">(</span>
-</span><span data-line="498">    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-</span><span data-line="499">    <span class="n">write</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
-</span><span data-line="500">    <span class="n">project_root</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"."</span><span class="p">,</span>
-</span><span data-line="501">    <span class="n">status</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"Proposed"</span><span class="p">,</span>
-</span><span data-line="502">    <span class="n">evidence</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
-</span><span data-line="503"><span class="p">):</span>
-</span><span data-line="504"><span class="w">    </span><span class="sd">"""Allocate the next numbered ADR for TITLE (dry run unless --write; never overwrites).</span>
-</span><span data-line="505">
-</span><span data-line="506"><span class="sd">    :param title: the decision's title; the file name is derived from it</span>
-</span><span data-line="507"><span class="sd">    :param write: actually write the file (default: dry run)</span>
-</span><span data-line="508"><span class="sd">    :param project_root: the project directory (default: current dir)</span>
-</span><span data-line="509"><span class="sd">    :param status: initial status — Proposed (default), or Accepted when the human has accepted it</span>
-</span><span data-line="510"><span class="sd">    :param evidence: the issue, discussion or PR this rests on (a URL or #N)</span>
-</span><span data-line="511"><span class="sd">    """</span>
-</span><span data-line="512">    <span class="kn">from</span><span class="w"> </span><span class="nn">opsward.decisions</span><span class="w"> </span><span class="kn">import</span> <span class="n">clean_title</span><span class="p">,</span> <span class="n">new_adr</span>
-</span><span data-line="513">
-</span><span data-line="514">    <span class="k">if</span> <span class="ow">not</span> <span class="n">clean_title</span><span class="p">(</span><span class="n">title</span><span class="p">):</span>
-</span><span data-line="515">        <span class="nb">print</span><span class="p">(</span><span class="s2">"Error: the title is empty"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-</span><span data-line="516">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</span><span data-line="517">    <span class="k">if</span> <span class="n">status</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_ADR_STATUSES</span><span class="p">:</span>
-</span><span data-line="518">        <span class="nb">print</span><span class="p">(</span>
-</span><span data-line="519">            <span class="sa">f</span><span class="s2">"Error: status must be one of </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_ADR_STATUSES</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span>
-</span><span data-line="520">        <span class="p">)</span>
-</span><span data-line="521">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</span><span data-line="522">    <span class="n">root</span><span class="p">,</span> <span class="n">decisions_dir</span> <span class="o">=</span> <span class="n">_decisions_dir</span><span class="p">(</span><span class="n">project_root</span><span class="p">)</span>
-</span><span data-line="523">    <span class="n">gf</span> <span class="o">=</span> <span class="n">new_adr</span><span class="p">(</span><span class="n">decisions_dir</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="p">,</span> <span class="n">evidence</span><span class="o">=</span><span class="n">evidence</span><span class="p">)</span>
-</span><span data-line="524">    <span class="n">rel</span> <span class="o">=</span> <span class="n">_relative_path</span><span class="p">(</span><span class="n">gf</span><span class="o">.</span><span class="n">target_path</span><span class="p">,</span> <span class="n">root</span><span class="p">)</span>
-</span><span data-line="525">    <span class="k">if</span> <span class="n">gf</span><span class="o">.</span><span class="n">target_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-</span><span data-line="526">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"SKIP </span><span class="si">{</span><span class="n">rel</span><span class="si">}</span><span class="s2">  (already exists)"</span><span class="p">)</span>
-</span><span data-line="527">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-</span><span data-line="528">    <span class="k">if</span> <span class="n">write</span><span class="p">:</span>
-</span><span data-line="529">        <span class="n">gf</span><span class="o">.</span><span class="n">target_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span data-line="530">        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span>
-</span><span data-line="531">            <span class="n">gf</span><span class="o">.</span><span class="n">target_path</span><span class="p">,</span> <span class="s2">"x"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span>
-</span><span data-line="532">        <span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>  <span class="c1"># exclusive: never over a file</span>
-</span><span data-line="533">            <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">gf</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
-</span><span data-line="534">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Created </span><span class="si">{</span><span class="n">rel</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-</span><span data-line="535">    <span class="k">else</span><span class="p">:</span>
-</span><span data-line="536">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Would create </span><span class="si">{</span><span class="n">rel</span><span class="si">}</span><span class="se">\n\n</span><span class="s2">Dry run — pass --write to create it."</span><span class="p">)</span></div>
+</span><span data-line="503"><span class="k">def</span><span class="w"> </span><span class="nf">new</span><span class="p">(</span>
+</span><span data-line="504">    <span class="n">title</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+</span><span data-line="505">    <span class="n">write</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+</span><span data-line="506">    <span class="n">project_root</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"."</span><span class="p">,</span>
+</span><span data-line="507">    <span class="n">status</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"Proposed"</span><span class="p">,</span>
+</span><span data-line="508">    <span class="n">evidence</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">""</span><span class="p">,</span>
+</span><span data-line="509"><span class="p">):</span>
+</span><span data-line="510"><span class="w">    </span><span class="sd">"""Allocate the next numbered ADR for TITLE (dry run unless --write; never overwrites).</span>
+</span><span data-line="511">
+</span><span data-line="512"><span class="sd">    :param title: the decision's title; the file name is derived from it</span>
+</span><span data-line="513"><span class="sd">    :param write: actually write the file (default: dry run)</span>
+</span><span data-line="514"><span class="sd">    :param project_root: the project directory (default: current dir)</span>
+</span><span data-line="515"><span class="sd">    :param status: initial status — Proposed (default), or Accepted when the human has accepted it</span>
+</span><span data-line="516"><span class="sd">    :param evidence: the issue, discussion or PR this rests on (a URL or #N)</span>
+</span><span data-line="517"><span class="sd">    """</span>
+</span><span data-line="518">    <span class="kn">from</span><span class="w"> </span><span class="nn">opsward.decisions</span><span class="w"> </span><span class="kn">import</span> <span class="n">clean_title</span><span class="p">,</span> <span class="n">new_adr</span>
+</span><span data-line="519">
+</span><span data-line="520">    <span class="k">if</span> <span class="ow">not</span> <span class="n">clean_title</span><span class="p">(</span><span class="n">title</span><span class="p">):</span>
+</span><span data-line="521">        <span class="nb">print</span><span class="p">(</span><span class="s2">"Error: the title is empty"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="522">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span data-line="523">    <span class="k">if</span> <span class="n">status</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">_ADR_STATUSES</span><span class="p">:</span>
+</span><span data-line="524">        <span class="nb">print</span><span class="p">(</span>
+</span><span data-line="525">            <span class="sa">f</span><span class="s2">"Error: status must be one of </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">_ADR_STATUSES</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span>
+</span><span data-line="526">        <span class="p">)</span>
+</span><span data-line="527">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span data-line="528">    <span class="n">root</span><span class="p">,</span> <span class="n">decisions_dir</span> <span class="o">=</span> <span class="n">_decisions_dir</span><span class="p">(</span><span class="n">project_root</span><span class="p">)</span>
+</span><span data-line="529">    <span class="n">gf</span> <span class="o">=</span> <span class="n">new_adr</span><span class="p">(</span><span class="n">decisions_dir</span><span class="p">,</span> <span class="n">title</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="n">status</span><span class="p">,</span> <span class="n">evidence</span><span class="o">=</span><span class="n">evidence</span><span class="p">)</span>
+</span><span data-line="530">    <span class="n">rel</span> <span class="o">=</span> <span class="n">_relative_path</span><span class="p">(</span><span class="n">gf</span><span class="o">.</span><span class="n">target_path</span><span class="p">,</span> <span class="n">root</span><span class="p">)</span>
+</span><span data-line="531">    <span class="k">if</span> <span class="n">gf</span><span class="o">.</span><span class="n">target_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+</span><span data-line="532">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"SKIP </span><span class="si">{</span><span class="n">rel</span><span class="si">}</span><span class="s2">  (already exists)"</span><span class="p">)</span>
+</span><span data-line="533">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span data-line="534">    <span class="k">if</span> <span class="n">write</span><span class="p">:</span>
+</span><span data-line="535">        <span class="n">gf</span><span class="o">.</span><span class="n">target_path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span data-line="536">        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span>
+</span><span data-line="537">            <span class="n">gf</span><span class="o">.</span><span class="n">target_path</span><span class="p">,</span> <span class="s2">"x"</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span>
+</span><span data-line="538">        <span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>  <span class="c1"># exclusive: never over a file</span>
+</span><span data-line="539">            <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">gf</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span data-line="540">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Created </span><span class="si">{</span><span class="n">rel</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span data-line="541">    <span class="k">else</span><span class="p">:</span>
+</span><span data-line="542">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Would create </span><span class="si">{</span><span class="n">rel</span><span class="si">}</span><span class="se">\n\n</span><span class="s2">Dry run — pass --write to create it."</span><span class="p">)</span></div>
 
-</span><span data-line="537">
-</span><span data-line="538">
+</span><span data-line="543">
+</span><span data-line="544">
 <div class="viewcode-block" id="note">
 <a class="viewcode-back" href="../../_autosummary/opsward.cli.html#opsward.cli.note">[docs]</a>
-</span><span data-line="539"><span class="k">def</span><span class="w"> </span><span class="nf">note</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">write</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">project_root</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"."</span><span class="p">):</span>
-</span><span data-line="540"><span class="w">    </span><span class="sd">"""Append TEXT as a dated one-line decision (a Y-statement) to decisions/log.md (dry run unless --write).</span>
-</span><span data-line="541">
-</span><span data-line="542"><span class="sd">    :param text: the decision: "In the context of …, facing …, we decided for …, because …"</span>
-</span><span data-line="543"><span class="sd">    :param write: actually append (default: dry run); the log is created from its template when missing</span>
-</span><span data-line="544"><span class="sd">    :param project_root: the project directory (default: current dir)</span>
-</span><span data-line="545"><span class="sd">    """</span>
-</span><span data-line="546">    <span class="kn">from</span><span class="w"> </span><span class="nn">opsward.decisions</span><span class="w"> </span><span class="kn">import</span> <span class="n">log_append</span>
+</span><span data-line="545"><span class="k">def</span><span class="w"> </span><span class="nf">note</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">write</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">project_root</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">"."</span><span class="p">):</span>
+</span><span data-line="546"><span class="w">    </span><span class="sd">"""Append TEXT as a dated one-line decision (a Y-statement) to decisions/log.md (dry run unless --write).</span>
 </span><span data-line="547">
-</span><span data-line="548">    <span class="k">if</span> <span class="ow">not</span> <span class="s2">" "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">()):</span>
-</span><span data-line="549">        <span class="nb">print</span><span class="p">(</span><span class="s2">"Error: the text is empty"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-</span><span data-line="550">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</span><span data-line="551">    <span class="n">root</span><span class="p">,</span> <span class="n">decisions_dir</span> <span class="o">=</span> <span class="n">_decisions_dir</span><span class="p">(</span><span class="n">project_root</span><span class="p">)</span>
-</span><span data-line="552">    <span class="k">try</span><span class="p">:</span>
-</span><span data-line="553">        <span class="n">path</span><span class="p">,</span> <span class="n">content</span> <span class="o">=</span> <span class="n">log_append</span><span class="p">(</span><span class="n">decisions_dir</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
-</span><span data-line="554">    <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">UnicodeDecodeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-</span><span data-line="555">        <span class="nb">print</span><span class="p">(</span>
-</span><span data-line="556">            <span class="sa">f</span><span class="s2">"Error: cannot read the existing log, nothing written: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
-</span><span data-line="557">            <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span>
-</span><span data-line="558">        <span class="p">)</span>
-</span><span data-line="559">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</span><span data-line="560">    <span class="n">rel</span> <span class="o">=</span> <span class="n">_relative_path</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">root</span><span class="p">)</span>
-</span><span data-line="561">    <span class="k">if</span> <span class="n">write</span><span class="p">:</span>
-</span><span data-line="562">        <span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-</span><span data-line="563">        <span class="n">path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
-</span><span data-line="564">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Appended to </span><span class="si">{</span><span class="n">rel</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
-</span><span data-line="565">    <span class="k">else</span><span class="p">:</span>
-</span><span data-line="566">        <span class="n">verb</span> <span class="o">=</span> <span class="s2">"append to"</span> <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="k">else</span> <span class="s2">"create"</span>
-</span><span data-line="567">        <span class="nb">print</span><span class="p">(</span>
-</span><span data-line="568">            <span class="sa">f</span><span class="s2">"Would </span><span class="si">{</span><span class="n">verb</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">rel</span><span class="si">}</span><span class="s2"> a dated entry: </span><span class="si">{</span><span class="s1">' '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">())</span><span class="si">}</span><span class="se">\n\n</span><span class="s2">Dry run — pass --write to do it."</span>
-</span><span data-line="569">        <span class="p">)</span></div>
+</span><span data-line="548"><span class="sd">    :param text: the decision: "In the context of …, facing …, we decided for …, because …"</span>
+</span><span data-line="549"><span class="sd">    :param write: actually append (default: dry run); the log is created from its template when missing</span>
+</span><span data-line="550"><span class="sd">    :param project_root: the project directory (default: current dir)</span>
+</span><span data-line="551"><span class="sd">    """</span>
+</span><span data-line="552">    <span class="kn">from</span><span class="w"> </span><span class="nn">opsward.decisions</span><span class="w"> </span><span class="kn">import</span> <span class="n">log_append</span>
+</span><span data-line="553">
+</span><span data-line="554">    <span class="k">if</span> <span class="ow">not</span> <span class="s2">" "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">()):</span>
+</span><span data-line="555">        <span class="nb">print</span><span class="p">(</span><span class="s2">"Error: the text is empty"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="556">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span data-line="557">    <span class="n">root</span><span class="p">,</span> <span class="n">decisions_dir</span> <span class="o">=</span> <span class="n">_decisions_dir</span><span class="p">(</span><span class="n">project_root</span><span class="p">)</span>
+</span><span data-line="558">    <span class="k">try</span><span class="p">:</span>
+</span><span data-line="559">        <span class="n">path</span><span class="p">,</span> <span class="n">content</span> <span class="o">=</span> <span class="n">log_append</span><span class="p">(</span><span class="n">decisions_dir</span><span class="p">,</span> <span class="n">text</span><span class="p">)</span>
+</span><span data-line="560">    <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">UnicodeDecodeError</span><span class="p">)</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+</span><span data-line="561">        <span class="nb">print</span><span class="p">(</span>
+</span><span data-line="562">            <span class="sa">f</span><span class="s2">"Error: cannot read the existing log, nothing written: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">,</span>
+</span><span data-line="563">            <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span>
+</span><span data-line="564">        <span class="p">)</span>
+</span><span data-line="565">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span data-line="566">    <span class="n">rel</span> <span class="o">=</span> <span class="n">_relative_path</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">root</span><span class="p">)</span>
+</span><span data-line="567">    <span class="k">if</span> <span class="n">write</span><span class="p">:</span>
+</span><span data-line="568">        <span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</span><span data-line="569">        <span class="n">path</span><span class="o">.</span><span class="n">write_text</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">"utf-8"</span><span class="p">)</span>
+</span><span data-line="570">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Appended to </span><span class="si">{</span><span class="n">rel</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</span><span data-line="571">    <span class="k">else</span><span class="p">:</span>
+</span><span data-line="572">        <span class="n">verb</span> <span class="o">=</span> <span class="s2">"append to"</span> <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="k">else</span> <span class="s2">"create"</span>
+</span><span data-line="573">        <span class="nb">print</span><span class="p">(</span>
+</span><span data-line="574">            <span class="sa">f</span><span class="s2">"Would </span><span class="si">{</span><span class="n">verb</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">rel</span><span class="si">}</span><span class="s2"> a dated entry: </span><span class="si">{</span><span class="s1">' '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">())</span><span class="si">}</span><span class="se">\n\n</span><span class="s2">Dry run — pass --write to do it."</span>
+</span><span data-line="575">        <span class="p">)</span></div>
 
-</span><span data-line="570">
-</span><span data-line="571">
-</span><span data-line="572"><span class="c1">#: The statuses `decision new` will stamp. Accepting is the operator's act: pass</span>
-</span><span data-line="573"><span class="c1">#: `--status Accepted` only when the human has said so (ADR 0010 §2).</span>
-</span><span data-line="574"><span class="n">_ADR_STATUSES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"Proposed"</span><span class="p">,</span> <span class="s2">"Accepted"</span><span class="p">)</span>
-</span><span data-line="575">
 </span><span data-line="576">
-</span><span data-line="577"><span class="k">def</span><span class="w"> </span><span class="nf">_decisions_dir</span><span class="p">(</span><span class="n">project_root</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="n">Path</span><span class="p">]:</span>
-</span><span data-line="578"><span class="w">    </span><span class="sd">"""(root, root/&lt;docs&gt;/decisions), by the same resolver `scan` uses to find ADRs."""</span>
-</span><span data-line="579">    <span class="kn">from</span><span class="w"> </span><span class="nn">opsward.scan</span><span class="w"> </span><span class="kn">import</span> <span class="n">docs_dir_for</span>
-</span><span data-line="580">
-</span><span data-line="581">    <span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">project_root</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
-</span><span data-line="582">    <span class="k">if</span> <span class="ow">not</span> <span class="n">root</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
-</span><span data-line="583">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error: </span><span class="si">{</span><span class="n">project_root</span><span class="si">}</span><span class="s2"> is not a directory"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
-</span><span data-line="584">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
-</span><span data-line="585">    <span class="n">sr</span> <span class="o">=</span> <span class="n">scan</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">claude_config_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
-</span><span data-line="586">    <span class="k">return</span> <span class="n">root</span><span class="p">,</span> <span class="n">docs_dir_for</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_type</span><span class="p">,</span> <span class="n">sr</span><span class="o">.</span><span class="n">docs_guide_path</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"decisions"</span>
-</span><span data-line="587">
-</span><span data-line="588">
-</span><span data-line="589"><span class="c1"># The SSOT of the CLI surface: a name -&gt; command mapping, with one nested group.</span>
-</span><span data-line="590"><span class="n">_dispatch_funcs</span> <span class="o">=</span> <span class="p">{</span>
-</span><span data-line="591">    <span class="s2">"diagnose"</span><span class="p">:</span> <span class="n">diagnose</span><span class="p">,</span>
-</span><span data-line="592">    <span class="s2">"generate"</span><span class="p">:</span> <span class="n">generate</span><span class="p">,</span>
-</span><span data-line="593">    <span class="s2">"maintain"</span><span class="p">:</span> <span class="n">maintain</span><span class="p">,</span>
-</span><span data-line="594">    <span class="s2">"recommend"</span><span class="p">:</span> <span class="n">recommend</span><span class="p">,</span>
-</span><span data-line="595">    <span class="s2">"install-skills"</span><span class="p">:</span> <span class="n">install_skills</span><span class="p">,</span>
-</span><span data-line="596">    <span class="s2">"find"</span><span class="p">:</span> <span class="n">find</span><span class="p">,</span>
-</span><span data-line="597">    <span class="s2">"fleet"</span><span class="p">:</span> <span class="n">fleet</span><span class="p">,</span>
-</span><span data-line="598">    <span class="s2">"lint"</span><span class="p">:</span> <span class="n">lint</span><span class="p">,</span>
-</span><span data-line="599">    <span class="s2">"decision"</span><span class="p">:</span> <span class="p">[</span><span class="n">new</span><span class="p">,</span> <span class="n">note</span><span class="p">],</span>
-</span><span data-line="600"><span class="p">}</span>
+</span><span data-line="577">
+</span><span data-line="578"><span class="c1">#: The statuses `decision new` will stamp. Accepting is the operator's act: pass</span>
+</span><span data-line="579"><span class="c1">#: `--status Accepted` only when the human has said so (ADR 0010 §2).</span>
+</span><span data-line="580"><span class="n">_ADR_STATUSES</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"Proposed"</span><span class="p">,</span> <span class="s2">"Accepted"</span><span class="p">)</span>
+</span><span data-line="581">
+</span><span data-line="582">
+</span><span data-line="583"><span class="k">def</span><span class="w"> </span><span class="nf">_decisions_dir</span><span class="p">(</span><span class="n">project_root</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Path</span><span class="p">,</span> <span class="n">Path</span><span class="p">]:</span>
+</span><span data-line="584"><span class="w">    </span><span class="sd">"""(root, root/&lt;docs&gt;/decisions), by the same resolver `scan` uses to find ADRs."""</span>
+</span><span data-line="585">    <span class="kn">from</span><span class="w"> </span><span class="nn">opsward.scan</span><span class="w"> </span><span class="kn">import</span> <span class="n">docs_dir_for</span>
+</span><span data-line="586">
+</span><span data-line="587">    <span class="n">root</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">project_root</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+</span><span data-line="588">    <span class="k">if</span> <span class="ow">not</span> <span class="n">root</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+</span><span data-line="589">        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error: </span><span class="si">{</span><span class="n">project_root</span><span class="si">}</span><span class="s2"> is not a directory"</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+</span><span data-line="590">        <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span data-line="591">    <span class="n">sr</span> <span class="o">=</span> <span class="n">scan</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">claude_config_dir</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+</span><span data-line="592">    <span class="k">return</span> <span class="n">root</span><span class="p">,</span> <span class="n">docs_dir_for</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_type</span><span class="p">,</span> <span class="n">sr</span><span class="o">.</span><span class="n">docs_guide_path</span><span class="p">)</span> <span class="o">/</span> <span class="s2">"decisions"</span>
+</span><span data-line="593">
+</span><span data-line="594">
+</span><span data-line="595"><span class="c1"># The SSOT of the CLI surface: a name -&gt; command mapping, with one nested group.</span>
+</span><span data-line="596"><span class="n">_dispatch_funcs</span> <span class="o">=</span> <span class="p">{</span>
+</span><span data-line="597">    <span class="s2">"diagnose"</span><span class="p">:</span> <span class="n">diagnose</span><span class="p">,</span>
+</span><span data-line="598">    <span class="s2">"generate"</span><span class="p">:</span> <span class="n">generate</span><span class="p">,</span>
+</span><span data-line="599">    <span class="s2">"maintain"</span><span class="p">:</span> <span class="n">maintain</span><span class="p">,</span>
+</span><span data-line="600">    <span class="s2">"recommend"</span><span class="p">:</span> <span class="n">recommend</span><span class="p">,</span>
+</span><span data-line="601">    <span class="s2">"install-skills"</span><span class="p">:</span> <span class="n">install_skills</span><span class="p">,</span>
+</span><span data-line="602">    <span class="s2">"find"</span><span class="p">:</span> <span class="n">find</span><span class="p">,</span>
+</span><span data-line="603">    <span class="s2">"fleet"</span><span class="p">:</span> <span class="n">fleet</span><span class="p">,</span>
+</span><span data-line="604">    <span class="s2">"lint"</span><span class="p">:</span> <span class="n">lint</span><span class="p">,</span>
+</span><span data-line="605">    <span class="s2">"decision"</span><span class="p">:</span> <span class="p">[</span><span class="n">new</span><span class="p">,</span> <span class="n">note</span><span class="p">],</span>
+</span><span data-line="606"><span class="p">}</span>
 </span></pre></div>
         </article><button class="back-to-top" type="button">
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -788,7 +794,7 @@ data-aria-dark="Switch to auto color mode">
     </div>
   </div>
 </footer>
-      <script src="../../_static/documentation_options.js?v=26ffa1e9"></script>
+      <script src="../../_static/documentation_options.js?v=828725f0"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>

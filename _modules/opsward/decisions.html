@@ -369,86 +369,87 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="207"><span class="sd">    ['../new.md', 'pkg/live.py']</span>
 </span><span data-line="208"><span class="sd">    """</span>
 </span><span data-line="209">    <span class="kn">from</span><span class="w"> </span><span class="nn">opsward.maintain</span><span class="w"> </span><span class="kn">import</span> <span class="n">_extract_paths</span>  <span class="c1"># the same extractor CLAUDE.md uses</span>
-</span><span data-line="210">
-</span><span data-line="211">    <span class="n">prose</span> <span class="o">=</span> <span class="n">_STRIKE_RE</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">""</span><span class="p">,</span> <span class="n">_FENCE_RE</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">""</span><span class="p">,</span> <span class="n">content</span><span class="p">))</span>
-</span><span data-line="212">    <span class="n">found</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-</span><span data-line="213">    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">prose</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
-</span><span data-line="214">        <span class="n">historical</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">_HISTORICAL_RE</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">line</span><span class="p">))</span>
-</span><span data-line="215">        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">_extract_paths</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
-</span><span data-line="216">            <span class="k">if</span> <span class="n">_DOMAIN_RE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"/"</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]):</span>
-</span><span data-line="217">                <span class="k">continue</span>
-</span><span data-line="218">            <span class="k">if</span> <span class="n">historical</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">_is_destination</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
-</span><span data-line="219">                <span class="k">continue</span>
-</span><span data-line="220">            <span class="n">found</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
-</span><span data-line="221">        <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">_LINK_RE</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
-</span><span data-line="222">            <span class="k">if</span> <span class="s2">"://"</span> <span class="ow">in</span> <span class="n">target</span> <span class="ow">or</span> <span class="n">target</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="s2">"mailto:"</span><span class="p">,</span> <span class="s2">"/"</span><span class="p">)):</span>
-</span><span data-line="223">                <span class="k">continue</span>
-</span><span data-line="224">            <span class="k">if</span> <span class="n">historical</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">_is_destination</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
-</span><span data-line="225">                <span class="k">continue</span>
-</span><span data-line="226">            <span class="n">found</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
-</span><span data-line="227">    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">found</span><span class="p">)</span></div>
+</span><span data-line="210">    <span class="kn">from</span><span class="w"> </span><span class="nn">opsward.util</span><span class="w"> </span><span class="kn">import</span> <span class="n">checked_lines</span>  <span class="c1"># `opsward: ignore-path` covers links too</span>
+</span><span data-line="211">
+</span><span data-line="212">    <span class="n">prose</span> <span class="o">=</span> <span class="n">_STRIKE_RE</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">""</span><span class="p">,</span> <span class="n">_FENCE_RE</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="s2">""</span><span class="p">,</span> <span class="n">checked_lines</span><span class="p">(</span><span class="n">content</span><span class="p">)))</span>
+</span><span data-line="213">    <span class="n">found</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+</span><span data-line="214">    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">prose</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
+</span><span data-line="215">        <span class="n">historical</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">_HISTORICAL_RE</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="n">line</span><span class="p">))</span>
+</span><span data-line="216">        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">_extract_paths</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
+</span><span data-line="217">            <span class="k">if</span> <span class="n">_DOMAIN_RE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">"/"</span><span class="p">,</span> <span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]):</span>
+</span><span data-line="218">                <span class="k">continue</span>
+</span><span data-line="219">            <span class="k">if</span> <span class="n">historical</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">_is_destination</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">p</span><span class="p">):</span>
+</span><span data-line="220">                <span class="k">continue</span>
+</span><span data-line="221">            <span class="n">found</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+</span><span data-line="222">        <span class="k">for</span> <span class="n">target</span> <span class="ow">in</span> <span class="n">_LINK_RE</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
+</span><span data-line="223">            <span class="k">if</span> <span class="s2">"://"</span> <span class="ow">in</span> <span class="n">target</span> <span class="ow">or</span> <span class="n">target</span><span class="o">.</span><span class="n">startswith</span><span class="p">((</span><span class="s2">"mailto:"</span><span class="p">,</span> <span class="s2">"/"</span><span class="p">)):</span>
+</span><span data-line="224">                <span class="k">continue</span>
+</span><span data-line="225">            <span class="k">if</span> <span class="n">historical</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">_is_destination</span><span class="p">(</span><span class="n">line</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
+</span><span data-line="226">                <span class="k">continue</span>
+</span><span data-line="227">            <span class="n">found</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
+</span><span data-line="228">    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">found</span><span class="p">)</span></div>
 
-</span><span data-line="228">
 </span><span data-line="229">
-</span><span data-line="230"><span class="k">def</span><span class="w"> </span><span class="nf">_is_destination</span><span class="p">(</span><span class="n">line</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-</span><span data-line="231"><span class="w">    </span><span class="sd">"""On a historical line, the path after "to"/"into"/"now" is the current one."""</span>
-</span><span data-line="232">    <span class="n">at</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-</span><span data-line="233">    <span class="n">before</span> <span class="o">=</span> <span class="n">line</span><span class="p">[:</span><span class="n">at</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
-</span><span data-line="234">    <span class="c1"># the path may be a code span (`x`) or a link target ([label](x)) right after the word</span>
-</span><span data-line="235">    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span>
-</span><span data-line="236">        <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span>
-</span><span data-line="237">            <span class="sa">r</span><span class="s2">"\b(to|into|now|now at|lives in|is now)\s*(\[[^\]]*\]\(|[`\[])?$"</span><span class="p">,</span>
-</span><span data-line="238">            <span class="n">before</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(),</span>
-</span><span data-line="239">        <span class="p">)</span>
-</span><span data-line="240">    <span class="p">)</span>
-</span><span data-line="241">
+</span><span data-line="230">
+</span><span data-line="231"><span class="k">def</span><span class="w"> </span><span class="nf">_is_destination</span><span class="p">(</span><span class="n">line</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+</span><span data-line="232"><span class="w">    </span><span class="sd">"""On a historical line, the path after "to"/"into"/"now" is the current one."""</span>
+</span><span data-line="233">    <span class="n">at</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+</span><span data-line="234">    <span class="n">before</span> <span class="o">=</span> <span class="n">line</span><span class="p">[:</span><span class="n">at</span><span class="p">]</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+</span><span data-line="235">    <span class="c1"># the path may be a code span (`x`) or a link target ([label](x)) right after the word</span>
+</span><span data-line="236">    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span>
+</span><span data-line="237">        <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span>
+</span><span data-line="238">            <span class="sa">r</span><span class="s2">"\b(to|into|now|now at|lives in|is now)\s*(\[[^\]]*\]\(|[`\[])?$"</span><span class="p">,</span>
+</span><span data-line="239">            <span class="n">before</span><span class="o">.</span><span class="n">rstrip</span><span class="p">(),</span>
+</span><span data-line="240">        <span class="p">)</span>
+</span><span data-line="241">    <span class="p">)</span>
 </span><span data-line="242">
+</span><span data-line="243">
 <div class="viewcode-block" id="check_decisions">
 <a class="viewcode-back" href="../../_autosummary/opsward.decisions.html#opsward.decisions.check_decisions">[docs]</a>
-</span><span data-line="243"><span class="k">def</span><span class="w"> </span><span class="nf">check_decisions</span><span class="p">(</span><span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">MaintenanceSuggestion</span><span class="p">]:</span>
-</span><span data-line="244"><span class="w">    </span><span class="sd">"""``maintain`` check: ADRs citing paths that no longer exist, or carrying no status.</span>
-</span><span data-line="245">
-</span><span data-line="246"><span class="sd">    Rot in a decision record is a path that moved: the rationale still reads well and</span>
-</span><span data-line="247"><span class="sd">    points at nothing. Superseded, deprecated and rejected ADRs are history and are not</span>
-</span><span data-line="248"><span class="sd">    checked for paths: the superseding record is where the current paths live. This</span>
-</span><span data-line="249"><span class="sd">    reports; it never rewrites an accepted ADR (ADR 0010).</span>
-</span><span data-line="250"><span class="sd">    """</span>
-</span><span data-line="251">    <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">decision_docs</span><span class="p">(</span><span class="n">sr</span><span class="p">):</span>
-</span><span data-line="252">        <span class="n">content</span> <span class="o">=</span> <span class="n">read_text_safe</span><span class="p">(</span><span class="n">doc</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
-</span><span data-line="253">        <span class="n">rel</span> <span class="o">=</span> <span class="n">_rel</span><span class="p">(</span><span class="n">doc</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span><span class="p">)</span>
-</span><span data-line="254">        <span class="n">status</span> <span class="o">=</span> <span class="n">status_of</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
-</span><span data-line="255">        <span class="k">if</span> <span class="n">status</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span data-line="256">            <span class="k">yield</span> <span class="n">MaintenanceSuggestion</span><span class="p">(</span>
-</span><span data-line="257">                <span class="n">category</span><span class="o">=</span><span class="s2">"stale_adr"</span><span class="p">,</span>
-</span><span data-line="258">                <span class="n">description</span><span class="o">=</span><span class="sa">f</span><span class="s2">"`</span><span class="si">{</span><span class="n">rel</span><span class="si">}</span><span class="s2">` has no status (a `## Status` section, `**Status:**` line or front matter) — an ADR without one cannot be superseded"</span><span class="p">,</span>
-</span><span data-line="259">            <span class="p">)</span>
-</span><span data-line="260">            <span class="k">continue</span>
-</span><span data-line="261">        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">word</span> <span class="ow">in</span> <span class="n">status</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">_CLOSED_STATUSES</span><span class="p">):</span>
-</span><span data-line="262">            <span class="k">continue</span>
-</span><span data-line="263">        <span class="c1"># a cited path may be repo-relative, relative to the ADR's folder (a sibling or a</span>
-</span><span data-line="264">        <span class="c1"># `../` link), or relative to the docs folder above it</span>
-</span><span data-line="265">        <span class="n">bases</span> <span class="o">=</span> <span class="p">(</span><span class="n">sr</span><span class="o">.</span><span class="n">project_root</span><span class="p">,</span> <span class="n">doc</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">doc</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
-</span><span data-line="266">        <span class="n">missing</span> <span class="o">=</span> <span class="p">[</span>
-</span><span data-line="267">            <span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">cited_paths</span><span class="p">(</span><span class="n">content</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">((</span><span class="n">b</span> <span class="o">/</span> <span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">bases</span><span class="p">)</span>
-</span><span data-line="268">        <span class="p">]</span>
-</span><span data-line="269">        <span class="k">if</span> <span class="n">missing</span><span class="p">:</span>
-</span><span data-line="270">            <span class="k">yield</span> <span class="n">MaintenanceSuggestion</span><span class="p">(</span>
-</span><span data-line="271">                <span class="n">category</span><span class="o">=</span><span class="s2">"stale_adr"</span><span class="p">,</span>
-</span><span data-line="272">                <span class="n">description</span><span class="o">=</span><span class="p">(</span>
-</span><span data-line="273">                    <span class="sa">f</span><span class="s2">"`</span><span class="si">{</span><span class="n">rel</span><span class="si">}</span><span class="s2">` cites path(s) that no longer exist: </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s1">'`</span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s1">`'</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">missing</span><span class="p">[:</span><span class="mi">5</span><span class="p">])</span><span class="si">}</span><span class="s2">"</span>
-</span><span data-line="274">                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">' …'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">missing</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">5</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">''</span><span class="si">}</span><span class="s2"> — write a superseding ADR (or a log entry) that says where it went "</span>
-</span><span data-line="275">                    <span class="s1">'("moved from `old` to `new`", or ~~old~~, keeps the old path out of this check); '</span>
-</span><span data-line="276">                    <span class="s2">"the accepted one is only edited to point at its successor"</span>
-</span><span data-line="277">                <span class="p">),</span>
-</span><span data-line="278">            <span class="p">)</span></div>
+</span><span data-line="244"><span class="k">def</span><span class="w"> </span><span class="nf">check_decisions</span><span class="p">(</span><span class="n">sr</span><span class="p">:</span> <span class="n">ScanResult</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">MaintenanceSuggestion</span><span class="p">]:</span>
+</span><span data-line="245"><span class="w">    </span><span class="sd">"""``maintain`` check: ADRs citing paths that no longer exist, or carrying no status.</span>
+</span><span data-line="246">
+</span><span data-line="247"><span class="sd">    Rot in a decision record is a path that moved: the rationale still reads well and</span>
+</span><span data-line="248"><span class="sd">    points at nothing. Superseded, deprecated and rejected ADRs are history and are not</span>
+</span><span data-line="249"><span class="sd">    checked for paths: the superseding record is where the current paths live. This</span>
+</span><span data-line="250"><span class="sd">    reports; it never rewrites an accepted ADR (ADR 0010).</span>
+</span><span data-line="251"><span class="sd">    """</span>
+</span><span data-line="252">    <span class="k">for</span> <span class="n">doc</span> <span class="ow">in</span> <span class="n">decision_docs</span><span class="p">(</span><span class="n">sr</span><span class="p">):</span>
+</span><span data-line="253">        <span class="n">content</span> <span class="o">=</span> <span class="n">read_text_safe</span><span class="p">(</span><span class="n">doc</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+</span><span data-line="254">        <span class="n">rel</span> <span class="o">=</span> <span class="n">_rel</span><span class="p">(</span><span class="n">doc</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">sr</span><span class="o">.</span><span class="n">project_root</span><span class="p">)</span>
+</span><span data-line="255">        <span class="n">status</span> <span class="o">=</span> <span class="n">status_of</span><span class="p">(</span><span class="n">content</span><span class="p">)</span>
+</span><span data-line="256">        <span class="k">if</span> <span class="n">status</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="257">            <span class="k">yield</span> <span class="n">MaintenanceSuggestion</span><span class="p">(</span>
+</span><span data-line="258">                <span class="n">category</span><span class="o">=</span><span class="s2">"stale_adr"</span><span class="p">,</span>
+</span><span data-line="259">                <span class="n">description</span><span class="o">=</span><span class="sa">f</span><span class="s2">"`</span><span class="si">{</span><span class="n">rel</span><span class="si">}</span><span class="s2">` has no status (a `## Status` section, `**Status:**` line or front matter) — an ADR without one cannot be superseded"</span><span class="p">,</span>
+</span><span data-line="260">            <span class="p">)</span>
+</span><span data-line="261">            <span class="k">continue</span>
+</span><span data-line="262">        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">word</span> <span class="ow">in</span> <span class="n">status</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="k">for</span> <span class="n">word</span> <span class="ow">in</span> <span class="n">_CLOSED_STATUSES</span><span class="p">):</span>
+</span><span data-line="263">            <span class="k">continue</span>
+</span><span data-line="264">        <span class="c1"># a cited path may be repo-relative, relative to the ADR's folder (a sibling or a</span>
+</span><span data-line="265">        <span class="c1"># `../` link), or relative to the docs folder above it</span>
+</span><span data-line="266">        <span class="n">bases</span> <span class="o">=</span> <span class="p">(</span><span class="n">sr</span><span class="o">.</span><span class="n">project_root</span><span class="p">,</span> <span class="n">doc</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">doc</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
+</span><span data-line="267">        <span class="n">missing</span> <span class="o">=</span> <span class="p">[</span>
+</span><span data-line="268">            <span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">cited_paths</span><span class="p">(</span><span class="n">content</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">((</span><span class="n">b</span> <span class="o">/</span> <span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="k">for</span> <span class="n">b</span> <span class="ow">in</span> <span class="n">bases</span><span class="p">)</span>
+</span><span data-line="269">        <span class="p">]</span>
+</span><span data-line="270">        <span class="k">if</span> <span class="n">missing</span><span class="p">:</span>
+</span><span data-line="271">            <span class="k">yield</span> <span class="n">MaintenanceSuggestion</span><span class="p">(</span>
+</span><span data-line="272">                <span class="n">category</span><span class="o">=</span><span class="s2">"stale_adr"</span><span class="p">,</span>
+</span><span data-line="273">                <span class="n">description</span><span class="o">=</span><span class="p">(</span>
+</span><span data-line="274">                    <span class="sa">f</span><span class="s2">"`</span><span class="si">{</span><span class="n">rel</span><span class="si">}</span><span class="s2">` cites path(s) that no longer exist: </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s1">'`</span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s1">`'</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">p</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">missing</span><span class="p">[:</span><span class="mi">5</span><span class="p">])</span><span class="si">}</span><span class="s2">"</span>
+</span><span data-line="275">                    <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">' …'</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">missing</span><span class="p">)</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">5</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="s1">''</span><span class="si">}</span><span class="s2"> — write a superseding ADR (or a log entry) that says where it went "</span>
+</span><span data-line="276">                    <span class="s1">'("moved from `old` to `new`", or ~~old~~, keeps the old path out of this check); '</span>
+</span><span data-line="277">                    <span class="s2">"the accepted one is only edited to point at its successor"</span>
+</span><span data-line="278">                <span class="p">),</span>
+</span><span data-line="279">            <span class="p">)</span></div>
 
-</span><span data-line="279">
 </span><span data-line="280">
-</span><span data-line="281"><span class="k">def</span><span class="w"> </span><span class="nf">_rel</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">root</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span data-line="282">    <span class="k">try</span><span class="p">:</span>
-</span><span data-line="283">        <span class="k">return</span> <span class="n">path</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">root</span><span class="p">)</span><span class="o">.</span><span class="n">as_posix</span><span class="p">()</span>
-</span><span data-line="284">    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-</span><span data-line="285">        <span class="k">return</span> <span class="n">path</span><span class="o">.</span><span class="n">as_posix</span><span class="p">()</span>
+</span><span data-line="281">
+</span><span data-line="282"><span class="k">def</span><span class="w"> </span><span class="nf">_rel</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">,</span> <span class="n">root</span><span class="p">:</span> <span class="n">Path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span data-line="283">    <span class="k">try</span><span class="p">:</span>
+</span><span data-line="284">        <span class="k">return</span> <span class="n">path</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">root</span><span class="p">)</span><span class="o">.</span><span class="n">as_posix</span><span class="p">()</span>
+</span><span data-line="285">    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+</span><span data-line="286">        <span class="k">return</span> <span class="n">path</span><span class="o">.</span><span class="n">as_posix</span><span class="p">()</span>
 </span></pre></div>
         </article><button class="back-to-top" type="button">
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -476,7 +477,7 @@ data-aria-dark="Switch to auto color mode">
     </div>
   </div>
 </footer>
-      <script src="../../_static/documentation_options.js?v=26ffa1e9"></script>
+      <script src="../../_static/documentation_options.js?v=828725f0"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>

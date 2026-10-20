@@ -101,6 +101,9 @@ data-aria-dark="Switch to auto color mode">
       <i class="i-lucide close"></i>
     </button>
     <div class="sy-scrollbar sy-rside-inner px-6 xl:top-16 xl:sticky xl:pl-0 pt-6 pb-4"><div class="localtoc"><h3>On this page</h3><ul>
+<li><a class="reference internal" href="#opsward.util.IGNORE_PATH_MARKER"><code class="docutils literal notranslate"><span class="pre">IGNORE_PATH_MARKER</span></code></a></li>
+<li><a class="reference internal" href="#opsward.util.checked_lines"><code class="docutils literal notranslate"><span class="pre">checked_lines()</span></code></a></li>
+<li><a class="reference internal" href="#opsward.util.extract_paths"><code class="docutils literal notranslate"><span class="pre">extract_paths()</span></code></a></li>
 <li><a class="reference internal" href="#opsward.util.iter_files"><code class="docutils literal notranslate"><span class="pre">iter_files()</span></code></a></li>
 <li><a class="reference internal" href="#opsward.util.iter_subdirs"><code class="docutils literal notranslate"><span class="pre">iter_subdirs()</span></code></a></li>
 <li><a class="reference internal" href="#opsward.util.read_json_safe"><code class="docutils literal notranslate"><span class="pre">read_json_safe()</span></code></a></li>
@@ -146,10 +149,26 @@ data-aria-dark="Switch to auto color mode">
           <section id="module-opsward.util">
 <span id="opsward-util"></span><h1>opsward.util<a class="headerlink" href="#module-opsward.util" title="Link to this heading">#</a></h1>
 <p>Shared helpers for opsward.</p>
+<p class="rubric">Module Attributes</p>
+<div class="table-wrapper autosummary longtable docutils container">
+<table class="autosummary longtable docutils align-default">
+<tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.util.IGNORE_PATH_MARKER" title="opsward.util.IGNORE_PATH_MARKER"><code class="xref py py-obj docutils literal notranslate"><span class="pre">IGNORE_PATH_MARKER</span></code></a></p></td>
+<td><p>Put this on a line (as <code class="docutils literal notranslate"><span class="pre">&lt;!--</span> <span class="pre">opsward:</span> <span class="pre">ignore-path</span> <span class="pre">--&gt;</span></code> or <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">opsward:</span> <span class="pre">ignore-path</span></code>) and the paths on it are not checked; alone on its line, it covers the next line too.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
 <p class="rubric">Functions</p>
 <div class="table-wrapper autosummary longtable docutils container">
 <table class="autosummary longtable docutils align-default">
 <tbody>
+<tr class="row-odd"><td><p><a class="reference internal" href="#opsward.util.checked_lines" title="opsward.util.checked_lines"><code class="xref py py-obj docutils literal notranslate"><span class="pre">checked_lines</span></code></a>(content, *[, marker])</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">content</span></code> without the lines an ignore-path marker covers.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#opsward.util.extract_paths" title="opsward.util.extract_paths"><code class="xref py py-obj docutils literal notranslate"><span class="pre">extract_paths</span></code></a>(content)</p></td>
+<td><p>Plausible repo-relative file paths cited in markdown, minus URLs and ignored lines.</p></td>
+</tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#opsward.util.iter_files" title="opsward.util.iter_files"><code class="xref py py-obj docutils literal notranslate"><span class="pre">iter_files</span></code></a>(directory, *[, suffix, ...])</p></td>
 <td><p>Yield files in <em>directory</em>, optionally filtered by suffix.</p></td>
 </tr>
@@ -165,6 +184,50 @@ data-aria-dark="Switch to auto color mode">
 </tbody>
 </table>
 </div>
+<dl class="py data">
+<dt class="sig sig-object py" id="opsward.util.IGNORE_PATH_MARKER">
+<span class="sig-prename descclassname"><span class="pre">opsward.util.</span></span><span class="sig-name descname"><span class="pre">IGNORE_PATH_MARKER</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'opsward:</span> <span class="pre">ignore-path'</span></span><a class="headerlink" href="#opsward.util.IGNORE_PATH_MARKER" title="Link to this definition">#</a></dt>
+<dd><p>Put this on a line (as <code class="docutils literal notranslate"><span class="pre">&lt;!--</span> <span class="pre">opsward:</span> <span class="pre">ignore-path</span> <span class="pre">--&gt;</span></code> or <code class="docutils literal notranslate"><span class="pre">#</span> <span class="pre">opsward:</span> <span class="pre">ignore-path</span></code>)
+and the paths on it are not checked; alone on its line, it covers the next line too.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="opsward.util.checked_lines">
+<span class="sig-prename descclassname"><span class="pre">opsward.util.</span></span><span class="sig-name descname"><span class="pre">checked_lines</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">content</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">marker</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'opsward:</span> <span class="pre">ignore-path'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/util.html#checked_lines"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.util.checked_lines" title="Link to this definition">#</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">content</span></code> without the lines an ignore-path marker covers.</p>
+<p>A marker quoted in backticks (prose <em>about</em> the marker) is not a marker.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="gp">&gt;&gt;&gt; </span><span class="n">checked_lines</span><span class="p">(</span><span class="s2">"a/b.py</span><span class="se">\n</span><span class="s2">old/c.py &lt;!-- opsward: ignore-path --&gt;</span><span class="se">\n</span><span class="s2"># opsward: ignore-path</span><span class="se">\n</span><span class="s2">tmp/d.py</span><span class="se">\n</span><span class="s2">e/f.py"</span><span class="p">)</span>
+</span><span data-line="2"><span class="go">'a/b.py\ne/f.py'</span>
+</span><span data-line="3"><span class="gp">&gt;&gt;&gt; </span><span class="n">checked_lines</span><span class="p">(</span><span class="s2">"&lt;!-- opsward: ignore-path --&gt;</span><span class="se">\n</span><span class="s2">&lt;!-- opsward: ignore-path --&gt;</span><span class="se">\n</span><span class="s2">x/y.py</span><span class="se">\n</span><span class="s2">z/w.py"</span><span class="p">)</span>
+</span><span data-line="4"><span class="go">'z/w.py'</span>
+</span><span data-line="5"><span class="gp">&gt;&gt;&gt; </span><span class="n">checked_lines</span><span class="p">(</span><span class="s2">"Use `&lt;!-- opsward: ignore-path --&gt;` on src/a.py"</span><span class="p">)</span>
+</span><span data-line="6"><span class="go">'Use `&lt;!-- opsward: ignore-path --&gt;` on src/a.py'</span>
+</span></pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="opsward.util.extract_paths">
+<span class="sig-prename descclassname"><span class="pre">opsward.util.</span></span><span class="sig-name descname"><span class="pre">extract_paths</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">content</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/util.html#extract_paths"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.util.extract_paths" title="Link to this definition">#</a></dt>
+<dd><p>Plausible repo-relative file paths cited in markdown, minus URLs and ignored lines.</p>
+<p>The one extractor behind the currency score, the cross-reference check, the stale-path
+finding and the ADR drift check, so <code class="docutils literal notranslate"><span class="pre">opsward:</span> <span class="pre">ignore-path</span></code> silences all of them.</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span data-line="1"><span class="gp">&gt;&gt;&gt; </span><span class="n">extract_paths</span><span class="p">(</span><span class="s2">"See `src/a.py`, https://x.io/b.html and ./docs/c.md"</span><span class="p">)</span>
+</span><span data-line="2"><span class="go">['src/a.py', './docs/c.md']</span>
+</span></pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="opsward.util.iter_files">
 <span class="sig-prename descclassname"><span class="pre">opsward.util.</span></span><span class="sig-name descname"><span class="pre">iter_files</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">directory</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">suffix</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">''</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">recursive</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_seen</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/opsward/util.html#iter_files"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#opsward.util.iter_files" title="Link to this definition">#</a></dt>
@@ -254,7 +317,7 @@ cannot be read is skipped rather than raised.</p>
     </div>
   </div>
 </footer>
-      <script src="../_static/documentation_options.js?v=26ffa1e9"></script>
+      <script src="../_static/documentation_options.js?v=828725f0"></script>
       <script src="../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../_static/clipboard.min.js?v=a7894cd8"></script>

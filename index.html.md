@@ -77,10 +77,12 @@ opsward maintain .
 ```default
 myproject: 3 issue(s)
 
-  [stale_path] CLAUDE.md references `src/old_module.py` but it does not exist
-  [sync_issue] `new_doc.md` exists in docs/ but is not listed in docs_guide.md
-  [empty_doc] `conventions.md` appears to be an empty stub (12 bytes)
+  [stale_path → align] CLAUDE.md references `src/old_module.py` but it does not exist
+  [sync_issue → align] `new_doc.md` exists in docs/ but is not listed in docs_guide.md
+  [empty_doc → align] `conventions.md` appears to be an empty stub (12 bytes)
 ```
+
+Each finding carries a recommended triage: **align** (the code is right, update the config), **revert** (the config is right, restore the code) or **ignore** (the reference is legitimately volatile). To ignore one, put `<!-- opsward: ignore-path -->` at the end of its line, or alone on the line before it; every path check (stale paths, the currency score, cross-references, ADR drift) then skips it.
 
 ### Fleet
 
@@ -209,14 +211,26 @@ The rubric scores form; evals ask whether a config actually helps. They make mod
 
 ```python
 from pathlib import Path
-from opsward.evals import judge_claude_md, anthropic_judge, run_golden_tasks, GoldenTask, anthropic_agent
+from opsward.evals import (
+    judge_claude_md,
+    anthropic_judge,
+    run_golden_tasks,
+    GoldenTask,
+    anthropic_agent,
+)
 
 # LLM-as-judge for the subjective dimensions (actionability, conciseness), next to the rubric's score
-print(judge_claude_md(Path("CLAUDE.md").read_text(), judge=anthropic_judge(), samples=3))
+print(
+    judge_claude_md(Path("CLAUDE.md").read_text(), judge=anthropic_judge(), samples=3)
+)
 
 # Golden tasks: does the agent honour a convention with the config, and not without it?
 tasks = [GoldenTask("kw-only", "Write a function f(a, b, c).", expect=[r"\*,"])]
-print(run_golden_tasks(tasks, agent=anthropic_agent(), config=Path("CLAUDE.md").read_text(), runs=3))
+print(
+    run_golden_tasks(
+        tasks, agent=anthropic_agent(), config=Path("CLAUDE.md").read_text(), runs=3
+    )
+)
 ```
 
 `pip install 'opsward[eval]'` for the paid judge and agent. Without them, `judge_claude_md` defaults to `rubric_judge` (opsward’s own rubric, free) and `echo_agent` exercises the golden-task harness without a model.
