@@ -585,156 +585,158 @@ data-aria-dark="Switch to auto color mode">
 </span><span data-line="412">    <span class="n">lines</span><span class="p">,</span> <span class="n">replaced</span> <span class="o">=</span> <span class="p">[],</span> <span class="kc">False</span>
 </span><span data-line="413">    <span class="k">for</span> <span class="n">line</span><span class="p">,</span> <span class="n">fenced</span> <span class="ow">in</span> <span class="n">_lines</span><span class="p">(</span><span class="n">render</span><span class="p">):</span>
 </span><span data-line="414">        <span class="c1"># Inlined once, and never from code (fenced, or indented as a code block)</span>
-</span><span data-line="415">        <span class="n">m</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">replaced</span> <span class="ow">or</span> <span class="n">fenced</span> <span class="ow">or</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"    "</span><span class="p">)</span> <span class="k">else</span> <span class="p">(</span>
-</span><span data-line="416">            <span class="n">_IMPORT_RE</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
-</span><span data-line="417">        <span class="p">)</span>
-</span><span data-line="418">        <span class="k">if</span> <span class="n">m</span> <span class="ow">and</span> <span class="n">resolves_to_canonical</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">importer</span><span class="o">=</span><span class="n">path</span><span class="p">):</span>
-</span><span data-line="419">            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">canonical</span><span class="p">)</span>
-</span><span data-line="420">            <span class="n">replaced</span> <span class="o">=</span> <span class="kc">True</span>
-</span><span data-line="421">        <span class="k">else</span><span class="p">:</span>
-</span><span data-line="422">            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
-</span><span data-line="423">    <span class="n">out</span> <span class="o">=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
-</span><span data-line="424">    <span class="k">return</span> <span class="n">out</span> <span class="k">if</span> <span class="n">replaced</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">out</span><span class="si">}</span><span class="se">\n\n</span><span class="si">{</span><span class="n">canonical</span><span class="si">}</span><span class="s2">"</span></div>
+</span><span data-line="415">        <span class="n">m</span> <span class="o">=</span> <span class="p">(</span>
+</span><span data-line="416">            <span class="kc">None</span>
+</span><span data-line="417">            <span class="k">if</span> <span class="n">replaced</span> <span class="ow">or</span> <span class="n">fenced</span> <span class="ow">or</span> <span class="n">line</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">"    "</span><span class="p">)</span>
+</span><span data-line="418">            <span class="k">else</span> <span class="p">(</span><span class="n">_IMPORT_RE</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()))</span>
+</span><span data-line="419">        <span class="p">)</span>
+</span><span data-line="420">        <span class="k">if</span> <span class="n">m</span> <span class="ow">and</span> <span class="n">resolves_to_canonical</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">importer</span><span class="o">=</span><span class="n">path</span><span class="p">):</span>
+</span><span data-line="421">            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">canonical</span><span class="p">)</span>
+</span><span data-line="422">            <span class="n">replaced</span> <span class="o">=</span> <span class="kc">True</span>
+</span><span data-line="423">        <span class="k">else</span><span class="p">:</span>
+</span><span data-line="424">            <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+</span><span data-line="425">    <span class="n">out</span> <span class="o">=</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+</span><span data-line="426">    <span class="k">return</span> <span class="n">out</span> <span class="k">if</span> <span class="n">replaced</span> <span class="k">else</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">out</span><span class="si">}</span><span class="se">\n\n</span><span class="si">{</span><span class="n">canonical</span><span class="si">}</span><span class="s2">"</span></div>
 
-</span><span data-line="425">
-</span><span data-line="426">
+</span><span data-line="427">
+</span><span data-line="428">
 <div class="viewcode-block" id="claude_md_as_read">
 <a class="viewcode-back" href="../../_autosummary/opsward.portability.html#opsward.portability.claude_md_as_read">[docs]</a>
-</span><span data-line="427"><span class="k">def</span><span class="w"> </span><span class="nf">claude_md_as_read</span><span class="p">(</span><span class="n">scan_result</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span data-line="428"><span class="w">    </span><span class="sd">"""The scanned CLAUDE.md as Claude Code reads it (``as_read`` at its own path)."""</span>
-</span><span data-line="429">    <span class="k">return</span> <span class="n">as_read</span><span class="p">(</span>
-</span><span data-line="430">        <span class="n">scan_result</span><span class="o">.</span><span class="n">claude_md_content</span><span class="p">,</span>
-</span><span data-line="431">        <span class="n">scan_result</span><span class="o">.</span><span class="n">agents_md_content</span><span class="p">,</span>
-</span><span data-line="432">        <span class="n">path</span><span class="o">=</span><span class="n">claude_md_relpath</span><span class="p">(</span><span class="n">scan_result</span><span class="p">),</span>
-</span><span data-line="433">    <span class="p">)</span></div>
+</span><span data-line="429"><span class="k">def</span><span class="w"> </span><span class="nf">claude_md_as_read</span><span class="p">(</span><span class="n">scan_result</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span data-line="430"><span class="w">    </span><span class="sd">"""The scanned CLAUDE.md as Claude Code reads it (``as_read`` at its own path)."""</span>
+</span><span data-line="431">    <span class="k">return</span> <span class="n">as_read</span><span class="p">(</span>
+</span><span data-line="432">        <span class="n">scan_result</span><span class="o">.</span><span class="n">claude_md_content</span><span class="p">,</span>
+</span><span data-line="433">        <span class="n">scan_result</span><span class="o">.</span><span class="n">agents_md_content</span><span class="p">,</span>
+</span><span data-line="434">        <span class="n">path</span><span class="o">=</span><span class="n">claude_md_relpath</span><span class="p">(</span><span class="n">scan_result</span><span class="p">),</span>
+</span><span data-line="435">    <span class="p">)</span></div>
 
-</span><span data-line="434">
-</span><span data-line="435">
+</span><span data-line="436">
+</span><span data-line="437">
 <div class="viewcode-block" id="claude_md_relpath">
 <a class="viewcode-back" href="../../_autosummary/opsward.portability.html#opsward.portability.claude_md_relpath">[docs]</a>
-</span><span data-line="436"><span class="k">def</span><span class="w"> </span><span class="nf">claude_md_relpath</span><span class="p">(</span><span class="n">scan_result</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span data-line="437"><span class="w">    </span><span class="sd">"""The scanned CLAUDE.md's path relative to the project root (``CLAUDE.md`` if unknown)."""</span>
-</span><span data-line="438">    <span class="n">p</span> <span class="o">=</span> <span class="n">scan_result</span><span class="o">.</span><span class="n">claude_md_path</span>
-</span><span data-line="439">    <span class="k">if</span> <span class="n">p</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span data-line="440">        <span class="k">return</span> <span class="s2">"CLAUDE.md"</span>
-</span><span data-line="441">    <span class="k">try</span><span class="p">:</span>
-</span><span data-line="442">        <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">scan_result</span><span class="o">.</span><span class="n">project_root</span><span class="p">)</span><span class="o">.</span><span class="n">as_posix</span><span class="p">()</span>
-</span><span data-line="443">    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
-</span><span data-line="444">        <span class="k">return</span> <span class="s2">"CLAUDE.md"</span></div>
+</span><span data-line="438"><span class="k">def</span><span class="w"> </span><span class="nf">claude_md_relpath</span><span class="p">(</span><span class="n">scan_result</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span data-line="439"><span class="w">    </span><span class="sd">"""The scanned CLAUDE.md's path relative to the project root (``CLAUDE.md`` if unknown)."""</span>
+</span><span data-line="440">    <span class="n">p</span> <span class="o">=</span> <span class="n">scan_result</span><span class="o">.</span><span class="n">claude_md_path</span>
+</span><span data-line="441">    <span class="k">if</span> <span class="n">p</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="442">        <span class="k">return</span> <span class="s2">"CLAUDE.md"</span>
+</span><span data-line="443">    <span class="k">try</span><span class="p">:</span>
+</span><span data-line="444">        <span class="k">return</span> <span class="n">Path</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="n">scan_result</span><span class="o">.</span><span class="n">project_root</span><span class="p">)</span><span class="o">.</span><span class="n">as_posix</span><span class="p">()</span>
+</span><span data-line="445">    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+</span><span data-line="446">        <span class="k">return</span> <span class="s2">"CLAUDE.md"</span></div>
 
-</span><span data-line="445">
-</span><span data-line="446">
-</span><span data-line="447"><span class="c1"># Strongest first: a host covered several ways reports the least drift-prone one.</span>
-</span><span data-line="448"><span class="n">_RELATION_ORDER</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"symlink"</span><span class="p">,</span> <span class="s2">"import"</span><span class="p">,</span> <span class="s2">"native"</span><span class="p">,</span> <span class="s2">"copy"</span><span class="p">,</span> <span class="s2">"rules"</span><span class="p">)</span>
-</span><span data-line="449">
-</span><span data-line="450">
-</span><span data-line="451"><span class="k">def</span><span class="w"> </span><span class="nf">_strongest</span><span class="p">(</span><span class="n">relations</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span data-line="452">    <span class="k">for</span> <span class="n">rel</span> <span class="ow">in</span> <span class="n">_RELATION_ORDER</span><span class="p">:</span>
-</span><span data-line="453">        <span class="k">if</span> <span class="n">rel</span> <span class="ow">in</span> <span class="n">relations</span><span class="p">:</span>
-</span><span data-line="454">            <span class="k">return</span> <span class="n">rel</span>
-</span><span data-line="455">    <span class="k">return</span> <span class="s2">"none"</span>
-</span><span data-line="456">
-</span><span data-line="457">
-</span><span data-line="458"><span class="k">def</span><span class="w"> </span><span class="nf">_drift</span><span class="p">(</span><span class="n">canonical</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">hf</span><span class="p">:</span> <span class="n">HostFile</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">DriftFinding</span><span class="p">]:</span>
-</span><span data-line="459">    <span class="n">relation</span> <span class="o">=</span> <span class="n">hf</span><span class="o">.</span><span class="n">relation</span>
-</span><span data-line="460">    <span class="c1"># An empty (or undecodable: read as '') file says nothing about drift</span>
-</span><span data-line="461">    <span class="k">if</span> <span class="n">relation</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"symlink"</span><span class="p">,</span> <span class="s2">"rules"</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">hf</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
-</span><span data-line="462">        <span class="k">return</span>
-</span><span data-line="463">    <span class="k">if</span> <span class="ow">not</span> <span class="n">hf</span><span class="o">.</span><span class="n">compared</span> <span class="ow">and</span> <span class="n">relation</span> <span class="o">==</span> <span class="s2">"copy"</span><span class="p">:</span>
+</span><span data-line="447">
+</span><span data-line="448">
+</span><span data-line="449"><span class="c1"># Strongest first: a host covered several ways reports the least drift-prone one.</span>
+</span><span data-line="450"><span class="n">_RELATION_ORDER</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"symlink"</span><span class="p">,</span> <span class="s2">"import"</span><span class="p">,</span> <span class="s2">"native"</span><span class="p">,</span> <span class="s2">"copy"</span><span class="p">,</span> <span class="s2">"rules"</span><span class="p">)</span>
+</span><span data-line="451">
+</span><span data-line="452">
+</span><span data-line="453"><span class="k">def</span><span class="w"> </span><span class="nf">_strongest</span><span class="p">(</span><span class="n">relations</span><span class="p">:</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span data-line="454">    <span class="k">for</span> <span class="n">rel</span> <span class="ow">in</span> <span class="n">_RELATION_ORDER</span><span class="p">:</span>
+</span><span data-line="455">        <span class="k">if</span> <span class="n">rel</span> <span class="ow">in</span> <span class="n">relations</span><span class="p">:</span>
+</span><span data-line="456">            <span class="k">return</span> <span class="n">rel</span>
+</span><span data-line="457">    <span class="k">return</span> <span class="s2">"none"</span>
+</span><span data-line="458">
+</span><span data-line="459">
+</span><span data-line="460"><span class="k">def</span><span class="w"> </span><span class="nf">_drift</span><span class="p">(</span><span class="n">canonical</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">hf</span><span class="p">:</span> <span class="n">HostFile</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="n">DriftFinding</span><span class="p">]:</span>
+</span><span data-line="461">    <span class="n">relation</span> <span class="o">=</span> <span class="n">hf</span><span class="o">.</span><span class="n">relation</span>
+</span><span data-line="462">    <span class="c1"># An empty (or undecodable: read as '') file says nothing about drift</span>
+</span><span data-line="463">    <span class="k">if</span> <span class="n">relation</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">"symlink"</span><span class="p">,</span> <span class="s2">"rules"</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">hf</span><span class="o">.</span><span class="n">content</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
 </span><span data-line="464">        <span class="k">return</span>
-</span><span data-line="465">    <span class="n">canon</span> <span class="o">=</span> <span class="n">_sections</span><span class="p">(</span><span class="n">canonical</span><span class="p">)</span>
-</span><span data-line="466">    <span class="n">render</span> <span class="o">=</span> <span class="n">_sections</span><span class="p">(</span><span class="n">hf</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
-</span><span data-line="467">    <span class="k">for</span> <span class="n">heading</span><span class="p">,</span> <span class="n">body</span> <span class="ow">in</span> <span class="n">render</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-</span><span data-line="468">        <span class="k">if</span> <span class="n">heading</span> <span class="ow">in</span> <span class="n">canon</span><span class="p">:</span>
-</span><span data-line="469">            <span class="k">if</span> <span class="n">canon</span><span class="p">[</span><span class="n">heading</span><span class="p">]</span> <span class="o">!=</span> <span class="n">body</span><span class="p">:</span>
-</span><span data-line="470">                <span class="k">yield</span> <span class="n">DriftFinding</span><span class="p">(</span><span class="s2">"diverged"</span><span class="p">,</span> <span class="n">hf</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">heading</span><span class="p">)</span>
-</span><span data-line="471">        <span class="k">elif</span> <span class="n">relation</span> <span class="o">==</span> <span class="s2">"copy"</span><span class="p">:</span>
-</span><span data-line="472">            <span class="c1"># After an import, render-only sections are the intended host deltas.</span>
-</span><span data-line="473">            <span class="k">yield</span> <span class="n">DriftFinding</span><span class="p">(</span><span class="s2">"host_only"</span><span class="p">,</span> <span class="n">hf</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">heading</span><span class="p">)</span>
-</span><span data-line="474">    <span class="k">if</span> <span class="n">relation</span> <span class="o">==</span> <span class="s2">"copy"</span><span class="p">:</span>
-</span><span data-line="475">        <span class="k">for</span> <span class="n">heading</span> <span class="ow">in</span> <span class="n">canon</span><span class="p">:</span>
-</span><span data-line="476">            <span class="k">if</span> <span class="n">heading</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">render</span><span class="p">:</span>
-</span><span data-line="477">                <span class="k">yield</span> <span class="n">DriftFinding</span><span class="p">(</span><span class="s2">"stale"</span><span class="p">,</span> <span class="n">hf</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">heading</span><span class="p">)</span>
-</span><span data-line="478">
-</span><span data-line="479">
-</span><span data-line="480"><span class="k">def</span><span class="w"> </span><span class="nf">_sections</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
-</span><span data-line="481"><span class="w">    </span><span class="sd">"""Sections keyed by normalised heading; bodies whitespace-normalised.</span>
-</span><span data-line="482">
-</span><span data-line="483"><span class="sd">    The first level-1 heading is skipped (it titles the file); ATX and setext headings</span>
-</span><span data-line="484"><span class="sd">    count, fenced code (backtick or tilde) never does.</span>
-</span><span data-line="485">
-</span><span data-line="486"><span class="sd">    &gt;&gt;&gt; _sections("# T\\n\\n## Build &amp; Test\\n\\n  pytest  \\n\\n\\n## Notes\\nx")</span>
-</span><span data-line="487"><span class="sd">    {'build test': 'pytest', 'notes': 'x'}</span>
-</span><span data-line="488"><span class="sd">    &gt;&gt;&gt; _sections("# T\\n~~~\\n## not one\\n~~~\\n# Usage\\nrun\\nAPI\\n---\\nf()")</span>
-</span><span data-line="489"><span class="sd">    {'usage': 'run', 'api': 'f()'}</span>
-</span><span data-line="490"><span class="sd">    """</span>
-</span><span data-line="491">    <span class="n">out</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span data-line="492">    <span class="n">current</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span data-line="493">    <span class="n">title_seen</span> <span class="o">=</span> <span class="kc">False</span>
-</span><span data-line="494">    <span class="n">pending</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># a prose line that a setext underline may promote</span>
-</span><span data-line="495">
-</span><span data-line="496">    <span class="k">def</span><span class="w"> </span><span class="nf">start</span><span class="p">(</span><span class="n">level</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">heading</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span data-line="497">        <span class="k">nonlocal</span> <span class="n">current</span><span class="p">,</span> <span class="n">title_seen</span>
-</span><span data-line="498">        <span class="k">if</span> <span class="n">level</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">title_seen</span><span class="p">:</span>
-</span><span data-line="499">            <span class="n">title_seen</span><span class="p">,</span> <span class="n">current</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span>
-</span><span data-line="500">            <span class="k">return</span>
-</span><span data-line="501">        <span class="n">title_seen</span> <span class="o">=</span> <span class="kc">True</span>
-</span><span data-line="502">        <span class="n">current</span> <span class="o">=</span> <span class="n">_norm_heading</span><span class="p">(</span><span class="n">heading</span><span class="p">)</span>
-</span><span data-line="503">        <span class="n">out</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="p">[])</span>
-</span><span data-line="504">
-</span><span data-line="505">    <span class="k">def</span><span class="w"> </span><span class="nf">emit</span><span class="p">(</span><span class="n">line</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
-</span><span data-line="506">        <span class="k">if</span> <span class="n">current</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span data-line="507">            <span class="n">out</span><span class="p">[</span><span class="n">current</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
-</span><span data-line="508">
-</span><span data-line="509">    <span class="k">for</span> <span class="n">line</span><span class="p">,</span> <span class="n">fenced</span> <span class="ow">in</span> <span class="n">_lines</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
-</span><span data-line="510">        <span class="n">setext</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">fenced</span> <span class="k">else</span> <span class="n">_SETEXT_RE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
-</span><span data-line="511">        <span class="k">if</span> <span class="n">setext</span> <span class="ow">and</span> <span class="n">pending</span> <span class="ow">and</span> <span class="n">pending</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
-</span><span data-line="512">            <span class="n">start</span><span class="p">(</span><span class="mi">1</span> <span class="k">if</span> <span class="n">setext</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"="</span> <span class="k">else</span> <span class="mi">2</span><span class="p">,</span> <span class="n">pending</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
-</span><span data-line="513">            <span class="n">pending</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span data-line="514">            <span class="k">continue</span>
-</span><span data-line="515">        <span class="k">if</span> <span class="n">pending</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span data-line="516">            <span class="n">emit</span><span class="p">(</span><span class="n">pending</span><span class="p">)</span>
-</span><span data-line="517">            <span class="n">pending</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span data-line="518">        <span class="n">atx</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">fenced</span> <span class="k">else</span> <span class="n">_HEADING_RE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
-</span><span data-line="519">        <span class="k">if</span> <span class="n">atx</span><span class="p">:</span>
-</span><span data-line="520">            <span class="n">start</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">atx</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)),</span> <span class="n">atx</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
-</span><span data-line="521">        <span class="k">elif</span> <span class="ow">not</span> <span class="n">fenced</span> <span class="ow">and</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">_FENCE_RE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
-</span><span data-line="522">            <span class="n">pending</span> <span class="o">=</span> <span class="n">line</span>
-</span><span data-line="523">        <span class="k">else</span><span class="p">:</span>
-</span><span data-line="524">            <span class="n">emit</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
-</span><span data-line="525">    <span class="k">if</span> <span class="n">pending</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-</span><span data-line="526">        <span class="n">emit</span><span class="p">(</span><span class="n">pending</span><span class="p">)</span>
-</span><span data-line="527">    <span class="k">return</span> <span class="p">{</span><span class="n">h</span><span class="p">:</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">l</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">lines</span> <span class="k">if</span> <span class="n">l</span><span class="p">)</span> <span class="k">for</span> <span class="n">h</span><span class="p">,</span> <span class="n">lines</span> <span class="ow">in</span> <span class="n">out</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
-</span><span data-line="528">
-</span><span data-line="529">
-</span><span data-line="530"><span class="k">def</span><span class="w"> </span><span class="nf">_lines</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]]:</span>
-</span><span data-line="531"><span class="w">    </span><span class="sd">"""Each line with whether it is inside (or delimits) a fenced code block.</span>
-</span><span data-line="532">
-</span><span data-line="533"><span class="sd">    A fence closes only on the same character, at least as long, with no info string;</span>
-</span><span data-line="534"><span class="sd">    a backtick fence's info string may not contain a backtick (CommonMark).</span>
-</span><span data-line="535"><span class="sd">    """</span>
-</span><span data-line="536">    <span class="n">fence</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span data-line="537">    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">text</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
-</span><span data-line="538">        <span class="n">m</span> <span class="o">=</span> <span class="n">_FENCE_RE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
-</span><span data-line="539">        <span class="k">if</span> <span class="n">fence</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-</span><span data-line="540">            <span class="k">if</span> <span class="n">m</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"`"</span> <span class="ow">and</span> <span class="s2">"`"</span> <span class="ow">in</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)):</span>
-</span><span data-line="541">                <span class="n">fence</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-</span><span data-line="542">                <span class="k">yield</span> <span class="n">line</span><span class="p">,</span> <span class="kc">True</span>
-</span><span data-line="543">            <span class="k">else</span><span class="p">:</span>
-</span><span data-line="544">                <span class="k">yield</span> <span class="n">line</span><span class="p">,</span> <span class="kc">False</span>
-</span><span data-line="545">        <span class="k">else</span><span class="p">:</span>
-</span><span data-line="546">            <span class="k">if</span> <span class="p">(</span>
-</span><span data-line="547">                <span class="n">m</span>
-</span><span data-line="548">                <span class="ow">and</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">fence</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-</span><span data-line="549">                <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">fence</span><span class="p">)</span>
-</span><span data-line="550">                <span class="ow">and</span> <span class="ow">not</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-</span><span data-line="551">            <span class="p">):</span>
-</span><span data-line="552">                <span class="n">fence</span> <span class="o">=</span> <span class="kc">None</span>
-</span><span data-line="553">            <span class="k">yield</span> <span class="n">line</span><span class="p">,</span> <span class="kc">True</span>
-</span><span data-line="554">
-</span><span data-line="555">
-</span><span data-line="556"><span class="k">def</span><span class="w"> </span><span class="nf">_norm_heading</span><span class="p">(</span><span class="n">heading</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-</span><span data-line="557">    <span class="k">return</span> <span class="s2">" "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">"[^\w\s]"</span><span class="p">,</span> <span class="s2">" "</span><span class="p">,</span> <span class="n">heading</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
+</span><span data-line="465">    <span class="k">if</span> <span class="ow">not</span> <span class="n">hf</span><span class="o">.</span><span class="n">compared</span> <span class="ow">and</span> <span class="n">relation</span> <span class="o">==</span> <span class="s2">"copy"</span><span class="p">:</span>
+</span><span data-line="466">        <span class="k">return</span>
+</span><span data-line="467">    <span class="n">canon</span> <span class="o">=</span> <span class="n">_sections</span><span class="p">(</span><span class="n">canonical</span><span class="p">)</span>
+</span><span data-line="468">    <span class="n">render</span> <span class="o">=</span> <span class="n">_sections</span><span class="p">(</span><span class="n">hf</span><span class="o">.</span><span class="n">content</span><span class="p">)</span>
+</span><span data-line="469">    <span class="k">for</span> <span class="n">heading</span><span class="p">,</span> <span class="n">body</span> <span class="ow">in</span> <span class="n">render</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+</span><span data-line="470">        <span class="k">if</span> <span class="n">heading</span> <span class="ow">in</span> <span class="n">canon</span><span class="p">:</span>
+</span><span data-line="471">            <span class="k">if</span> <span class="n">canon</span><span class="p">[</span><span class="n">heading</span><span class="p">]</span> <span class="o">!=</span> <span class="n">body</span><span class="p">:</span>
+</span><span data-line="472">                <span class="k">yield</span> <span class="n">DriftFinding</span><span class="p">(</span><span class="s2">"diverged"</span><span class="p">,</span> <span class="n">hf</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">heading</span><span class="p">)</span>
+</span><span data-line="473">        <span class="k">elif</span> <span class="n">relation</span> <span class="o">==</span> <span class="s2">"copy"</span><span class="p">:</span>
+</span><span data-line="474">            <span class="c1"># After an import, render-only sections are the intended host deltas.</span>
+</span><span data-line="475">            <span class="k">yield</span> <span class="n">DriftFinding</span><span class="p">(</span><span class="s2">"host_only"</span><span class="p">,</span> <span class="n">hf</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">heading</span><span class="p">)</span>
+</span><span data-line="476">    <span class="k">if</span> <span class="n">relation</span> <span class="o">==</span> <span class="s2">"copy"</span><span class="p">:</span>
+</span><span data-line="477">        <span class="k">for</span> <span class="n">heading</span> <span class="ow">in</span> <span class="n">canon</span><span class="p">:</span>
+</span><span data-line="478">            <span class="k">if</span> <span class="n">heading</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">render</span><span class="p">:</span>
+</span><span data-line="479">                <span class="k">yield</span> <span class="n">DriftFinding</span><span class="p">(</span><span class="s2">"stale"</span><span class="p">,</span> <span class="n">hf</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">heading</span><span class="p">)</span>
+</span><span data-line="480">
+</span><span data-line="481">
+</span><span data-line="482"><span class="k">def</span><span class="w"> </span><span class="nf">_sections</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+</span><span data-line="483"><span class="w">    </span><span class="sd">"""Sections keyed by normalised heading; bodies whitespace-normalised.</span>
+</span><span data-line="484">
+</span><span data-line="485"><span class="sd">    The first level-1 heading is skipped (it titles the file); ATX and setext headings</span>
+</span><span data-line="486"><span class="sd">    count, fenced code (backtick or tilde) never does.</span>
+</span><span data-line="487">
+</span><span data-line="488"><span class="sd">    &gt;&gt;&gt; _sections("# T\\n\\n## Build &amp; Test\\n\\n  pytest  \\n\\n\\n## Notes\\nx")</span>
+</span><span data-line="489"><span class="sd">    {'build test': 'pytest', 'notes': 'x'}</span>
+</span><span data-line="490"><span class="sd">    &gt;&gt;&gt; _sections("# T\\n~~~\\n## not one\\n~~~\\n# Usage\\nrun\\nAPI\\n---\\nf()")</span>
+</span><span data-line="491"><span class="sd">    {'usage': 'run', 'api': 'f()'}</span>
+</span><span data-line="492"><span class="sd">    """</span>
+</span><span data-line="493">    <span class="n">out</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span data-line="494">    <span class="n">current</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span data-line="495">    <span class="n">title_seen</span> <span class="o">=</span> <span class="kc">False</span>
+</span><span data-line="496">    <span class="n">pending</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># a prose line that a setext underline may promote</span>
+</span><span data-line="497">
+</span><span data-line="498">    <span class="k">def</span><span class="w"> </span><span class="nf">start</span><span class="p">(</span><span class="n">level</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="n">heading</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="499">        <span class="k">nonlocal</span> <span class="n">current</span><span class="p">,</span> <span class="n">title_seen</span>
+</span><span data-line="500">        <span class="k">if</span> <span class="n">level</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">title_seen</span><span class="p">:</span>
+</span><span data-line="501">            <span class="n">title_seen</span><span class="p">,</span> <span class="n">current</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">None</span>
+</span><span data-line="502">            <span class="k">return</span>
+</span><span data-line="503">        <span class="n">title_seen</span> <span class="o">=</span> <span class="kc">True</span>
+</span><span data-line="504">        <span class="n">current</span> <span class="o">=</span> <span class="n">_norm_heading</span><span class="p">(</span><span class="n">heading</span><span class="p">)</span>
+</span><span data-line="505">        <span class="n">out</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="p">[])</span>
+</span><span data-line="506">
+</span><span data-line="507">    <span class="k">def</span><span class="w"> </span><span class="nf">emit</span><span class="p">(</span><span class="n">line</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="508">        <span class="k">if</span> <span class="n">current</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="509">            <span class="n">out</span><span class="p">[</span><span class="n">current</span><span class="p">]</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+</span><span data-line="510">
+</span><span data-line="511">    <span class="k">for</span> <span class="n">line</span><span class="p">,</span> <span class="n">fenced</span> <span class="ow">in</span> <span class="n">_lines</span><span class="p">(</span><span class="n">text</span><span class="p">):</span>
+</span><span data-line="512">        <span class="n">setext</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">fenced</span> <span class="k">else</span> <span class="n">_SETEXT_RE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+</span><span data-line="513">        <span class="k">if</span> <span class="n">setext</span> <span class="ow">and</span> <span class="n">pending</span> <span class="ow">and</span> <span class="n">pending</span><span class="o">.</span><span class="n">strip</span><span class="p">():</span>
+</span><span data-line="514">            <span class="n">start</span><span class="p">(</span><span class="mi">1</span> <span class="k">if</span> <span class="n">setext</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"="</span> <span class="k">else</span> <span class="mi">2</span><span class="p">,</span> <span class="n">pending</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+</span><span data-line="515">            <span class="n">pending</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span data-line="516">            <span class="k">continue</span>
+</span><span data-line="517">        <span class="k">if</span> <span class="n">pending</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="518">            <span class="n">emit</span><span class="p">(</span><span class="n">pending</span><span class="p">)</span>
+</span><span data-line="519">            <span class="n">pending</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span data-line="520">        <span class="n">atx</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">fenced</span> <span class="k">else</span> <span class="n">_HEADING_RE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+</span><span data-line="521">        <span class="k">if</span> <span class="n">atx</span><span class="p">:</span>
+</span><span data-line="522">            <span class="n">start</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">atx</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)),</span> <span class="n">atx</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+</span><span data-line="523">        <span class="k">elif</span> <span class="ow">not</span> <span class="n">fenced</span> <span class="ow">and</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">_FENCE_RE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">):</span>
+</span><span data-line="524">            <span class="n">pending</span> <span class="o">=</span> <span class="n">line</span>
+</span><span data-line="525">        <span class="k">else</span><span class="p">:</span>
+</span><span data-line="526">            <span class="n">emit</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+</span><span data-line="527">    <span class="k">if</span> <span class="n">pending</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="528">        <span class="n">emit</span><span class="p">(</span><span class="n">pending</span><span class="p">)</span>
+</span><span data-line="529">    <span class="k">return</span> <span class="p">{</span><span class="n">h</span><span class="p">:</span> <span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">l</span> <span class="k">for</span> <span class="n">l</span> <span class="ow">in</span> <span class="n">lines</span> <span class="k">if</span> <span class="n">l</span><span class="p">)</span> <span class="k">for</span> <span class="n">h</span><span class="p">,</span> <span class="n">lines</span> <span class="ow">in</span> <span class="n">out</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+</span><span data-line="530">
+</span><span data-line="531">
+</span><span data-line="532"><span class="k">def</span><span class="w"> </span><span class="nf">_lines</span><span class="p">(</span><span class="n">text</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterator</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bool</span><span class="p">]]:</span>
+</span><span data-line="533"><span class="w">    </span><span class="sd">"""Each line with whether it is inside (or delimits) a fenced code block.</span>
+</span><span data-line="534">
+</span><span data-line="535"><span class="sd">    A fence closes only on the same character, at least as long, with no info string;</span>
+</span><span data-line="536"><span class="sd">    a backtick fence's info string may not contain a backtick (CommonMark).</span>
+</span><span data-line="537"><span class="sd">    """</span>
+</span><span data-line="538">    <span class="n">fence</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span data-line="539">    <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">text</span><span class="o">.</span><span class="n">splitlines</span><span class="p">():</span>
+</span><span data-line="540">        <span class="n">m</span> <span class="o">=</span> <span class="n">_FENCE_RE</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+</span><span data-line="541">        <span class="k">if</span> <span class="n">fence</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+</span><span data-line="542">            <span class="k">if</span> <span class="n">m</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s2">"`"</span> <span class="ow">and</span> <span class="s2">"`"</span> <span class="ow">in</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)):</span>
+</span><span data-line="543">                <span class="n">fence</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span data-line="544">                <span class="k">yield</span> <span class="n">line</span><span class="p">,</span> <span class="kc">True</span>
+</span><span data-line="545">            <span class="k">else</span><span class="p">:</span>
+</span><span data-line="546">                <span class="k">yield</span> <span class="n">line</span><span class="p">,</span> <span class="kc">False</span>
+</span><span data-line="547">        <span class="k">else</span><span class="p">:</span>
+</span><span data-line="548">            <span class="k">if</span> <span class="p">(</span>
+</span><span data-line="549">                <span class="n">m</span>
+</span><span data-line="550">                <span class="ow">and</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">fence</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+</span><span data-line="551">                <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">fence</span><span class="p">)</span>
+</span><span data-line="552">                <span class="ow">and</span> <span class="ow">not</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+</span><span data-line="553">            <span class="p">):</span>
+</span><span data-line="554">                <span class="n">fence</span> <span class="o">=</span> <span class="kc">None</span>
+</span><span data-line="555">            <span class="k">yield</span> <span class="n">line</span><span class="p">,</span> <span class="kc">True</span>
+</span><span data-line="556">
+</span><span data-line="557">
+</span><span data-line="558"><span class="k">def</span><span class="w"> </span><span class="nf">_norm_heading</span><span class="p">(</span><span class="n">heading</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+</span><span data-line="559">    <span class="k">return</span> <span class="s2">" "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s2">"[^\w\s]"</span><span class="p">,</span> <span class="s2">" "</span><span class="p">,</span> <span class="n">heading</span><span class="o">.</span><span class="n">lower</span><span class="p">())</span><span class="o">.</span><span class="n">split</span><span class="p">())</span>
 </span></pre></div>
         </article><button class="back-to-top" type="button">
   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -762,7 +764,7 @@ data-aria-dark="Switch to auto color mode">
     </div>
   </div>
 </footer>
-      <script src="../../_static/documentation_options.js?v=e648f5b4"></script>
+      <script src="../../_static/documentation_options.js?v=84bd753f"></script>
       <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
       <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
       <script src="../../_static/clipboard.min.js?v=a7894cd8"></script>
