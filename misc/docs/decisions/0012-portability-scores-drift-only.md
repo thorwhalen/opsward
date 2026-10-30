@@ -2,7 +2,7 @@
 
 ## Status
 
-Proposed (2026-10-20). Decides [thorwhalen/opsward#67](https://github.com/thorwhalen/opsward/issues/67), the scored follow-up of [thorwhalen/opsward#15](https://github.com/thorwhalen/opsward/issues/15). Accepting is the operator's act (ADR 0010 §2).
+Accepted (2026-10-30), by the operator on [thorwhalen/opsward#75](https://github.com/thorwhalen/opsward/issues/75); proposed 2026-10-20. Decides [thorwhalen/opsward#67](https://github.com/thorwhalen/opsward/issues/67), the scored follow-up of [thorwhalen/opsward#15](https://github.com/thorwhalen/opsward/issues/15).
 
 ## Context
 
